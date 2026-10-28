@@ -93,9 +93,11 @@ export class TerminalSimulator {
             symlinks: initial.symlinks.map(function normalizeLink(link): SimulatedSymlink {
                 return { ...link, path: normalizePath(link.path) };
             }),
-            processes: (initial.processes ?? []).map(function copyProcess(process): SimulatedProcess {
-                return { ...process };
-            }),
+            processes: (initial.processes ?? []).map(
+                function copyProcess(process): SimulatedProcess {
+                    return { ...process };
+                },
+            ),
             transcript: [],
         };
     }
@@ -103,13 +105,22 @@ export class TerminalSimulator {
     public snapshot(): TerminalSnapshot {
         return {
             cwd: this.state.cwd,
-            files: this.state.files.map(function copyFile(file): SimulatedFile { return { ...file }; }),
+            files: this.state.files.map(function copyFile(file): SimulatedFile {
+                return { ...file };
+            }),
             services: this.state.services.map(function copyService(service): SimulatedService {
                 return { ...service, logs: [...service.logs] };
             }),
-            symlinks: this.state.symlinks.map(function copyLink(link): SimulatedSymlink { return { ...link }; }),
-            processes: this.state.processes.map(function copyProcess(process): SimulatedProcess { return { ...process }; }),
-            transcript: this.state.transcript.map(function copyEntry(entry): { command: string; output: string } {
+            symlinks: this.state.symlinks.map(function copyLink(link): SimulatedSymlink {
+                return { ...link };
+            }),
+            processes: this.state.processes.map(function copyProcess(process): SimulatedProcess {
+                return { ...process };
+            }),
+            transcript: this.state.transcript.map(function copyEntry(entry): {
+                command: string;
+                output: string;
+            } {
                 return { ...entry };
             }),
         };
@@ -213,7 +224,11 @@ export class TerminalSimulator {
             }
         };
         for (const file of this.state.files) {
-            const segments = file.path.split("/").filter(function present(segment: string): boolean { return segment.length > 0; });
+            const segments = file.path.split("/").filter(function present(
+                segment: string,
+            ): boolean {
+                return segment.length > 0;
+            });
             let cursor = "";
             for (let index = 0; index < segments.length - 1; index += 1) {
                 cursor += `/${segments[index]}`;
@@ -232,15 +247,21 @@ export class TerminalSimulator {
         if (resolved === "/") {
             return true;
         }
-        return this.allDirectories().has(resolved) || this.state.symlinks.some(function link(item): boolean {
-            return item.path === resolved;
-        });
+        return (
+            this.allDirectories().has(resolved) ||
+            this.state.symlinks.some(function link(item): boolean {
+                return item.path === resolved;
+            })
+        );
     }
 
     private list(args: readonly string[]): string {
         const long = args.includes("-l");
-        const positional = args.filter(function notFlag(arg: string): boolean { return !arg.startsWith("-"); });
-        const target = positional[0] === undefined ? this.state.cwd : this.relativePath(positional[0]);
+        const positional = args.filter(function notFlag(arg: string): boolean {
+            return !arg.startsWith("-");
+        });
+        const target =
+            positional[0] === undefined ? this.state.cwd : this.relativePath(positional[0]);
         const resolved = this.resolveSymlinks(target);
         if (!this.isDirectory(target)) {
             return `ls: cannot access '${positional[0] ?? target}': Not a directory`;
@@ -274,25 +295,23 @@ export class TerminalSimulator {
         const files = this.state.files;
         const symlinks = this.state.symlinks;
         return names
-            .map(
-                function format(name: string): string {
-                    const kind = entries.get(name);
-                    if (kind === "link") {
-                        const link = symlinks.find(function match(item): boolean {
-                            return item.path === joinPath(resolved, name);
-                        });
-                        return `lrwxrwxrwx 1 campus campus 0 ${name} -> ${link?.target ?? ""}`;
-                    }
-                    if (kind === "directory") {
-                        return `drwxr-xr-x 2 campus campus 4096 ${name}`;
-                    }
-                    const file = files.find(function match(item): boolean {
+            .map(function format(name: string): string {
+                const kind = entries.get(name);
+                if (kind === "link") {
+                    const link = symlinks.find(function match(item): boolean {
                         return item.path === joinPath(resolved, name);
                     });
-                    const mode = file === undefined ? "644" : normalizeMode(file.mode);
-                    return `-rw-r--r-- 1 campus campus ${file?.content.length ?? 0} ${mode} ${name}`;
-                },
-            )
+                    return `lrwxrwxrwx 1 campus campus 0 ${name} -> ${link?.target ?? ""}`;
+                }
+                if (kind === "directory") {
+                    return `drwxr-xr-x 2 campus campus 4096 ${name}`;
+                }
+                const file = files.find(function match(item): boolean {
+                    return item.path === joinPath(resolved, name);
+                });
+                const mode = file === undefined ? "644" : normalizeMode(file.mode);
+                return `-rw-r--r-- 1 campus campus ${file?.content.length ?? 0} ${mode} ${name}`;
+            })
             .join("\n");
     }
 
@@ -341,9 +360,12 @@ export class TerminalSimulator {
         if (this.state.processes.length === 0) {
             return "PID COMMAND";
         }
-        return ["PID COMMAND", ...this.state.processes.map(function format(process): string {
-            return `${process.pid} ${process.command}`;
-        })].join("\n");
+        return [
+            "PID COMMAND",
+            ...this.state.processes.map(function format(process): string {
+                return `${process.pid} ${process.command}`;
+            }),
+        ].join("\n");
     }
 
     private kill(pidText: string | undefined): string {
@@ -467,8 +489,8 @@ export class TerminalSimulator {
             return service.status === "running";
         });
         return allRunning
-            ? "{\"status\":\"healthy\",\"system\":\"ready\"}"
-            : "{\"status\":\"healthy\",\"system\":\"degraded\"}";
+            ? '{"status":"healthy","system":"ready"}'
+            : '{"status":"healthy","system":"degraded"}';
     }
 
     private readlink(target: string | undefined): string {
@@ -488,7 +510,9 @@ export class TerminalSimulator {
     private link(args: readonly string[]): string {
         const symbolic = args[0] === "-s" || args[0] === "-sf" || args[0] === "-fs";
         const force = args[0] === "-sf" || args[0] === "-fs" || args.includes("-f");
-        const positional = args.filter(function notFlag(arg: string): boolean { return !arg.startsWith("-s") && !arg.startsWith("-f"); });
+        const positional = args.filter(function notFlag(arg: string): boolean {
+            return !arg.startsWith("-s") && !arg.startsWith("-f");
+        });
         if (!symbolic || positional.length < 2) {
             return "ln: usage: ln -s <target> <link>";
         }
@@ -519,11 +543,9 @@ export class TerminalSimulator {
         if (file === undefined) {
             return `grep: ${target}: No such file or directory`;
         }
-        const matches = file.content
-            .split("\n")
-            .filter(function matches(line: string): boolean {
-                return line.includes(pattern);
-            });
+        const matches = file.content.split("\n").filter(function matches(line: string): boolean {
+            return line.includes(pattern);
+        });
         return matches.join("\n");
     }
 }
@@ -533,7 +555,11 @@ export function evaluateTerminalChecks(
     checks: readonly TerminalCheck[],
 ): readonly string[] {
     const completed: string[] = [];
-    const output = state.transcript.map(function entry(item): string { return item.output; }).join("\n");
+    const output = state.transcript
+        .map(function entry(item): string {
+            return item.output;
+        })
+        .join("\n");
 
     for (const check of checks) {
         if (check.kind === "command-output") {
@@ -543,21 +569,27 @@ export function evaluateTerminalChecks(
             continue;
         }
         if (check.kind === "service") {
-            const service = state.services.find(function match(item): boolean { return item.id === check.serviceId; });
+            const service = state.services.find(function match(item): boolean {
+                return item.id === check.serviceId;
+            });
             if (service?.status === check.status) {
                 completed.push(check.serviceId);
             }
             continue;
         }
         if (check.kind === "file-mode") {
-            const file = state.files.find(function match(item): boolean { return item.path === check.path; });
+            const file = state.files.find(function match(item): boolean {
+                return item.path === check.path;
+            });
             if (file !== undefined && normalizeMode(file.mode) === normalizeMode(check.mode)) {
                 completed.push(check.path);
             }
             continue;
         }
         if (check.kind === "symlink") {
-            const link = state.symlinks.find(function match(item): boolean { return item.path === check.path; });
+            const link = state.symlinks.find(function match(item): boolean {
+                return item.path === check.path;
+            });
             if (link !== undefined) {
                 const actual = link.target.startsWith("/")
                     ? normalizePath(link.target)
@@ -579,9 +611,14 @@ export function terminalObjectiveIds(
     state: TerminalSnapshot,
     objectives: readonly { readonly id: string; readonly check: TerminalCheck }[],
 ): readonly string[] {
-    const completedSet = new Set(evaluateTerminalChecks(state, objectives.map(function checkOf(objective): TerminalCheck {
-        return objective.check;
-    })));
+    const completedSet = new Set(
+        evaluateTerminalChecks(
+            state,
+            objectives.map(function checkOf(objective): TerminalCheck {
+                return objective.check;
+            }),
+        ),
+    );
     const completed: string[] = [];
     for (const objective of objectives) {
         const check = objective.check;
