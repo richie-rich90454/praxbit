@@ -5,22 +5,14 @@
     "courseId": "before-code",
     "title": "Fix the instructions",
     "summary": "Find the single incorrect instruction that makes a sorting robot fail.",
-    "skills": [
-        "concept.debugging"
-    ],
-    "prerequisites": [
-        "concept.tracing"
-    ],
+    "skills": ["concept.debugging"],
+    "prerequisites": ["concept.tracing"],
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "debug",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "interactive-simulation",
-            "keyboard",
-            "screen-reader"
-        ]
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "find-fault",
             "description": "Identify the faulty instruction.",
-            "stepIds": [
-                "robot-fault"
-            ]
+            "stepIds": ["robot-fault"]
         },
         {
             "id": "choose-repair",
             "description": "Choose a replacement that fixes the cause.",
-            "stepIds": [
-                "robot-fault"
-            ]
+            "stepIds": ["robot-fault"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["verification-check", "debug-claims"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:robotics",
-        "icon:debug"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:robotics", "icon:debug"],
     "hints": [
         "Compare what the robot does with where the bins actually are.",
         "The arm reaches the correct bin only if it turns toward it.",
@@ -217,9 +205,7 @@
     },
     "rewards": {
         "experience": 75,
-        "unlocks": [
-            "before-code.everything-is-information"
-        ]
+        "unlocks": ["before-code.everything-is-information"]
     },
     "persistence": {
         "kind": "none"
@@ -230,8 +216,5 @@
         "screenReaderNotes": "Each instruction is announced with its position. The feedback states whether the selected fault and repair match the evidence."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "everything",
-        "professional"
-    ]
+    "tags": ["everything", "professional"]
 }
