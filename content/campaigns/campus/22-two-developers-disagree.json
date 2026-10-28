@@ -1,0 +1,213 @@
+{
+    "id": "campus.two-developers-disagree",
+    "version": 1,
+    "sequence": 22,
+    "courseId": "campus",
+    "title": "Two developers disagree",
+    "summary": "Merge a conflicting branch while preserving both genuine intentions.",
+    "skills": [
+        "git.branches"
+    ],
+    "prerequisites": [
+        "git.basics"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "git",
+    "runtime": {
+        "kind": "browser-git",
+        "capabilities": [
+            "isomorphic-git",
+            "in-memory-repository",
+            "merge-conflicts"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "tax-conflict",
+        "briefing": "Main now rounds tax to the nearest unit. A feature branch changed the tax rate to 0.2. Both changes matter. Merge the branch into the feature and resolve the conflict so the result rounds and uses the new rate."
+    },
+    "objectives": [
+        {
+            "id": "merge-branch",
+            "description": "Merge main into the feature branch.",
+            "stepIds": [
+                "resolve-conflict"
+            ]
+        },
+        {
+            "id": "preserve-intent",
+            "description": "Keep both rounding and the new rate in the resolved file.",
+            "stepIds": [
+                "resolve-conflict"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:dev-team",
+        "icon:branches"
+    ],
+    "hints": [
+        "Check out feature/tax, then run git merge main.",
+        "Git reports a conflict in src/pricing.js and inserts conflict markers.",
+        "Edit the file so the calculation uses Math.round(amount * 0.2), then git add and git commit.",
+        "git checkout feature/tax; git merge main; edit src/pricing.js; git add src/pricing.js; git commit -m \"Resolve tax merge\"."
+    ],
+    "misconceptions": [
+        {
+            "id": "keeps-one-side",
+            "description": "Resolving by discarding the other branch's intent.",
+            "stepId": "resolve-conflict",
+            "feedback": "The conflict exists because both changes are valid. Keep rounding and the new rate together."
+        },
+        {
+            "id": "markers-left",
+            "description": "Committing conflict markers as if they were code.",
+            "stepId": "resolve-conflict",
+            "feedback": "Conflict markers are not valid code. Remove them and write the combined result before committing."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Branches are parallel lines of work",
+                "body": "A branch names a commit and moves as new commits are added. Merging combines histories. When two branches changed the same lines, Git stops and asks a person to decide the result because it cannot infer intent."
+            },
+            {
+                "title": "A resolution preserves intent",
+                "body": "Conflict resolution is not choosing a winner. It is writing the version that satisfies both changes. Tests should run after the merge because a syntactically valid resolution can still be semantically wrong."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Branch",
+                "definition": "A movable name pointing to a commit."
+            },
+            {
+                "term": "Merge",
+                "definition": "Combining the history of one branch into another."
+            },
+            {
+                "term": "Conflict",
+                "definition": "Overlapping changes Git cannot resolve automatically."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "git",
+            "id": "resolve-conflict",
+            "title": "Merge and resolve",
+            "prompt": "Use the Git terminal and file editor. Merge main into feature/tax, resolve src/pricing.js by rounding amount * 0.2, stage it, and commit the resolution.",
+            "evidence": "construction",
+            "initialBranch": "main",
+            "seedCommits": [
+                {
+                    "message": "Create pricing",
+                    "files": {
+                        "src/pricing.js": "function tax(amount) {\n  return amount * 0.15;\n}\n",
+                        "README.md": "# Campus pricing\n"
+                    }
+                },
+                {
+                    "message": "Round tax to whole units",
+                    "files": {
+                        "src/pricing.js": "function tax(amount) {\n  return Math.round(amount * 0.15);\n}\n"
+                    }
+                }
+            ],
+            "extraBranches": [
+                {
+                    "name": "feature/tax",
+                    "from": "Create pricing",
+                    "commits": [
+                        {
+                            "message": "Raise tax rate",
+                            "files": {
+                                "src/pricing.js": "function tax(amount) {\n  return amount * 0.2;\n}\n"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "checks": {
+                "branch": "feature/tax",
+                "fileIncludes": {
+                    "src/pricing.js": [
+                        "Math.round",
+                        "0.2"
+                    ]
+                },
+                "fileExcludes": {
+                    "src/pricing.js": [
+                        "<<<<<<<",
+                        "=======",
+                        ">>>>>>>"
+                    ]
+                },
+                "mergeCommit": true,
+                "logIncludes": [
+                    "Resolve tax merge"
+                ]
+            },
+            "explanation": "The resolved function rounds the result of amount * 0.2, preserving both the rounding commit and the rate change. The merge commit records both parents."
+        },
+        {
+            "kind": "explain",
+            "id": "merge-check",
+            "title": "What did the merge preserve?",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "intent",
+                    "label": "A conflict resolution should preserve the intent of both changes when both are valid.",
+                    "correct": true
+                },
+                {
+                    "id": "markers",
+                    "label": "Conflict markers must be removed before committing.",
+                    "correct": true
+                },
+                {
+                    "id": "test",
+                    "label": "The merged result should still be tested.",
+                    "correct": true
+                },
+                {
+                    "id": "always-ours",
+                    "label": "The safest resolution is always to keep your own side.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Merging is about combining intent. A clean diff does not prove semantic correctness."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": [
+            "campus.the-broken-request"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "resolve-merge",
+        "system": "dev-team"
+    },
+    "accessibility": {
+        "summary": "Git commands are text and the conflict file is editable with the keyboard. Checks are listed as text.",
+        "keyboardNotes": "Ctrl+Enter runs checks. The editor supports standard text editing and selection.",
+        "screenReaderNotes": "The command output reports branch, conflict paths, and status. Conflicts are announced with line numbers."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
