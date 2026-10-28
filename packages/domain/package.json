@@ -1,0 +1,22 @@
+{
+    "name": "@praxbit/domain",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./skills": "./src/skills/index.ts",
+        "./mastery": "./src/mastery/index.ts",
+        "./review": "./src/review/index.ts",
+        "./learning": "./src/learning/index.ts",
+        "./missions": "./src/missions/index.ts",
+        "./simulation": "./src/simulation/index.ts",
+        "./progression": "./src/progression/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc -p tsconfig.json"
+    },
+    "dependencies": {
+        "@praxbit/contracts": "workspace:*"
+    }
+}
