@@ -40,7 +40,9 @@ export async function runJavaScriptTests(
     request: JavaScriptTestRequest,
     signal?: AbortSignal,
 ): Promise<JavaScriptTestReport> {
-    const worker = new Worker(new URL("./javascript.worker.ts", import.meta.url), { type: "module" });
+    const worker = new Worker(new URL("./javascript.worker.ts", import.meta.url), {
+        type: "module",
+    });
     const timeoutMs = request.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const maximumOutputBytes = request.maximumOutputBytes ?? DEFAULT_OUTPUT_BYTES;
 
