@@ -51,7 +51,7 @@ function execute(db: Database, source: string): QueryOutcome {
         }
         return {
             rows: last.values.map(function toRow(row): unknown[] {
-                return [...row];
+                return Array.from(row);
             }),
         };
     } catch (error) {
