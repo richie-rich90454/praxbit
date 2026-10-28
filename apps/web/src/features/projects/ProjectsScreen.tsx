@@ -13,8 +13,9 @@ export function ProjectsScreen(): JSX.Element {
                 <div class="page-header__text">
                     <h1>Projects</h1>
                     <p class="lede">
-                        Longer authentic work with files, a real editor, executable checks, and an explanation of the
-                        result. Projects are not a course list; each one produces a working artifact.
+                        Longer authentic work with files, a real editor, executable checks, and an
+                        explanation of the result. Projects are not a course list; each one produces
+                        a working artifact.
                     </p>
                 </div>
                 <Pip pose="explaining" size={80} />
@@ -42,7 +43,10 @@ export function ProjectsScreen(): JSX.Element {
                                         <span class="status__mark" aria-hidden="true" />
                                         {completed ? "Completed" : `${item.stages.length} stages`}
                                     </span>
-                                    <A class="button button--secondary button--small" href={`/projects/${item.id}`}>
+                                    <A
+                                        class="button button--secondary button--small"
+                                        href={`/projects/${item.id}`}
+                                    >
                                         {completed ? "Open project" : "Start project"}
                                     </A>
                                 </div>
