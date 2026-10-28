@@ -1,0 +1,288 @@
+{
+    "id": "campus.inventory-went-negative",
+    "version": 1,
+    "sequence": 16,
+    "courseId": "campus",
+    "title": "Inventory went negative",
+    "summary": "Repair a stock check that accepts impossible orders.",
+    "skills": [
+        "js.conditions",
+        "testing.boundaries"
+    ],
+    "prerequisites": [
+        "js.events",
+        "concept.conditions"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "invalid-stock",
+        "briefing": "An order for zero notebooks slipped through, and a negative quantity pushed stock above its real value. Repair canFulfill so it accepts only whole quantities from 1 through available stock."
+    },
+    "objectives": [
+        {
+            "id": "reject-invalid",
+            "description": "Reject zero, negative, fractional, and over-stock quantities.",
+            "stepIds": [
+                "repair-stock"
+            ]
+        },
+        {
+            "id": "preserve-valid",
+            "description": "Preserve valid orders at and below the stock limit.",
+            "stepIds": [
+                "repair-stock"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:storefront",
+        "icon:stock"
+    ],
+    "hints": [
+        "A valid quantity has a lower bound as well as an upper bound.",
+        "Reject when quantity is less than 1 or greater than stock.",
+        "Also reject non-integers and negative stock, because neither describes a real shipment.",
+        "Return false unless Number.isInteger(stock) && Number.isInteger(quantity) && stock >= 0 && quantity >= 1 && quantity <= stock."
+    ],
+    "misconceptions": [
+        {
+            "id": "upper-bound-only",
+            "description": "Checking only the maximum stock.",
+            "stepId": "repair-stock",
+            "feedback": "The upper bound alone accepts zero and negative quantities. A valid shipment also needs a lower bound."
+        },
+        {
+            "id": "float-quantity",
+            "description": "Allowing fractional notebooks.",
+            "stepId": "repair-stock",
+            "feedback": "An order of 1.5 notebooks is not a whole item. Reject non-integer quantities unless the product explicitly supports fractions."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Conditions need both edges",
+                "body": "A range check has a lower and an upper boundary. quantity <= stock silently accepts 0 and negative numbers because they are small. A complete rule is quantity >= 1 and quantity <= stock, with type and integer checks where those values must be whole."
+            },
+            {
+                "title": "Boundary tests find the gaps",
+                "body": "Test at the smallest valid value, the largest valid value, and one step outside each. Those cases reveal off-by-one errors and missing lower bounds far more reliably than a single ordinary example."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Boundary",
+                "definition": "A value at or just outside a valid limit."
+            },
+            {
+                "term": "Predicate",
+                "definition": "A function that returns true or false."
+            },
+            {
+                "term": "Range check",
+                "definition": "A condition that enforces both a minimum and a maximum."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "repair-stock",
+            "title": "Repair the stock check",
+            "prompt": "Edit inventory.js. canFulfill(stock, quantity) returns true only for whole quantities from 1 through stock. Run the tests.",
+            "evidence": "debugging",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "inventory.js",
+                    "content": "function canFulfill(stock, quantity) {\n  return quantity <= stock;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "inventory.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "An ordinary order is accepted.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        3
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "An order for the exact stock is accepted.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        5
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "An order above stock is rejected.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        6
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "A zero-quantity order is rejected.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        0
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "A negative quantity is rejected.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        -1
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "A fractional quantity is rejected.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        1.5
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "An order from empty stock is rejected.",
+                    "name": "canFulfill",
+                    "args": [
+                        0,
+                        1
+                    ],
+                    "expected": false
+                }
+            ]
+        },
+        {
+            "kind": "test-design",
+            "id": "boundary-suite",
+            "title": "Choose boundary cases",
+            "prompt": "A different rule accepts ages from 18 through 65 inclusive. Select the cases that test its boundaries.",
+            "evidence": "testing",
+            "cases": [
+                {
+                    "id": "seventeen",
+                    "label": "17 → reject",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "eighteen",
+                    "label": "18 → accept",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "sixty-five",
+                    "label": "65 → accept",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "sixty-six",
+                    "label": "66 → reject",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "thirty",
+                    "label": "30 → accept",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "looks",
+                    "label": "Read the condition and assume it works",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The boundary cases are just below, exactly at, and just above each limit. An ordinary value is useful but does not test the edges."
+        },
+        {
+            "kind": "explain",
+            "id": "conditions-check",
+            "title": "Why both bounds matter",
+            "prompt": "Select the accurate statements.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "lower",
+                    "label": "A lower bound is needed to reject zero and negative quantities.",
+                    "correct": true
+                },
+                {
+                    "id": "upper",
+                    "label": "An upper bound alone accepts some impossible orders.",
+                    "correct": true
+                },
+                {
+                    "id": "compile",
+                    "label": "A condition that compiles must be logically correct.",
+                    "correct": false
+                },
+                {
+                    "id": "boundary",
+                    "label": "Testing exact boundary values reveals counting mistakes.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Compilation checks syntax, not intent. Both bounds and boundary tests are required for a range rule."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": [
+            "campus.repeating-the-same-work"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "repair-inventory",
+        "system": "storefront"
+    },
+    "accessibility": {
+        "summary": "Code is editable with the keyboard and tests are listed as text. The test-design cases are checkboxes.",
+        "keyboardNotes": "Ctrl+Enter runs tests. Use Space to select test cases.",
+        "screenReaderNotes": "Each test announces its description, inputs, expected result, and pass or fail."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
