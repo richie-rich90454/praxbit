@@ -12,6 +12,7 @@ export interface RecommendationContext {
     readonly interests: readonly string[];
     readonly challenge: ChallengeLevel;
     readonly completedMissionIds: readonly string[];
+    readonly completedMissionSkills?: readonly string[];
     readonly completedSequences: Readonly<Record<string, number>>;
     readonly misconceptionSkills: readonly string[];
     readonly recentFailureSkills: readonly string[];
@@ -48,7 +49,9 @@ function stringHash(value: string): number {
     return Math.abs(hash);
 }
 
-export function recommendMission(context: RecommendationContext): MissionRecommendation | undefined {
+export function recommendMission(
+    context: RecommendationContext,
+): MissionRecommendation | undefined {
     const dueSkillIds = new Set(
         context.reviews
             .filter(function isDue(review: ReviewItem): boolean {
@@ -60,6 +63,7 @@ export function recommendMission(context: RecommendationContext): MissionRecomme
     );
     const completed = new Set(context.completedMissionIds);
     const skipped = new Set(context.skippedSkills);
+    const completedSkills = new Set(context.completedMissionSkills ?? []);
     const weakSkills = Object.entries(context.mastery)
         .filter(function isWeak(entry): boolean {
             return entry[1] < 0.5;
@@ -74,7 +78,11 @@ export function recommendMission(context: RecommendationContext): MissionRecomme
         const eligible =
             mission.prerequisites.length === 0 ||
             mission.prerequisites.every(function ready(skillId: string): boolean {
-                return skipped.has(skillId) || (context.mastery[skillId] ?? 0) >= MASTERY_ELIGIBILITY;
+                return (
+                    skipped.has(skillId) ||
+                    completedSkills.has(skillId) ||
+                    (context.mastery[skillId] ?? 0) >= MASTERY_ELIGIBILITY
+                );
             });
         if (!eligible) {
             continue;
@@ -168,7 +176,10 @@ export function recommendMission(context: RecommendationContext): MissionRecomme
         missionId: top.mission.id,
         score: top.score,
         reasons: top.reasons,
-        alternatives: scored.slice(1, 4).map(function toAlternative(entry): { missionId: string; score: number } {
+        alternatives: scored.slice(1, 4).map(function toAlternative(entry): {
+            missionId: string;
+            score: number;
+        } {
             return { missionId: entry.mission.id, score: entry.score };
         }),
     };
@@ -176,10 +187,18 @@ export function recommendMission(context: RecommendationContext): MissionRecomme
 
 function challengeFit(mission: Mission, challenge: ChallengeLevel): number {
     if (challenge === "gentle") {
-        return mission.difficulty === "beginner" ? 12 : mission.difficulty === "developing" ? 4 : -8;
+        return mission.difficulty === "beginner"
+            ? 12
+            : mission.difficulty === "developing"
+              ? 4
+              : -8;
     }
     if (challenge === "stretch") {
-        return mission.difficulty === "advanced" ? 12 : mission.difficulty === "developing" ? 6 : -4;
+        return mission.difficulty === "advanced"
+            ? 12
+            : mission.difficulty === "developing"
+              ? 6
+              : -4;
     }
     return mission.difficulty === "developing" ? 8 : 4;
 }
@@ -257,7 +276,10 @@ export function buildPracticePlan(
     };
 }
 
-export function skillsForMission(missions: readonly Mission[], missionId: string): readonly string[] {
+export function skillsForMission(
+    missions: readonly Mission[],
+    missionId: string,
+): readonly string[] {
     const mission = missions.find(function matches(item: Mission): boolean {
         return item.id === missionId;
     });
