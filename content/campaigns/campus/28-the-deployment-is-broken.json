@@ -5,23 +5,14 @@
     "courseId": "campus",
     "title": "The deployment is broken",
     "summary": "Restore a release by repointing the deployment symlink and verifying the service.",
-    "skills": [
-        "ops.deployment"
-    ],
-    "prerequisites": [
-        "git.branches",
-        "ops.processes"
-    ],
+    "skills": ["ops.deployment"],
+    "prerequisites": ["git.branches", "ops.processes"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "terminal",
     "runtime": {
         "kind": "simulated-linux",
-        "capabilities": [
-            "deterministic-linux-simulation",
-            "shell",
-            "symlinks"
-        ]
+        "capabilities": ["deterministic-linux-simulation", "shell", "symlinks"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,25 @@
         {
             "id": "inspect-link",
             "description": "Inspect the current release link.",
-            "stepIds": [
-                "restore-release"
-            ]
+            "stepIds": ["restore-release"]
         },
         {
             "id": "repoint",
             "description": "Point current at the known-good release.",
-            "stepIds": [
-                "restore-release"
-            ]
+            "stepIds": ["restore-release"]
         },
         {
             "id": "verify",
             "description": "Restart and verify the service.",
-            "stepIds": [
-                "restore-release"
-            ]
+            "stepIds": ["restore-release"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["deployment-check"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:server-room",
-        "icon:deploy"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:server-room", "icon:deploy"],
     "hints": [
         "Run readlink current and ls releases.",
         "current points at 2026-10-20-skipped, which is missing.",
@@ -230,9 +215,7 @@
     },
     "rewards": {
         "experience": 200,
-        "unlocks": [
-            "campus.nothing-works-together"
-        ]
+        "unlocks": ["campus.nothing-works-together"]
     },
     "persistence": {
         "kind": "world-action",
@@ -245,8 +228,5 @@
         "screenReaderNotes": "readlink output is read as a path. Objectives announce pass when the link, service, and health check succeed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
