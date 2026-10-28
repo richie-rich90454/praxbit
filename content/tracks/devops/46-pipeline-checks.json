@@ -1,0 +1,240 @@
+{
+    "id": "devops.pipeline-checks",
+    "version": 1,
+    "sequence": 46,
+    "courseId": "devops",
+    "title": "Pipeline checks",
+    "summary": "Order a continuous integration pipeline so failures stop before deployment.",
+    "skills": [
+        "devops.ci"
+    ],
+    "prerequisites": [
+        "git.branches",
+        "ops.deployment"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "order",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "pipeline-simulation",
+            "keyboard"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "pipeline-order",
+        "briefing": "The campus CI pipeline has the right checks but the wrong order. A failed test currently deploys before anyone notices. Put verification before release."
+    },
+    "objectives": [
+        {
+            "id": "pipeline-order",
+            "description": "Order checks before deployment.",
+            "stepIds": [
+                "pipeline"
+            ]
+        },
+        {
+            "id": "fail-fast",
+            "description": "Explain why cheap checks run before expensive ones.",
+            "stepIds": [
+                "pipeline-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:dev-team",
+        "icon:pipeline"
+    ],
+    "hints": [
+        "Start by obtaining the exact source revision.",
+        "Install reproducibly, then run static checks and tests.",
+        "Build only after checks pass, and deploy only after a successful build.",
+        "Order: checkout, frozen install, lint, typecheck, test, content validate, build, deploy."
+    ],
+    "misconceptions": [
+        {
+            "id": "deploy-first",
+            "description": "Deploying to discover whether checks pass.",
+            "stepId": "pipeline",
+            "feedback": "Deployment must follow successful verification. Shipping first turns a test failure into an incident."
+        },
+        {
+            "id": "no-lock",
+            "description": "Installing without a frozen lockfile.",
+            "stepId": "pipeline-check",
+            "feedback": "A frozen lockfile makes CI reproducible. Floating installs can pass locally and fail elsewhere."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "CI is a gate",
+                "body": "Continuous integration runs repeatable checks on every change. The pipeline should stop at the first failure, preserve logs, and prevent unreviewed artifacts from reaching deployment. The same revision should flow through every stage."
+            },
+            {
+                "title": "Order by cost and risk",
+                "body": "Cheap checks such as lint and types fail fast before slower tests and builds. Content validation and security checks belong before release. A pipeline that reports success without executing its checks is worse than no pipeline."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "CI",
+                "definition": "Continuous integration: automated checks on changes."
+            },
+            {
+                "term": "Frozen lockfile",
+                "definition": "An install that uses exact locked dependency versions."
+            },
+            {
+                "term": "Fail fast",
+                "definition": "Stop at the earliest reliable failure."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "order",
+            "id": "pipeline",
+            "title": "Order the pipeline",
+            "prompt": "Arrange the stages so a failing check stops the pipeline before deployment.",
+            "evidence": "construction",
+            "items": [
+                {
+                    "id": "checkout",
+                    "label": "Check out the exact revision"
+                },
+                {
+                    "id": "install",
+                    "label": "Install with a frozen lockfile"
+                },
+                {
+                    "id": "lint",
+                    "label": "Run lint and formatting checks"
+                },
+                {
+                    "id": "typecheck",
+                    "label": "Run type checks"
+                },
+                {
+                    "id": "test",
+                    "label": "Run unit and integration tests"
+                },
+                {
+                    "id": "content",
+                    "label": "Validate educational content"
+                },
+                {
+                    "id": "build",
+                    "label": "Build the web and server artifacts"
+                },
+                {
+                    "id": "deploy",
+                    "label": "Deploy the built artifact"
+                }
+            ],
+            "correctOrder": [
+                "checkout",
+                "install",
+                "lint",
+                "typecheck",
+                "test",
+                "content",
+                "build",
+                "deploy"
+            ],
+            "explanation": "Acquire the revision, install reproducibly, run fast checks, run tests and content validation, build, then deploy. Any failure stops the chain."
+        },
+        {
+            "kind": "quiz",
+            "id": "pipeline-check",
+            "title": "Why a frozen lockfile?",
+            "prompt": "Why does CI install dependencies with a frozen lockfile?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the best reason.",
+                "options": [
+                    {
+                        "id": "repro",
+                        "label": "It reproduces the exact dependency versions recorded for the project."
+                    },
+                    {
+                        "id": "fast",
+                        "label": "It always installs faster than every other method."
+                    },
+                    {
+                        "id": "latest",
+                        "label": "It upgrades every dependency to the latest version."
+                    },
+                    {
+                        "id": "skip",
+                        "label": "It skips installing dependencies entirely."
+                    }
+                ],
+                "correctId": "repro",
+                "explanation": "A frozen lockfile makes installs reproducible, so CI checks the same dependency graph that was reviewed."
+            },
+            "hints": [
+                "The lockfile records resolved versions.",
+                "CI needs to match the reviewed dependency set.",
+                "Frozen installs do not silently upgrade.",
+                "It reproduces exact locked versions."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "pipeline-claims",
+            "title": "Pipeline evidence",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "stop",
+                    "label": "A failed check should stop later stages.",
+                    "correct": true
+                },
+                {
+                    "id": "same",
+                    "label": "The tested and deployed revision should be the same artifact.",
+                    "correct": true
+                },
+                {
+                    "id": "success",
+                    "label": "A script that exits zero without running checks is acceptable.",
+                    "correct": false
+                },
+                {
+                    "id": "logs",
+                    "label": "Failure logs should be preserved for diagnosis.",
+                    "correct": true
+                }
+            ],
+            "explanation": "A gate is only useful if it stops release and preserves evidence when it fails."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Pipeline stages can be reordered with buttons and read as an ordered list.",
+        "keyboardNotes": "Use move buttons; drag is optional. Arrow keys select quiz options.",
+        "screenReaderNotes": "Each stage announces its position after every move. The quiz explanation is read after submission."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "systems"
+    ]
+}
