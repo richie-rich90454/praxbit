@@ -1,0 +1,58 @@
+# Content license
+
+Original educational content in this repository is licensed under the
+**Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International**
+license (CC BY-NC-SA 4.0).
+
+License summary: https://creativecommons.org/licenses/by-nc-sa/4.0/
+Full legal code: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+
+This applies to the original mission manifests, lesson text, hints,
+misconceptions, project briefs, placement questions, achievements, club events,
+and other instructional material authored for Praxbit under the `content/`
+directory, unless a file states otherwise.
+
+Under CC BY-NC-SA 4.0, you may share and adapt the content for noncommercial
+purposes, provided you:
+
+- give appropriate credit to Praxbit and the content authors;
+- link to the license and indicate whether changes were made;
+- do not use the material for commercial purposes without separate permission;
+- distribute adaptations under the same license.
+
+Commercial use of the content requires prior written permission from the
+rights holder. This includes paid courses, paid tutoring, commercial learning
+platforms, and products whose primary value is the licensed content.
+
+## Not covered by this content license
+
+- **Source code** is licensed under the MIT license in the repository root
+  `LICENSE`. That includes applications, packages, scripts, infrastructure
+  templates, and tests.
+- **Brand, logo, mascot, character artwork, and visual identity** are all
+  rights reserved. No trademark, brand, or endorsement rights are granted by
+  either license. Do not use the Praxbit name or logo in a way that suggests
+  endorsement or affiliation.
+- **Third-party assets and dependencies** remain under their own licenses.
+  Their inclusion in this repository does not relicense them. Check the
+  relevant package or asset before redistribution.
+- **User-generated work** (learner code, projects, and exported results)
+  remains the learner's work. The product license does not claim ownership of
+  it.
+
+## Attribution
+
+A practical attribution for reused content:
+
+> Adapted from Praxbit, originally licensed under CC BY-NC-SA 4.0. Changes were
+> made. https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+Replace the link with the canonical repository URL when one is published.
+
+## No legal review
+
+This file is a summary, not legal advice. The project has not obtained legal
+review of its licensing, trademark position, or content provenance. Confirm
+the obligations that apply to your jurisdiction and use case before public
+distribution, commercial use, or relicensing. If a third-party asset has an
+incompatible license, remove it rather than assuming this notice covers it.
