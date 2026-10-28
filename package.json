@@ -1,0 +1,50 @@
+{
+    "name": "praxbit",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "Praxbit, the computer science learning game",
+    "packageManager": "pnpm@12.14.0",
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "scripts": {
+        "dev": "pnpm --parallel --filter @praxbit/web --filter @praxbit/server dev",
+        "dev:web": "pnpm --filter @praxbit/web dev",
+        "dev:server": "pnpm --filter @praxbit/server dev",
+        "build": "pnpm --filter @praxbit/web build && pnpm --filter @praxbit/server build && pnpm --filter @praxbit/companion build",
+        "format": "oxfmt .",
+        "format:check": "oxfmt --check .",
+        "lint": "oxlint . && eslint .",
+        "typecheck": "pnpm -r --if-present typecheck && tsc -p tests/tsconfig.json --noEmit",
+        "test": "vitest run --project unit --project content --project security",
+        "test:integration": "vitest run --project integration",
+        "test:e2e": "pnpm --filter @praxbit/web build && playwright test",
+        "test:a11y": "playwright test --grep @a11y",
+        "test:visual": "playwright test --grep @visual",
+        "test:security": "vitest run --project security",
+        "test:perf": "node scripts/load-test.mjs",
+        "content:validate": "tsx packages/content-validator/src/cli.ts",
+        "db:migrate": "node-pg-migrate up --migrations-dir database/migrations --database-url-var DATABASE_URL",
+        "db:rollback": "node-pg-migrate down --migrations-dir database/migrations --database-url-var DATABASE_URL",
+        "companion": "tsx apps/companion/src/main.ts",
+        "cap:sync": "pnpm --filter @praxbit/web cap:sync"
+    },
+    "devDependencies": {
+        "@axe-core/playwright": "^4.14.0",
+        "@playwright/test": "^1.64.1",
+        "@types/node": "^26.6.5",
+        "esbuild": "^0.28.2",
+        "eslint": "^10.13.0",
+        "eslint-plugin-import-x": "^4.17.1",
+        "fast-check": "^4.10.2",
+        "oxfmt": "^0.75.0",
+        "oxlint": "^1.90.0",
+        "tsx": "^4.23.15",
+        "typescript": "5.9.3",
+        "typescript-eslint": "^8.72.1",
+        "vite": "^8.3.5",
+        "vite-plugin-solid": "^2.11.14",
+        "vitest": "^5.0.5"
+    }
+}
