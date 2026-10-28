@@ -1,0 +1,245 @@
+{
+    "id": "algorithms.complexity",
+    "version": 1,
+    "sequence": 39,
+    "courseId": "algorithms",
+    "title": "Complexity claims",
+    "summary": "Review a performance claim by reading the loops instead of trusting the comment.",
+    "skills": [
+        "algorithms.complexity",
+        "performance.measure"
+    ],
+    "prerequisites": [
+        "algorithms.arrays"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "code-review",
+            "no-execution"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "complexity-review",
+        "briefing": "A colleague says a duplicate detector runs in linear time. The code is short. Review the loops before accepting the claim."
+    },
+    "objectives": [
+        {
+            "id": "read-loops",
+            "description": "Determine growth from nested iteration.",
+            "stepIds": [
+                "complexity-review"
+            ]
+        },
+        {
+            "id": "measure",
+            "description": "Choose an appropriate way to validate performance claims.",
+            "stepIds": [
+                "complexity-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:chart"
+    ],
+    "hints": [
+        "Count how many times the inner loop runs for each outer iteration.",
+        "For every element, the inner loop scans the remaining elements.",
+        "That is roughly n × n comparisons, not n.",
+        "Reject the linear claim. Measure with growing input sizes and use the growth shape as evidence."
+    ],
+    "misconceptions": [
+        {
+            "id": "trusts-comment",
+            "description": "Accepting a complexity comment without reading the loops.",
+            "stepId": "complexity-review",
+            "feedback": "The comment says linear, but the nested loop performs quadratic work."
+        },
+        {
+            "id": "single-measurement",
+            "description": "Judging growth from one timing.",
+            "stepId": "complexity-check",
+            "answer": "one",
+            "feedback": "One timing cannot distinguish growth rates. Measure several input sizes and compare the trend."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Complexity is about growth",
+                "body": "Big-O describes how work grows as input grows, ignoring constant factors. A nested loop over the same input often indicates O(n²). A single pass is O(n). Reading structure gives a model; measurements test that model on real hardware."
+            },
+            {
+                "title": "Measure the right thing",
+                "body": "Wall-clock time includes noise. Measure several input sizes, use representative data, and look at the shape of growth. A micro-optimization without a measured problem is usually wasted effort."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Big-O",
+                "definition": "A description of asymptotic growth."
+            },
+            {
+                "term": "Nested loop",
+                "definition": "A loop whose body contains another loop."
+            },
+            {
+                "term": "Benchmark",
+                "definition": "A measurement of performance under defined conditions."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "complexity-review",
+            "title": "Review the duplicate detector",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Duplicate detector",
+                "caption": "Submitted with a comment claiming linear time.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "// O(n): one pass over the values\nfunction hasDuplicate(values) {\n  for (let i = 0; i < values.length; i += 1) {\n    for (let j = i + 1; j < values.length; j += 1) {\n      if (values[i] === values[j]) return true;\n    }\n  }\n  return false;\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "nested",
+                    "label": "The function contains nested loops over the values.",
+                    "correct": true
+                },
+                {
+                    "id": "quadratic",
+                    "label": "The comparison count grows quadratically, not linearly.",
+                    "correct": true
+                },
+                {
+                    "id": "comment",
+                    "label": "The O(n) comment is contradicted by the code.",
+                    "correct": true
+                },
+                {
+                    "id": "constant",
+                    "label": "The function runs in constant time because it returns early sometimes.",
+                    "correct": false
+                },
+                {
+                    "id": "set",
+                    "label": "A Set could reduce the expected time to O(n).",
+                    "correct": true
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the linear claim"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject the claim and measure or redesign with a Set"
+                },
+                {
+                    "id": "rename",
+                    "label": "Rename the function"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The nested loop is quadratic in the worst case. A Set can track seen values in one pass."
+        },
+        {
+            "kind": "quiz",
+            "id": "complexity-check",
+            "title": "Measure growth",
+            "prompt": "Which experiment best tests whether a function is linear or quadratic?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the strongest method.",
+                "options": [
+                    {
+                        "id": "one",
+                        "label": "Time it once with 100 items"
+                    },
+                    {
+                        "id": "sizes",
+                        "label": "Measure several input sizes and compare how time grows"
+                    },
+                    {
+                        "id": "comment",
+                        "label": "Read the function's comment"
+                    },
+                    {
+                        "id": "cpu",
+                        "label": "Check the CPU brand"
+                    }
+                ],
+                "correctId": "sizes",
+                "explanation": "Growth is visible only by comparing multiple sizes. A single timing cannot separate linear from quadratic behavior."
+            },
+            "hints": [
+                "Growth requires more than one data point.",
+                "Measure small, medium, and large inputs.",
+                "Compare the ratios as n grows.",
+                "Measure several input sizes and compare the trend."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "performance-claims",
+            "title": "Evidence for performance",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "structure",
+                    "label": "Loop structure informs a complexity estimate.",
+                    "correct": true
+                },
+                {
+                    "id": "measure",
+                    "label": "Measurements should use multiple input sizes.",
+                    "correct": true
+                },
+                {
+                    "id": "comment",
+                    "label": "A comment is sufficient proof of performance.",
+                    "correct": false
+                },
+                {
+                    "id": "premature",
+                    "label": "Optimizing without a measured problem can add complexity for no benefit.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Estimates guide design; measurements verify behavior under realistic conditions."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The artifact is text and review controls are standard form elements.",
+        "keyboardNotes": "Use Space for findings and arrow keys for the verdict.",
+        "screenReaderNotes": "The code block is read with line structure. Findings announce their support after submission."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
