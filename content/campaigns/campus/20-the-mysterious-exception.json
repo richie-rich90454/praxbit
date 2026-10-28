@@ -5,23 +5,14 @@
     "courseId": "campus",
     "title": "The mysterious exception",
     "summary": "Read a runtime stack trace, find the failing access, and repair the function.",
-    "skills": [
-        "js.debugging"
-    ],
-    "prerequisites": [
-        "js.objects",
-        "js.functions"
-    ],
+    "skills": ["js.debugging"],
+    "prerequisites": ["js.objects", "js.functions"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,20 @@
         {
             "id": "locate-exception",
             "description": "Identify the failing property access.",
-            "stepIds": [
-                "find-exception"
-            ]
+            "stepIds": ["find-exception"]
         },
         {
             "id": "repair-safe-access",
             "description": "Handle missing customer data without hiding real names.",
-            "stepIds": [
-                "repair-label"
-            ]
+            "stepIds": ["repair-label"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["debug-claims"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:api",
-        "icon:error"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:api", "icon:error"],
     "hints": [
         "The trace says it cannot read a property of undefined.",
         "order.customer may be missing for guest orders.",
@@ -175,9 +162,7 @@
                     "kind": "function",
                     "description": "A missing customer becomes Guest.",
                     "name": "customerLabel",
-                    "args": [
-                        {}
-                    ],
+                    "args": [{}],
                     "expected": "Guest"
                 },
                 {
@@ -241,9 +226,7 @@
     },
     "rewards": {
         "experience": 150,
-        "unlocks": [
-            "campus.changes-nobody-can-find"
-        ]
+        "unlocks": ["campus.changes-nobody-can-find"]
     },
     "persistence": {
         "kind": "world-action",
@@ -256,8 +239,5 @@
         "screenReaderNotes": "The stack trace is read as a code block. Each test announces its input case and expected label."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
