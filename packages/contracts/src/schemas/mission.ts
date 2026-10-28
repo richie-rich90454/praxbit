@@ -64,18 +64,22 @@ const QuizStepSchema = z.strictObject({
 const LessonStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("lesson"),
-    sections: z.array(
-        z.strictObject({
-            title: z.string().min(1).max(120),
-            body: z.string().min(1).max(1800),
-        }),
-    ).min(1),
-    vocabulary: z.array(
-        z.strictObject({
-            term: z.string().min(1).max(60),
-            definition: z.string().min(1).max(400),
-        }),
-    ).min(1),
+    sections: z
+        .array(
+            z.strictObject({
+                title: z.string().min(1).max(120),
+                body: z.string().min(1).max(1800),
+            }),
+        )
+        .min(1),
+    vocabulary: z
+        .array(
+            z.strictObject({
+                term: z.string().min(1).max(60),
+                definition: z.string().min(1).max(400),
+            }),
+        )
+        .min(1),
 });
 
 const MachineStepSchema = z.strictObject({
@@ -89,7 +93,10 @@ const MachineStepSchema = z.strictObject({
 const OrderStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("order"),
-    items: z.array(z.strictObject({ id: z.string().min(1).max(80), label: z.string().min(1).max(300) })).min(3).max(8),
+    items: z
+        .array(z.strictObject({ id: z.string().min(1).max(80), label: z.string().min(1).max(300) }))
+        .min(3)
+        .max(8),
     correctOrder: z.array(z.string().min(1)).min(3).max(8),
     explanation: z.string().min(1).max(900),
 });
@@ -97,20 +104,26 @@ const OrderStepSchema = z.strictObject({
 const StateStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("state"),
-    cells: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(60),
-            label: z.string().min(1).max(120),
-            initial: z.string().max(200),
-        }),
-    ).min(1).max(4),
-    operations: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(80),
-            label: z.string().min(1).max(200),
-            effects: z.record(z.string(), z.string()),
-        }),
-    ).min(2).max(6),
+    cells: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(60),
+                label: z.string().min(1).max(120),
+                initial: z.string().max(200),
+            }),
+        )
+        .min(1)
+        .max(4),
+    operations: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(80),
+                label: z.string().min(1).max(200),
+                effects: z.record(z.string(), z.string()),
+            }),
+        )
+        .min(2)
+        .max(6),
     target: z.record(z.string(), z.string()),
     explanation: z.string().min(1).max(900),
 });
@@ -118,14 +131,22 @@ const StateStepSchema = z.strictObject({
 const RuleStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("rule"),
-    inputs: z.array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(200) })).min(2).max(6),
-    rules: z.array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(300) })).min(2).max(5),
-    expected: z.array(
-        z.strictObject({
-            inputId: z.string().min(1),
-            outcome: z.enum(["allow", "reject"]),
-        }),
-    ).min(2),
+    inputs: z
+        .array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(200) }))
+        .min(2)
+        .max(6),
+    rules: z
+        .array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(300) }))
+        .min(2)
+        .max(5),
+    expected: z
+        .array(
+            z.strictObject({
+                inputId: z.string().min(1),
+                outcome: z.enum(["allow", "reject"]),
+            }),
+        )
+        .min(2),
     correctRuleId: z.string().min(1),
     explanation: z.string().min(1).max(900),
 });
@@ -135,7 +156,10 @@ const LoopStepSchema = z.strictObject({
     kind: z.literal("loop"),
     repeatChoices: z.array(z.number().int().min(1).max(12)).min(2).max(6),
     correctRepeat: z.number().int().min(1).max(12),
-    bodyItems: z.array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(200) })).min(2).max(5),
+    bodyItems: z
+        .array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(200) }))
+        .min(2)
+        .max(5),
     correctBody: z.array(z.string().min(1)).min(2).max(5),
     explanation: z.string().min(1).max(900),
 });
@@ -143,30 +167,44 @@ const LoopStepSchema = z.strictObject({
 const TraceStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("trace"),
-    lines: z.array(z.strictObject({ id: z.string().min(1), code: z.string().min(1).max(160) })).min(3).max(12),
-    watches: z.array(
-        z.strictObject({
-            id: z.string().min(1),
-            label: z.string().min(1).max(60),
-            initial: z.string().max(100),
-        }),
-    ).min(1).max(4),
-    snapshots: z.array(
-        z.strictObject({
-            lineId: z.string().min(1),
-            values: z.record(z.string(), z.string()),
-            note: z.string().max(400).optional(),
-        }),
-    ).min(2),
+    lines: z
+        .array(z.strictObject({ id: z.string().min(1), code: z.string().min(1).max(160) }))
+        .min(3)
+        .max(12),
+    watches: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1),
+                label: z.string().min(1).max(60),
+                initial: z.string().max(100),
+            }),
+        )
+        .min(1)
+        .max(4),
+    snapshots: z
+        .array(
+            z.strictObject({
+                lineId: z.string().min(1),
+                values: z.record(z.string(), z.string()),
+                note: z.string().max(400).optional(),
+            }),
+        )
+        .min(2),
     explanation: z.string().min(1).max(900),
 });
 
 const DebugStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("debug"),
-    instructions: z.array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(240) })).min(3).max(8),
+    instructions: z
+        .array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(240) }))
+        .min(3)
+        .max(8),
     buggyId: z.string().min(1),
-    fixes: z.array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(300) })).min(2).max(5),
+    fixes: z
+        .array(z.strictObject({ id: z.string().min(1), label: z.string().min(1).max(300) }))
+        .min(2)
+        .max(5),
     correctFixId: z.string().min(1),
     explanation: z.string().min(1).max(900),
 });
@@ -177,20 +215,27 @@ const BinaryStepSchema = z.strictObject({
     message: z.string().min(1).max(12),
     bitsPerChar: z.literal(8),
     expectedBits: z.string().regex(/^[01]+$/),
-    reference: z.array(z.strictObject({ char: z.string().min(1).max(1), bits: z.string().regex(/^[01]{8}$/) })).min(2),
+    reference: z
+        .array(
+            z.strictObject({ char: z.string().min(1).max(1), bits: z.string().regex(/^[01]{8}$/) }),
+        )
+        .min(2),
     explanation: z.string().min(1).max(900),
 });
 
 const FilesystemStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("filesystem"),
-    nodes: z.array(
-        z.strictObject({
-            path: z.string().min(1).max(240),
-            type: z.enum(["folder", "file"]),
-            note: z.string().max(240).optional(),
-        }),
-    ).min(3).max(30),
+    nodes: z
+        .array(
+            z.strictObject({
+                path: z.string().min(1).max(240),
+                type: z.enum(["folder", "file"]),
+                note: z.string().max(240).optional(),
+            }),
+        )
+        .min(3)
+        .max(30),
     targetPath: z.array(z.string().min(1)).min(2),
     explanation: z.string().min(1).max(900),
 });
@@ -198,13 +243,16 @@ const FilesystemStepSchema = z.strictObject({
 const NetworkStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("network"),
-    nodes: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(60),
-            label: z.string().min(1).max(120),
-            kind: z.enum(["device", "router", "server", "service", "database"]),
-        }),
-    ).min(3).max(10),
+    nodes: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(60),
+                label: z.string().min(1).max(120),
+                kind: z.enum(["device", "router", "server", "service", "database"]),
+            }),
+        )
+        .min(3)
+        .max(10),
     edges: z.array(z.tuple([z.string().min(1), z.string().min(1)])).min(2),
     startId: z.string().min(1),
     targetId: z.string().min(1),
@@ -223,31 +271,36 @@ const ReviewStepSchema = z.strictObject({
         language: z.string().min(1).max(40),
         content: z.string().min(1).max(6000),
     }),
-    findings: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(80),
-            label: z.string().min(1).max(300),
-            correct: z.boolean(),
-        }),
-    ).min(2).max(6),
+    findings: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(80),
+                label: z.string().min(1).max(300),
+                correct: z.boolean(),
+            }),
+        )
+        .min(2)
+        .max(6),
     verdicts: z.array(OptionSchema).min(2).max(4),
     correctVerdict: z.string().min(1),
     explanation: z.string().min(1).max(1200),
 });
 
-
 const CodeStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("code"),
     language: z.enum(["javascript", "typescript", "html", "css", "json", "python", "sql", "text"]),
-    files: z.array(
-        z.strictObject({
-            path: z.string().min(1).max(200),
-            content: z.string().max(30_000),
-            editable: z.boolean(),
-            language: z.string().min(1).max(40),
-        }),
-    ).min(1).max(6),
+    files: z
+        .array(
+            z.strictObject({
+                path: z.string().min(1).max(200),
+                content: z.string().max(30_000),
+                editable: z.boolean(),
+                language: z.string().min(1).max(40),
+            }),
+        )
+        .min(1)
+        .max(6),
     entry: z.string().min(1).max(200),
     preview: z.enum(["html", "css", "console", "sql", "none"]),
     tests: z.array(CodeTestSchema).min(1).max(12),
@@ -269,17 +322,23 @@ const GitStepSchema = z.strictObject({
     kind: z.literal("git"),
     initialBranch: z.string().min(1).max(80),
     seedCommits: z.array(GitSeedCommitSchema).min(1).max(8),
-    extraBranches: z.array(
-        z.strictObject({
-            name: z.string().min(1).max(80),
-            from: z.string().min(1).max(80),
-            commits: z.array(GitSeedCommitSchema).min(1).max(6),
-        }),
-    ).max(3),
+    extraBranches: z
+        .array(
+            z.strictObject({
+                name: z.string().min(1).max(80),
+                from: z.string().min(1).max(80),
+                commits: z.array(GitSeedCommitSchema).min(1).max(6),
+            }),
+        )
+        .max(3),
     checks: z.strictObject({
         branch: z.string().min(1).max(80).optional(),
-        fileIncludes: z.record(z.string().min(1).max(200), z.array(z.string().min(1).max(500))).optional(),
-        fileExcludes: z.record(z.string().min(1).max(200), z.array(z.string().min(1).max(200))).optional(),
+        fileIncludes: z
+            .record(z.string().min(1).max(200), z.array(z.string().min(1).max(500)))
+            .optional(),
+        fileExcludes: z
+            .record(z.string().min(1).max(200), z.array(z.string().min(1).max(200)))
+            .optional(),
         logIncludes: z.array(z.string().min(1).max(160)).max(6).optional(),
         mergeCommit: z.boolean().optional(),
     }),
@@ -314,67 +373,87 @@ const TerminalStepSchema = z.strictObject({
     kind: z.literal("terminal"),
     initial: z.strictObject({
         cwd: z.string().min(1).max(240),
-        files: z.array(
-            z.strictObject({
-                path: z.string().min(1).max(240),
-                content: z.string().max(6000),
-                mode: z.string().regex(/^[0-7]{3,4}$/),
-            }),
-        ).min(1).max(30),
-        services: z.array(
+        files: z
+            .array(
+                z.strictObject({
+                    path: z.string().min(1).max(240),
+                    content: z.string().max(6000),
+                    mode: z.string().regex(/^[0-7]{3,4}$/),
+                }),
+            )
+            .min(1)
+            .max(30),
+        services: z
+            .array(
+                z.strictObject({
+                    id: z.string().min(1).max(80),
+                    name: z.string().min(1).max(120),
+                    status: z.enum(["running", "failed"]),
+                    logs: z.array(z.string().min(1).max(400)).max(20),
+                }),
+            )
+            .min(1)
+            .max(6),
+        symlinks: z
+            .array(
+                z.strictObject({
+                    path: z.string().min(1).max(240),
+                    target: z.string().min(1).max(240),
+                }),
+            )
+            .max(6),
+        processes: z
+            .array(
+                z.strictObject({
+                    pid: z.number().int().positive(),
+                    command: z.string().min(1).max(200),
+                }),
+            )
+            .max(12)
+            .optional(),
+    }),
+    objectives: z
+        .array(
             z.strictObject({
                 id: z.string().min(1).max(80),
-                name: z.string().min(1).max(120),
-                status: z.enum(["running", "failed"]),
-                logs: z.array(z.string().min(1).max(400)).max(20),
+                description: z.string().min(1).max(300),
+                check: TerminalCheckSchema,
             }),
-        ).min(1).max(6),
-        symlinks: z.array(
-            z.strictObject({
-                path: z.string().min(1).max(240),
-                target: z.string().min(1).max(240),
-            }),
-        ).max(6),
-        processes: z.array(
-            z.strictObject({
-                pid: z.number().int().positive(),
-                command: z.string().min(1).max(200),
-            }),
-        ).max(12).optional(),
-    }),
-    objectives: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(80),
-            description: z.string().min(1).max(300),
-            check: TerminalCheckSchema,
-        }),
-    ).min(1).max(5),
+        )
+        .min(1)
+        .max(5),
     explanation: z.string().min(1).max(1200),
 });
 
 const TestDesignStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("test-design"),
-    cases: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(80),
-            label: z.string().min(1).max(300),
-            shouldSelect: z.boolean(),
-        }),
-    ).min(3).max(8),
+    cases: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(80),
+                label: z.string().min(1).max(300),
+                shouldSelect: z.boolean(),
+            }),
+        )
+        .min(3)
+        .max(8),
     explanation: z.string().min(1).max(1200),
 });
 
 const ExplainStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("explain"),
-    statements: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(80),
-            label: z.string().min(1).max(400),
-            correct: z.boolean(),
-        }),
-    ).min(3).max(6),
+    statements: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(80),
+                label: z.string().min(1).max(400),
+                correct: z.boolean(),
+            }),
+        )
+        .min(3)
+        .max(6),
     explanation: z.string().min(1).max(1200),
 });
 
@@ -461,18 +540,24 @@ export const MissionSchema = z.strictObject({
     hints: z.array(z.string().min(1).max(800)).length(4),
     misconceptions: z.array(MisconceptionSchema).min(2).max(8),
     lesson: z.strictObject({
-        sections: z.array(
-            z.strictObject({
-                title: z.string().min(1).max(120),
-                body: z.string().min(1).max(2400),
-            }),
-        ).min(1).max(5),
-        vocabulary: z.array(
-            z.strictObject({
-                term: z.string().min(1).max(60),
-                definition: z.string().min(1).max(500),
-            }),
-        ).min(1).max(10),
+        sections: z
+            .array(
+                z.strictObject({
+                    title: z.string().min(1).max(120),
+                    body: z.string().min(1).max(2400),
+                }),
+            )
+            .min(1)
+            .max(5),
+        vocabulary: z
+            .array(
+                z.strictObject({
+                    term: z.string().min(1).max(60),
+                    definition: z.string().min(1).max(500),
+                }),
+            )
+            .min(1)
+            .max(10),
     }),
     steps: z.array(MissionStepSchema).min(1).max(12),
     evaluation: z.strictObject({
@@ -505,7 +590,9 @@ export const MissionCatalogSchema = z.strictObject({
 });
 export type MissionCatalog = z.infer<typeof MissionCatalogSchema>;
 
-export const StepEvaluatorKindByInteraction: Readonly<Record<InteractionKind, EvaluatorKind | null>> = {
+export const StepEvaluatorKindByInteraction: Readonly<
+    Record<InteractionKind, EvaluatorKind | null>
+> = {
     lesson: null,
     quiz: "exact",
     machine: "program-output",
