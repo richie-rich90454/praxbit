@@ -21,7 +21,12 @@ interface WorkerResult {
 
 export async function runPythonTests(
     source: string,
-    tests: readonly { description: string; name: string; args: readonly unknown[]; expected: unknown }[],
+    tests: readonly {
+        description: string;
+        name: string;
+        args: readonly unknown[];
+        expected: unknown;
+    }[],
     timeoutMs = 30_000,
 ): Promise<PythonTestReport> {
     const worker = new Worker(new URL("./python.worker.ts", import.meta.url), { type: "module" });
@@ -42,7 +47,11 @@ export async function runPythonTests(
             cleanup();
             resolve({
                 outcomes: tests.map(function timedOut(test): PythonTestOutcome {
-                    return { description: test.description, passed: false, error: "Python runtime timed out." };
+                    return {
+                        description: test.description,
+                        passed: false,
+                        error: "Python runtime timed out.",
+                    };
                 }),
                 stdout: "",
                 stderr: "",
