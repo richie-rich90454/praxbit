@@ -8,7 +8,10 @@
             "weekOf": "2026-10-26",
             "skillIds": ["api.validation", "concept.state"],
             "options": [
-                { "id": "idempotency-key", "label": "Use a stable idempotency key and record the accepted result before the irreversible side effect." },
+                {
+                    "id": "idempotency-key",
+                    "label": "Use a stable idempotency key and record the accepted result before the irreversible side effect."
+                },
                 { "id": "sleep", "label": "Wait five seconds before every order." },
                 { "id": "disable", "label": "Disable order retries entirely." },
                 { "id": "log", "label": "Log each request and hope the operator notices." }
