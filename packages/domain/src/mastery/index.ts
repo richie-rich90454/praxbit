@@ -1,8 +1,4 @@
-import type {
-    EvidenceCategory,
-    EvidenceSubmission,
-    SkillMastery,
-} from "@praxbit/contracts";
+import type { EvidenceCategory, EvidenceSubmission, SkillMastery } from "@praxbit/contracts";
 
 export interface WeightedEvidence {
     readonly evidence: EvidenceSubmission;
@@ -42,7 +38,9 @@ export const DEFAULT_CATEGORY_WEIGHTS: Readonly<Record<EvidenceCategory, number>
     review: 0.08,
 };
 
-export const DEFAULT_ASSISTANCE_FACTORS: Readonly<Record<EvidenceSubmission["assistance"], number>> = {
+export const DEFAULT_ASSISTANCE_FACTORS: Readonly<
+    Record<EvidenceSubmission["assistance"], number>
+> = {
     independent: 1,
     "hint-1": 0.8,
     "hint-2": 0.6,
