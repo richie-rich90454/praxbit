@@ -1,0 +1,273 @@
+{
+    "id": "campus.the-duplicate-order",
+    "version": 1,
+    "sequence": 24,
+    "courseId": "campus",
+    "title": "The duplicate order",
+    "summary": "Model idempotent processing so a retried request does not charge a customer twice.",
+    "skills": [
+        "api.validation",
+        "concept.state"
+    ],
+    "prerequisites": [
+        "http.basics",
+        "concept.state"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "review",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "curated-ai",
+            "state-simulation"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "retry-duplicate",
+        "briefing": "A network timeout caused the client to retry an order request. The API charged the customer twice. Design a deduplication state and review a proposed patch before it is deployed."
+    },
+    "objectives": [
+        {
+            "id": "model-dedupe",
+            "description": "Model accepted order ids and the accepted count.",
+            "stepIds": [
+                "dedupe-state"
+            ]
+        },
+        {
+            "id": "review-retry",
+            "description": "Find the ordering flaw in the proposed patch.",
+            "stepIds": [
+                "dedupe-review"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:retry"
+    ],
+    "hints": [
+        "Process A1 once, try A1 again, then process B2.",
+        "A duplicate must not increase the accepted count.",
+        "The patch records the id after charging, so a crash between those steps can still double-charge.",
+        "Set processed to A1, then B2; accepted becomes 2. In review, reject the patch because the side effect happens before the id is recorded."
+    ],
+    "misconceptions": [
+        {
+            "id": "dedupe-after-charge",
+            "description": "Recording the id after the side effect.",
+            "stepId": "dedupe-review",
+            "feedback": "If the process dies after charging but before recording the id, the retry charges again. Record or reserve the id before the irreversible side effect."
+        },
+        {
+            "id": "duplicate-is-fine",
+            "description": "Treating a retry as a harmless second order.",
+            "stepId": "dedupe-state",
+            "feedback": "A retry represents the same intent. Processing it twice charges twice. Idempotency makes the repeated request safe."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Retries are normal",
+                "body": "Networks time out. Clients retry. A retried request may reach the server even when the first response was lost, so the server must decide whether it has already processed that intent. A stable idempotency key identifies the same request across attempts."
+            },
+            {
+                "title": "Order side effects carefully",
+                "body": "A charge is an irreversible side effect. If the system records the request after charging, a crash in between leaves no memory of the charge. The record must be created atomically with the side effect, or reserved before it, so a retry can be recognized."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Idempotent",
+                "definition": "Safe to repeat with the same result."
+            },
+            {
+                "term": "Idempotency key",
+                "definition": "A stable identifier for one intended operation."
+            },
+            {
+                "term": "Side effect",
+                "definition": "A change outside the function's return value, such as a charge."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "state",
+            "id": "dedupe-state",
+            "title": "Simulate the retry cache",
+            "prompt": "Apply operations so A1 is processed once, its retry is ignored, and B2 is processed. The accepted count must reach 2.",
+            "evidence": "construction",
+            "cells": [
+                {
+                    "id": "processed",
+                    "label": "Processed ids",
+                    "initial": ""
+                },
+                {
+                    "id": "accepted",
+                    "label": "Accepted orders",
+                    "initial": "0"
+                }
+            ],
+            "operations": [
+                {
+                    "id": "a1",
+                    "label": "Process A1 (new)",
+                    "effects": {
+                        "processed": "A1",
+                        "accepted": "1"
+                    }
+                },
+                {
+                    "id": "a1-again",
+                    "label": "Process A1 again (retry)",
+                    "effects": {
+                        "processed": "A1",
+                        "accepted": "1"
+                    }
+                },
+                {
+                    "id": "b2",
+                    "label": "Process B2 (new)",
+                    "effects": {
+                        "processed": "A1,B2",
+                        "accepted": "2"
+                    }
+                },
+                {
+                    "id": "clear",
+                    "label": "Clear cache",
+                    "effects": {
+                        "processed": "",
+                        "accepted": "0"
+                    }
+                }
+            ],
+            "target": {
+                "processed": "A1,B2",
+                "accepted": "2"
+            },
+            "explanation": "The retry leaves processed and accepted unchanged. A new id is added once."
+        },
+        {
+            "kind": "review",
+            "id": "dedupe-review",
+            "title": "Review the retry patch",
+            "prompt": "Inspect the proposed order handler. Select every supported finding, then choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Proposed retry handler",
+                "caption": "The patch is intended to prevent duplicate charges.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "async function handleOrder(order, db, payments) {\n  const existing = await db.findOrder(order.id);\n  if (existing) return existing;\n\n  const charge = await payments.charge(order.total);\n  const saved = await db.saveOrder({ id: order.id, chargeId: charge.id });\n  return saved;\n}\n\nAI note: \"The lookup prevents duplicates. Ship it.\""
+            },
+            "findings": [
+                {
+                    "id": "race",
+                    "label": "Two simultaneous requests can both pass the lookup before either saves.",
+                    "correct": true
+                },
+                {
+                    "id": "crash",
+                    "label": "A crash after charging but before saving loses the record, so a retry charges again.",
+                    "correct": true
+                },
+                {
+                    "id": "atomic",
+                    "label": "The charge and the record are not created atomically.",
+                    "correct": true
+                },
+                {
+                    "id": "lookup",
+                    "label": "The initial lookup is useless and should be removed.",
+                    "correct": false
+                },
+                {
+                    "id": "safe",
+                    "label": "The patch is safe because it checks for an existing order.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "ship",
+                    "label": "Ship it"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until the id is reserved atomically before charging and retries return the recorded result"
+                },
+                {
+                    "id": "log",
+                    "label": "Add a console log and ship"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "A lookup followed by a separate charge and save has race and crash windows. The idempotency record must be created atomically with, or before, the side effect."
+        },
+        {
+            "kind": "explain",
+            "id": "idempotency-check",
+            "title": "Retry safety",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "same-intent",
+                    "label": "A retry with the same idempotency key represents the same intended operation.",
+                    "correct": true
+                },
+                {
+                    "id": "atomic",
+                    "label": "Recording the operation and performing its side effect must be coordinated.",
+                    "correct": true
+                },
+                {
+                    "id": "duplicate",
+                    "label": "Processing a retry twice is always harmless.",
+                    "correct": false
+                },
+                {
+                    "id": "response",
+                    "label": "A stored result can be returned for a duplicate request.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Idempotency records intent and result so retries are recognized. The record and side effect must be ordered safely."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 170,
+        "unlocks": [
+            "campus.the-ai-says-it-is-fixed"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "repair-inventory",
+        "system": "api"
+    },
+    "accessibility": {
+        "summary": "The retry cache is shown as labeled state cells. Findings and verdict use standard checkboxes and radio controls.",
+        "keyboardNotes": "Apply operations with Enter or Space. Review findings with Tab and Space.",
+        "screenReaderNotes": "Each operation announces its effect. Findings list whether they are supported after submission, and the verdict feedback is read."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional",
+        "ai"
+    ]
+}
