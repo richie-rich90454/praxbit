@@ -1,0 +1,195 @@
+{
+    "id": "node.middleware-order",
+    "version": 1,
+    "sequence": 48,
+    "courseId": "node-services",
+    "title": "Middleware order",
+    "summary": "Arrange a Hono middleware pipeline so requests are identified, authenticated, validated, handled, and safely failed.",
+    "skills": [
+        "node.middleware",
+        "node.hono"
+    ],
+    "prerequisites": [
+        "node.hono",
+        "security.auth"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 6,
+    "interaction": "order",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "pipeline-simulation",
+            "keyboard"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "middleware-order",
+        "briefing": "The orders API has correct middleware but the wrong order. Authentication currently runs before request correlation, validation runs after the handler, and errors escape without a stable shape. Reorder the pipeline."
+    },
+    "objectives": [
+        {
+            "id": "order-middleware",
+            "description": "Order middleware by responsibility and dependency.",
+            "stepIds": [
+                "middleware-order"
+            ]
+        },
+        {
+            "id": "middleware-reasoning",
+            "description": "Explain why order changes behavior.",
+            "stepIds": [
+                "middleware-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:middleware"
+    ],
+    "hints": [
+        "Request identity should exist before anything logs or fails.",
+        "Authentication must precede authorization and validation of protected input.",
+        "Validation belongs before the handler; error formatting wraps the whole chain.",
+        "Order: request id, authentication, authorization, validation, handler, error formatter."
+    ],
+    "misconceptions": [
+        {
+            "id": "validate-after",
+            "description": "Validating after the handler already used the input.",
+            "stepId": "middleware-order",
+            "feedback": "Validation must run before the handler trusts the request body. Afterward is too late."
+        },
+        {
+            "id": "order-irrelevant",
+            "description": "Believing middleware order does not affect behavior.",
+            "stepId": "middleware-check",
+            "feedback": "Each middleware can short-circuit or mutate context. Order changes what later steps see and whether they run."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Middleware forms a chain",
+                "body": "Each middleware can inspect the request, change context, stop the chain, or call the next handler. A request id should exist early so every log and error can reference it. Authentication needs to run before protected work."
+            },
+            {
+                "title": "Wrap, validate, then handle",
+                "body": "Validation rejects bad input before the handler acts. Error formatting belongs around the chain so failures become stable responses. Authorization depends on identity and belongs after authentication but before the action."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Middleware",
+                "definition": "A function in the request chain that can inspect or change the exchange."
+            },
+            {
+                "term": "Context",
+                "definition": "Per-request data shared through the chain."
+            },
+            {
+                "term": "Short-circuit",
+                "definition": "Ending the chain early with a response."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "order",
+            "id": "middleware-order",
+            "title": "Order the API pipeline",
+            "prompt": "Arrange the middleware so identity exists early, protected input is validated before use, and failures have a stable response.",
+            "evidence": "construction",
+            "items": [
+                {
+                    "id": "request-id",
+                    "label": "Attach a request id and correlation header"
+                },
+                {
+                    "id": "auth",
+                    "label": "Authenticate the session"
+                },
+                {
+                    "id": "authorize",
+                    "label": "Authorize the member action"
+                },
+                {
+                    "id": "validate",
+                    "label": "Validate the request body with a schema"
+                },
+                {
+                    "id": "handler",
+                    "label": "Run the order handler"
+                },
+                {
+                    "id": "errors",
+                    "label": "Serialize unexpected errors into the stable error shape"
+                }
+            ],
+            "correctOrder": [
+                "request-id",
+                "auth",
+                "authorize",
+                "validate",
+                "handler",
+                "errors"
+            ],
+            "explanation": "Request identity comes first, authentication enables authorization, validation protects the handler, and error formatting wraps the chain."
+        },
+        {
+            "kind": "explain",
+            "id": "middleware-check",
+            "title": "Why order matters",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "context",
+                    "label": "Middleware can change the context seen by later steps.",
+                    "correct": true
+                },
+                {
+                    "id": "stop",
+                    "label": "Middleware can end the request before the handler.",
+                    "correct": true
+                },
+                {
+                    "id": "irrelevant",
+                    "label": "Reordering middleware never changes behavior.",
+                    "correct": false
+                },
+                {
+                    "id": "validate",
+                    "label": "Validation should run before the handler trusts input.",
+                    "correct": true
+                }
+            ],
+            "explanation": "A middleware chain is ordered behavior. Context, short-circuiting, and validation all depend on position."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Pipeline items can be reordered with buttons and are announced as an ordered list.",
+        "keyboardNotes": "Use move buttons. Drag is optional.",
+        "screenReaderNotes": "Each item announces its position after a move. The explanation is read after submission."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
