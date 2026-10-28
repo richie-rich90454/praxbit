@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-narrowing": {
+            "files": {
+                "format.ts": "function formatIdentifier(value: string | number): string {\n  if (typeof value === \"number\") {\n    return `ID-${value}`;\n  }\n  return `ID-${value.trim().toUpperCase()}`;\n}\n"
+            }
+        }
+    }
+}
