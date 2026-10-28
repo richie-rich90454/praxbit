@@ -52,8 +52,9 @@ export function PlacementScreen(): JSX.Element {
                 <div class="page-header__text">
                     <h1>I already know programming</h1>
                     <p class="lede">
-                        Answer what you can. Placement is skippable and only adjusts where you start. It does not grant
-                        mastery; later evidence still builds your skill estimates.
+                        Answer what you can. Placement is skippable and only adjusts where you
+                        start. It does not grant mastery; later evidence still builds your skill
+                        estimates.
                     </p>
                 </div>
             </div>
@@ -65,15 +66,18 @@ export function PlacementScreen(): JSX.Element {
                         <div class="surface stack">
                             <h2>Suggested start</h2>
                             <p>
-                                {result()?.correct} of {result()?.total} correct. The recommendation is a starting
-                                point, not a permanent placement.
+                                {result()?.correct} of {result()?.total} correct. The recommendation
+                                is a starting point, not a permanent placement.
                             </p>
                             <Show when={recommendedMission() !== undefined}>
                                 <div class="stack stack--tight">
                                     <h3>{recommendedMission()?.title}</h3>
                                     <p class="small muted">{recommendedMission()?.summary}</p>
                                     <div class="row">
-                                        <A class="button" href={`/missions/${recommendedMission()?.id}`}>
+                                        <A
+                                            class="button"
+                                            href={`/missions/${recommendedMission()?.id}`}
+                                        >
                                             Start here
                                         </A>
                                         <A class="button button--secondary" href="/learn">
@@ -84,8 +88,9 @@ export function PlacementScreen(): JSX.Element {
                             </Show>
                             <Show when={(result()?.skippedSkills.length ?? 0) > 0}>
                                 <p class="meta">
-                                    Placement credits cover {result()?.skippedSkills.length} prerequisite skills. They
-                                    are visible in your progress and can be revisited.
+                                    Placement credits cover {result()?.skippedSkills.length}{" "}
+                                    prerequisite skills. They are visible in your progress and can
+                                    be revisited.
                                 </p>
                             </Show>
                         </div>
@@ -111,9 +116,18 @@ export function PlacementScreen(): JSX.Element {
                                                         name={`placement-${item.id}`}
                                                         checked={answers()[item.id] === choice.id}
                                                         onChange={function choose(): void {
-                                                            setAnswers(function update(current): Readonly<Record<string, string>> {
-                                                                return { ...current, [item.id]: choice.id };
-                                                            });
+                                                            setAnswers(
+                                                                function update(
+                                                                    current,
+                                                                ): Readonly<
+                                                                    Record<string, string>
+                                                                > {
+                                                                    return {
+                                                                        ...current,
+                                                                        [item.id]: choice.id,
+                                                                    };
+                                                                },
+                                                            );
                                                         }}
                                                     />
                                                     <span class="choice__text">{choice.label}</span>
@@ -137,9 +151,13 @@ export function PlacementScreen(): JSX.Element {
                             >
                                 {saving() ? "Saving placement" : "See suggested start"}
                             </button>
-                            <button type="button" class="button button--secondary" onClick={function leave(): void {
-                                void skip();
-                            }}>
+                            <button
+                                type="button"
+                                class="button button--secondary"
+                                onClick={function leave(): void {
+                                    void skip();
+                                }}
+                            >
                                 Skip placement
                             </button>
                         </div>
