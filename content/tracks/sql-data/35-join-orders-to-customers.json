@@ -5,22 +5,14 @@
     "courseId": "sql-data",
     "title": "Join orders to customers",
     "summary": "Combine two related tables without losing or duplicating rows.",
-    "skills": [
-        "sql.joins"
-    ],
-    "prerequisites": [
-        "sql.queries"
-    ],
+    "skills": ["sql.joins"],
+    "prerequisites": ["sql.queries"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": [
-            "sqlite-wasm",
-            "deterministic-tests",
-            "learning-runtime"
-        ]
+        "capabilities": ["sqlite-wasm", "deterministic-tests", "learning-runtime"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "join",
             "description": "Join orders to their customers by foreign key.",
-            "stepIds": [
-                "join-orders"
-            ]
+            "stepIds": ["join-orders"]
         },
         {
             "id": "no-duplicates",
             "description": "Return exactly one row per order.",
-            "stepIds": [
-                "join-orders"
-            ]
+            "stepIds": ["join-orders"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["join-count", "join-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:database",
-        "icon:join"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:join"],
     "hints": [
         "Name both tables in FROM and connect them with ON.",
         "orders.customer_id = customers.id.",
@@ -119,36 +107,12 @@
                     "kind": "sql",
                     "description": "Each order appears once with the right customer.",
                     "expectedRows": [
-                        [
-                            "o1",
-                            "Ada",
-                            2500
-                        ],
-                        [
-                            "o2",
-                            "Ada",
-                            7500
-                        ],
-                        [
-                            "o3",
-                            "Bo",
-                            12900
-                        ],
-                        [
-                            "o4",
-                            "Cy",
-                            4000
-                        ],
-                        [
-                            "o5",
-                            "Bo",
-                            5200
-                        ],
-                        [
-                            "o6",
-                            "Ada",
-                            9900
-                        ]
+                        ["o1", "Ada", 2500],
+                        ["o2", "Ada", 7500],
+                        ["o3", "Bo", 12900],
+                        ["o4", "Cy", 4000],
+                        ["o5", "Bo", 5200],
+                        ["o6", "Ada", 9900]
                     ]
                 }
             ],
@@ -230,9 +194,7 @@
     },
     "rewards": {
         "experience": 110,
-        "unlocks": [
-            "sql.review-model"
-        ]
+        "unlocks": ["sql.review-model"]
     },
     "persistence": {
         "kind": "none"
@@ -243,8 +205,5 @@
         "screenReaderNotes": "The result row count and each row are announced. The test failure identifies an unexpected row count."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
