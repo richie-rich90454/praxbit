@@ -7,10 +7,10 @@
         "dev": "tsx watch src/main.ts",
         "start": "node dist/main.js",
         "build": "node ../../scripts/build-server.mjs",
-        "typecheck": "tsc -p tsconfig.json",
+        "typecheck": "tsc -p tsconfig.json && tsc -p scripts/tsconfig.json",
         "test:integration": "node ../../node_modules/tsx/dist/cli.mjs scripts/run-integration-tests.ts",
-        "db:migrate": "node-pg-migrate up --migrations-dir ../../database/migrations --database-url-var DATABASE_URL",
-        "db:rollback": "node-pg-migrate down --migrations-dir ../../database/migrations --database-url-var DATABASE_URL"
+        "db:migrate": "node ../../node_modules/tsx/dist/cli.mjs scripts/migrate.ts up",
+        "db:rollback": "node ../../node_modules/tsx/dist/cli.mjs scripts/migrate.ts down"
     },
     "dependencies": {
         "@hono/node-server": "^2.1.5",
