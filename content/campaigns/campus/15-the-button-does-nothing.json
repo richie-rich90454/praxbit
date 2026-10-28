@@ -5,25 +5,14 @@
     "courseId": "campus",
     "title": "The button does nothing",
     "summary": "Wire a browser event so the storefront cart responds to a real click.",
-    "skills": [
-        "js.events",
-        "js.functions"
-    ],
-    "prerequisites": [
-        "web.html",
-        "concept.state",
-        "concept.conditions"
-    ],
+    "skills": ["js.events", "js.functions"],
+    "prerequisites": ["web.html", "concept.state", "concept.conditions"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "dom-event-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "dom-event-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -35,24 +24,15 @@
         {
             "id": "click-updates",
             "description": "Update count and status when the button is clicked.",
-            "stepIds": [
-                "wire-button"
-            ]
+            "stepIds": ["wire-button"]
         },
         {
             "id": "event-model",
             "description": "Explain the relationship between events, handlers, and state.",
-            "stepIds": [
-                "event-check"
-            ]
+            "stepIds": ["event-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:click"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:click"],
     "hints": [
         "The button already has addEventListener. Implement the function it calls.",
         "Inside addItem, increase count, then update both text elements.",
@@ -204,9 +184,7 @@
     },
     "rewards": {
         "experience": 125,
-        "unlocks": [
-            "campus.inventory-went-negative"
-        ]
+        "unlocks": ["campus.inventory-went-negative"]
     },
     "persistence": {
         "kind": "world-action",
@@ -219,8 +197,5 @@
         "screenReaderNotes": "The status text is announced politely after it changes. Test results list each requirement and outcome."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "games"
-    ]
+    "tags": ["web", "games"]
 }
