@@ -10,7 +10,10 @@
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "filesystem",
-    "runtime": { "kind": "none", "capabilities": ["interactive-simulation", "keyboard", "screen-reader"] },
+    "runtime": {
+        "kind": "none",
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
+    },
     "scenario": {
         "world": "campus",
         "system": "server-room",
@@ -18,8 +21,21 @@
         "briefing": "The server room files are organized in folders. Find the live inventory file without opening unrelated data or backups."
     },
     "objectives": [
-        { "id": "locate-file", "description": "Locate the live inventory file.", "stepIds": ["find-inventory"] },
-        { "id": "relative-path", "description": "Read a relative path correctly.", "stepIds": ["path-check"] }
+        {
+            "id": "locate-file",
+            "description": "Locate the live inventory file.",
+            "stepIds": ["find-inventory"]
+        },
+        {
+            "id": "relative-path",
+            "description": "Read a relative path correctly.",
+            "stepIds": ["path-check"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["filesystem-claims"]
+        }
     ],
     "assets": ["pip:observing", "scene:campus", "system:server-room", "icon:folder"],
     "hints": [
@@ -56,9 +72,18 @@
             }
         ],
         "vocabulary": [
-            { "term": "Directory", "definition": "A folder that contains files or other folders." },
-            { "term": "Absolute path", "definition": "A path that starts at the filesystem root." },
-            { "term": "Relative path", "definition": "A path interpreted from the current directory." }
+            {
+                "term": "Directory",
+                "definition": "A folder that contains files or other folders."
+            },
+            {
+                "term": "Absolute path",
+                "definition": "A path that starts at the filesystem root."
+            },
+            {
+                "term": "Relative path",
+                "definition": "A path interpreted from the current directory."
+            }
         ]
     },
     "steps": [
@@ -69,22 +94,76 @@
             "prompt": "Navigate the folders and select the live inventory file. Do not select a backup.",
             "evidence": "construction",
             "nodes": [
-                { "path": "srv", "type": "folder" },
-                { "path": "srv/campus", "type": "folder" },
-                { "path": "srv/campus/app", "type": "folder" },
-                { "path": "srv/campus/app/server.js", "type": "file", "note": "Orders service entry point" },
-                { "path": "srv/campus/app/config.json", "type": "file", "note": "Service configuration" },
-                { "path": "srv/campus/data", "type": "folder" },
-                { "path": "srv/campus/data/inventory.json", "type": "file", "note": "Live inventory" },
-                { "path": "srv/campus/data/orders.json", "type": "file", "note": "Recent orders" },
-                { "path": "srv/campus/backups", "type": "folder" },
-                { "path": "srv/campus/backups/inventory-old.json", "type": "file", "note": "Last week's copy" },
-                { "path": "var", "type": "folder" },
-                { "path": "var/log", "type": "folder" },
-                { "path": "var/log/campus.log", "type": "file", "note": "Service log" },
-                { "path": "home", "type": "folder" },
-                { "path": "home/student", "type": "folder" },
-                { "path": "home/student/notes.txt", "type": "file" }
+                {
+                    "path": "srv",
+                    "type": "folder"
+                },
+                {
+                    "path": "srv/campus",
+                    "type": "folder"
+                },
+                {
+                    "path": "srv/campus/app",
+                    "type": "folder"
+                },
+                {
+                    "path": "srv/campus/app/server.js",
+                    "type": "file",
+                    "note": "Orders service entry point"
+                },
+                {
+                    "path": "srv/campus/app/config.json",
+                    "type": "file",
+                    "note": "Service configuration"
+                },
+                {
+                    "path": "srv/campus/data",
+                    "type": "folder"
+                },
+                {
+                    "path": "srv/campus/data/inventory.json",
+                    "type": "file",
+                    "note": "Live inventory"
+                },
+                {
+                    "path": "srv/campus/data/orders.json",
+                    "type": "file",
+                    "note": "Recent orders"
+                },
+                {
+                    "path": "srv/campus/backups",
+                    "type": "folder"
+                },
+                {
+                    "path": "srv/campus/backups/inventory-old.json",
+                    "type": "file",
+                    "note": "Last week's copy"
+                },
+                {
+                    "path": "var",
+                    "type": "folder"
+                },
+                {
+                    "path": "var/log",
+                    "type": "folder"
+                },
+                {
+                    "path": "var/log/campus.log",
+                    "type": "file",
+                    "note": "Service log"
+                },
+                {
+                    "path": "home",
+                    "type": "folder"
+                },
+                {
+                    "path": "home/student",
+                    "type": "folder"
+                },
+                {
+                    "path": "home/student/notes.txt",
+                    "type": "file"
+                }
             ],
             "targetPath": ["srv", "campus", "data", "inventory.json"],
             "explanation": "The live inventory file is srv/campus/data/inventory.json. The similarly named file in backups is stale."
@@ -98,10 +177,22 @@
             "quiz": {
                 "prompt": "Choose the correct relative path.",
                 "options": [
-                    { "id": "data", "label": "data/inventory.json" },
-                    { "id": "parent", "label": "../data/inventory.json" },
-                    { "id": "root", "label": "srv/campus/data/inventory.json" },
-                    { "id": "backup", "label": "../backups/inventory.json" }
+                    {
+                        "id": "data",
+                        "label": "data/inventory.json"
+                    },
+                    {
+                        "id": "parent",
+                        "label": "../data/inventory.json"
+                    },
+                    {
+                        "id": "root",
+                        "label": "srv/campus/data/inventory.json"
+                    },
+                    {
+                        "id": "backup",
+                        "label": "../backups/inventory.json"
+                    }
                 ],
                 "correctId": "parent",
                 "explanation": "From app, .. moves up to campus. Then data/inventory.json reaches the live file."
@@ -120,17 +211,41 @@
             "prompt": "Select the accurate statements.",
             "evidence": "explanation",
             "statements": [
-                { "id": "same-name", "label": "Two different files can share a file name in different folders.", "correct": true },
-                { "id": "relative", "label": "A relative path depends on the current directory.", "correct": true },
-                { "id": "backup-current", "label": "A backup file is always the live data source.", "correct": false },
-                { "id": "extension", "label": "A .json extension guarantees the file is valid JSON.", "correct": false }
+                {
+                    "id": "same-name",
+                    "label": "Two different files can share a file name in different folders.",
+                    "correct": true
+                },
+                {
+                    "id": "relative",
+                    "label": "A relative path depends on the current directory.",
+                    "correct": true
+                },
+                {
+                    "id": "backup-current",
+                    "label": "A backup file is always the live data source.",
+                    "correct": false
+                },
+                {
+                    "id": "extension",
+                    "label": "A .json extension guarantees the file is valid JSON.",
+                    "correct": false
+                }
             ],
             "explanation": "Paths disambiguate names. Extensions and folder names are conventions, not proof of content."
         }
     ],
-    "evaluation": { "kind": "steps", "passScore": 1 },
-    "rewards": { "experience": 80, "unlocks": ["before-code.send-a-message"] },
-    "persistence": { "kind": "none" },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 80,
+        "unlocks": ["before-code.send-a-message"]
+    },
+    "persistence": {
+        "kind": "none"
+    },
     "accessibility": {
         "summary": "The filesystem is a keyboard-navigable tree with expandable folders. A breadcrumb shows the current path.",
         "keyboardNotes": "Use arrow keys to move through the tree and Enter to open a folder or select a file.",
