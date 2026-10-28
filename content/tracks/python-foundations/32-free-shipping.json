@@ -1,0 +1,235 @@
+{
+    "id": "python.decisions",
+    "version": 1,
+    "sequence": 32,
+    "courseId": "python-foundations",
+    "title": "Free shipping",
+    "summary": "Write a Python condition for an exact order threshold.",
+    "skills": [
+        "python.control"
+    ],
+    "prerequisites": [
+        "python.basics"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-python",
+        "capabilities": [
+            "pyodide-wasm",
+            "source-editing",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "python-shipping",
+        "briefing": "Shipping is free at exactly 5000 cents and above. The current Python check uses a strict comparison and charges some qualifying orders."
+    },
+    "objectives": [
+        {
+            "id": "threshold",
+            "description": "Apply the inclusive shipping threshold.",
+            "stepIds": [
+                "shipping"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:storefront",
+        "icon:python"
+    ],
+    "hints": [
+        "Free shipping begins at 5000 cents, including 5000.",
+        "The comparison needs >=, not >.",
+        "Return 0 when the total qualifies, otherwise 500.",
+        "if total_cents >= 5000: return 0; return 500"
+    ],
+    "misconceptions": [
+        {
+            "id": "strict-comparison",
+            "description": "Using > when the boundary is inclusive.",
+            "stepId": "shipping",
+            "feedback": "An order of exactly 5000 must ship free. Use >= so the boundary is included."
+        },
+        {
+            "id": "backwards-condition",
+            "description": "Returning the shipping cost for qualifying orders.",
+            "stepId": "shipping",
+            "feedback": "The condition selects free shipping. Return 0 inside the qualifying branch and 500 for everything else."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Conditions select a path",
+                "body": "A Python if statement evaluates a boolean expression. The indented block runs only when the expression is true. An else block handles the other path. Boundary comparisons decide whether the exact threshold belongs to the qualifying group."
+            },
+            {
+                "title": "Read natural language precisely",
+                "body": "\"At 5000 cents and above\" includes 5000. A strict > excludes it. Translating a policy into code requires deciding which side of every boundary is included."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "if statement",
+                "definition": "A conditional block that runs only when a test is true."
+            },
+            {
+                "term": "Inclusive",
+                "definition": "Including the stated boundary value."
+            },
+            {
+                "term": "Threshold",
+                "definition": "A boundary at which behavior changes."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "shipping",
+            "title": "Implement free shipping",
+            "prompt": "Edit shipping.py. shipping_cost(total_cents) returns 0 at or above 5000 cents, otherwise 500.",
+            "evidence": "construction",
+            "language": "python",
+            "files": [
+                {
+                    "path": "shipping.py",
+                    "content": "def shipping_cost(total_cents):\n    if total_cents > 5000:\n        return 0\n    return 500\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "shipping.py",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Below the threshold pays shipping.",
+                    "name": "shipping_cost",
+                    "args": [
+                        4999
+                    ],
+                    "expected": 500
+                },
+                {
+                    "kind": "function",
+                    "description": "The exact threshold is free.",
+                    "name": "shipping_cost",
+                    "args": [
+                        5000
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Above the threshold is free.",
+                    "name": "shipping_cost",
+                    "args": [
+                        12000
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Zero total still pays shipping.",
+                    "name": "shipping_cost",
+                    "args": [
+                        0
+                    ],
+                    "expected": 500
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "python-boundary",
+            "title": "Which comparison?",
+            "prompt": "A rule says \"18 and older\". Which Python comparison includes the boundary?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the comparison.",
+                "options": [
+                    {
+                        "id": "ge",
+                        "label": "age >= 18"
+                    },
+                    {
+                        "id": "gt",
+                        "label": "age > 18"
+                    },
+                    {
+                        "id": "lt",
+                        "label": "age < 18"
+                    }
+                ],
+                "correctId": "ge",
+                "explanation": ">= includes 18. > would exclude the boundary."
+            },
+            "hints": [
+                "The rule includes 18.",
+                "Use the comparison that includes equality.",
+                ">= means greater than or equal.",
+                "age >= 18."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "python-condition-check",
+            "title": "Boundaries in decisions",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "inclusive",
+                    "label": "An inclusive threshold needs >= or <=.",
+                    "correct": true
+                },
+                {
+                    "id": "strict",
+                    "label": "A strict comparison includes the boundary value.",
+                    "correct": false
+                },
+                {
+                    "id": "test",
+                    "label": "Testing exactly at a threshold is essential.",
+                    "correct": true
+                },
+                {
+                    "id": "bool",
+                    "label": "A Python if condition can evaluate a comparison expression.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Threshold semantics must be translated precisely and tested at the exact boundary."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": [
+            "python.loops"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Python editor and tests are keyboard accessible. Python loads on demand.",
+        "keyboardNotes": "Ctrl+Enter runs tests. The runtime loading state is announced.",
+        "screenReaderNotes": "Tests announce the total, expected shipping cost, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "ai"
+    ]
+}
