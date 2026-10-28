@@ -43,7 +43,9 @@ export function CodeView(props: CodeViewProps): JSX.Element {
     const [activePath, setActivePath] = createSignal(props.step.entry);
     const [running, setRunning] = createSignal(false);
     const [outcomes, setOutcomes] = createSignal<readonly CheckOutcome[]>([]);
-    const [diagnostics, setDiagnostics] = createSignal<readonly { message: string; severity: string }[]>([]);
+    const [diagnostics, setDiagnostics] = createSignal<
+        readonly { message: string; severity: string }[]
+    >([]);
     const [stdout, setStdout] = createSignal("");
     const [stderr, setStderr] = createSignal("");
     const [runtimeError, setRuntimeError] = createSignal("");
@@ -68,7 +70,11 @@ export function CodeView(props: CodeViewProps): JSX.Element {
             if (draft === undefined) {
                 return;
             }
-            const allowed = new Set(props.step.files.map(function pathOf(file): string { return file.path; }));
+            const allowed = new Set(
+                props.step.files.map(function pathOf(file): string {
+                    return file.path;
+                }),
+            );
             const next: Record<string, string> = { ...initialFiles };
             for (const [path, content] of Object.entries(draft.files)) {
                 if (allowed.has(path)) {
@@ -80,7 +86,11 @@ export function CodeView(props: CodeViewProps): JSX.Element {
     });
 
     async function saveDraft(): Promise<void> {
-        await db.drafts.put({ key: props.draftKey, files: files(), updatedAt: new Date().toISOString() });
+        await db.drafts.put({
+            key: props.draftKey,
+            files: files(),
+            updatedAt: new Date().toISOString(),
+        });
         setSaved(true);
         setTimeout(function quiet(): void {
             setSaved(false);
@@ -172,7 +182,9 @@ export function CodeView(props: CodeViewProps): JSX.Element {
                                 }}
                             >
                                 <span class="method-tab__name">{item.path}</span>
-                                <span class="method-tab__detail">{item.editable ? "editable" : "read only"}</span>
+                                <span class="method-tab__detail">
+                                    {item.editable ? "editable" : "read only"}
+                                </span>
                             </button>
                         );
                     }}
@@ -197,12 +209,19 @@ export function CodeView(props: CodeViewProps): JSX.Element {
             </Show>
 
             <div class="row">
-                <button type="button" class="button" disabled={running()} onClick={function runTests(): void {
-                    void run();
-                }}>
+                <button
+                    type="button"
+                    class="button"
+                    disabled={running()}
+                    onClick={function runTests(): void {
+                        void run();
+                    }}
+                >
                     {running() ? "Running tests" : "Run tests"}
                 </button>
-                <span class="meta">Ctrl+Enter runs the tests. {saved() ? "Draft saved on this device." : ""}</span>
+                <span class="meta">
+                    Ctrl+Enter runs the tests. {saved() ? "Draft saved on this device." : ""}
+                </span>
             </div>
 
             <Show when={props.step.preview === "html" || props.step.preview === "css"}>
@@ -229,7 +248,10 @@ export function CodeView(props: CodeViewProps): JSX.Element {
                             {function diagnostic(item): JSX.Element {
                                 return (
                                     <li class="small">
-                                        <strong>{item.severity === "error" ? "Error" : "Warning"}:</strong> {item.message}
+                                        <strong>
+                                            {item.severity === "error" ? "Error" : "Warning"}:
+                                        </strong>{" "}
+                                        {item.message}
                                     </li>
                                 );
                             }}
@@ -256,14 +278,23 @@ export function CodeView(props: CodeViewProps): JSX.Element {
                                         <tr>
                                             <td>{item.description}</td>
                                             <td>
-                                                <span class={`status ${item.passed ? "status--success" : "status--error"}`}>
+                                                <span
+                                                    class={`status ${item.passed ? "status--success" : "status--error"}`}
+                                                >
                                                     <span class="status__mark" aria-hidden="true" />
                                                     {statusLabel(item.passed)}
                                                 </span>
                                             </td>
                                             <td class="small">
-                                                <Show when={item.error !== undefined}>{item.error}</Show>
-                                                <Show when={item.error === undefined && item.actual !== undefined}>
+                                                <Show when={item.error !== undefined}>
+                                                    {item.error}
+                                                </Show>
+                                                <Show
+                                                    when={
+                                                        item.error === undefined &&
+                                                        item.actual !== undefined
+                                                    }
+                                                >
                                                     Actual: {item.actual}
                                                 </Show>
                                             </td>
@@ -280,10 +311,14 @@ export function CodeView(props: CodeViewProps): JSX.Element {
                 <div class="surface surface--quiet stack stack--tight">
                     <h3>Program output</h3>
                     <Show when={stdout().length > 0}>
-                        <pre class="mono" aria-label="Standard output">{stdout()}</pre>
+                        <pre class="mono" aria-label="Standard output">
+                            {stdout()}
+                        </pre>
                     </Show>
                     <Show when={stderr().length > 0}>
-                        <pre class="mono" aria-label="Standard error">{stderr()}</pre>
+                        <pre class="mono" aria-label="Standard error">
+                            {stderr()}
+                        </pre>
                     </Show>
                 </div>
             </Show>
