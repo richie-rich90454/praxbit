@@ -1,0 +1,237 @@
+{
+    "id": "before-code.fix-the-instructions",
+    "version": 1,
+    "sequence": 7,
+    "courseId": "before-code",
+    "title": "Fix the instructions",
+    "summary": "Find the single incorrect instruction that makes a sorting robot fail.",
+    "skills": [
+        "concept.debugging"
+    ],
+    "prerequisites": [
+        "concept.tracing"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "debug",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "interactive-simulation",
+            "keyboard",
+            "screen-reader"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "sorting-fault",
+        "briefing": "A sorting robot places every can into the wrong bin. The steps are all present and the counts are right, so one instruction must be wrong."
+    },
+    "objectives": [
+        {
+            "id": "find-fault",
+            "description": "Identify the faulty instruction.",
+            "stepIds": [
+                "robot-fault"
+            ]
+        },
+        {
+            "id": "choose-repair",
+            "description": "Choose a replacement that fixes the cause.",
+            "stepIds": [
+                "robot-fault"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:robotics",
+        "icon:debug"
+    ],
+    "hints": [
+        "Compare what the robot does with where the bins actually are.",
+        "The arm reaches the correct bin only if it turns toward it.",
+        "The robot turns left, but the recycling bin is on the right.",
+        "The faulty instruction is turn left. Replace it with turn right."
+    ],
+    "misconceptions": [
+        {
+            "id": "fixes-symptom",
+            "description": "Changing the scan step instead of the movement.",
+            "stepId": "robot-fault",
+            "answer": "scan:rescan",
+            "feedback": "Rescanning repeats the same wrong placement. The evidence points to movement, not scanning."
+        },
+        {
+            "id": "multiple-changes",
+            "description": "Changing several instructions at once.",
+            "stepId": "robot-fault",
+            "feedback": "If you change two things, you cannot tell which change fixed the behavior. Make one justified change, then verify."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Debugging is evidence-driven",
+                "body": "A bug is a mismatch between expected and actual behavior. Good debugging narrows the fault with observations before changing code. Changing several things at once destroys the evidence about which change mattered."
+            },
+            {
+                "title": "Fix the cause, verify the behavior",
+                "body": "The robot's wrong bin is a symptom. The cause is a movement instruction pointing away from the bin. After one repair, rerun the behavior and check the result."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Bug",
+                "definition": "A defect that makes behavior differ from expectation."
+            },
+            {
+                "term": "Symptom",
+                "definition": "Visible wrong behavior caused by a defect."
+            },
+            {
+                "term": "Root cause",
+                "definition": "The condition that produces the symptom."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "debug",
+            "id": "robot-fault",
+            "title": "Find the faulty instruction",
+            "prompt": "The recycling bin is to the robot's right. Choose the instruction that is wrong, then choose the smallest repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "lift",
+                    "label": "Lift the can"
+                },
+                {
+                    "id": "turn",
+                    "label": "Turn left 90 degrees"
+                },
+                {
+                    "id": "walk",
+                    "label": "Walk forward 2 steps"
+                },
+                {
+                    "id": "drop",
+                    "label": "Lower the can into the bin"
+                },
+                {
+                    "id": "scan",
+                    "label": "Scan the can"
+                }
+            ],
+            "buggyId": "turn",
+            "fixes": [
+                {
+                    "id": "turn-right",
+                    "label": "Turn right 90 degrees"
+                },
+                {
+                    "id": "walk-longer",
+                    "label": "Walk forward 5 steps"
+                },
+                {
+                    "id": "rescan",
+                    "label": "Scan the can twice"
+                }
+            ],
+            "correctFixId": "turn-right",
+            "explanation": "The bin is on the right, so the robot must turn right. Walking farther or rescanning does not change direction."
+        },
+        {
+            "kind": "quiz",
+            "id": "verification-check",
+            "title": "How do you know it is fixed?",
+            "prompt": "After changing one instruction, what is the best next step?",
+            "evidence": "testing",
+            "quiz": {
+                "prompt": "Choose the strongest verification.",
+                "options": [
+                    {
+                        "id": "assume",
+                        "label": "Assume it works because the change looks right"
+                    },
+                    {
+                        "id": "rerun",
+                        "label": "Run the sorting task again and check the bin and scan result"
+                    },
+                    {
+                        "id": "add",
+                        "label": "Change two more instructions to be safe"
+                    },
+                    {
+                        "id": "ask",
+                        "label": "Ask an AI whether the instruction sounds correct"
+                    }
+                ],
+                "correctId": "rerun",
+                "explanation": "Running the actual behavior and checking its outcome is stronger evidence than appearance or opinion."
+            },
+            "hints": [
+                "What evidence would show the robot now reaches the bin?",
+                "Run the behavior, do not just read it.",
+                "Check both the physical destination and the scan result.",
+                "Rerun the task and inspect where the can ends up."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "debug-claims",
+            "title": "Debugging practice",
+            "prompt": "Select every statement that describes careful debugging.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "one-change",
+                    "label": "Change one suspected cause at a time.",
+                    "correct": true
+                },
+                {
+                    "id": "evidence",
+                    "label": "Use observations to narrow where the fault can be.",
+                    "correct": true
+                },
+                {
+                    "id": "random",
+                    "label": "Rewrite the whole project at the first failure.",
+                    "correct": false
+                },
+                {
+                    "id": "symptom",
+                    "label": "Treating a symptom as proof of the root cause is enough.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Careful debugging isolates one cause, verifies a change, and keeps evidence of what happened."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 75,
+        "unlocks": [
+            "before-code.everything-is-information"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Instructions are radio options and the repair list is a separate radio group. Results are text.",
+        "keyboardNotes": "Choose the faulty instruction and repair with normal radio controls.",
+        "screenReaderNotes": "Each instruction is announced with its position. The feedback states whether the selected fault and repair match the evidence."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "everything",
+        "professional"
+    ]
+}
