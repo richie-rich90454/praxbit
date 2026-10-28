@@ -1,0 +1,200 @@
+{
+    "id": "sql.filter-orders",
+    "version": 1,
+    "sequence": 34,
+    "courseId": "sql-data",
+    "title": "Find high-value orders",
+    "summary": "Write a SELECT with a filter, ordering, and explicit columns.",
+    "skills": [
+        "sql.queries"
+    ],
+    "prerequisites": [
+        "concept.data"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-sql",
+        "capabilities": [
+            "sqlite-wasm",
+            "deterministic-tests",
+            "learning-runtime"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "sql-filter",
+        "briefing": "The data team wants orders of at least 5000 cents, highest first. Write one query that returns exactly the requested columns."
+    },
+    "objectives": [
+        {
+            "id": "filter",
+            "description": "Filter orders at or above the threshold.",
+            "stepIds": [
+                "high-value"
+            ]
+        },
+        {
+            "id": "order",
+            "description": "Order results by total descending.",
+            "stepIds": [
+                "high-value"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:database",
+        "icon:query"
+    ],
+    "hints": [
+        "SELECT chooses columns, FROM names the table, WHERE filters rows.",
+        "total_cents >= 5000 includes the boundary.",
+        "ORDER BY total_cents DESC puts the largest first.",
+        "SELECT id, total_cents FROM orders WHERE total_cents >= 5000 ORDER BY total_cents DESC;"
+    ],
+    "misconceptions": [
+        {
+            "id": "select-star",
+            "description": "Returning every column when only two are requested.",
+            "stepId": "high-value",
+            "feedback": "SELECT * returns extra columns. Name the two requested columns explicitly."
+        },
+        {
+            "id": "strict-threshold",
+            "description": "Excluding the exact threshold.",
+            "stepId": "high-value",
+            "feedback": "\"At least 5000\" includes 5000. Use >= rather than >."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A query is a precise question",
+                "body": "SELECT names the columns, FROM names the table, WHERE filters rows, and ORDER BY controls output order. The result shape is part of the question. Returning extra columns can break a caller that expects a fixed contract."
+            },
+            {
+                "title": "Boundaries are explicit",
+                "body": "At least means greater than or equal. The database evaluates exactly what is written. SQLite is used here as a learning runtime; PostgreSQL behaves similarly for this basic query."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "SELECT",
+                "definition": "The clause that chooses result columns."
+            },
+            {
+                "term": "WHERE",
+                "definition": "The clause that filters rows."
+            },
+            {
+                "term": "ORDER BY",
+                "definition": "The clause that sorts result rows."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "high-value",
+            "title": "Query the high-value orders",
+            "prompt": "Edit query.sql. Return id and total_cents for orders with total_cents at least 5000, largest total first.",
+            "evidence": "construction",
+            "language": "sql",
+            "files": [
+                {
+                    "path": "query.sql",
+                    "content": "SELECT * FROM orders;\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "query.sql",
+            "preview": "sql",
+            "tests": [
+                {
+                    "kind": "sql",
+                    "description": "The query returns the exact expected rows in order.",
+                    "expectedRows": [
+                        [
+                            "o3",
+                            12900
+                        ],
+                        [
+                            "o6",
+                            9900
+                        ],
+                        [
+                            "o2",
+                            7500
+                        ],
+                        [
+                            "o5",
+                            5200
+                        ]
+                    ]
+                }
+            ],
+            "database": {
+                "schemaSql": "CREATE TABLE orders (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, total_cents INTEGER NOT NULL, placed_at TEXT NOT NULL);\n",
+                "seedSql": "INSERT INTO orders (id, customer_id, total_cents, placed_at) VALUES ('o1', 'c1', 2500, '2026-10-01'), ('o2', 'c1', 7500, '2026-10-02'), ('o3', 'c2', 12900, '2026-10-03'), ('o4', 'c3', 4000, '2026-10-04'), ('o5', 'c2', 5200, '2026-10-05'), ('o6', 'c1', 9900, '2026-10-06');\n"
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "sql-check",
+            "title": "Query clauses",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "where",
+                    "label": "WHERE filters rows before they are returned.",
+                    "correct": true
+                },
+                {
+                    "id": "order",
+                    "label": "ORDER BY DESC sorts larger values first.",
+                    "correct": true
+                },
+                {
+                    "id": "star",
+                    "label": "SELECT * always matches a two-column contract.",
+                    "correct": false
+                },
+                {
+                    "id": "inclusive",
+                    "label": ">= includes the boundary value.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Explicit columns, filters, and ordering make a query's contract clear."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": [
+            "sql.join-customers"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The SQL editor and result table are keyboard accessible. SQLite loads only for this mission.",
+        "keyboardNotes": "Ctrl+Enter runs the query. Result rows are a real table.",
+        "screenReaderNotes": "The result table announces column names and row count. The test compares rows and reports the first mismatch."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
