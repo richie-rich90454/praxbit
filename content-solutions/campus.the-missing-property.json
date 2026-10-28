@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-types": {
+            "files": {
+                "order.ts": "interface Order {\n  id: string;\n  customerName: string;\n  items: Array<{ name: string; quantity: number }>;\n}\n\nfunction itemCount(order: Order): number {\n  let total = 0;\n  for (const item of order.items) {\n    total += item.quantity;\n  }\n  return total;\n}\n"
+            }
+        }
+    }
+}
