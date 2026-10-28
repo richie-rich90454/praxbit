@@ -3,15 +3,16 @@ import { evaluateStep } from "@praxbit/domain";
 import type { LoopStep, OrderStep } from "@praxbit/contracts";
 import type { InteractionProps } from "./types.ts";
 
-function ReorderList(
-    props: {
-        readonly items: readonly { id: string; label: string }[];
-        readonly order: readonly string[];
-        readonly label: string;
-        readonly onMove: (index: number, delta: number) => void;
-    },
-): JSX.Element {
-    const byId = createMemo(function indexItems(): ReadonlyMap<string, { id: string; label: string }> {
+function ReorderList(props: {
+    readonly items: readonly { id: string; label: string }[];
+    readonly order: readonly string[];
+    readonly label: string;
+    readonly onMove: (index: number, delta: number) => void;
+}): JSX.Element {
+    const byId = createMemo(function indexItems(): ReadonlyMap<
+        string,
+        { id: string; label: string }
+    > {
         return new Map(
             props.items.map(function entry(item): [string, { id: string; label: string }] {
                 return [item.id, item];
@@ -98,7 +99,10 @@ export function OrderView(props: { readonly step: OrderStep } & InteractionProps
                 type="button"
                 class="button"
                 onClick={function submit(): void {
-                    props.onResult(evaluateStep(props.step, { kind: "order", order: order() }), order().join(","));
+                    props.onResult(
+                        evaluateStep(props.step, { kind: "order", order: order() }),
+                        order().join(","),
+                    );
                 }}
             >
                 Check order
