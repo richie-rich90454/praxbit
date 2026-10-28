@@ -1,8 +1,4 @@
-import type {
-    AchievementDefinition,
-    EvidenceSubmission,
-    Mission,
-} from "@praxbit/contracts";
+import type { AchievementDefinition, EvidenceSubmission, Mission } from "@praxbit/contracts";
 
 export interface LevelProgress {
     readonly level: number;
@@ -56,8 +52,14 @@ export function satisfiesAchievement(
 ): boolean {
     switch (definition.rule) {
         case "first-independent-transfer":
-            return context.evidence.some(function independentTransfer(item: EvidenceSubmission): boolean {
-                return item.category === "transfer" && item.outcome === "success" && item.assistance === "independent";
+            return context.evidence.some(function independentTransfer(
+                item: EvidenceSubmission,
+            ): boolean {
+                return (
+                    item.category === "transfer" &&
+                    item.outcome === "success" &&
+                    item.assistance === "independent"
+                );
             });
         case "three-boundary-tests":
             return (
@@ -109,7 +111,9 @@ export interface CompletionReward {
 
 export function completionReward(mission: Mission, independent: boolean): CompletionReward {
     return {
-        experience: independent ? Math.round(mission.rewards.experience * 1.15) : mission.rewards.experience,
+        experience: independent
+            ? Math.round(mission.rewards.experience * 1.15)
+            : mission.rewards.experience,
         independent,
         unlockedMissionIds: mission.rewards.unlocks,
     };
