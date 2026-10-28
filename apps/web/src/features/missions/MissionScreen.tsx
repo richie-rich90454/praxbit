@@ -30,11 +30,31 @@ interface CompletionState {
 }
 
 const INTEREST_CHOICES: readonly { id: Interest; label: string; detail: string }[] = [
-    { id: "web", label: "Websites and applications", detail: "Build pages, interfaces, and services." },
-    { id: "games", label: "Games and interactive worlds", detail: "Simulation, graphics, and interaction." },
-    { id: "systems", label: "How computers work", detail: "Memory, networks, operating systems, and infrastructure." },
-    { id: "ai", label: "AI and automation", detail: "Models, evaluation, and responsible delegation." },
-    { id: "professional", label: "Professional development", detail: "Testing, collaboration, architecture, and delivery." },
+    {
+        id: "web",
+        label: "Websites and applications",
+        detail: "Build pages, interfaces, and services.",
+    },
+    {
+        id: "games",
+        label: "Games and interactive worlds",
+        detail: "Simulation, graphics, and interaction.",
+    },
+    {
+        id: "systems",
+        label: "How computers work",
+        detail: "Memory, networks, operating systems, and infrastructure.",
+    },
+    {
+        id: "ai",
+        label: "AI and automation",
+        detail: "Models, evaluation, and responsible delegation.",
+    },
+    {
+        id: "professional",
+        label: "Professional development",
+        detail: "Testing, collaboration, architecture, and delivery.",
+    },
     { id: "everything", label: "Explore everything", detail: "Follow the whole map." },
 ];
 
@@ -80,7 +100,9 @@ export function MissionScreen(): JSX.Element {
     const [feedback, setFeedback] = createSignal<FeedbackState | undefined>(undefined);
     const [hintLevel, setHintLevel] = createSignal(0);
     const [hints, setHints] = createSignal<Readonly<Record<string, number>>>({});
-    const [evaluations, setEvaluations] = createSignal<Readonly<Record<string, StepEvaluation>>>({});
+    const [evaluations, setEvaluations] = createSignal<Readonly<Record<string, StepEvaluation>>>(
+        {},
+    );
     const [completion, setCompletion] = createSignal<CompletionState | undefined>(undefined);
     const [attemptId, setAttemptId] = createSignal("");
     const [savedStep, setSavedStep] = createSignal(0);
@@ -114,7 +136,11 @@ export function MissionScreen(): JSX.Element {
             }
             try {
                 const parsed = JSON.parse(row.value) as SavedMissionProgress;
-                if (Number.isInteger(parsed.stepIndex) && parsed.stepIndex >= 0 && parsed.stepIndex < mission.steps.length) {
+                if (
+                    Number.isInteger(parsed.stepIndex) &&
+                    parsed.stepIndex >= 0 &&
+                    parsed.stepIndex < mission.steps.length
+                ) {
                     setSavedStep(parsed.stepIndex);
                     setHints(parsed.hints ?? {});
                 }
@@ -138,7 +164,10 @@ export function MissionScreen(): JSX.Element {
         let id: string = crypto.randomUUID();
         if (learning.user() !== undefined) {
             try {
-                const attempt = await api.startAttempt({ missionId: mission.id, missionVersion: mission.version });
+                const attempt = await api.startAttempt({
+                    missionId: mission.id,
+                    missionVersion: mission.version,
+                });
                 id = attempt.attemptId;
             } catch (error) {
                 setBeginError(
@@ -169,10 +198,13 @@ export function MissionScreen(): JSX.Element {
         setEvaluations(function update(current): Readonly<Record<string, StepEvaluation>> {
             return { ...current, [step.id]: evaluation };
         });
-        if (step.kind !== "lesson") {
-            const hintsUsed = hints()[step.id] ?? hintLevel();
-            await learning.recordStepEvidence(mission, step, evaluation, hintsUsed);
+        if (step.kind === "lesson") {
+            saveProgress();
+            await continueStep();
+            return;
         }
+        const hintsUsed = hints()[step.id] ?? hintLevel();
+        await learning.recordStepEvidence(mission, step, evaluation, hintsUsed);
         saveProgress();
     }
 
@@ -249,6 +281,22 @@ export function MissionScreen(): JSX.Element {
         return mission?.hints[hintLevel() - 1] ?? "";
     }
 
+    function nextReviewLabel(): string {
+        const skillIds = mission?.skills ?? [];
+        const dueDates = learning
+            .reviews()
+            .filter(function relevant(review): boolean {
+                return skillIds.includes(review.skillId);
+            })
+            .map(function dueDate(review): number {
+                return new Date(review.dueAt).getTime();
+            });
+        if (dueDates.length === 0) {
+            return "Review will be scheduled when progress synchronizes.";
+        }
+        return new Date(Math.min(...dueDates)).toLocaleDateString();
+    }
+
     async function chooseInterest(interest: Interest): Promise<void> {
         const current = learning.preferences();
         await learning.savePreferences({ ...current, interests: [interest] });
@@ -273,9 +321,13 @@ export function MissionScreen(): JSX.Element {
             setAiAnswer(response.text);
         } catch (error) {
             if (error instanceof ApiError && error.code === "ai_unavailable") {
-                setAiError("The live tutor is not configured on this deployment. The curated hints remain available.");
+                setAiError(
+                    "The live tutor is not configured on this deployment. The curated hints remain available.",
+                );
             } else {
-                setAiError(error instanceof Error ? error.message : "The live tutor request failed.");
+                setAiError(
+                    error instanceof Error ? error.message : "The live tutor request failed.",
+                );
             }
         } finally {
             setAiBusy(false);
@@ -304,7 +356,8 @@ export function MissionScreen(): JSX.Element {
                     Back to Learn
                 </A>
                 <span class="meta">
-                    {track?.title ?? "Campus"} · {mission.estimatedMinutes} min · {mission.difficulty}
+                    {track?.title ?? "Campus"} · {mission.estimatedMinutes} min ·{" "}
+                    {mission.difficulty}
                 </span>
             </div>
 
@@ -352,18 +405,24 @@ export function MissionScreen(): JSX.Element {
                         </div>
                         <Show when={savedStep() > 0}>
                             <p class="notice">
-                                A saved attempt resumes at step {savedStep() + 1}. Mission answers are checked, not
-                                remembered as proof of understanding.
+                                A saved attempt resumes at step {savedStep() + 1}. Mission answers
+                                are checked, not remembered as proof of understanding.
                             </p>
                         </Show>
                         <Show when={beginError().length > 0}>
                             <p class="notice notice--error">{beginError()}</p>
                         </Show>
                         <div class="row">
-                            <button type="button" class="button" onClick={function start(): void {
-                                void begin();
-                            }}>
-                                {savedStep() > 0 ? `Resume at step ${savedStep() + 1}` : "Start mission"}
+                            <button
+                                type="button"
+                                class="button"
+                                onClick={function start(): void {
+                                    void begin();
+                                }}
+                            >
+                                {savedStep() > 0
+                                    ? `Resume at step ${savedStep() + 1}`
+                                    : "Start mission"}
                             </button>
                             <A class="button button--secondary" href="/placement">
                                 I already know this
@@ -384,23 +443,30 @@ export function MissionScreen(): JSX.Element {
                     <div class="progress-bar" aria-hidden="true">
                         <div
                             class="progress-bar__fill"
-                            style={{ width: `${((stepIndex() + 1) / mission.steps.length) * 100}%` }}
+                            style={{
+                                width: `${((stepIndex() + 1) / mission.steps.length) * 100}%`,
+                            }}
                         />
                     </div>
 
                     <div class="stack stack--tight">
-                        <h1 ref={headingRef} tabindex="-1" style={{ "font-size": "var(--text-section)" }}>
+                        <h1
+                            ref={headingRef}
+                            tabindex="-1"
+                            style={{ "font-size": "var(--text-section)" }}
+                        >
                             {currentStep()?.title}
                         </h1>
+                        <h2 class="visually-hidden">Step content</h2>
                         <p>{currentStep()?.prompt}</p>
                     </div>
 
-                    <Show when={currentStep()}>
+                    <Show keyed when={currentStep()}>
                         {function stepContent(step): JSX.Element {
                             return (
                                 <StepView
-                                    step={step()}
-                                    draftKey={`mission:${mission.id}:${step().id}`}
+                                    step={step}
+                                    draftKey={`mission:${mission.id}:${step.id}`}
                                     onResult={function result(evaluation, answerKey): void {
                                         void handleResult(evaluation, answerKey);
                                     }}
@@ -418,12 +484,21 @@ export function MissionScreen(): JSX.Element {
                                 disabled={hintLevel() >= 4}
                                 onClick={showHint}
                             >
-                                {hintLevel() === 0 ? "Show a hint" : hintLevel() >= 4 ? "All hints shown" : "Next hint"}
+                                {hintLevel() === 0
+                                    ? "Show a hint"
+                                    : hintLevel() >= 4
+                                      ? "All hints shown"
+                                      : "Next hint"}
                             </button>
                         </div>
                         <Show
                             when={hintLevel() > 0}
-                            fallback={<p class="small muted">Hints are available without penalty to your XP. Assisted work counts as weaker mastery evidence.</p>}
+                            fallback={
+                                <p class="small muted">
+                                    Hints are available without penalty to your XP. Assisted work
+                                    counts as weaker mastery evidence.
+                                </p>
+                            }
                         >
                             <p class="small">{hintText()}</p>
                             <p class="meta">Hint {hintLevel()} of 4</p>
@@ -437,9 +512,9 @@ export function MissionScreen(): JSX.Element {
                                 <span class="meta">Optional, external provider</span>
                             </div>
                             <p class="small muted">
-                                Ask a question about this step. Only the mission identifier, step identifier, and your
-                                question are sent to the configured provider. The answer is guidance, not an authoritative
-                                evaluator.
+                                Ask a question about this step. Only the mission identifier, step
+                                identifier, and your question are sent to the configured provider.
+                                The answer is guidance, not an authoritative evaluator.
                             </p>
                             <label class="field">
                                 <span>Your question</span>
@@ -474,18 +549,29 @@ export function MissionScreen(): JSX.Element {
                     </Show>
 
                     <Show when={feedback() !== undefined}>
-                        <div class={`feedback ${feedback()?.evaluation.passed === true ? "feedback--success" : "feedback--error"}`} role="status">
+                        <div
+                            class={`feedback ${feedback()?.evaluation.passed === true ? "feedback--success" : "feedback--error"}`}
+                            role="status"
+                        >
                             <div class="stack stack--tight">
-                                <strong>{feedback()?.evaluation.passed === true ? "That works" : "Not yet"}</strong>
+                                <strong>
+                                    {feedback()?.evaluation.passed === true
+                                        ? "That works"
+                                        : "Not yet"}
+                                </strong>
                                 <p>{feedback()?.evaluation.detail}</p>
                                 <Show when={feedback()?.misconception !== undefined}>
                                     <p>{feedback()?.misconception?.feedback}</p>
                                 </Show>
                                 <Show when={feedback()?.evaluation.passed === true}>
                                     <div class="row">
-                                        <button type="button" class="button" onClick={function next(): void {
-                                            void continueStep();
-                                        }}>
+                                        <button
+                                            type="button"
+                                            class="button"
+                                            onClick={function next(): void {
+                                                void continueStep();
+                                            }}
+                                        >
                                             Continue
                                         </button>
                                     </div>
@@ -501,7 +587,11 @@ export function MissionScreen(): JSX.Element {
                     <div class="row" style={{ "align-items": "flex-start" }}>
                         <Pip pose="celebrating" size={104} />
                         <div class="stack stack--tight">
-                            <h1>{practice && completion()?.outcome.alreadyCompleted === true ? "Practice complete" : "Mission complete"}</h1>
+                            <h1>
+                                {practice && completion()?.outcome.alreadyCompleted === true
+                                    ? "Practice complete"
+                                    : "Mission complete"}
+                            </h1>
                             <p class="lede">
                                 {completion()?.outcome.alreadyCompleted === true
                                     ? "The review is recorded. The schedule will bring this skill back when it is useful."
@@ -515,22 +605,36 @@ export function MissionScreen(): JSX.Element {
                             <div class="stack stack--tight">
                                 <h3>Result</h3>
                                 <p class="small">
-                                    {completion()?.outcome.independent === true ? "Independent success" : "Completed with assistance"}
+                                    {completion()?.outcome.independent === true
+                                        ? "Independent success"
+                                        : "Completed with assistance"}
                                 </p>
                                 <p class="meta">
-                                    {completion()?.outcome.experience ?? 0} experience points. Experience is separate from mastery.
+                                    {completion()?.outcome.experience ?? 0} experience points.
+                                    Experience is separate from mastery.
+                                </p>
+                                <p class="meta">
+                                    {practice && completion()?.outcome.alreadyCompleted === true
+                                        ? "Review interval updated."
+                                        : `Next review: ${nextReviewLabel()}`}
                                 </p>
                             </div>
                             <div class="stack stack--tight">
                                 <h3>Evidence</h3>
                                 <p class="small">
-                                    Evidence was recorded for prediction, construction, debugging, testing, or
-                                    explanation as each step required. Attempt outcomes are saved on this device and
-                                    synchronized when an account is connected.
+                                    Evidence was recorded for prediction, construction, debugging,
+                                    testing, or explanation as each step required. Attempt outcomes
+                                    are saved on this device and synchronized when an account is
+                                    connected.
                                 </p>
                             </div>
                         </div>
-                        <Show when={completion()?.outcome.newAchievements !== undefined && (completion()?.outcome.newAchievements.length ?? 0) > 0}>
+                        <Show
+                            when={
+                                completion()?.outcome.newAchievements !== undefined &&
+                                (completion()?.outcome.newAchievements.length ?? 0) > 0
+                            }
+                        >
                             <div class="stack stack--tight">
                                 <h3>Achievements</h3>
                                 <ul class="stack stack--tight">
@@ -538,7 +642,8 @@ export function MissionScreen(): JSX.Element {
                                         {function achievement(item): JSX.Element {
                                             return (
                                                 <li>
-                                                    <strong>{item.title}</strong>: {item.description}
+                                                    <strong>{item.title}</strong>:{" "}
+                                                    {item.description}
                                                 </li>
                                             );
                                         }}
@@ -548,22 +653,24 @@ export function MissionScreen(): JSX.Element {
                         </Show>
                         <Show when={completion()?.outcome.worldChanged === true}>
                             <p class="notice">
-                                The campus world changed as a result of this repair. Open World to see the new system
-                                state and its evidence.
+                                The campus world changed as a result of this repair. Open World to
+                                see the new system state and its evidence.
                             </p>
                         </Show>
                         <Show when={!learning.onboarded()}>
                             <div class="stack stack--tight">
                                 <h3>What do you want to explore next?</h3>
-                                <p class="small muted">This changes recommendations, not the curriculum. You can change it any time.</p>
+                                <p class="small muted">
+                                    This changes recommendations, not the curriculum. You can change
+                                    it any time.
+                                </p>
                                 <div class="grid grid--two">
                                     <For each={INTEREST_CHOICES}>
                                         {function interest(item): JSX.Element {
                                             return (
                                                 <button
                                                     type="button"
-                                                    class="surface surface--quiet"
-                                                    style={{ "text-align": "left" }}
+                                                    class="surface surface--quiet interest-option"
                                                     onClick={function choose(): void {
                                                         void chooseInterest(item.id);
                                                     }}
@@ -576,7 +683,9 @@ export function MissionScreen(): JSX.Element {
                                     </For>
                                 </div>
                                 <Show when={interestSaved()}>
-                                    <p class="small">Interest saved. Recommendations will use it.</p>
+                                    <p class="small">
+                                        Interest saved. Recommendations will use it.
+                                    </p>
                                 </Show>
                             </div>
                         </Show>
@@ -628,10 +737,14 @@ export function MissionScreen(): JSX.Element {
                             </A>
                         </Show>
                     </div>
-                    <button type="button" class="button button--ghost" onClick={function again(): void {
-                        navigate(`/missions/${mission.id}?practice=1`);
-                        window.location.reload();
-                    }}>
+                    <button
+                        type="button"
+                        class="button button--ghost"
+                        onClick={function again(): void {
+                            navigate(`/missions/${mission.id}?practice=1`);
+                            window.location.reload();
+                        }}
+                    >
                         Practice this mission again
                     </button>
                 </div>
