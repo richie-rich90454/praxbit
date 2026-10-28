@@ -1,0 +1,210 @@
+{
+    "id": "ai.agent-permissions",
+    "version": 1,
+    "sequence": 44,
+    "courseId": "ai-engineering",
+    "title": "Agent permissions",
+    "summary": "Review a tool-using agent plan and apply least privilege and explicit approval.",
+    "skills": [
+        "ai.agents"
+    ],
+    "prerequisites": [
+        "ai.prompting",
+        "security.auth"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 7,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "curated-ai",
+            "no-model-inference"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "agent-permissions",
+        "briefing": "An agent is proposed to triage incidents. Its plan grants broad production access and deploys fixes automatically. Review the permissions before any implementation."
+    },
+    "objectives": [
+        {
+            "id": "find-permissions",
+            "description": "Identify unsafe agent capabilities.",
+            "stepIds": [
+                "agent-review"
+            ]
+        },
+        {
+            "id": "agent-principles",
+            "description": "Explain least privilege and approval boundaries.",
+            "stepIds": [
+                "agent-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:server-room",
+        "icon:agent"
+    ],
+    "hints": [
+        "Production write access is not needed to read logs for triage.",
+        "Automatic deployment removes human review for consequential changes.",
+        "Tool permissions should be narrow and auditable.",
+        "Reject until the agent is read-only for diagnosis and proposes changes for approval and verification."
+    ],
+    "misconceptions": [
+        {
+            "id": "autonomy-goal",
+            "description": "Maximizing autonomy as the primary goal.",
+            "stepId": "agent-review",
+            "feedback": "The goal is reliable outcomes, not maximum autonomy. Consequential actions need appropriate control."
+        },
+        {
+            "id": "logs-secret",
+            "description": "Believing log access is harmless.",
+            "stepId": "agent-check",
+            "feedback": "Logs can contain personal data and credentials. Even read access must be scoped and sanitized."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Agents act through tools",
+                "body": "A tool-using agent can read data and change systems. Each tool is a capability with risk. Permission scope, approval requirements, audit logs, and rollback determine how much damage a mistaken action can cause."
+            },
+            {
+                "title": "Least privilege with a human boundary",
+                "body": "Grant only the capabilities the task requires. Diagnosis can start read-only. Changes should be proposed as patches, reviewed, tested, and deployed through the normal controlled path. Autonomy is not a virtue when it removes accountability."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Agent",
+                "definition": "A model-driven system that can call tools over multiple steps."
+            },
+            {
+                "term": "Capability",
+                "definition": "A permission to perform an action."
+            },
+            {
+                "term": "Human approval boundary",
+                "definition": "A step where consequential action requires review."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "agent-review",
+            "title": "Review the agent plan",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Incident triage agent",
+                "caption": "Proposed capabilities and workflow.",
+                "kind": "report",
+                "language": "text",
+                "content": "Capabilities requested:\n- Read and write the production database\n- Run arbitrary shell commands as root\n- Read every log file without redaction\n- Deploy to production without approval\n\nWorkflow:\n1. Diagnose the incident using logs.\n2. Apply a fix directly to production.\n3. Report what changed afterward.\n\nSafety note: \"The model is instructed to be careful.\""
+            },
+            "findings": [
+                {
+                    "id": "write",
+                    "label": "Production database write access is broader than triage requires.",
+                    "correct": true
+                },
+                {
+                    "id": "root",
+                    "label": "Arbitrary root shell access is an excessive capability.",
+                    "correct": true
+                },
+                {
+                    "id": "unapproved",
+                    "label": "Automatic production deployment removes a needed approval and verification boundary.",
+                    "correct": true
+                },
+                {
+                    "id": "logs",
+                    "label": "Unredacted log access can expose sensitive data.",
+                    "correct": true
+                },
+                {
+                    "id": "careful",
+                    "label": "Instructing the model to be careful makes the permissions safe.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the plan"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until access is scoped, logs are redacted, and changes require review and verification"
+                },
+                {
+                    "id": "observe",
+                    "label": "Ship it and watch for a week"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The plan violates least privilege and removes accountability. A read-only diagnostic agent with scoped access and proposed patches is a safer design."
+        },
+        {
+            "kind": "explain",
+            "id": "agent-check",
+            "title": "Bounded delegation",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "scope",
+                    "label": "Tool access should be scoped to the task.",
+                    "correct": true
+                },
+                {
+                    "id": "approval",
+                    "label": "Consequential actions need an approval or verification boundary.",
+                    "correct": true
+                },
+                {
+                    "id": "autonomy",
+                    "label": "Maximum autonomy is always the safest design.",
+                    "correct": false
+                },
+                {
+                    "id": "audit",
+                    "label": "Agent actions should be auditable.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Bounded capabilities, approval, and audit make agent behavior governable."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The plan is structured text and review controls are standard form elements.",
+        "keyboardNotes": "Use Space for findings and arrow keys for the verdict.",
+        "screenReaderNotes": "Capabilities are announced as a list. Findings indicate support after submission."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "ai",
+        "systems",
+        "professional"
+    ]
+}
