@@ -1,0 +1,129 @@
+{
+    "id": "before-code.give-better-instructions",
+    "version": 1,
+    "sequence": 2,
+    "courseId": "before-code",
+    "title": "Give better instructions",
+    "summary": "Turn a vague goal into a precise, ordered algorithm that a machine can follow.",
+    "skills": ["concept.instructions"],
+    "prerequisites": ["concept.computation"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "order",
+    "runtime": { "kind": "none", "capabilities": ["interactive-simulation", "keyboard", "screen-reader"] },
+    "scenario": {
+        "world": "campus",
+        "system": "delivery",
+        "initialState": "courier-training",
+        "briefing": "A campus courier robot understands only the commands you place in its queue. Order the commands so it delivers a parcel without knocking anything over."
+    },
+    "objectives": [
+        { "id": "ordered-delivery", "description": "Arrange a precise delivery procedure.", "stepIds": ["delivery-order"] },
+        { "id": "precision", "description": "Recognize why ambiguous instructions fail.", "stepIds": ["precision-check"] }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:delivery", "icon:steps"],
+    "hints": [
+        "Think about what the robot must hold before it can move.",
+        "A safe delivery starts by picking up the parcel and ends by returning to the charger.",
+        "Pick up, turn, walk, lower, return. Put the movement in the middle.",
+        "The sequence is: lift the parcel, turn right, walk forward, lower the parcel, return to the charger."
+    ],
+    "misconceptions": [
+        {
+            "id": "movement-before-pickup",
+            "description": "Moving before acquiring the parcel.",
+            "stepId": "delivery-order",
+            "answer": "turn,walk,lift,lower,return",
+            "feedback": "A robot cannot deliver what it is not holding. Acquire the parcel before moving."
+        },
+        {
+            "id": "vague-is-enough",
+            "description": "Believing a high-level goal is a precise instruction.",
+            "stepId": "precision-check",
+            "answer": "goal",
+            "feedback": "\"Deliver the parcel\" states an outcome, not the steps. A machine needs unambiguous operations in a workable order."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Algorithms are precise",
+                "body": "An algorithm is a finite sequence of unambiguous steps that solves a problem. The courier robot knows how to lift, turn, walk, lower, and return, but it does not know what delivery means. You supply the order and the details."
+            },
+            {
+                "title": "Order carries meaning",
+                "body": "The same set of commands in a different order can produce a broken result. Ordering is part of the algorithm, not decoration. Later you will see that programs are algorithms expressed in a language a computer can execute."
+            }
+        ],
+        "vocabulary": [
+            { "term": "Algorithm", "definition": "A finite, precise sequence of steps for solving a problem." },
+            { "term": "Ambiguous", "definition": "Open to more than one interpretation." },
+            { "term": "Execution", "definition": "Carrying out the steps of an algorithm." }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "order",
+            "id": "delivery-order",
+            "title": "Load the courier queue",
+            "prompt": "Arrange these commands so the courier delivers the parcel safely. Use the up and down buttons or drag with a pointer.",
+            "evidence": "construction",
+            "items": [
+                { "id": "lift", "label": "Lift the parcel from the loading shelf" },
+                { "id": "turn", "label": "Turn right 90 degrees" },
+                { "id": "walk", "label": "Walk forward four steps" },
+                { "id": "lower", "label": "Lower the parcel at the delivery desk" },
+                { "id": "return", "label": "Return to the charging station" }
+            ],
+            "correctOrder": ["lift", "turn", "walk", "lower", "return"],
+            "explanation": "The courier must hold the parcel before moving, travel to the desk, release the parcel, and then return."
+        },
+        {
+            "kind": "quiz",
+            "id": "precision-check",
+            "title": "Which instruction is precise?",
+            "prompt": "A new courier has no shared assumptions about the campus. Choose the instruction it can execute without guessing.",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Which command is precise enough for a machine?",
+                "options": [
+                    { "id": "goal", "label": "Deliver the parcel quickly" },
+                    { "id": "walk4", "label": "Walk forward 4 steps" },
+                    { "id": "nice", "label": "Be careful near the desk" }
+                ],
+                "correctId": "walk4",
+                "explanation": "Walk forward 4 steps names an action and a measurable amount. The other commands depend on judgment the robot does not have."
+            },
+            "hints": [
+                "Which command has a measurable action?",
+                "Look for a number and a direction.",
+                "Walk forward 4 steps is actionable. Quickly and carefully are not measurable here.",
+                "The precise command is walk forward 4 steps."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "algorithm-claims",
+            "title": "Why order matters",
+            "prompt": "Select every statement that is true about algorithms.",
+            "evidence": "explanation",
+            "statements": [
+                { "id": "finite", "label": "An algorithm should finish after a finite number of steps.", "correct": true },
+                { "id": "order-free", "label": "The order of steps never changes the result.", "correct": false },
+                { "id": "precise", "label": "Each step should be unambiguous to its executor.", "correct": true },
+                { "id": "random", "label": "An algorithm is any random sequence of actions.", "correct": false }
+            ],
+            "explanation": "Algorithms are finite, precise, and order-sensitive. Reordering operations can change or break the result."
+        }
+    ],
+    "evaluation": { "kind": "steps", "passScore": 1 },
+    "rewards": { "experience": 55, "unlocks": ["before-code.remember-this"] },
+    "persistence": { "kind": "none" },
+    "accessibility": {
+        "summary": "Reordering works with buttons as well as pointer dragging, and the current order is available as text.",
+        "keyboardNotes": "Focus an item and use the move up and move down buttons. Drag and drop is optional.",
+        "screenReaderNotes": "Each item announces its position, such as item 2 of 5, and the final order is read after each move."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["everything", "games"]
+}
