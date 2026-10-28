@@ -1,0 +1,141 @@
+{
+    "id": "before-code.send-a-message",
+    "version": 1,
+    "sequence": 10,
+    "courseId": "before-code",
+    "title": "Send a message",
+    "summary": "Trace an order notification across the campus network.",
+    "skills": ["concept.networks"],
+    "prerequisites": ["concept.computation"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "network",
+    "runtime": { "kind": "none", "capabilities": ["interactive-simulation", "keyboard", "screen-reader"] },
+    "scenario": {
+        "world": "campus",
+        "system": "messaging",
+        "initialState": "notification-delay",
+        "briefing": "A customer placed an order, but the delivery notification never arrived. Trace the message path from the laptop to the messaging service to find where the route belongs."
+    },
+    "objectives": [
+        { "id": "trace-request", "description": "Trace the notification route.", "stepIds": ["notification-route"] },
+        { "id": "request-response", "description": "Distinguish a request from a response.", "stepIds": ["http-check"] }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:messaging", "icon:network"],
+    "hints": [
+        "A laptop does not reach the API directly over the network. Start with the wireless link.",
+        "The campus wireless connects to the router, then to the orders API.",
+        "The API hands the notification to the messaging service.",
+        "The correct route is laptop, campus wifi, router, orders API, messaging service."
+    ],
+    "misconceptions": [
+        {
+            "id": "skips-router",
+            "description": "Jumping directly from the laptop to the API.",
+            "stepId": "notification-route",
+            "answer": "laptop>api>messaging",
+            "feedback": "On this campus the wireless link reaches the router first. The router forwards traffic to the service network."
+        },
+        {
+            "id": "response-is-request",
+            "description": "Confusing the reply with the original request.",
+            "stepId": "http-check",
+            "answer": "response",
+            "feedback": "The POST that creates the order is the request. The confirmation returned afterwards is the response."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Networks move messages in hops",
+                "body": "A request travels through several devices. Wireless access, routers, and service endpoints each forward data toward its destination. A fault at any hop can stop the message even when the application code is fine."
+            },
+            {
+                "title": "Requests and responses",
+                "body": "A client sends a request and a server returns a response. The request names an action and a target; the response reports an outcome and often carries data. Later you will use HTTP, the protocol that gives these messages a standard shape."
+            }
+        ],
+        "vocabulary": [
+            { "term": "Client", "definition": "The system that sends a request." },
+            { "term": "Server", "definition": "The system that receives and answers a request." },
+            { "term": "Packet", "definition": "A small unit of data moved across a network." }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "network",
+            "id": "notification-route",
+            "title": "Trace the notification",
+            "prompt": "Click the devices in order from the laptop to the messaging service.",
+            "evidence": "construction",
+            "nodes": [
+                { "id": "laptop", "label": "Customer laptop", "kind": "device" },
+                { "id": "wifi", "label": "Campus wifi access point", "kind": "router" },
+                { "id": "router", "label": "Campus edge router", "kind": "router" },
+                { "id": "api", "label": "Orders API", "kind": "service" },
+                { "id": "messaging", "label": "Messaging service", "kind": "service" },
+                { "id": "database", "label": "Inventory database", "kind": "database" }
+            ],
+            "edges": [
+                ["laptop", "wifi"],
+                ["wifi", "router"],
+                ["router", "api"],
+                ["api", "messaging"],
+                ["api", "database"]
+            ],
+            "startId": "laptop",
+            "targetId": "messaging",
+            "goal": "Deliver an order notification",
+            "correctPath": ["laptop", "wifi", "router", "api", "messaging"],
+            "explanation": "The laptop reaches the wireless access point, the router forwards the request to the API, and the API calls the messaging service."
+        },
+        {
+            "kind": "quiz",
+            "id": "http-check",
+            "title": "Which message is which?",
+            "prompt": "The laptop sends an order to the API. The API replies with a confirmation number. Which part is the request?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the request.",
+                "options": [
+                    { "id": "response", "label": "The confirmation number returned by the API" },
+                    { "id": "request", "label": "The order data sent by the laptop to the API" },
+                    { "id": "database", "label": "The database lookup performed by the API" },
+                    { "id": "notification", "label": "The delivery notification sent later" }
+                ],
+                "correctId": "request",
+                "explanation": "The laptop initiates the interaction by sending the order data. The confirmation is the response."
+            },
+            "hints": [
+                "Who initiates the exchange?",
+                "Which message asks the server to do something?",
+                "The order data travels from the client to the server.",
+                "The request is the order data sent by the laptop."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "network-claims",
+            "title": "Network responsibility",
+            "prompt": "Select the accurate statements about networked systems.",
+            "evidence": "explanation",
+            "statements": [
+                { "id": "hops", "label": "A message may pass through devices that do not understand the application data.", "correct": true },
+                { "id": "local", "label": "A network request is identical to a local function call.", "correct": false },
+                { "id": "timeout", "label": "A request can fail or time out, so the client must handle that outcome.", "correct": true },
+                { "id": "guaranteed", "label": "A successful send guarantees the server processed the request.", "correct": false }
+            ],
+            "explanation": "Remote calls cross failure boundaries. A message being sent is not proof that the remote action succeeded."
+        }
+    ],
+    "evaluation": { "kind": "steps", "passScore": 1 },
+    "rewards": { "experience": 85, "unlocks": ["before-code.break-it-into-parts"] },
+    "persistence": { "kind": "world-action", "action": "restart-service", "system": "messaging" },
+    "accessibility": {
+        "summary": "Network nodes are buttons in a labeled diagram; a text list offers the same order selection.",
+        "keyboardNotes": "Use Tab to move between nodes and Enter to add a node to the route. Clear the route with the reset button.",
+        "screenReaderNotes": "Each node announces its name, type, and whether it is connected. The selected route is read as an ordered list."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "web"]
+}
