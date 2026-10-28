@@ -1,0 +1,499 @@
+{
+    "id": "campus.the-campus-incident",
+    "version": 1,
+    "sequence": 30,
+    "courseId": "campus",
+    "title": "The campus incident",
+    "summary": "Recover connected services, repair a replayable inventory bug, and review the incident response.",
+    "skills": [
+        "engineering.incident"
+    ],
+    "prerequisites": [
+        "testing.integration",
+        "ai.review",
+        "ops.deployment"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 12,
+    "interaction": "terminal",
+    "runtime": {
+        "kind": "simulated-linux",
+        "capabilities": [
+            "deterministic-linux-simulation",
+            "worker-isolation",
+            "curated-ai"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "campus-outage",
+        "briefing": "The inventory database and orders API are down, duplicate events have corrupted stock, and a postmortem blames one person. Restore the services, repair replay deduplication, and decide whether the report is trustworthy."
+    },
+    "objectives": [
+        {
+            "id": "recover-services",
+            "description": "Restore the database and API, then verify health.",
+            "stepIds": [
+                "recover-services"
+            ]
+        },
+        {
+            "id": "repair-replay",
+            "description": "Make inventory replay ignore duplicate and unknown events.",
+            "stepIds": [
+                "repair-replay"
+            ]
+        },
+        {
+            "id": "review-postmortem",
+            "description": "Evaluate the incident report against the evidence.",
+            "stepIds": [
+                "review-postmortem"
+            ]
+        },
+        {
+            "id": "incident-practice",
+            "description": "Explain responsible incident response.",
+            "stepIds": [
+                "incident-practice"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:server-room",
+        "icon:incident"
+    ],
+    "hints": [
+        "Inspect both services with systemctl status and journalctl. Restore the database before the API.",
+        "Read the logs to find the event id that appears twice in the inventory replay.",
+        "Deduplicate by event id before applying any item change, and ignore unknown product ids.",
+        "Restart inventory-db, restart orders-api, curl health, then fix reconcileInventory and reject the blame-only postmortem."
+    ],
+    "misconceptions": [
+        {
+            "id": "restart-api-first",
+            "description": "Starting the API before its database dependency.",
+            "stepId": "recover-services",
+            "feedback": "The API depends on the inventory database. Restore the dependency first, then the API."
+        },
+        {
+            "id": "dedupe-after",
+            "description": "Applying events before checking whether they were already seen.",
+            "stepId": "repair-replay",
+            "feedback": "A duplicate event must be ignored before its items are applied. Checking afterwards still corrupts stock."
+        },
+        {
+            "id": "blame-report",
+            "description": "Accepting a report that names a person but no systemic cause.",
+            "stepId": "review-postmortem",
+            "feedback": "Blame is not a prevention mechanism. A trustworthy report identifies the faulty state, the missing guard, and the verification that will prevent recurrence."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Incidents cross boundaries",
+                "body": "A campus outage can involve service dependencies, event replay, validation, deployment state, and human decisions. Recovery starts with the dependency order, then moves to the data-integrity fault, then to verification."
+            },
+            {
+                "title": "A postmortem is engineering evidence",
+                "body": "A useful report describes the timeline, contributing conditions, detection gaps, and concrete prevention. Naming a culprit without changing the system leaves the same failure available to the next person. Responsibility includes improving the conditions under which people work."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Incident",
+                "definition": "An unplanned event that degrades a service."
+            },
+            {
+                "term": "Replay",
+                "definition": "Reprocessing recorded events to rebuild state."
+            },
+            {
+                "term": "Postmortem",
+                "definition": "A structured review of an incident and its prevention."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "terminal",
+            "id": "recover-services",
+            "title": "Restore the campus services",
+            "prompt": "Inspect both failed services, restart the database before the API, and verify the combined health endpoint.",
+            "evidence": "debugging",
+            "initial": {
+                "cwd": "/srv/campus",
+                "files": [
+                    {
+                        "path": "/srv/campus/app/server.js",
+                        "content": "startOrdersApi();\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/srv/campus/app/config.json",
+                        "content": "{\"database\":\"inventory-db\",\"port\":8080}\n",
+                        "mode": "640"
+                    },
+                    {
+                        "path": "/var/log/inventory.log",
+                        "content": "[error] database storage unavailable after failed release\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/var/log/orders.log",
+                        "content": "[error] connect ECONNREFUSED inventory-db:5432\n",
+                        "mode": "644"
+                    }
+                ],
+                "services": [
+                    {
+                        "id": "inventory-db",
+                        "name": "inventory-db",
+                        "status": "failed",
+                        "logs": [
+                            "[error] data volume could not be opened",
+                            "[info] waiting for operator restart"
+                        ]
+                    },
+                    {
+                        "id": "orders-api",
+                        "name": "orders-api",
+                        "status": "failed",
+                        "logs": [
+                            "[error] connect ECONNREFUSED inventory-db:5432",
+                            "[info] retry limit reached"
+                        ]
+                    }
+                ],
+                "symlinks": [],
+                "processes": []
+            },
+            "objectives": [
+                {
+                    "id": "db",
+                    "description": "The inventory database is running.",
+                    "check": {
+                        "kind": "service",
+                        "serviceId": "inventory-db",
+                        "status": "running"
+                    }
+                },
+                {
+                    "id": "api",
+                    "description": "The orders API is running.",
+                    "check": {
+                        "kind": "service",
+                        "serviceId": "orders-api",
+                        "status": "running"
+                    }
+                },
+                {
+                    "id": "health",
+                    "description": "The combined health endpoint responds.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "ready"
+                    }
+                }
+            ],
+            "explanation": "The API could not connect while the database was down. Restarting the database first, then the API, restored the dependency chain. The health request confirmed both."
+        },
+        {
+            "kind": "code",
+            "id": "repair-replay",
+            "title": "Repair inventory replay",
+            "prompt": "Edit replay.js. reconcileInventory(initial, events) must ignore duplicate event ids, ignore unknown product ids, apply sales and returns, and never go below zero. It must return a new inventory object.",
+            "evidence": "debugging",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "replay.js",
+                    "content": "function reconcileInventory(initial, events) {\n  const inventory = { ...initial };\n  for (const event of events) {\n    for (const item of event.items) {\n      if (event.type === \"sale\") {\n        inventory[item.id] -= item.quantity;\n      } else if (event.type === \"return\") {\n        inventory[item.id] += item.quantity;\n      }\n    }\n  }\n  return inventory;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "replay.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A sale reduces stock.",
+                    "name": "reconcileInventory",
+                    "args": [
+                        {
+                            "pencil": 5,
+                            "notebook": 2
+                        },
+                        [
+                            {
+                                "id": "e1",
+                                "type": "sale",
+                                "items": [
+                                    {
+                                        "id": "pencil",
+                                        "quantity": 2
+                                    }
+                                ]
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "pencil": 3,
+                        "notebook": 2
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A duplicated event is ignored.",
+                    "name": "reconcileInventory",
+                    "args": [
+                        {
+                            "pencil": 5
+                        },
+                        [
+                            {
+                                "id": "e1",
+                                "type": "sale",
+                                "items": [
+                                    {
+                                        "id": "pencil",
+                                        "quantity": 2
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "e1",
+                                "type": "sale",
+                                "items": [
+                                    {
+                                        "id": "pencil",
+                                        "quantity": 2
+                                    }
+                                ]
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "pencil": 3
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A return adds stock.",
+                    "name": "reconcileInventory",
+                    "args": [
+                        {
+                            "pencil": 3
+                        },
+                        [
+                            {
+                                "id": "e2",
+                                "type": "return",
+                                "items": [
+                                    {
+                                        "id": "pencil",
+                                        "quantity": 1
+                                    }
+                                ]
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "pencil": 4
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Unknown products are ignored.",
+                    "name": "reconcileInventory",
+                    "args": [
+                        {
+                            "pencil": 3
+                        },
+                        [
+                            {
+                                "id": "e3",
+                                "type": "sale",
+                                "items": [
+                                    {
+                                        "id": "lamp",
+                                        "quantity": 1
+                                    }
+                                ]
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "pencil": 3
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Stock never becomes negative.",
+                    "name": "reconcileInventory",
+                    "args": [
+                        {
+                            "pencil": 1
+                        },
+                        [
+                            {
+                                "id": "e4",
+                                "type": "sale",
+                                "items": [
+                                    {
+                                        "id": "pencil",
+                                        "quantity": 5
+                                    }
+                                ]
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "pencil": 0
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "The original inventory is not mutated.",
+                    "name": "reconcileInventory",
+                    "args": [
+                        {
+                            "pencil": 2
+                        },
+                        [
+                            {
+                                "id": "e5",
+                                "type": "sale",
+                                "items": [
+                                    {
+                                        "id": "pencil",
+                                        "quantity": 1
+                                    }
+                                ]
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "pencil": 1
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review-postmortem",
+            "title": "Review the postmortem",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Campus incident report",
+                "caption": "Draft report circulated after the outage.",
+                "kind": "report",
+                "language": "text",
+                "content": "Campus incident report\n\nSummary: Orders API and inventory database were down for 38 minutes.\nTimeline: Database volume failed at 09:12. API errors began at 09:13. Restart completed at 09:50.\n\nRoot cause: One developer ignored the deployment procedure.\nPrevention: Remind the team to be more careful.\n\nNo data was lost. No regression tests were added."
+            },
+            "findings": [
+                {
+                    "id": "blame",
+                    "label": "The report names a person but does not identify the faulty system condition.",
+                    "correct": true
+                },
+                {
+                    "id": "guard",
+                    "label": "No prevention step changes the replay or deployment guard that allowed corruption.",
+                    "correct": true
+                },
+                {
+                    "id": "tests",
+                    "label": "The report explicitly says no regression tests were added.",
+                    "correct": true
+                },
+                {
+                    "id": "timeline",
+                    "label": "The report omits the incident timeline.",
+                    "correct": false
+                },
+                {
+                    "id": "trust",
+                    "label": "The prevention plan is sufficient because it asks people to be careful.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the report"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until it identifies systemic causes, adds replay and deployment guards, and defines regression evidence"
+                },
+                {
+                    "id": "minor",
+                    "label": "Accept after changing the developer's name"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "A timeline exists, but the cause and prevention are blame and exhortation rather than system change. The report needs guards and verification."
+        },
+        {
+            "kind": "explain",
+            "id": "incident-practice",
+            "title": "Incident response principles",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "dependency",
+                    "label": "Restore dependencies before the services that rely on them.",
+                    "correct": true
+                },
+                {
+                    "id": "systemic",
+                    "label": "Prevention should change systems and add verification, not only ask for care.",
+                    "correct": true
+                },
+                {
+                    "id": "blame",
+                    "label": "Naming a person is a complete root-cause analysis.",
+                    "correct": false
+                },
+                {
+                    "id": "verify",
+                    "label": "Recovery is complete only after health verification.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Incident response restores dependency order, fixes system conditions, and verifies recovery."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 250,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "resolve-incident",
+        "system": "server-room"
+    },
+    "accessibility": {
+        "summary": "Terminal, code, report, and tests are all text-based and keyboard operable. Objectives are announced as they complete.",
+        "keyboardNotes": "Type terminal commands, use Ctrl+Enter for code tests, Space for findings, and arrow keys for the verdict.",
+        "screenReaderNotes": "The report is read as structured text. Service states, test results, and review findings are announced in order."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional",
+        "ai"
+    ]
+}
