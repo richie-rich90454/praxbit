@@ -14,6 +14,7 @@ export interface ServerConfig {
     readonly databaseUrl: string;
     readonly databasePoolSize: number;
     readonly contentDirectory: string | undefined;
+    readonly webDirectory: string | undefined;
     readonly corsOrigins: readonly string[];
     readonly adminHandles: readonly string[];
     readonly cookieSecure: boolean;
@@ -171,6 +172,7 @@ export function loadConfiguration(environment: NodeJS.ProcessEnv = process.env):
         databaseUrl,
         databasePoolSize,
         contentDirectory: optionalString(environment, "CONTENT_DIR"),
+        webDirectory: optionalString(environment, "WEB_DIST"),
         corsOrigins,
         adminHandles,
         cookieSecure,
