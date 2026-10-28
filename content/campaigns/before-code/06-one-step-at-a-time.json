@@ -5,22 +5,14 @@
     "courseId": "before-code",
     "title": "One step at a time",
     "summary": "Trace a program line by line and record the values it leaves behind.",
-    "skills": [
-        "concept.tracing"
-    ],
-    "prerequisites": [
-        "concept.iteration"
-    ],
+    "skills": ["concept.tracing"],
+    "prerequisites": ["concept.iteration"],
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "trace",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "interactive-simulation",
-            "keyboard",
-            "screen-reader"
-        ]
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "trace-final",
             "description": "Trace the watched values to the final line.",
-            "stepIds": [
-                "receipt-trace"
-            ]
+            "stepIds": ["receipt-trace"]
         },
         {
             "id": "trace-order",
             "description": "Identify when a value changes.",
-            "stepIds": [
-                "trace-check"
-            ]
+            "stepIds": ["trace-check"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["trace-claims"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:storefront",
-        "icon:steps"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:storefront", "icon:steps"],
     "hints": [
         "Start with total 0 and price 4. Advance one line at a time.",
         "Line 3 adds the current price to total.",
@@ -246,9 +234,7 @@
     },
     "rewards": {
         "experience": 70,
-        "unlocks": [
-            "before-code.fix-the-instructions"
-        ]
+        "unlocks": ["before-code.fix-the-instructions"]
     },
     "persistence": {
         "kind": "none"
@@ -259,8 +245,5 @@
         "screenReaderNotes": "Each step announces the executed line and the current total and price."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "everything",
-        "professional"
-    ]
+    "tags": ["everything", "professional"]
 }
