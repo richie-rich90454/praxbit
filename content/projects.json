@@ -27,11 +27,41 @@
                     "title": "Build the board structure",
                     "description": "Keep the existing content but ensure the board has a header, two main sections, a captioned status table, and one row header per incident.",
                     "tests": [
-                        { "kind": "dom", "description": "The board has a main heading.", "selector": "header h1", "property": "text", "expected": "Campus status" },
-                        { "kind": "dom", "description": "The two content sections are present.", "selector": "main section", "property": "count", "expected": 2 },
-                        { "kind": "dom", "description": "The table has a caption.", "selector": "table caption", "property": "text", "expected": "Service status" },
-                        { "kind": "dom", "description": "There are three incident rows.", "selector": "tbody tr", "property": "count", "expected": 3 },
-                        { "kind": "dom", "description": "Each row begins with a row header.", "selector": "tbody th[scope=\"row\"]", "property": "count", "expected": 3 }
+                        {
+                            "kind": "dom",
+                            "description": "The board has a main heading.",
+                            "selector": "header h1",
+                            "property": "text",
+                            "expected": "Campus status"
+                        },
+                        {
+                            "kind": "dom",
+                            "description": "The two content sections are present.",
+                            "selector": "main section",
+                            "property": "count",
+                            "expected": 2
+                        },
+                        {
+                            "kind": "dom",
+                            "description": "The table has a caption.",
+                            "selector": "table caption",
+                            "property": "text",
+                            "expected": "Service status"
+                        },
+                        {
+                            "kind": "dom",
+                            "description": "There are three incident rows.",
+                            "selector": "tbody tr",
+                            "property": "count",
+                            "expected": 3
+                        },
+                        {
+                            "kind": "dom",
+                            "description": "Each row begins with a row header.",
+                            "selector": "tbody th[scope=\"row\"]",
+                            "property": "count",
+                            "expected": 3
+                        }
                     ]
                 },
                 {
@@ -39,10 +69,34 @@
                     "title": "Make the table readable",
                     "description": "Add column headers and a skip link to the main landmark.",
                     "tests": [
-                        { "kind": "dom", "description": "The table has three column headers.", "selector": "thead th[scope=\"col\"]", "property": "count", "expected": 3 },
-                        { "kind": "dom", "description": "The main landmark has an id.", "selector": "main#main", "property": "exists", "expected": true },
-                        { "kind": "dom", "description": "A skip link points to the main landmark.", "selector": "a[href=\"#main\"]", "property": "exists", "expected": true },
-                        { "kind": "dom", "description": "The primary action is present.", "selector": "a.primary", "property": "text", "expected": "Review incidents" }
+                        {
+                            "kind": "dom",
+                            "description": "The table has three column headers.",
+                            "selector": "thead th[scope=\"col\"]",
+                            "property": "count",
+                            "expected": 3
+                        },
+                        {
+                            "kind": "dom",
+                            "description": "The main landmark has an id.",
+                            "selector": "main#main",
+                            "property": "exists",
+                            "expected": true
+                        },
+                        {
+                            "kind": "dom",
+                            "description": "A skip link points to the main landmark.",
+                            "selector": "a[href=\"#main\"]",
+                            "property": "exists",
+                            "expected": true
+                        },
+                        {
+                            "kind": "dom",
+                            "description": "The primary action is present.",
+                            "selector": "a.primary",
+                            "property": "text",
+                            "expected": "Review incidents"
+                        }
                     ]
                 },
                 {
@@ -50,10 +104,34 @@
                     "title": "Lay out the panels",
                     "description": "Use the design tokens: a grid with 16px gaps, 5px panel corners, and a one-column layout below 700px.",
                     "tests": [
-                        { "kind": "css", "description": "The status grid uses grid layout.", "selector": ".status-grid", "property": "display", "expected": "grid" },
-                        { "kind": "css", "description": "Panels are separated by 16px.", "selector": ".status-grid", "property": "gap", "expected": "16px" },
-                        { "kind": "css", "description": "Panels use a 5px radius.", "selector": ".panel", "property": "border-top-left-radius", "expected": "5px" },
-                        { "kind": "regex", "description": "A narrow-screen media query is present.", "file": "styles.css", "pattern": "@media[^{]*max-width", "flags": "i" }
+                        {
+                            "kind": "css",
+                            "description": "The status grid uses grid layout.",
+                            "selector": ".status-grid",
+                            "property": "display",
+                            "expected": "grid"
+                        },
+                        {
+                            "kind": "css",
+                            "description": "Panels are separated by 16px.",
+                            "selector": ".status-grid",
+                            "property": "gap",
+                            "expected": "16px"
+                        },
+                        {
+                            "kind": "css",
+                            "description": "Panels use a 5px radius.",
+                            "selector": ".panel",
+                            "property": "border-top-left-radius",
+                            "expected": "5px"
+                        },
+                        {
+                            "kind": "regex",
+                            "description": "A narrow-screen media query is present.",
+                            "file": "styles.css",
+                            "pattern": "@media[^{]*max-width",
+                            "flags": "i"
+                        }
                     ]
                 }
             ],
@@ -88,11 +166,41 @@
                     "title": "Availability",
                     "description": "Accept only whole quantities from 1 through stock.",
                     "tests": [
-                        { "kind": "function", "description": "Ordinary order.", "name": "canFulfill", "args": [5, 2], "expected": true },
-                        { "kind": "function", "description": "Exact stock.", "name": "canFulfill", "args": [5, 5], "expected": true },
-                        { "kind": "function", "description": "Over stock.", "name": "canFulfill", "args": [5, 6], "expected": false },
-                        { "kind": "function", "description": "Zero quantity.", "name": "canFulfill", "args": [5, 0], "expected": false },
-                        { "kind": "function", "description": "Negative quantity.", "name": "canFulfill", "args": [5, -1], "expected": false }
+                        {
+                            "kind": "function",
+                            "description": "Ordinary order.",
+                            "name": "canFulfill",
+                            "args": [5, 2],
+                            "expected": true
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Exact stock.",
+                            "name": "canFulfill",
+                            "args": [5, 5],
+                            "expected": true
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Over stock.",
+                            "name": "canFulfill",
+                            "args": [5, 6],
+                            "expected": false
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Zero quantity.",
+                            "name": "canFulfill",
+                            "args": [5, 0],
+                            "expected": false
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Negative quantity.",
+                            "name": "canFulfill",
+                            "args": [5, -1],
+                            "expected": false
+                        }
                     ]
                 },
                 {
@@ -100,10 +208,39 @@
                     "title": "Quote",
                     "description": "Return an integer cent total and reject invalid line items.",
                     "tests": [
-                        { "kind": "function", "description": "Two lines total correctly.", "name": "quoteOrder", "args": [[{ "quantity": 2, "unitCents": 125 }, { "quantity": 1, "unitCents": 250 }]], "expected": 500 },
-                        { "kind": "function", "description": "An empty order totals zero.", "name": "quoteOrder", "args": [[]], "expected": 0 },
-                        { "kind": "function", "description": "Invalid quantities are rejected with null.", "name": "quoteOrder", "args": [[{ "quantity": 0, "unitCents": 100 }]], "expected": null },
-                        { "kind": "function", "description": "Invalid prices are rejected with null.", "name": "quoteOrder", "args": [[{ "quantity": 1, "unitCents": -5 }]], "expected": null }
+                        {
+                            "kind": "function",
+                            "description": "Two lines total correctly.",
+                            "name": "quoteOrder",
+                            "args": [
+                                [
+                                    { "quantity": 2, "unitCents": 125 },
+                                    { "quantity": 1, "unitCents": 250 }
+                                ]
+                            ],
+                            "expected": 500
+                        },
+                        {
+                            "kind": "function",
+                            "description": "An empty order totals zero.",
+                            "name": "quoteOrder",
+                            "args": [[]],
+                            "expected": 0
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Invalid quantities are rejected with null.",
+                            "name": "quoteOrder",
+                            "args": [[{ "quantity": 0, "unitCents": 100 }]],
+                            "expected": null
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Invalid prices are rejected with null.",
+                            "name": "quoteOrder",
+                            "args": [[{ "quantity": 1, "unitCents": -5 }]],
+                            "expected": null
+                        }
                     ]
                 },
                 {
@@ -111,10 +248,67 @@
                     "title": "Atomic order",
                     "description": "Validate every line, then return a new inventory and total. Failures return the original inventory and a stable error.",
                     "tests": [
-                        { "kind": "function", "description": "Valid order updates stock.", "name": "placeOrder", "args": [{ "pencil": 5 }, { "items": [{ "id": "pencil", "quantity": 2, "unitCents": 100 }] }], "expected": { "ok": true, "inventory": { "pencil": 3 }, "totalCents": 200 } },
-                        { "kind": "function", "description": "Insufficient stock changes nothing.", "name": "placeOrder", "args": [{ "pencil": 1 }, { "items": [{ "id": "pencil", "quantity": 2, "unitCents": 100 }] }], "expected": { "ok": false, "error": "insufficient-stock", "inventory": { "pencil": 1 } } },
-                        { "kind": "function", "description": "Unknown products are rejected.", "name": "placeOrder", "args": [{ "pencil": 1 }, { "items": [{ "id": "lamp", "quantity": 1, "unitCents": 100 }] }], "expected": { "ok": false, "error": "unknown-item", "inventory": { "pencil": 1 } } },
-                        { "kind": "function", "description": "Duplicate lines are rejected.", "name": "placeOrder", "args": [{ "pencil": 3 }, { "items": [{ "id": "pencil", "quantity": 1, "unitCents": 100 }, { "id": "pencil", "quantity": 1, "unitCents": 100 }] }], "expected": { "ok": false, "error": "duplicate-item", "inventory": { "pencil": 3 } } }
+                        {
+                            "kind": "function",
+                            "description": "Valid order updates stock.",
+                            "name": "placeOrder",
+                            "args": [
+                                { "pencil": 5 },
+                                { "items": [{ "id": "pencil", "quantity": 2, "unitCents": 100 }] }
+                            ],
+                            "expected": {
+                                "ok": true,
+                                "inventory": { "pencil": 3 },
+                                "totalCents": 200
+                            }
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Insufficient stock changes nothing.",
+                            "name": "placeOrder",
+                            "args": [
+                                { "pencil": 1 },
+                                { "items": [{ "id": "pencil", "quantity": 2, "unitCents": 100 }] }
+                            ],
+                            "expected": {
+                                "ok": false,
+                                "error": "insufficient-stock",
+                                "inventory": { "pencil": 1 }
+                            }
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Unknown products are rejected.",
+                            "name": "placeOrder",
+                            "args": [
+                                { "pencil": 1 },
+                                { "items": [{ "id": "lamp", "quantity": 1, "unitCents": 100 }] }
+                            ],
+                            "expected": {
+                                "ok": false,
+                                "error": "unknown-item",
+                                "inventory": { "pencil": 1 }
+                            }
+                        },
+                        {
+                            "kind": "function",
+                            "description": "Duplicate lines are rejected.",
+                            "name": "placeOrder",
+                            "args": [
+                                { "pencil": 3 },
+                                {
+                                    "items": [
+                                        { "id": "pencil", "quantity": 1, "unitCents": 100 },
+                                        { "id": "pencil", "quantity": 1, "unitCents": 100 }
+                                    ]
+                                }
+                            ],
+                            "expected": {
+                                "ok": false,
+                                "error": "duplicate-item",
+                                "inventory": { "pencil": 3 }
+                            }
+                        }
                     ]
                 }
             ],
@@ -156,7 +350,12 @@
                         {
                             "kind": "sql",
                             "description": "Only orders at or above 5000 are returned.",
-                            "expectedRows": [["o3", 12900], ["o6", 9900], ["o2", 7500], ["o5", 5200]]
+                            "expectedRows": [
+                                ["o3", 12900],
+                                ["o6", 9900],
+                                ["o2", 7500],
+                                ["o5", 5200]
+                            ]
                         }
                     ]
                 },
@@ -168,7 +367,14 @@
                         {
                             "kind": "sql",
                             "description": "Every order is joined to its customer.",
-                            "expectedRows": [["o1", "Ada", 2500], ["o2", "Ada", 7500], ["o3", "Bo", 12900], ["o4", "Cy", 4000], ["o5", "Bo", 5200], ["o6", "Ada", 9900]]
+                            "expectedRows": [
+                                ["o1", "Ada", 2500],
+                                ["o2", "Ada", 7500],
+                                ["o3", "Bo", 12900],
+                                ["o4", "Cy", 4000],
+                                ["o5", "Bo", 5200],
+                                ["o6", "Ada", 9900]
+                            ]
                         }
                     ]
                 },
@@ -180,7 +386,11 @@
                         {
                             "kind": "sql",
                             "description": "Revenue is grouped and ordered correctly.",
-                            "expectedRows": [["Ada", 3, 19900], ["Bo", 2, 18100], ["Cy", 1, 4000]]
+                            "expectedRows": [
+                                ["Ada", 3, 19900],
+                                ["Bo", 2, 18100],
+                                ["Cy", 1, 4000]
+                            ]
                         }
                     ]
                 }
