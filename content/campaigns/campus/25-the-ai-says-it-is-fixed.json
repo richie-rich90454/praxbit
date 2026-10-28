@@ -1,0 +1,325 @@
+{
+    "id": "campus.the-ai-says-it-is-fixed",
+    "version": 1,
+    "sequence": 25,
+    "courseId": "campus",
+    "title": "The AI says it is fixed",
+    "summary": "Review an AI-written patch, reject an unsupported claim, and repair the code yourself.",
+    "skills": [
+        "ai.review",
+        "api.validation",
+        "testing.boundaries"
+    ],
+    "prerequisites": [
+        "concept.testing",
+        "concept.ai-limits"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "review",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "curated-ai",
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "ai-patch-approved",
+        "briefing": "An AI colleague submitted a stock patch with a confident message and one passing test. The deployment is waiting on your review. Find the flaw, reject the unsupported claim, and implement a verified fix."
+    },
+    "objectives": [
+        {
+            "id": "review-ai",
+            "description": "Evaluate the patch against boundary behavior.",
+            "stepIds": [
+                "ai-review"
+            ]
+        },
+        {
+            "id": "repair-ai",
+            "description": "Implement and test a correct stock rule.",
+            "stepIds": [
+                "ai-repair"
+            ]
+        },
+        {
+            "id": "verification",
+            "description": "Explain verification rather than trusting confident output.",
+            "stepIds": [
+                "ai-verification"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:ai"
+    ],
+    "hints": [
+        "Read the comparison. Which quantities does it allow?",
+        "Test zero and negative quantities, not just the example in the message.",
+        "The claim is unsupported and the function accepts impossible shipments.",
+        "Reject the patch, implement both bounds and integer checks, then verify with boundary tests."
+    ],
+    "misconceptions": [
+        {
+            "id": "confidence-proof",
+            "description": "Treating a confident message as evidence.",
+            "stepId": "ai-review",
+            "feedback": "Confidence is not evidence. The function still accepts zero and negative quantities."
+        },
+        {
+            "id": "one-test",
+            "description": "Accepting one passing example as complete verification.",
+            "stepId": "ai-verification",
+            "feedback": "One example tests one path. Boundary and invalid cases are where this patch fails."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Review the change, not the tone",
+                "body": "AI messages often sound certain regardless of evidence. Review the actual diff, understand what it does, and run tests that challenge the claim. A patch is not correct because it is described as correct."
+            },
+            {
+                "title": "Verification is a separate skill",
+                "body": "Delegation is legitimate. Unverified delegation is the problem. Decide what evidence would be sufficient for the risk, gather it, and only then accept the change. For a stock rule, valid boundaries and invalid inputs are essential."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Patch",
+                "definition": "A proposed change to source code."
+            },
+            {
+                "term": "Unsupported claim",
+                "definition": "A statement presented without adequate evidence."
+            },
+            {
+                "term": "Independent verification",
+                "definition": "Checking work with evidence not supplied by the author."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "ai-review",
+            "title": "Review the proposed patch",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "AI colleague patch",
+                "caption": "Submitted with the message shown below.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "function canFulfill(stock, quantity) {\n  return quantity <= stock;\n}\n\nAI message:\n\"Fixed. canFulfill(5, 3) returns true, so the stock bug is resolved.\nThis is safe for production.\""
+            },
+            "findings": [
+                {
+                    "id": "zero",
+                    "label": "The function accepts quantity 0.",
+                    "correct": true
+                },
+                {
+                    "id": "negative",
+                    "label": "The function accepts negative quantities.",
+                    "correct": true
+                },
+                {
+                    "id": "evidence",
+                    "label": "The claim rests on one ordinary input.",
+                    "correct": true
+                },
+                {
+                    "id": "types",
+                    "label": "The function rejects non-numeric values explicitly.",
+                    "correct": false
+                },
+                {
+                    "id": "safe",
+                    "label": "The patch is production-safe.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the patch"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject and repair with complete boundary tests"
+                },
+                {
+                    "id": "comment",
+                    "label": "Ask for a friendlier message and accept"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The rule lacks a lower bound and integer checks. The message's single example does not cover the failing cases."
+        },
+        {
+            "kind": "code",
+            "id": "ai-repair",
+            "title": "Implement the verified repair",
+            "prompt": "Edit stock.js. canFulfill(stock, quantity) must accept only whole quantities from 1 through stock, and only nonnegative integer stock. Run the tests.",
+            "evidence": "debugging",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "stock.js",
+                    "content": "function canFulfill(stock, quantity) {\n  return quantity <= stock;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "stock.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Ordinary valid order.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        3
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Exact stock boundary.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        5
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Above stock.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        6
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Zero quantity.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        0
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Negative quantity.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        -2
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Fractional quantity.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        2.5
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Non-numeric quantity.",
+                    "name": "canFulfill",
+                    "args": [
+                        5,
+                        "3"
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Negative stock.",
+                    "name": "canFulfill",
+                    "args": [
+                        -1,
+                        1
+                    ],
+                    "expected": false
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "ai-verification",
+            "title": "What counts as verification?",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "diff",
+                    "label": "The reviewer should read the actual change rather than only the summary.",
+                    "correct": true
+                },
+                {
+                    "id": "boundary",
+                    "label": "Boundary and invalid inputs are necessary evidence for a range rule.",
+                    "correct": true
+                },
+                {
+                    "id": "confidence",
+                    "label": "Confident language increases the correctness of a patch.",
+                    "correct": false
+                },
+                {
+                    "id": "responsibility",
+                    "label": "The person accepting the change remains responsible for the outcome.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Verification uses independent evidence. Tone and authority are not evidence."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 180,
+        "unlocks": [
+            "campus.a-failing-service"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "secure-service",
+        "system": "api"
+    },
+    "accessibility": {
+        "summary": "The AI message and patch are text. Findings, verdict, code, and tests are all keyboard accessible.",
+        "keyboardNotes": "Use Space to select findings, arrow keys for the verdict, and Ctrl+Enter to run code tests.",
+        "screenReaderNotes": "The patch is announced as code. Each test reports its inputs, expected result, and outcome."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "ai",
+        "professional",
+        "web"
+    ]
+}
