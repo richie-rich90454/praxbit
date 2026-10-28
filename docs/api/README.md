@@ -134,7 +134,7 @@ These routes are outside `/api/v1`:
 | `GET /healthz` | none | `{ status: "ok", uptimeSeconds }` |
 | `GET /readyz` | none | `{ status: "ready" }` or `503 { status: "not_ready" }` after a database check |
 
-`/healthz` is a process liveness check. `/readyz` checks `SELECT 1` against PostgreSQL. Use `/readyz` for a proxy or systemd readiness check; do not use either as a user-facing status widget.
+`/healthz` is a process liveness check. `/readyz` checks `SELECT 1` against PostgreSQL. Use `/readyz` for a proxy or process-manager readiness check; do not use either as a user-facing status widget.
 
 ## Endpoint index
 
