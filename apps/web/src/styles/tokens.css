@@ -1,0 +1,57 @@
+:root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --accent: #b54131;
+    --accent-strong: #8f3024;
+    --success: #236a50;
+    --warning: #926300;
+    --error: #b42318;
+    --border: #d6d6d6;
+    --border-strong: #9a9a9a;
+    --support: #555555;
+    --surface: #f7f7f5;
+    --surface-raised: #ffffff;
+    --radius: 5px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --font-interface: "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-code: "Noto Sans Mono", ui-monospace, "Cascadia Code", monospace;
+    --text-title: 32px;
+    --text-section: 22px;
+    --text-component: 17px;
+    --text-body: 16px;
+    --text-support: 14px;
+    --text-meta: 13px;
+    --line-body: 1.6;
+    --line-tight: 1.3;
+    --duration: 160ms;
+    --focus-ring: 2px solid var(--accent);
+    --content-width: 1120px;
+}
+
+html[data-text-scale="small"] {
+    --text-title: 28px;
+    --text-section: 20px;
+    --text-body: 15px;
+}
+
+html[data-text-scale="large"] {
+    --text-title: 38px;
+    --text-section: 26px;
+    --text-body: 18px;
+    --text-support: 16px;
+}
+
+@media (max-width: 640px) {
+    :root {
+        --text-title: 28px;
+        --text-section: 21px;
+    }
+}
