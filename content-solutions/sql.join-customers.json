@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "join-orders": {
+            "files": {
+                "join.sql": "SELECT o.id, c.name, o.total_cents\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nORDER BY o.id;\n"
+            }
+        }
+    }
+}
