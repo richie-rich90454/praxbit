@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-stock": {
+            "files": {
+                "inventory.js": "function canFulfill(stock, quantity) {\n  return Number.isInteger(stock) && Number.isInteger(quantity) && stock >= 0 && quantity >= 1 && quantity <= stock;\n}\n"
+            }
+        }
+    }
+}
