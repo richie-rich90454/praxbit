@@ -5,26 +5,14 @@
     "courseId": "campus",
     "title": "The AI says it is fixed",
     "summary": "Review an AI-written patch, reject an unsupported claim, and repair the code yourself.",
-    "skills": [
-        "ai.review",
-        "api.validation",
-        "testing.boundaries"
-    ],
-    "prerequisites": [
-        "concept.testing",
-        "concept.ai-limits"
-    ],
+    "skills": ["ai.review", "api.validation", "testing.boundaries", "concept.ai-limits"],
+    "prerequisites": ["concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "review",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "curated-ai",
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["curated-ai", "source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -36,31 +24,20 @@
         {
             "id": "review-ai",
             "description": "Evaluate the patch against boundary behavior.",
-            "stepIds": [
-                "ai-review"
-            ]
+            "stepIds": ["ai-review"]
         },
         {
             "id": "repair-ai",
             "description": "Implement and test a correct stock rule.",
-            "stepIds": [
-                "ai-repair"
-            ]
+            "stepIds": ["ai-repair"]
         },
         {
             "id": "verification",
             "description": "Explain verification rather than trusting confident output.",
-            "stepIds": [
-                "ai-verification"
-            ]
+            "stepIds": ["ai-verification"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:ai"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:ai"],
     "hints": [
         "Read the comparison. Which quantities does it allow?",
         "Test zero and negative quantities, not just the example in the message.",
@@ -187,80 +164,56 @@
                     "kind": "function",
                     "description": "Ordinary valid order.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        3
-                    ],
+                    "args": [5, 3],
                     "expected": true
                 },
                 {
                     "kind": "function",
                     "description": "Exact stock boundary.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        5
-                    ],
+                    "args": [5, 5],
                     "expected": true
                 },
                 {
                     "kind": "function",
                     "description": "Above stock.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        6
-                    ],
+                    "args": [5, 6],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "Zero quantity.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        0
-                    ],
+                    "args": [5, 0],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "Negative quantity.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        -2
-                    ],
+                    "args": [5, -2],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "Fractional quantity.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        2.5
-                    ],
+                    "args": [5, 2.5],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "Non-numeric quantity.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        "3"
-                    ],
+                    "args": [5, "3"],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "Negative stock.",
                     "name": "canFulfill",
-                    "args": [
-                        -1,
-                        1
-                    ],
+                    "args": [-1, 1],
                     "expected": false
                 }
             ]
@@ -302,9 +255,7 @@
     },
     "rewards": {
         "experience": 180,
-        "unlocks": [
-            "campus.a-failing-service"
-        ]
+        "unlocks": ["campus.a-failing-service"]
     },
     "persistence": {
         "kind": "world-action",
@@ -317,9 +268,5 @@
         "screenReaderNotes": "The patch is announced as code. Each test reports its inputs, expected result, and outcome."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "ai",
-        "professional",
-        "web"
-    ]
+    "tags": ["ai", "professional", "web"]
 }
