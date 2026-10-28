@@ -113,12 +113,12 @@ Do not stop a shared PostgreSQL instance on the production host. Use a separate 
 Run these in another terminal during the test:
 
 ```bash
-systemd-cgtop
-systemctl show praxbit -p MemoryCurrent -p MemoryHigh -p MemoryMax
 ps -o pid,rss,%cpu,etime,cmd -C node
 psql "$DATABASE_URL" -c "SELECT count(*), state FROM pg_stat_activity WHERE datname = current_database() GROUP BY state;"
 free -m
 ```
+
+On Windows, use `Get-Process node` and Task Manager in place of `ps` and `free`.
 
 Record:
 
