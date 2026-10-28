@@ -1,0 +1,254 @@
+{
+    "id": "campus.permission-denied",
+    "version": 1,
+    "sequence": 27,
+    "courseId": "campus",
+    "title": "Permission denied",
+    "summary": "Diagnose a service that cannot read its configuration and fix file modes with least access.",
+    "skills": [
+        "ops.permissions"
+    ],
+    "prerequisites": [
+        "ops.processes"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "terminal",
+    "runtime": {
+        "kind": "simulated-linux",
+        "capabilities": [
+            "deterministic-linux-simulation",
+            "shell",
+            "file-modes"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "bad-modes",
+        "briefing": "The orders API cannot read its configuration. A secret key is also world-readable. Repair both permissions with the least access needed, then restart and verify the service."
+    },
+    "objectives": [
+        {
+            "id": "diagnose",
+            "description": "Find the permission-denied evidence.",
+            "stepIds": [
+                "repair-modes"
+            ]
+        },
+        {
+            "id": "config",
+            "description": "Make the config readable by its owner and group only.",
+            "stepIds": [
+                "repair-modes"
+            ]
+        },
+        {
+            "id": "secret",
+            "description": "Limit the API key to its owner.",
+            "stepIds": [
+                "repair-modes"
+            ]
+        },
+        {
+            "id": "verify",
+            "description": "Restart the service and verify it runs.",
+            "stepIds": [
+                "repair-modes"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:server-room",
+        "icon:lock"
+    ],
+    "hints": [
+        "Run systemctl status orders-api and journalctl -u orders-api.",
+        "List details with ls -l. The config currently has mode 000.",
+        "Use chmod 640 for config.json and chmod 600 for api.key.",
+        "journalctl -u orders-api; ls -l app secrets; chmod 640 app/config.json; chmod 600 secrets/api.key; systemctl restart orders-api."
+    ],
+    "misconceptions": [
+        {
+            "id": "chmod-777",
+            "description": "Granting everyone access to fix a permission error.",
+            "stepId": "repair-modes",
+            "feedback": "World-writable configuration and secrets are a security failure. Grant only the access the service needs."
+        },
+        {
+            "id": "secret-public",
+            "description": "Leaving a secret readable by every user.",
+            "stepId": "repair-modes",
+            "feedback": "Secret material should not be world-readable. Mode 600 limits read and write to the owner."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Permissions answer who can do what",
+                "body": "Unix file modes describe read, write, and execute access for the owner, group, and others. A service runs as a user and needs just enough access to read its files. Permission errors are diagnosed by checking both the running user and the mode."
+            },
+            {
+                "title": "Least privilege",
+                "body": "Making a file world-readable may stop an error, but it also exposes data. Secrets such as API keys should be readable only by the account that needs them. Configuration is usually readable by the service user and its group."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "File mode",
+                "definition": "A numeric description of read, write, and execute permissions."
+            },
+            {
+                "term": "Owner",
+                "definition": "The user account that owns a file."
+            },
+            {
+                "term": "Least privilege",
+                "definition": "Granting only the access required for a task."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "terminal",
+            "id": "repair-modes",
+            "title": "Repair file access",
+            "prompt": "Use the terminal. Diagnose the failure, set config.json to 640, set secrets/api.key to 600, restart orders-api, and verify it runs.",
+            "evidence": "debugging",
+            "initial": {
+                "cwd": "/srv/campus",
+                "files": [
+                    {
+                        "path": "/srv/campus/app/server.js",
+                        "content": "startServer({ config: \"app/config.json\" });\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/srv/campus/app/config.json",
+                        "content": "{\"port\":8080,\"database\":\"inventory\"}\n",
+                        "mode": "000"
+                    },
+                    {
+                        "path": "/srv/campus/secrets/api.key",
+                        "content": "dev-api-key-not-a-real-secret\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/var/log/orders.log",
+                        "content": "[error] EACCES: permission denied, open '/srv/campus/app/config.json'\n",
+                        "mode": "644"
+                    }
+                ],
+                "services": [
+                    {
+                        "id": "orders-api",
+                        "name": "orders-api",
+                        "status": "failed",
+                        "logs": [
+                            "[info] loading configuration",
+                            "[error] EACCES: permission denied, open '/srv/campus/app/config.json'",
+                            "[info] service exited with code 1"
+                        ]
+                    }
+                ],
+                "symlinks": [],
+                "processes": []
+            },
+            "objectives": [
+                {
+                    "id": "evidence",
+                    "description": "Find the permission-denied evidence.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "permission denied"
+                    }
+                },
+                {
+                    "id": "config-mode",
+                    "description": "config.json is mode 640.",
+                    "check": {
+                        "kind": "file-mode",
+                        "path": "/srv/campus/app/config.json",
+                        "mode": "640"
+                    }
+                },
+                {
+                    "id": "key-mode",
+                    "description": "api.key is mode 600.",
+                    "check": {
+                        "kind": "file-mode",
+                        "path": "/srv/campus/secrets/api.key",
+                        "mode": "600"
+                    }
+                },
+                {
+                    "id": "running",
+                    "description": "orders-api is running.",
+                    "check": {
+                        "kind": "service",
+                        "serviceId": "orders-api",
+                        "status": "running"
+                    }
+                }
+            ],
+            "explanation": "The service could not read a config with no permissions. Modes 640 and 600 grant necessary access without exposing secrets, and the restarted service is running."
+        },
+        {
+            "kind": "explain",
+            "id": "permission-check",
+            "title": "Least access",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "owner",
+                    "label": "Permissions depend on the user the service runs as.",
+                    "correct": true
+                },
+                {
+                    "id": "world",
+                    "label": "Mode 777 is an acceptable fix for configuration errors.",
+                    "correct": false
+                },
+                {
+                    "id": "secret",
+                    "label": "Secret files should be readable only by the accounts that need them.",
+                    "correct": true
+                },
+                {
+                    "id": "evidence",
+                    "label": "The service log can identify a permission failure.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Permissions are evaluated for a specific user. Broad access solves today's error and creates a security problem."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 195,
+        "unlocks": [
+            "campus.the-deployment-is-broken"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "fix-permissions",
+        "system": "server-room"
+    },
+    "accessibility": {
+        "summary": "The terminal is keyboard-first and objectives are text. File listings include textual permission descriptions.",
+        "keyboardNotes": "Type commands and press Enter. The output log scrolls with arrow keys.",
+        "screenReaderNotes": "ls -l output is announced as mode, owner, group, size, and path. Permission changes are confirmed in text."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
