@@ -1,0 +1,203 @@
+{
+    "id": "python.values",
+    "version": 1,
+    "sequence": 31,
+    "courseId": "python-foundations",
+    "title": "Prices in Python",
+    "summary": "Use integers, division, and formatted strings to print exact prices.",
+    "skills": [
+        "python.basics"
+    ],
+    "prerequisites": [
+        "concept.state"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-python",
+        "capabilities": [
+            "pyodide-wasm",
+            "source-editing",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "python-price-format",
+        "briefing": "A Python report prints 12.5 instead of 12.50. Repair format_price so cents render with two decimal places and a dollar sign."
+    },
+    "objectives": [
+        {
+            "id": "format-price",
+            "description": "Render integer cents as an exact price string.",
+            "stepIds": [
+                "format-price"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:python"
+    ],
+    "hints": [
+        "Integer division // gives whole dollars. Remainder % gives cents.",
+        "Cents need two digits, including a leading zero.",
+        "Use an f-string with :02d on the remainder.",
+        "return f\"${cents // 100}.{cents % 100:02d}\""
+    ],
+    "misconceptions": [
+        {
+            "id": "true-division",
+            "description": "Using true division and losing the two-digit cents format.",
+            "stepId": "format-price",
+            "feedback": "True division produces a float. Work with integer dollars and integer cents so formatting stays exact."
+        },
+        {
+            "id": "no-padding",
+            "description": "Formatting cents without a leading zero for values under ten.",
+            "stepId": "format-price",
+            "feedback": "Five cents must render as 05 in the cents position. The :02d format specifier supplies the leading zero."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Python values have types",
+                "body": "An int is a whole number, a float has a fractional part, and a str is text. Integer division with // discards the remainder, while % returns it. Formatting a number is a presentation decision, not a new value."
+            },
+            {
+                "title": "Format widths preserve meaning",
+                "body": "The format specifier 02d means at least two digits, padded with a leading zero. Without it, five cents becomes .5 instead of .05. Exact formatting matters for money and identifiers."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "f-string",
+                "definition": "A Python string that embeds expressions inside braces."
+            },
+            {
+                "term": "Integer division",
+                "definition": "Division that discards the fractional part."
+            },
+            {
+                "term": "Format specifier",
+                "definition": "Instructions for how a value should be rendered as text."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "format-price",
+            "title": "Format a price",
+            "prompt": "Edit prices.py. format_price(cents) returns a string such as $12.50. Run the tests.",
+            "evidence": "construction",
+            "language": "python",
+            "files": [
+                {
+                    "path": "prices.py",
+                    "content": "def format_price(cents):\n    return \"$\" + str(cents / 100)\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "prices.py",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A normal price uses two decimals.",
+                    "name": "format_price",
+                    "args": [
+                        1250
+                    ],
+                    "expected": "$12.50"
+                },
+                {
+                    "kind": "function",
+                    "description": "Five cents keeps the leading zero.",
+                    "name": "format_price",
+                    "args": [
+                        5
+                    ],
+                    "expected": "$0.05"
+                },
+                {
+                    "kind": "function",
+                    "description": "Zero is formatted exactly.",
+                    "name": "format_price",
+                    "args": [
+                        0
+                    ],
+                    "expected": "$0.00"
+                },
+                {
+                    "kind": "function",
+                    "description": "Whole hundreds format correctly.",
+                    "name": "format_price",
+                    "args": [
+                        100000
+                    ],
+                    "expected": "$1000.00"
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "python-values-check",
+            "title": "Integers and text",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "intdiv",
+                    "label": "// returns the integer quotient.",
+                    "correct": true
+                },
+                {
+                    "id": "mod",
+                    "label": "% returns the remainder.",
+                    "correct": true
+                },
+                {
+                    "id": "float",
+                    "label": "A float is always an exact representation of a decimal price.",
+                    "correct": false
+                },
+                {
+                    "id": "format",
+                    "label": "Formatting changes presentation, not the stored integer value.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Integer arithmetic and formatting keep money display predictable. Floats are not exact for every decimal."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": [
+            "python.decisions"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Python editor is keyboard accessible. Pyodide loads only when this mission runs, and tests are text.",
+        "keyboardNotes": "Ctrl+Enter runs tests. The runtime status is announced while loading.",
+        "screenReaderNotes": "Each test announces its name, arguments, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "ai"
+    ]
+}
