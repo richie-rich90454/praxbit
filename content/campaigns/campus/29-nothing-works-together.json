@@ -1,0 +1,361 @@
+{
+    "id": "campus.nothing-works-together",
+    "version": 1,
+    "sequence": 29,
+    "courseId": "campus",
+    "title": "Nothing works together",
+    "summary": "Make an order and inventory calculation validate first, then update state atomically.",
+    "skills": [
+        "testing.integration",
+        "api.validation",
+        "concept.state"
+    ],
+    "prerequisites": [
+        "http.basics",
+        "testing.boundaries"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "partial-order",
+        "briefing": "The storefront and inventory service now agree on a contract. placeOrder must reject bad orders before changing stock, and accepted orders must update every line atomically."
+    },
+    "objectives": [
+        {
+            "id": "validate-first",
+            "description": "Validate every line before changing inventory.",
+            "stepIds": [
+                "integrate-order"
+            ]
+        },
+        {
+            "id": "atomic-update",
+            "description": "Apply all valid changes to a copy of inventory.",
+            "stepIds": [
+                "integrate-order"
+            ]
+        },
+        {
+            "id": "contract-errors",
+            "description": "Return stable errors for bad orders.",
+            "stepIds": [
+                "integrate-order"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:integration"
+    ],
+    "hints": [
+        "A failed order must leave inventory unchanged.",
+        "Check every line first: known id, positive integer quantity, nonnegative unit price.",
+        "Copy inventory only after validation succeeds, then apply all decrements.",
+        "Validate the whole order, reject duplicate item ids, copy inventory, apply changes, and return the new object."
+    ],
+    "misconceptions": [
+        {
+            "id": "partial-mutation",
+            "description": "Changing inventory while still validating later lines.",
+            "stepId": "integrate-order",
+            "feedback": "If line two fails after line one decremented stock, inventory is corrupted. Validate everything before applying anything."
+        },
+        {
+            "id": "mutates-input",
+            "description": "Returning a mutated input as if it were a new state.",
+            "stepId": "integrate-order",
+            "feedback": "Mutating the caller's inventory makes retries and comparisons unpredictable. Build a new inventory after validation."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Integration is an agreement",
+                "body": "The order service expects inventory to expose product ids and quantities. The inventory service expects valid commands. Integration defects often appear at the boundary where both sides think their own assumptions are obvious."
+            },
+            {
+                "title": "All-or-nothing updates",
+                "body": "An order with several lines is one transaction. Either every line succeeds or none does. Validating first and applying changes to a copy prevents a partial update from corrupting stock when a later line fails."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Atomic update",
+                "definition": "An update that fully succeeds or has no effect."
+            },
+            {
+                "term": "Integration test",
+                "definition": "A test that verifies connected parts agree."
+            },
+            {
+                "term": "Contract",
+                "definition": "An agreed shape and behavior between components."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "integrate-order",
+            "title": "Integrate order processing",
+            "prompt": "Edit orders.js. placeOrder(inventory, order) validates the entire order, then returns a new inventory and total. Use the documented errors and run the tests.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "orders.js",
+                    "content": "function placeOrder(inventory, order) {\n  let totalCents = 0;\n  for (const item of order.items) {\n    if (inventory[item.id] < item.quantity) {\n      return { ok: false, error: \"insufficient-stock\", inventory: inventory };\n    }\n    inventory[item.id] -= item.quantity;\n    totalCents += item.unitCents * item.quantity;\n  }\n  return { ok: true, inventory: inventory, totalCents: totalCents };\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "orders.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A valid multi-line order updates all stock and totals.",
+                    "name": "placeOrder",
+                    "args": [
+                        {
+                            "pencil": 5,
+                            "notebook": 3
+                        },
+                        {
+                            "items": [
+                                {
+                                    "id": "pencil",
+                                    "quantity": 2,
+                                    "unitCents": 100
+                                },
+                                {
+                                    "id": "notebook",
+                                    "quantity": 1,
+                                    "unitCents": 250
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": {
+                        "ok": true,
+                        "inventory": {
+                            "pencil": 3,
+                            "notebook": 2
+                        },
+                        "totalCents": 450
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Insufficient stock leaves every line unchanged.",
+                    "name": "placeOrder",
+                    "args": [
+                        {
+                            "pencil": 1,
+                            "notebook": 0
+                        },
+                        {
+                            "items": [
+                                {
+                                    "id": "pencil",
+                                    "quantity": 1,
+                                    "unitCents": 100
+                                },
+                                {
+                                    "id": "notebook",
+                                    "quantity": 1,
+                                    "unitCents": 250
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "error": "insufficient-stock",
+                        "inventory": {
+                            "pencil": 1,
+                            "notebook": 0
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An unknown product is rejected.",
+                    "name": "placeOrder",
+                    "args": [
+                        {
+                            "pencil": 2
+                        },
+                        {
+                            "items": [
+                                {
+                                    "id": "lamp",
+                                    "quantity": 1,
+                                    "unitCents": 300
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "error": "unknown-item",
+                        "inventory": {
+                            "pencil": 2
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A zero quantity is rejected.",
+                    "name": "placeOrder",
+                    "args": [
+                        {
+                            "pencil": 2
+                        },
+                        {
+                            "items": [
+                                {
+                                    "id": "pencil",
+                                    "quantity": 0,
+                                    "unitCents": 100
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "error": "invalid-quantity",
+                        "inventory": {
+                            "pencil": 2
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An order for exact stock is accepted.",
+                    "name": "placeOrder",
+                    "args": [
+                        {
+                            "pencil": 2
+                        },
+                        {
+                            "items": [
+                                {
+                                    "id": "pencil",
+                                    "quantity": 2,
+                                    "unitCents": 125
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": {
+                        "ok": true,
+                        "inventory": {
+                            "pencil": 0
+                        },
+                        "totalCents": 250
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Duplicate item lines are rejected.",
+                    "name": "placeOrder",
+                    "args": [
+                        {
+                            "pencil": 5
+                        },
+                        {
+                            "items": [
+                                {
+                                    "id": "pencil",
+                                    "quantity": 1,
+                                    "unitCents": 100
+                                },
+                                {
+                                    "id": "pencil",
+                                    "quantity": 2,
+                                    "unitCents": 100
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "error": "duplicate-item",
+                        "inventory": {
+                            "pencil": 5
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "integration-check",
+            "title": "Contracts and failure",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "validate",
+                    "label": "Validate all lines before applying side effects.",
+                    "correct": true
+                },
+                {
+                    "id": "atomic",
+                    "label": "An order update should be all-or-nothing.",
+                    "correct": true
+                },
+                {
+                    "id": "partial",
+                    "label": "A partial inventory update is acceptable when a later line fails.",
+                    "correct": false
+                },
+                {
+                    "id": "errors",
+                    "label": "Stable error codes let callers handle failures predictably.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Validation, atomicity, and stable errors make integration behavior predictable."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 210,
+        "unlocks": [
+            "campus.the-campus-incident"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "integrate-systems",
+        "system": "api"
+    },
+    "accessibility": {
+        "summary": "The editor and tests are keyboard accessible. Each test lists the full input and expected result.",
+        "keyboardNotes": "Ctrl+Enter runs tests. Results are focusable headings for quick navigation.",
+        "screenReaderNotes": "Test output announces validation errors and inventory values as structured text."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
