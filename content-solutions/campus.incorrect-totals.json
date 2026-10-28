@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-total": {
+            "files": {
+                "receipt.js": "function orderTotalCents(prices) {\n  let total = 0;\n  for (const price of prices) {\n    const parts = String(price).split(\".\");\n    const dollars = Number(parts[0] ?? \"0\");\n    const cents = Number((parts[1] ?? \"\").padEnd(2, \"0\").slice(0, 2));\n    total += dollars * 100 + cents;\n  }\n  return total;\n}\n"
+            }
+        }
+    }
+}
