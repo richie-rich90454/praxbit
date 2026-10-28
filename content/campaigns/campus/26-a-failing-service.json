@@ -1,0 +1,242 @@
+{
+    "id": "campus.a-failing-service",
+    "version": 1,
+    "sequence": 26,
+    "courseId": "campus",
+    "title": "A failing service",
+    "summary": "Diagnose a service that cannot bind its port, clear the conflicting process, and verify recovery.",
+    "skills": [
+        "ops.processes"
+    ],
+    "prerequisites": [
+        "concept.filesystems"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "terminal",
+    "runtime": {
+        "kind": "simulated-linux",
+        "capabilities": [
+            "deterministic-linux-simulation",
+            "shell",
+            "service-state"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "port-conflict",
+        "briefing": "The orders API will not start. Its log says the port is already in use. Find the process holding the port, stop it, restart the service, and verify the health endpoint."
+    },
+    "objectives": [
+        {
+            "id": "read-log",
+            "description": "Find the address-in-use evidence in the service log.",
+            "stepIds": [
+                "recover-service"
+            ]
+        },
+        {
+            "id": "clear-conflict",
+            "description": "Stop the conflicting process and restart the service.",
+            "stepIds": [
+                "recover-service"
+            ]
+        },
+        {
+            "id": "verify-health",
+            "description": "Verify the running service with its health endpoint.",
+            "stepIds": [
+                "recover-service"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:server-room",
+        "icon:terminal"
+    ],
+    "hints": [
+        "Start with systemctl status orders-api and journalctl -u orders-api.",
+        "The log reports EADDRINUSE on port 8080.",
+        "Run ps to find the process holding the port, then kill it.",
+        "Run: journalctl -u orders-api; ps; kill 4242; systemctl restart orders-api; curl http://localhost:8080/health."
+    ],
+    "misconceptions": [
+        {
+            "id": "restart-only",
+            "description": "Restarting without clearing the conflicting process.",
+            "stepId": "recover-service",
+            "feedback": "A restart repeats the bind attempt while the port is still occupied. Remove the conflicting process first."
+        },
+        {
+            "id": "assumes-health",
+            "description": "Treating a restart command as proof of health.",
+            "stepId": "recover-service",
+            "feedback": "A service can start and still fail readiness. Check its health endpoint after restarting."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Logs are evidence",
+                "body": "A service log records what the process attempted and why it failed. EADDRINUSE means the requested network port is already bound. The log narrows the fault before any change is made."
+            },
+            {
+                "title": "Processes and ports",
+                "body": "A running process can hold a port. Restarting the failed service does not remove the other process. Inspect the process list, stop the correct process, restart, and verify with a health check rather than assuming success."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Process",
+                "definition": "A running program instance with an identifier."
+            },
+            {
+                "term": "Port",
+                "definition": "A numbered endpoint used by network services."
+            },
+            {
+                "term": "Health check",
+                "definition": "A request that reports whether a service is ready."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "terminal",
+            "id": "recover-service",
+            "title": "Recover the orders API",
+            "prompt": "Use the simulated Linux terminal. Inspect the service, find and stop the conflicting process, restart orders-api, and request its health endpoint.",
+            "evidence": "debugging",
+            "initial": {
+                "cwd": "/srv/campus",
+                "files": [
+                    {
+                        "path": "/srv/campus/app/server.js",
+                        "content": "startServer({ port: 8080 });\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/srv/campus/app/config.json",
+                        "content": "{\"port\":8080}\n",
+                        "mode": "640"
+                    },
+                    {
+                        "path": "/srv/campus/old-worker.js",
+                        "content": "// experimental worker left running\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/var/log/orders.log",
+                        "content": "[error] listen EADDRINUSE: address already in use :8080\n",
+                        "mode": "644"
+                    }
+                ],
+                "services": [
+                    {
+                        "id": "orders-api",
+                        "name": "orders-api",
+                        "status": "failed",
+                        "logs": [
+                            "[info] starting orders-api on port 8080",
+                            "[error] listen EADDRINUSE: address already in use :8080",
+                            "[info] service failed; retry limit reached"
+                        ]
+                    }
+                ],
+                "symlinks": [],
+                "processes": [
+                    {
+                        "pid": 4242,
+                        "command": "node old-worker.js --port 8080"
+                    }
+                ]
+            },
+            "objectives": [
+                {
+                    "id": "log",
+                    "description": "Find the address-in-use evidence.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "EADDRINUSE"
+                    }
+                },
+                {
+                    "id": "running",
+                    "description": "orders-api is running.",
+                    "check": {
+                        "kind": "service",
+                        "serviceId": "orders-api",
+                        "status": "running"
+                    }
+                },
+                {
+                    "id": "health",
+                    "description": "The health endpoint responds.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "healthy"
+                    }
+                }
+            ],
+            "explanation": "The orphan worker held port 8080. Killing it allowed orders-api to bind, and the health request confirmed readiness."
+        },
+        {
+            "kind": "explain",
+            "id": "process-check",
+            "title": "Recovery evidence",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "log",
+                    "label": "The log narrows the failure before changes are made.",
+                    "correct": true
+                },
+                {
+                    "id": "restart",
+                    "label": "A restart always resolves a port conflict.",
+                    "correct": false
+                },
+                {
+                    "id": "health",
+                    "label": "A health check provides evidence that the service is ready.",
+                    "correct": true
+                },
+                {
+                    "id": "process",
+                    "label": "An orphan process can keep a port occupied after its original purpose ends.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Diagnosis precedes recovery. A restart can fail again, and readiness must be verified."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 190,
+        "unlocks": [
+            "campus.permission-denied"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "restart-service",
+        "system": "api"
+    },
+    "accessibility": {
+        "summary": "The terminal is a real text input with an ordered output log. All objectives are listed as text with pass state.",
+        "keyboardNotes": "Type commands and press Enter. Use arrow keys to scroll terminal output. The input is always focusable.",
+        "screenReaderNotes": "The terminal announces the current directory, each command, and its output. Objective completion is announced after each command."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
