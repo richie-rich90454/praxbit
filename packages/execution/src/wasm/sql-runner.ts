@@ -49,7 +49,11 @@ function execute(db: Database, source: string): QueryOutcome {
         if (last === undefined) {
             return { rows: [] };
         }
-        return { rows: last.values.map(function toRow(row): unknown[] { return [...row]; }) };
+        return {
+            rows: last.values.map(function toRow(row): unknown[] {
+                return [...row];
+            }),
+        };
     } catch (error) {
         return {
             rows: [],
@@ -70,7 +74,10 @@ function rowsEqual(left: readonly unknown[], right: readonly unknown[]): boolean
     return true;
 }
 
-function resultSetsEqual(left: readonly (readonly unknown[])[], right: readonly (readonly unknown[])[]): boolean {
+function resultSetsEqual(
+    left: readonly (readonly unknown[])[],
+    right: readonly (readonly unknown[])[],
+): boolean {
     if (left.length !== right.length) {
         return false;
     }
@@ -112,7 +119,11 @@ export async function runSqlChecks(
 
         const sourceResult = execute(db, source);
         if (sourceResult.error !== undefined) {
-            outcomes.push({ description: check.description, passed: false, error: sourceResult.error });
+            outcomes.push({
+                description: check.description,
+                passed: false,
+                error: sourceResult.error,
+            });
             db.close();
             continue;
         }
@@ -121,7 +132,11 @@ export async function runSqlChecks(
         if (check.verify !== undefined) {
             const verified = execute(db, check.verify);
             if (verified.error !== undefined) {
-                outcomes.push({ description: check.description, passed: false, error: verified.error });
+                outcomes.push({
+                    description: check.description,
+                    passed: false,
+                    error: verified.error,
+                });
                 db.close();
                 continue;
             }
