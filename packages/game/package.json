@@ -1,0 +1,20 @@
+{
+    "name": "@praxbit/game",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./rendering": "./src/rendering/index.ts",
+        "./animation": "./src/animation/index.ts",
+        "./scenes": "./src/scenes/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc -p tsconfig.json"
+    },
+    "dependencies": {
+        "@praxbit/contracts": "workspace:*",
+        "@praxbit/domain": "workspace:*",
+        "pixi.js": "^8.14.0"
+    }
+}
