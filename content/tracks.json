@@ -1,0 +1,143 @@
+{
+    "version": 1,
+    "tracks": [
+        {
+            "id": "before-code",
+            "title": "Before code",
+            "summary": "The computer science ideas beneath every program, taught without requiring an editor.",
+            "kind": "campaign",
+            "missionIds": [
+                "before-code.make-it-respond",
+                "before-code.give-better-instructions",
+                "before-code.remember-this",
+                "before-code.make-a-decision",
+                "before-code.do-it-again",
+                "before-code.one-step-at-a-time",
+                "before-code.fix-the-instructions",
+                "before-code.everything-is-information",
+                "before-code.find-the-file",
+                "before-code.send-a-message",
+                "before-code.break-it-into-parts",
+                "before-code.can-we-trust-the-result"
+            ],
+            "interests": ["everything"]
+        },
+        {
+            "id": "campus",
+            "title": "The campus network",
+            "summary": "Repair a connected storefront, its services, its history, and its people.",
+            "kind": "campaign",
+            "missionIds": [
+                "campus.page-with-no-identity",
+                "campus.everything-is-misplaced",
+                "campus.the-button-does-nothing",
+                "campus.inventory-went-negative",
+                "campus.repeating-the-same-work",
+                "campus.incorrect-totals",
+                "campus.the-missing-property",
+                "campus.the-mysterious-exception",
+                "campus.changes-nobody-can-find",
+                "campus.two-developers-disagree",
+                "campus.the-broken-request",
+                "campus.the-duplicate-order",
+                "campus.the-ai-says-it-is-fixed",
+                "campus.a-failing-service",
+                "campus.permission-denied",
+                "campus.the-deployment-is-broken",
+                "campus.nothing-works-together",
+                "campus.the-campus-incident"
+            ],
+            "interests": ["web", "professional", "systems", "ai"]
+        },
+        {
+            "id": "python-foundations",
+            "title": "Python foundations",
+            "summary": "Values, decisions, and loops in a language used for data work and automation.",
+            "kind": "language",
+            "missionIds": [
+                "python.values",
+                "python.decisions",
+                "python.loops"
+            ],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "sql-data",
+            "title": "SQL and data",
+            "summary": "Ask precise questions of relational data and keep results trustworthy.",
+            "kind": "language",
+            "missionIds": [
+                "sql.filter-orders",
+                "sql.join-customers",
+                "sql.review-model"
+            ],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "algorithms",
+            "title": "Algorithms",
+            "summary": "Search, count, and reason about cost as data grows.",
+            "kind": "discipline",
+            "missionIds": [
+                "algorithms.binary-search",
+                "algorithms.frequency-map",
+                "algorithms.complexity"
+            ],
+            "interests": ["professional", "systems"]
+        },
+        {
+            "id": "security",
+            "title": "Security",
+            "summary": "Injection, sessions, and the boundaries where trust must stop.",
+            "kind": "discipline",
+            "missionIds": [
+                "security.injection",
+                "security.sessions"
+            ],
+            "interests": ["systems", "professional", "web"]
+        },
+        {
+            "id": "ai-engineering",
+            "title": "AI engineering",
+            "summary": "Prompts, evaluation, and bounded delegation that keeps responsibility with the engineer.",
+            "kind": "discipline",
+            "missionIds": [
+                "ai.prompt-contract",
+                "ai.evaluate-output",
+                "ai.agent-permissions"
+            ],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "devops",
+            "title": "DevOps",
+            "summary": "Containers, pipelines, and releases that can be verified and reversed.",
+            "kind": "discipline",
+            "missionIds": [
+                "devops.container-limits",
+                "devops.pipeline-checks"
+            ],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "typescript",
+            "title": "TypeScript",
+            "summary": "Narrowing, contracts, and types that survive contact with external data.",
+            "kind": "language",
+            "missionIds": [
+                "typescript.narrowing"
+            ],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "node-services",
+            "title": "Node services",
+            "summary": "Middleware order, validation, and error boundaries in Hono services.",
+            "kind": "framework",
+            "missionIds": [
+                "node.middleware-order"
+            ],
+            "interests": ["web", "professional"]
+        }
+    ]
+}
