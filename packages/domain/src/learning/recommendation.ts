@@ -64,13 +64,15 @@ export function recommendMission(
     const completed = new Set(context.completedMissionIds);
     const skipped = new Set(context.skippedSkills);
     const completedSkills = new Set(context.completedMissionSkills ?? []);
-    const weakSkills = Object.entries(context.mastery)
-        .filter(function isWeak(entry): boolean {
-            return entry[1] < 0.5;
-        })
-        .map(function skillId(entry): string {
-            return entry[0];
-        });
+    const weakSkills = new Set(
+        Object.entries(context.mastery)
+            .filter(function isWeak(entry): boolean {
+                return entry[1] < 0.5;
+            })
+            .map(function skillId(entry): string {
+                return entry[0];
+            }),
+    );
 
     const scored: { mission: Mission; score: number; reasons: string[] }[] = [];
 
@@ -109,7 +111,7 @@ export function recommendMission(
         }
 
         const weakMatches = mission.skills.filter(function weak(skillId: string): boolean {
-            return weakSkills.includes(skillId);
+            return weakSkills.has(skillId);
         }).length;
         if (weakMatches > 0 && !isCompleted) {
             score += weakMatches * 10;
