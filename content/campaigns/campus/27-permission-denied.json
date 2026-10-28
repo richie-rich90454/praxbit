@@ -5,22 +5,14 @@
     "courseId": "campus",
     "title": "Permission denied",
     "summary": "Diagnose a service that cannot read its configuration and fix file modes with least access.",
-    "skills": [
-        "ops.permissions"
-    ],
-    "prerequisites": [
-        "ops.processes"
-    ],
+    "skills": ["ops.permissions"],
+    "prerequisites": ["ops.processes"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "terminal",
     "runtime": {
         "kind": "simulated-linux",
-        "capabilities": [
-            "deterministic-linux-simulation",
-            "shell",
-            "file-modes"
-        ]
+        "capabilities": ["deterministic-linux-simulation", "shell", "file-modes"]
     },
     "scenario": {
         "world": "campus",
@@ -32,38 +24,30 @@
         {
             "id": "diagnose",
             "description": "Find the permission-denied evidence.",
-            "stepIds": [
-                "repair-modes"
-            ]
+            "stepIds": ["repair-modes"]
         },
         {
             "id": "config",
             "description": "Make the config readable by its owner and group only.",
-            "stepIds": [
-                "repair-modes"
-            ]
+            "stepIds": ["repair-modes"]
         },
         {
             "id": "secret",
             "description": "Limit the API key to its owner.",
-            "stepIds": [
-                "repair-modes"
-            ]
+            "stepIds": ["repair-modes"]
         },
         {
             "id": "verify",
             "description": "Restart the service and verify it runs.",
-            "stepIds": [
-                "repair-modes"
-            ]
+            "stepIds": ["repair-modes"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["permission-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:server-room",
-        "icon:lock"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:lock"],
     "hints": [
         "Run systemctl status orders-api and journalctl -u orders-api.",
         "List details with ls -l. The config currently has mode 000.",
@@ -232,9 +216,7 @@
     },
     "rewards": {
         "experience": 195,
-        "unlocks": [
-            "campus.the-deployment-is-broken"
-        ]
+        "unlocks": ["campus.the-deployment-is-broken"]
     },
     "persistence": {
         "kind": "world-action",
@@ -247,8 +229,5 @@
         "screenReaderNotes": "ls -l output is announced as mode, owner, group, size, and path. Permission changes are confirmed in text."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
