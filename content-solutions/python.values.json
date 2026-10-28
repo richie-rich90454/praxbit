@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "format-price": {
+            "files": {
+                "prices.py": "def format_price(cents):\n    dollars = cents // 100\n    remainder = cents % 100\n    return f\"${dollars}.{remainder:02d}\"\n"
+            }
+        }
+    }
+}
