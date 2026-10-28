@@ -1,0 +1,23 @@
+{
+    "name": "@praxbit/execution",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./interfaces": "./src/interfaces/index.ts",
+        "./browser": "./src/browser/index.ts",
+        "./wasm": "./src/wasm/index.ts",
+        "./simulated": "./src/simulated/index.ts"
+    },
+    "scripts": {
+        "typecheck": "tsc -p tsconfig.json"
+    },
+    "dependencies": {
+        "@praxbit/contracts": "workspace:*",
+        "sql.js": "^1.15.2"
+    },
+    "devDependencies": {
+        "@types/sql.js": "^1.4.11"
+    }
+}
