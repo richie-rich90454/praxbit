@@ -79,22 +79,37 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
         });
     }
 
-    async function runCommand(): Promise<void> {
-        if (exercise === undefined || busy()) {
-            return;
-        }
-        const entry = command().trim();
-        if (entry.length === 0) {
+    let executionQueue: Promise<void> = Promise.resolve();
+
+    async function executeCommand(entry: string): Promise<void> {
+        if (exercise === undefined) {
             return;
         }
         setBusy(true);
-        const result = await exercise.execute(entry);
-        setOutput(function append(current): string {
-            return `${current}\n$ ${entry}\n${result.output}`.trim();
-        });
-        await refreshFiles();
-        setBusy(false);
-        inputElement?.focus();
+        try {
+            const result = await exercise.execute(entry);
+            setOutput(function append(current): string {
+                return `${current}\n$ ${entry}\n${result.output}`.trim();
+            });
+            await refreshFiles();
+        } finally {
+            setBusy(false);
+            inputElement?.focus();
+        }
+    }
+
+    function enqueueCommand(): void {
+        const entry = (inputElement?.value ?? command()).trim();
+        if (entry.length === 0) {
+            return;
+        }
+        executionQueue = executionQueue
+            .then(function runQueued(): Promise<void> {
+                return executeCommand(entry);
+            })
+            .catch(function report(caught: unknown): void {
+                setError(caught instanceof Error ? caught.message : "The Git command failed.");
+            });
     }
 
     async function verify(): Promise<void> {
@@ -116,10 +131,16 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                 const runner = new GitExercise(props.step);
                 await runner.initialize();
                 exercise = runner;
-                setOutput(`Initialized an in-browser repository on branch ${props.step.initialBranch}.\nType git status to inspect it.`);
+                setOutput(
+                    `Initialized an in-browser repository on branch ${props.step.initialBranch}.\nType git status to inspect it.`,
+                );
                 await refreshFiles();
             } catch (caught) {
-                setError(caught instanceof Error ? caught.message : "The repository could not be initialized.");
+                setError(
+                    caught instanceof Error
+                        ? caught.message
+                        : "The repository could not be initialized.",
+                );
             } finally {
                 setLoading(false);
                 inputElement?.focus();
@@ -130,8 +151,8 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
     return (
         <div class="stack">
             <p class="meta">
-                Real Git operations run through isomorphic-git against an in-browser repository. This is a repository
-                in your browser, not a remote copy on the campus server.
+                Real Git operations run through isomorphic-git against an in-browser repository.
+                This is a repository in your browser, not a remote copy on the campus server.
             </p>
             <Show when={error().length > 0}>
                 <p class="feedback feedback--error">{error()}</p>
@@ -165,7 +186,13 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                     </div>
                     <div class="surface stack stack--tight">
                         <h3>Git terminal</h3>
-                        <div class="terminal" role="log" aria-live="polite" aria-label="Git output">
+                        <div
+                            class="terminal"
+                            role="log"
+                            aria-live="polite"
+                            aria-busy={busy()}
+                            aria-label="Git output"
+                        >
                             <pre class="terminal__line" style={{ "white-space": "pre-wrap" }}>
                                 {output()}
                             </pre>
@@ -174,7 +201,7 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                             class="row"
                             onSubmit={function submit(event): void {
                                 event.preventDefault();
-                                void runCommand();
+                                enqueueCommand();
                             }}
                         >
                             <label class="visually-hidden" for={`git-command-${props.step.id}`}>
@@ -191,7 +218,7 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                                     setCommand(event.currentTarget.value);
                                 }}
                             />
-                            <button type="submit" class="button" disabled={busy()}>
+                            <button type="submit" class="button">
                                 Run
                             </button>
                         </form>
@@ -207,9 +234,13 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                             onChange={setFileContent}
                         />
                         <div class="row">
-                            <button type="button" class="button button--secondary button--small" onClick={function save(): void {
-                                void saveFile();
-                            }}>
+                            <button
+                                type="button"
+                                class="button button--secondary button--small"
+                                onClick={function save(): void {
+                                    void saveFile();
+                                }}
+                            >
                                 Save file in working tree
                             </button>
                         </div>
@@ -217,12 +248,19 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                 </Show>
 
                 <div class="row">
-                    <button type="button" class="button" onClick={function check(): void {
-                        void verify();
-                    }}>
+                    <button
+                        type="button"
+                        class="button"
+                        onClick={function check(): void {
+                            void verify();
+                        }}
+                    >
                         Check repository
                     </button>
-                    <span class="meta">A merge conflict leaves markers in the file. Resolve them, stage, and commit.</span>
+                    <span class="meta">
+                        A merge conflict leaves markers in the file. Resolve them, stage, and
+                        commit.
+                    </span>
                 </div>
 
                 <Show when={Object.keys(checks()).length > 0}>
@@ -241,7 +279,9 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                                         <tr>
                                             <td>{item[0]}</td>
                                             <td>
-                                                <span class={`status ${item[1] ? "status--success" : "status--error"}`}>
+                                                <span
+                                                    class={`status ${item[1] ? "status--success" : "status--error"}`}
+                                                >
                                                     <span class="status__mark" aria-hidden="true" />
                                                     {item[1] ? "Pass" : "Fail"}
                                                 </span>
