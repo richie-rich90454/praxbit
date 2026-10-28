@@ -81,7 +81,13 @@ export class MissionStateMachine {
                 phase = "exploring";
                 break;
             case "attempt":
-                this.requirePhase(from, event, ["exploring", "attempting", "assistance", "feedback", "review-scheduled"]);
+                this.requirePhase(from, event, [
+                    "exploring",
+                    "attempting",
+                    "assistance",
+                    "feedback",
+                    "review-scheduled",
+                ]);
                 phase = "attempting";
                 break;
             case "request-help":
@@ -123,12 +129,17 @@ export class MissionStateMachine {
             ...this.current,
             phase,
             attempts: event === "attempt" ? this.current.attempts + 1 : this.current.attempts,
-            hintsUsed: event === "request-help" ? Math.min(4, this.current.hintsUsed + 1) : this.current.hintsUsed,
+            hintsUsed:
+                event === "request-help"
+                    ? Math.min(4, this.current.hintsUsed + 1)
+                    : this.current.hintsUsed,
             completionRecorded: event === "complete" ? true : this.current.completionRecorded,
         };
 
         const startedAt =
-            event === "start" && this.current.startedAt === undefined ? now.toISOString() : this.current.startedAt;
+            event === "start" && this.current.startedAt === undefined
+                ? now.toISOString()
+                : this.current.startedAt;
         const completedAt = event === "complete" ? now.toISOString() : this.current.completedAt;
         this.current = {
             ...updated,
@@ -139,7 +150,11 @@ export class MissionStateMachine {
         return this.current;
     }
 
-    private requirePhase(from: MissionPhase, event: MissionEvent, allowed: readonly MissionPhase[]): void {
+    private requirePhase(
+        from: MissionPhase,
+        event: MissionEvent,
+        allowed: readonly MissionPhase[],
+    ): void {
         if (!allowed.includes(from)) {
             throw new MissionTransitionError(from, event);
         }
