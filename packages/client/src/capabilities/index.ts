@@ -13,7 +13,8 @@ export function detectWebCapabilities(): PlatformCapabilities {
     return {
         supportsLocalFiles: hasWindow && "showOpenFilePicker" in window,
         supportsNotifications: hasWindow && "Notification" in window,
-        supportsBackgroundSync: hasWindow && "serviceWorker" in navigator && "SyncManager" in window,
+        supportsBackgroundSync:
+            hasWindow && "serviceWorker" in navigator && "SyncManager" in window,
         supportsBrowserWasm: typeof WebAssembly === "object",
         supportsIndexedDb: hasWindow && "indexedDB" in window,
         supportsServiceWorker: hasWindow && "serviceWorker" in navigator,
@@ -22,7 +23,8 @@ export function detectWebCapabilities(): PlatformCapabilities {
 }
 
 export function detectNativeCapabilities(): PlatformCapabilities {
-    const capacitor = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+    const capacitor = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } })
+        .Capacitor;
     const native = capacitor?.isNativePlatform?.() === true;
     return {
         supportsLocalFiles: native,
