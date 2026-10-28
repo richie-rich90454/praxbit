@@ -1,0 +1,314 @@
+{
+    "id": "campus.repeating-the-same-work",
+    "version": 1,
+    "sequence": 17,
+    "courseId": "campus",
+    "title": "Repeating the same work",
+    "summary": "Use a loop over an array to calculate available stock.",
+    "skills": [
+        "js.loops",
+        "js.arrays"
+    ],
+    "prerequisites": [
+        "js.events",
+        "concept.iteration"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "manual-stock-count",
+        "briefing": "The storefront lists stock and reserved counts for every product. The current total ignores reservations and will oversell. Write one loop that computes the true available total."
+    },
+    "objectives": [
+        {
+            "id": "loop-total",
+            "description": "Compute available stock by iterating over all items.",
+            "stepIds": [
+                "available-total"
+            ]
+        },
+        {
+            "id": "clamp-negative",
+            "description": "Prevent a reserved count from producing negative availability.",
+            "stepIds": [
+                "available-total"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:storefront",
+        "icon:loop"
+    ],
+    "hints": [
+        "Start a total at zero and visit each item in the array.",
+        "For each item, availability is stock minus reserved.",
+        "A product cannot have less than zero available. Clamp the difference at zero.",
+        "Loop over items, add Math.max(0, item.stock - item.reserved) to total, and return total."
+    ],
+    "misconceptions": [
+        {
+            "id": "ignores-reserved",
+            "description": "Summing stock without subtracting reservations.",
+            "stepId": "available-total",
+            "feedback": "Reserved units are already promised to other orders. Subtract them before counting availability."
+        },
+        {
+            "id": "negative-availability",
+            "description": "Allowing reserved stock to produce a negative total.",
+            "stepId": "available-total",
+            "feedback": "A reservation mistake should not create negative physical stock. Clamp each product's availability at zero."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Loops process collections",
+                "body": "A for...of loop visits each element of an array. The loop body performs the same operation for every item, while an accumulator carries the result forward. This is the core pattern behind totals, filters, and transformations."
+            },
+            {
+                "title": "Reservations are state",
+                "body": "Stock minus reserved is the amount actually available. If reserved exceeds stock, the data may be inconsistent, but the available count should not become negative. Clamping preserves a truthful lower bound while the underlying data issue can be investigated."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Array",
+                "definition": "An ordered collection of values."
+            },
+            {
+                "term": "Accumulator",
+                "definition": "A variable that carries a running result through a loop."
+            },
+            {
+                "term": "Clamp",
+                "definition": "Restrict a value to a defined minimum or maximum."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "available-total",
+            "title": "Compute available stock",
+            "prompt": "Edit stock.js. sumAvailable(items) must loop over the array and return the total available, with each item clamped at zero.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "stock.js",
+                    "content": "function sumAvailable(items) {\n  let total = 0;\n  for (let index = 0; index < items.length; index += 1) {\n    total += items[index].stock;\n  }\n  return total;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "stock.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Reserved units are excluded.",
+                    "name": "sumAvailable",
+                    "args": [
+                        [
+                            {
+                                "stock": 5,
+                                "reserved": 2
+                            },
+                            {
+                                "stock": 3,
+                                "reserved": 0
+                            }
+                        ]
+                    ],
+                    "expected": 6
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty array totals zero.",
+                    "name": "sumAvailable",
+                    "args": [
+                        []
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Over-reserved products clamp at zero.",
+                    "name": "sumAvailable",
+                    "args": [
+                        [
+                            {
+                                "stock": 2,
+                                "reserved": 5
+                            }
+                        ]
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Multiple products are all visited.",
+                    "name": "sumAvailable",
+                    "args": [
+                        [
+                            {
+                                "stock": 4,
+                                "reserved": 0
+                            },
+                            {
+                                "stock": 6,
+                                "reserved": 1
+                            },
+                            {
+                                "stock": 2,
+                                "reserved": 2
+                            }
+                        ]
+                    ],
+                    "expected": 9
+                },
+                {
+                    "kind": "function",
+                    "description": "A single fully reserved product contributes zero.",
+                    "name": "sumAvailable",
+                    "args": [
+                        [
+                            {
+                                "stock": 7,
+                                "reserved": 7
+                            }
+                        ]
+                    ],
+                    "expected": 0
+                }
+            ]
+        },
+        {
+            "kind": "trace",
+            "id": "loop-values",
+            "title": "Trace the loop",
+            "prompt": "Advance through the loop for two products and enter the final total.",
+            "evidence": "prediction",
+            "lines": [
+                {
+                    "id": "s1",
+                    "code": "total = 0"
+                },
+                {
+                    "id": "s2",
+                    "code": "item = {stock: 4, reserved: 1}"
+                },
+                {
+                    "id": "s3",
+                    "code": "total = total + max(0, 4 - 1)"
+                },
+                {
+                    "id": "s4",
+                    "code": "item = {stock: 2, reserved: 5}"
+                },
+                {
+                    "id": "s5",
+                    "code": "total = total + max(0, 2 - 5)"
+                }
+            ],
+            "watches": [
+                {
+                    "id": "total",
+                    "label": "total",
+                    "initial": "0"
+                }
+            ],
+            "snapshots": [
+                {
+                    "lineId": "s1",
+                    "values": {
+                        "total": "0"
+                    }
+                },
+                {
+                    "lineId": "s3",
+                    "values": {
+                        "total": "3"
+                    },
+                    "note": "The first product adds 3."
+                },
+                {
+                    "lineId": "s5",
+                    "values": {
+                        "total": "3"
+                    },
+                    "note": "The second product is clamped to 0, so total stays 3."
+                }
+            ],
+            "explanation": "The first product contributes 3. The over-reserved product contributes zero because availability cannot be negative."
+        },
+        {
+            "kind": "explain",
+            "id": "loop-claims",
+            "title": "Loop correctness",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "all-items",
+                    "label": "A total must visit every item that should contribute.",
+                    "correct": true
+                },
+                {
+                    "id": "reserved",
+                    "label": "Reserved units reduce availability.",
+                    "correct": true
+                },
+                {
+                    "id": "index",
+                    "label": "A loop must always use an index variable.",
+                    "correct": false
+                },
+                {
+                    "id": "empty",
+                    "label": "An empty array can produce a total of zero.",
+                    "correct": true
+                }
+            ],
+            "explanation": "for...of and other loop forms can visit items without manual indexing. Empty collections are a normal boundary."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 135,
+        "unlocks": [
+            "campus.incorrect-totals"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "repair-inventory",
+        "system": "storefront"
+    },
+    "accessibility": {
+        "summary": "Loop tracing uses a Next line button and text values. The code editor and tests are keyboard accessible.",
+        "keyboardNotes": "Ctrl+Enter runs tests. Next line advances the trace.",
+        "screenReaderNotes": "The trace announces each line, the product values, and the running total."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
