@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
+import { existsSync } from "node:fs";
+import { readFile, stat } from "node:fs/promises";
+import { extname, resolve, sep } from "node:path";
 import { ZodError } from "zod";
 import type { Pool } from "pg";
 import type { ServerConfig } from "./config.ts";
@@ -33,6 +36,7 @@ export interface ApplicationDependencies {
     readonly config: ServerConfig;
     readonly pool: Pool;
     readonly content: ContentCatalog;
+    readonly webDirectory?: string;
     readonly startedAt?: number;
 }
 
@@ -98,6 +102,94 @@ export function createApplication(dependencies: ApplicationDependencies): Hono<A
     app.route("/api/v1/ai", createAiRoutes(services));
     app.route("/api/v1/admin", createAdminRoutes(services));
     app.route("/api/v1", createCatalogRoutes(services));
+
+    const webDirectory = dependencies.webDirectory;
+    if (webDirectory !== undefined && existsSync(webDirectory)) {
+        const webRoot = resolve(webDirectory);
+        const contentTypes: Readonly<Record<string, string>> = {
+            ".css": "text/css; charset=utf-8",
+            ".html": "text/html; charset=utf-8",
+            ".ico": "image/x-icon",
+            ".js": "text/javascript; charset=utf-8",
+            ".json": "application/json; charset=utf-8",
+            ".map": "application/json; charset=utf-8",
+            ".png": "image/png",
+            ".svg": "image/svg+xml",
+            ".wasm": "application/wasm",
+            ".webmanifest": "application/manifest+json; charset=utf-8",
+            ".woff2": "font/woff2",
+        };
+
+        async function readWebFile(
+            pathname: string,
+        ): Promise<
+            { readonly body: Blob; readonly type: string; readonly cache: string } | undefined
+        > {
+            const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+            const absolute = resolve(webRoot, relative);
+            if (absolute !== webRoot && !absolute.startsWith(`${webRoot}${sep}`)) {
+                return undefined;
+            }
+            try {
+                const information = await stat(absolute);
+                if (!information.isFile()) {
+                    return undefined;
+                }
+                return {
+                    body: new Blob([new Uint8Array(await readFile(absolute))]),
+                    type:
+                        contentTypes[extname(absolute).toLowerCase()] ?? "application/octet-stream",
+                    cache: relative.startsWith("assets/")
+                        ? "public, max-age=31536000, immutable"
+                        : "no-cache",
+                };
+            } catch {
+                return undefined;
+            }
+        }
+
+        app.all("/api", function apiRootNotFound(context): Response {
+            return context.json(
+                errorBody("not_found", "No route matches this request.", context.get("requestId")),
+                404,
+            );
+        });
+        app.all("/api/*", function apiNotFound(context): Response {
+            return context.json(
+                errorBody("not_found", "No route matches this request.", context.get("requestId")),
+                404,
+            );
+        });
+        app.get("*", async function serveWeb(context): Promise<Response> {
+            const requested = await readWebFile(context.req.path);
+            if (requested !== undefined) {
+                return context.body(requested.body, 200, {
+                    "content-type": requested.type,
+                    "cache-control": requested.cache,
+                });
+            }
+            const looksLikeAsset =
+                context.req.path.startsWith("/assets/") || /\.[a-z0-9]+$/i.test(context.req.path);
+            if (looksLikeAsset) {
+                return context.text("Not found", 404);
+            }
+            const shell = await readWebFile("/");
+            if (shell === undefined) {
+                return context.json(
+                    errorBody(
+                        "web_build_missing",
+                        "The web build is missing. Run pnpm build before starting the server.",
+                        context.get("requestId"),
+                    ),
+                    503,
+                );
+            }
+            return context.body(shell.body, 200, {
+                "content-type": shell.type,
+                "cache-control": "no-cache",
+            });
+        });
+    }
 
     app.notFound(function notFound(context): Response {
         return context.json(
