@@ -5,22 +5,14 @@
     "courseId": "python-foundations",
     "title": "Prices in Python",
     "summary": "Use integers, division, and formatted strings to print exact prices.",
-    "skills": [
-        "python.basics"
-    ],
-    "prerequisites": [
-        "concept.state"
-    ],
+    "skills": ["python.basics"],
+    "prerequisites": ["concept.state"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-python",
-        "capabilities": [
-            "pyodide-wasm",
-            "source-editing",
-            "deterministic-tests"
-        ]
+        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -32,17 +24,15 @@
         {
             "id": "format-price",
             "description": "Render integer cents as an exact price string.",
-            "stepIds": [
-                "format-price"
-            ]
+            "stepIds": ["format-price"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["python-values-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:python"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:python"],
     "hints": [
         "Integer division // gives whole dollars. Remainder % gives cents.",
         "Cents need two digits, including a leading zero.",
@@ -112,36 +102,28 @@
                     "kind": "function",
                     "description": "A normal price uses two decimals.",
                     "name": "format_price",
-                    "args": [
-                        1250
-                    ],
+                    "args": [1250],
                     "expected": "$12.50"
                 },
                 {
                     "kind": "function",
                     "description": "Five cents keeps the leading zero.",
                     "name": "format_price",
-                    "args": [
-                        5
-                    ],
+                    "args": [5],
                     "expected": "$0.05"
                 },
                 {
                     "kind": "function",
                     "description": "Zero is formatted exactly.",
                     "name": "format_price",
-                    "args": [
-                        0
-                    ],
+                    "args": [0],
                     "expected": "$0.00"
                 },
                 {
                     "kind": "function",
                     "description": "Whole hundreds format correctly.",
                     "name": "format_price",
-                    "args": [
-                        100000
-                    ],
+                    "args": [100000],
                     "expected": "$1000.00"
                 }
             ]
@@ -183,9 +165,7 @@
     },
     "rewards": {
         "experience": 90,
-        "unlocks": [
-            "python.decisions"
-        ]
+        "unlocks": ["python.decisions"]
     },
     "persistence": {
         "kind": "none"
@@ -196,8 +176,5 @@
         "screenReaderNotes": "Each test announces its name, arguments, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "ai"
-    ]
+    "tags": ["professional", "ai"]
 }
