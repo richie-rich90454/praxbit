@@ -32,8 +32,8 @@ export function PracticeScreen(): JSX.Element {
                 <div class="page-header__text">
                     <h1>Practice</h1>
                     <p class="lede">
-                        Short sessions use retrieval, review, and one useful challenge. Stop after a few minutes if
-                        that is enough.
+                        Short sessions use retrieval, review, and one useful challenge. Stop after a
+                        few minutes if that is enough.
                     </p>
                 </div>
                 <Pip pose="observing" size={80} />
@@ -45,8 +45,9 @@ export function PracticeScreen(): JSX.Element {
                         <div class="stack stack--tight">
                             <h2>Your next session</h2>
                             <p class="meta">
-                                {missionsInPlan().length} {missionsInPlan().length === 1 ? "activity" : "activities"} ·
-                                about {plan().estimatedMinutes} min
+                                {missionsInPlan().length}{" "}
+                                {missionsInPlan().length === 1 ? "activity" : "activities"} · about{" "}
+                                {plan().estimatedMinutes} min
                             </p>
                         </div>
                         <div class="row" role="group" aria-label="Session length">
@@ -98,9 +99,7 @@ export function PracticeScreen(): JSX.Element {
                     <Show when={plan().weakSkillIds.length > 0}>
                         <div class="stack stack--tight">
                             <h3>Worth strengthening</h3>
-                            <p class="small">
-                                {plan().weakSkillIds.map(skillName).join(", ")}
-                            </p>
+                            <p class="small">{plan().weakSkillIds.map(skillName).join(", ")}</p>
                         </div>
                     </Show>
 
@@ -113,7 +112,8 @@ export function PracticeScreen(): JSX.Element {
                                         <li class="row row--between">
                                             <span>{item.title}</span>
                                             <span class="meta">
-                                                {item.estimatedMinutes} min · {item.skills.map(skillName).join(", ")}
+                                                {item.estimatedMinutes} min ·{" "}
+                                                {item.skills.map(skillName).join(", ")}
                                             </span>
                                         </li>
                                     );
@@ -137,9 +137,9 @@ export function PracticeScreen(): JSX.Element {
                 <div class="surface surface--quiet stack stack--tight">
                     <h2>How practice changes evidence</h2>
                     <p class="small muted">
-                        Independent answers count more than assisted ones. Repeated practice refreshes the review
-                        schedule, but it does not replace an independent transfer challenge. Experience is awarded only
-                        for a first completion.
+                        Independent answers count more than assisted ones. Repeated practice
+                        refreshes the review schedule, but it does not replace an independent
+                        transfer challenge. Experience is awarded only for a first completion.
                     </p>
                 </div>
             </div>
