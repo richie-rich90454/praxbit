@@ -31,7 +31,8 @@ export function gradePlacement(
     return {
         correct,
         total: document.questions.length,
-        recommendedMissionId: recommendation?.missionId ?? document.recommendations[0]?.missionId ?? "",
+        recommendedMissionId:
+            recommendation?.missionId ?? document.recommendations[0]?.missionId ?? "",
         skippedSkills,
     };
 }
