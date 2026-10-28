@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "search-code": {
+            "files": {
+                "search.js": "function binarySearch(sorted, target) {\n  let low = 0;\n  let high = sorted.length - 1;\n  while (low <= high) {\n    const middle = Math.floor((low + high) / 2);\n    const value = sorted[middle];\n    if (value === target) {\n      return middle;\n    }\n    if (value < target) {\n      low = middle + 1;\n    } else {\n      high = middle - 1;\n    }\n  }\n  return -1;\n}\n"
+            }
+        }
+    }
+}
