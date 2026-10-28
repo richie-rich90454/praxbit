@@ -1,0 +1,211 @@
+{
+    "id": "ai.evaluate-output",
+    "version": 1,
+    "sequence": 43,
+    "courseId": "ai-engineering",
+    "title": "Evaluate the answer",
+    "summary": "Check an AI answer against supplied evidence and reject unsupported claims.",
+    "skills": [
+        "ai.evaluation"
+    ],
+    "prerequisites": [
+        "ai.foundations",
+        "concept.testing"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "curated-ai",
+            "no-model-inference"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "evaluation-review",
+        "briefing": "An AI assistant answered a question about the campus refund policy using two supplied documents. Check whether every claim is supported and decide whether to act on it."
+    },
+    "objectives": [
+        {
+            "id": "find-unsupported",
+            "description": "Identify claims not supported by the sources.",
+            "stepIds": [
+                "evaluate-answer"
+            ]
+        },
+        {
+            "id": "evaluation-method",
+            "description": "Explain a reliable evaluation method.",
+            "stepIds": [
+                "evaluation-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:dev-team",
+        "icon:ai"
+    ],
+    "hints": [
+        "Compare each sentence with the source text.",
+        "The 30-day window is stated. The 14-day exception is not in the sources.",
+        "A confident answer can still contain invented details.",
+        "Reject the answer until the 14-day exception is removed or a source is supplied."
+    ],
+    "misconceptions": [
+        {
+            "id": "sounds-specific",
+            "description": "Trusting specific-sounding invented details.",
+            "stepId": "evaluate-answer",
+            "feedback": "Specific numbers are not evidence. Every material claim needs support in the provided sources."
+        },
+        {
+            "id": "fluent",
+            "description": "Treating fluent writing as proof of accuracy.",
+            "stepId": "evaluation-check",
+            "feedback": "Fluency measures presentation, not truth. Evaluation compares claims with evidence."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Ground claims in evidence",
+                "body": "An answer is only as trustworthy as its support. For factual questions, compare each material claim with the supplied sources. A missing citation is not automatically false, but it is unverified and must be treated that way."
+            },
+            {
+                "title": "Evaluate the task, not the style",
+                "body": "Use a rubric: correctness, completeness, support, and constraints. Run tests or check sources independently. Do not let confident tone or specific numbers substitute for evidence."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Grounding",
+                "definition": "Supporting an answer with trusted evidence."
+            },
+            {
+                "term": "Hallucination",
+                "definition": "A fluent but unsupported or false generated claim."
+            },
+            {
+                "term": "Rubric",
+                "definition": "Explicit criteria for judging quality."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "evaluate-answer",
+            "title": "Review the answer",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "AI answer with sources",
+                "caption": "Sources supplied with the question.",
+                "kind": "report",
+                "language": "text",
+                "content": "Sources:\n1. Refunds are available within 30 days of purchase with a receipt.\n2. Opened software is refundable only if it is faulty.\n\nAI answer:\n\"You can request a refund within 30 days with a receipt. Opened software is refundable only if faulty. There is also a 14-day exception for campus clubs, and the refund is always approved immediately.\"\n\nConfidence: high."
+            },
+            "findings": [
+                {
+                    "id": "exception",
+                    "label": "The 14-day club exception is not supported by either source.",
+                    "correct": true
+                },
+                {
+                    "id": "immediate",
+                    "label": "Immediate approval is not supported by either source.",
+                    "correct": true
+                },
+                {
+                    "id": "thirty",
+                    "label": "The 30-day receipt rule is supported by source 1.",
+                    "correct": true
+                },
+                {
+                    "id": "software",
+                    "label": "The faulty-software rule is supported by source 2.",
+                    "correct": true
+                },
+                {
+                    "id": "confidence",
+                    "label": "High confidence makes the unsupported claims acceptable.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the answer as written"
+                },
+                {
+                    "id": "reject",
+                    "label": "Remove unsupported claims or supply sources before using the answer"
+                },
+                {
+                    "id": "shorten",
+                    "label": "Shorten the answer without checking claims"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "Two supported facts are correct, but the exception and immediate approval are invented. Confidence is not evidence."
+        },
+        {
+            "kind": "explain",
+            "id": "evaluation-check",
+            "title": "Reliable evaluation",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "source",
+                    "label": "Material claims should be checked against trusted sources.",
+                    "correct": true
+                },
+                {
+                    "id": "tests",
+                    "label": "For code, executable tests provide independent evidence.",
+                    "correct": true
+                },
+                {
+                    "id": "fluent",
+                    "label": "Fluent prose proves accuracy.",
+                    "correct": false
+                },
+                {
+                    "id": "rubric",
+                    "label": "A rubric makes evaluation more consistent.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Evaluation compares output with evidence and explicit criteria. Style is not correctness."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": [
+            "ai.agent-permissions"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Sources and answer are plain text. Findings and verdict use labeled controls.",
+        "keyboardNotes": "Use Space for findings and arrow keys for the verdict.",
+        "screenReaderNotes": "Source numbers are announced so claims can be compared with evidence."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "ai",
+        "professional"
+    ]
+}
