@@ -137,7 +137,10 @@ export async function loadPreferences(db: PraxbitDatabase): Promise<Preferences>
     return existing?.value ?? DEFAULT_PREFERENCES;
 }
 
-export async function savePreferences(db: PraxbitDatabase, preferences: Preferences): Promise<void> {
+export async function savePreferences(
+    db: PraxbitDatabase,
+    preferences: Preferences,
+): Promise<void> {
     await db.preferences.put({ id: "local", value: preferences });
 }
 
@@ -159,16 +162,21 @@ export async function addAchievements(
     achievements: readonly AchievementRecord[],
 ): Promise<LocalProgress> {
     const progress = await loadProgress(db);
-    const existing = new Set(progress.achievements.map(function idOf(item): string {
-        return item.achievementId;
-    }));
+    const existing = new Set(
+        progress.achievements.map(function idOf(item): string {
+            return item.achievementId;
+        }),
+    );
     const additions = achievements.filter(function isNew(item): boolean {
         return !existing.has(item.achievementId);
     });
     if (additions.length === 0) {
         return progress;
     }
-    const next: LocalProgress = { ...progress, achievements: [...progress.achievements, ...additions] };
+    const next: LocalProgress = {
+        ...progress,
+        achievements: [...progress.achievements, ...additions],
+    };
     await saveProgress(db, next);
     return next;
 }
@@ -182,7 +190,11 @@ export async function queueOperation(db: PraxbitDatabase, operation: SyncOperati
     });
 }
 
-export async function markOutboxFailure(db: PraxbitDatabase, seq: number, message: string): Promise<void> {
+export async function markOutboxFailure(
+    db: PraxbitDatabase,
+    seq: number,
+    message: string,
+): Promise<void> {
     const row = await db.outbox.get(seq);
     if (row === undefined) {
         return;
