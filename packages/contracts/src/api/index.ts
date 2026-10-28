@@ -187,7 +187,13 @@ export type SyncRequest = z.infer<typeof SyncRequestSchema>;
 
 export const SyncResultSchema = z.strictObject({
     operationId: z.string(),
-    kind: z.enum(["evidence", "world-action", "project-revision", "mission-completion", "preferences"]),
+    kind: z.enum([
+        "evidence",
+        "world-action",
+        "project-revision",
+        "mission-completion",
+        "preferences",
+    ]),
     status: z.enum(["accepted", "duplicate", "conflict", "rejected"]),
     code: z.string().optional(),
     message: z.string().optional(),
