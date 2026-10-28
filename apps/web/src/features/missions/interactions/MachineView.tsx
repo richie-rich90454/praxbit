@@ -3,15 +3,13 @@ import { evaluateStep } from "@praxbit/domain";
 import type { MachineStep, QuizDefinition } from "@praxbit/contracts";
 import type { InteractionProps } from "./types.ts";
 
-function InlineQuiz(
-    props: {
-        readonly title: string;
-        readonly quiz: QuizDefinition;
-        readonly name: string;
-        readonly selected: string;
-        readonly onSelect: (id: string) => void;
-    },
-): JSX.Element {
+function InlineQuiz(props: {
+    readonly title: string;
+    readonly quiz: QuizDefinition;
+    readonly name: string;
+    readonly selected: string;
+    readonly onSelect: (id: string) => void;
+}): JSX.Element {
     return (
         <fieldset class="stack stack--tight">
             <legend>
@@ -59,7 +57,9 @@ export function MachineView(props: { readonly step: MachineStep } & InteractionP
         switch (machine.kind) {
             case "dot-stamp": {
                 const count = Number(inputs["count"] ?? "0");
-                return Number.isFinite(count) && count > 0 ? "•".repeat(Math.min(24, Math.floor(count))) : "";
+                return Number.isFinite(count) && count > 0
+                    ? "•".repeat(Math.min(24, Math.floor(count)))
+                    : "";
             }
             case "uppercase":
                 return (inputs["text"] ?? "").toUpperCase();
@@ -73,7 +73,9 @@ export function MachineView(props: { readonly step: MachineStep } & InteractionP
                 return Number.isFinite(left) && Number.isFinite(right) ? String(left + right) : "";
             }
             case "greeting":
-                return (inputs["name"] ?? "").trim().length === 0 ? "" : `Welcome, ${(inputs["name"] ?? "").trim()}`;
+                return (inputs["name"] ?? "").trim().length === 0
+                    ? ""
+                    : `Welcome, ${(inputs["name"] ?? "").trim()}`;
             default:
                 return "";
         }
@@ -104,7 +106,9 @@ export function MachineView(props: { readonly step: MachineStep } & InteractionP
                         {function input(item): JSX.Element {
                             return (
                                 <div class="field">
-                                    <label for={`machine-${props.step.id}-${item.id}`}>{item.label}</label>
+                                    <label for={`machine-${props.step.id}-${item.id}`}>
+                                        {item.label}
+                                    </label>
                                     <input
                                         id={`machine-${props.step.id}-${item.id}`}
                                         class="input"
@@ -115,7 +119,9 @@ export function MachineView(props: { readonly step: MachineStep } & InteractionP
                                         value={values()[item.id] ?? ""}
                                         onInput={function change(event): void {
                                             const next = event.currentTarget.value;
-                                            setValues(function update(current): Readonly<Record<string, string>> {
+                                            setValues(function update(current): Readonly<
+                                                Record<string, string>
+                                            > {
                                                 return { ...current, [item.id]: next };
                                             });
                                         }}
@@ -141,7 +147,9 @@ export function MachineView(props: { readonly step: MachineStep } & InteractionP
                     <span class="meta">{machine.outputLabel}</span>
                     <Show
                         when={output().length > 0}
-                        fallback={<p class="muted">No output yet. Run the machine to see a result.</p>}
+                        fallback={
+                            <p class="muted">No output yet. Run the machine to see a result.</p>
+                        }
                     >
                         <Show when={machine.kind === "dot-stamp"}>
                             <div class="row" aria-label={`${output().length} marks`}>
