@@ -5,8 +5,8 @@ This runbook is for the operator of a deployed Praxbit instance. It assumes the 
 ## First five minutes
 
 1. **Assess impact.** Is the site down, slow, returning errors, exposing data, or only failing an optional feature?
-2. **Check the obvious.** `systemctl status praxbit`, `/healthz`, `/readyz`, disk, memory, and the proxy.
-3. **Preserve evidence.** Capture the journal window, request ids, proxy errors, and resource graphs before restarting.
+2. **Check the obvious.** Process status, `/healthz`, `/readyz`, disk, memory, and the proxy.
+3. **Preserve evidence.** Capture the process log window, request ids, proxy errors, and resource graphs before restarting.
 4. **Stop the bleeding.** Roll back a bad release, revoke a compromised session, or disable AI. Do not make multiple unrelated changes at once.
 5. **Communicate.** Tell the operator or team what is known, what is not known, and when the next update will be. Do not speculate publicly.
 
@@ -21,16 +21,15 @@ This runbook is for the operator of a deployed Praxbit instance. It assumes the 
 
 ## Service is down
 
-1. `systemctl status praxbit --no-pager`.
-2. `journalctl -u praxbit -n 200 --no-pager`.
-3. `curl -i http://127.0.0.1:8787/healthz` and `/readyz`.
-4. Check memory, CPU, and disk. A full disk or OOM kill is common.
-5. Check the proxy: is it returning its own `502`, or is the request reaching the API?
-6. If the last deploy is the likely cause, roll back the symlink and restart.
-7. If the database is unreachable, fix connectivity before restarting the API repeatedly.
-8. Verify `/readyz`, the web page, login, and sync after recovery.
+1. Confirm the Node process is running and read its recent log lines.
+2. `curl -i http://127.0.0.1:8787/healthz` and `/readyz`.
+3. Check memory, CPU, and disk. A full disk or OOM kill is common.
+4. Check the proxy: is it returning its own `502`, or is the request reaching the API?
+5. If the last deploy is the likely cause, check out the previous revision, rebuild, and restart.
+6. If the database is unreachable, fix connectivity before restarting the API repeatedly.
+7. Verify `/readyz`, the web page, login, and sync after recovery.
 
-Do not delete the active release or the database to “start clean”.
+Do not delete the active checkout or the database to "start clean".
 
 ## Database unavailable
 
@@ -43,20 +42,20 @@ Do not delete the active release or the database to “start clean”.
 
 ## High memory or CPU
 
-1. Capture `systemctl show praxbit -p MemoryCurrent -p MemoryMax -p CPUUsageNSec` and `systemd-cgtop`.
+1. Capture resident memory, CPU, and the process start time from the platform tools.
 2. Check for a traffic spike, a load test, a runaway query, or a release regression.
-3. If the process is near `MemoryMax` and restarting is safe, restart the single service. Preserve the journal first.
+3. If the process is near its memory limit and restarting is safe, restart the single process. Preserve the log first.
 4. If the host is under pressure and other services are affected, stop Praxbit rather than letting the kernel OOM-kill unrelated services.
-5. Do not raise `MemoryMax` without checking free memory and the other workloads.
+5. Do not raise a supervisor memory limit without checking free memory and the other workloads.
 6. If a query is the cause, inspect `pg_stat_activity` and locks. Do not cancel a query unless you understand its transaction.
 
 ## Disk full
 
-1. `df -h`, `du -sh /opt/praxbit/releases /var/backups/praxbit /var/log`.
-2. Remove old releases only outside the retention window and never the current or previous release.
-3. Reduce journal use with `journalctl --vacuum-size=…` after checking retention policy.
+1. `df -h`, plus the backup and log directories for the host.
+2. Remove old builds only outside the retention window and never the active checkout.
+3. Rotate or reduce logs according to the process supervisor's retention policy.
 4. Do not delete the newest backup. Copy it off-box first if space allows.
-5. Investigate the growth: logs, releases, database WAL, or a backup loop.
+5. Investigate the growth: logs, builds, database WAL, or a backup loop.
 
 ## Suspected account compromise
 
