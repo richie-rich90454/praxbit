@@ -5,24 +5,14 @@
     "courseId": "campus",
     "title": "Inventory went negative",
     "summary": "Repair a stock check that accepts impossible orders.",
-    "skills": [
-        "js.conditions",
-        "testing.boundaries"
-    ],
-    "prerequisites": [
-        "js.events",
-        "concept.conditions"
-    ],
+    "skills": ["js.conditions", "testing.boundaries"],
+    "prerequisites": ["js.events", "concept.conditions"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,24 +24,20 @@
         {
             "id": "reject-invalid",
             "description": "Reject zero, negative, fractional, and over-stock quantities.",
-            "stepIds": [
-                "repair-stock"
-            ]
+            "stepIds": ["repair-stock"]
         },
         {
             "id": "preserve-valid",
             "description": "Preserve valid orders at and below the stock limit.",
-            "stepIds": [
-                "repair-stock"
-            ]
+            "stepIds": ["repair-stock"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["boundary-suite", "conditions-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:storefront",
-        "icon:stock"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:storefront", "icon:stock"],
     "hints": [
         "A valid quantity has a lower bound as well as an upper bound.",
         "Reject when quantity is less than 1 or greater than stock.",
@@ -121,70 +107,49 @@
                     "kind": "function",
                     "description": "An ordinary order is accepted.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        3
-                    ],
+                    "args": [5, 3],
                     "expected": true
                 },
                 {
                     "kind": "function",
                     "description": "An order for the exact stock is accepted.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        5
-                    ],
+                    "args": [5, 5],
                     "expected": true
                 },
                 {
                     "kind": "function",
                     "description": "An order above stock is rejected.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        6
-                    ],
+                    "args": [5, 6],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "A zero-quantity order is rejected.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        0
-                    ],
+                    "args": [5, 0],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "A negative quantity is rejected.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        -1
-                    ],
+                    "args": [5, -1],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "A fractional quantity is rejected.",
                     "name": "canFulfill",
-                    "args": [
-                        5,
-                        1.5
-                    ],
+                    "args": [5, 1.5],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "An order from empty stock is rejected.",
                     "name": "canFulfill",
-                    "args": [
-                        0,
-                        1
-                    ],
+                    "args": [0, 1],
                     "expected": false
                 }
             ]
@@ -266,9 +231,7 @@
     },
     "rewards": {
         "experience": 130,
-        "unlocks": [
-            "campus.repeating-the-same-work"
-        ]
+        "unlocks": ["campus.repeating-the-same-work"]
     },
     "persistence": {
         "kind": "world-action",
@@ -281,8 +244,5 @@
         "screenReaderNotes": "Each test announces its description, inputs, expected result, and pass or fail."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
