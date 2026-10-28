@@ -32,7 +32,10 @@ const RegexTestSchema = z.strictObject({
     description: z.string().min(1).max(300),
     file: z.string().min(1).max(200),
     pattern: z.string().min(1).max(600),
-    flags: z.string().regex(/^[dgimsuvy]*$/).max(8),
+    flags: z
+        .string()
+        .regex(/^[dgimsuvy]*$/)
+        .max(8),
 });
 
 const JsonTestSchema = z.strictObject({
