@@ -37,7 +37,12 @@ export class CampusRenderer {
     private readonly scene: Container;
     private readonly width: number;
 
-    private constructor(app: Application, container: HTMLElement, onSelect: (systemId: WorldSystemId) => void, width: number) {
+    private constructor(
+        app: Application,
+        container: HTMLElement,
+        onSelect: (systemId: WorldSystemId) => void,
+        width: number,
+    ) {
         this.app = app;
         this.container = container;
         this.onSelect = onSelect;
@@ -98,8 +103,7 @@ export class CampusRenderer {
             const color = STATUS_COLORS[system.status];
 
             const node = new Graphics();
-            node
-                .roundRect(x, y, width, height, 5)
+            node.roundRect(x, y, width, height, 5)
                 .fill({ color: "#FFFFFF" })
                 .stroke({ width: 1.5, color });
             node.eventMode = "static";
