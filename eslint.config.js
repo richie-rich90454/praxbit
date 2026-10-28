@@ -37,10 +37,12 @@ export default tseslint.config(
                 "error",
                 {
                     selector: "ArrowFunctionExpression",
-                    message: "Use a named function or class method. Arrow functions are not allowed in authored platform code.",
+                    message:
+                        "Use a named function or class method. Arrow functions are not allowed in authored platform code.",
                 },
                 {
-                    selector: "FunctionExpression:not([id])",
+                    selector:
+                        "FunctionExpression:not([id]):not(MethodDefinition > FunctionExpression):not(Property > FunctionExpression)",
                     message: "Anonymous function expressions are not allowed. Name the function.",
                 },
                 {
@@ -76,7 +78,7 @@ export default tseslint.config(
             "no-eval": "error",
             "no-implied-eval": "error",
             "no-new-func": "error",
-            "eqeqeq": ["error", "always"],
+            eqeqeq: ["error", "always"],
             "prefer-const": "error",
         },
     },
@@ -87,11 +89,23 @@ export default tseslint.config(
                 "error",
                 {
                     paths: [
-                        { name: "solid-js", message: "Portable packages cannot import the frontend framework." },
-                        { name: "hono", message: "Portable packages cannot import the server framework." },
+                        {
+                            name: "solid-js",
+                            message: "Portable packages cannot import the frontend framework.",
+                        },
+                        {
+                            name: "hono",
+                            message: "Portable packages cannot import the server framework.",
+                        },
                         { name: "pg", message: "Portable packages cannot import PostgreSQL." },
-                        { name: "pixi.js", message: "Portable packages cannot import the renderer." },
-                        { name: "dexie", message: "Portable packages cannot import browser persistence." },
+                        {
+                            name: "pixi.js",
+                            message: "Portable packages cannot import the renderer.",
+                        },
+                        {
+                            name: "dexie",
+                            message: "Portable packages cannot import browser persistence.",
+                        },
                     ],
                 },
             ],
@@ -104,8 +118,14 @@ export default tseslint.config(
                 "error",
                 {
                     paths: [
-                        { name: "solid-js", message: "Server business logic must not import SolidJS." },
-                        { name: "pixi.js", message: "Server business logic must not import the renderer." },
+                        {
+                            name: "solid-js",
+                            message: "Server business logic must not import SolidJS.",
+                        },
+                        {
+                            name: "pixi.js",
+                            message: "Server business logic must not import the renderer.",
+                        },
                     ],
                 },
             ],
