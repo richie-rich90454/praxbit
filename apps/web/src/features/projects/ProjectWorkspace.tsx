@@ -66,7 +66,7 @@ export function ProjectWorkspace(): JSX.Element {
     });
 
     const activeFile = createMemo(function currentFile() {
-        return project?.files[activePath()] !== undefined ? activePath() : project?.entry ?? "";
+        return project?.files[activePath()] !== undefined ? activePath() : (project?.entry ?? "");
     });
 
     const previewDocument = createMemo(function preview(): string {
@@ -95,7 +95,9 @@ export function ProjectWorkspace(): JSX.Element {
                 setFiles({ ...project.files, ...draft });
             }
             if (learning.completedProjectIds().includes(project.id)) {
-                setCompletionMessage("This project is already complete. You can keep refining the artifact.");
+                setCompletionMessage(
+                    "This project is already complete. You can keep refining the artifact.",
+                );
             }
         })();
     });
@@ -123,9 +125,11 @@ export function ProjectWorkspace(): JSX.Element {
                 ...(project.database === undefined ? {} : { database: project.database }),
             });
             setOutcomes(result.outcomes);
-            const passed = result.outcomes.length > 0 && result.outcomes.every(function passed(item): boolean {
-                return item.passed;
-            });
+            const passed =
+                result.outcomes.length > 0 &&
+                result.outcomes.every(function passed(item): boolean {
+                    return item.passed;
+                });
             if (passed && stage() !== undefined) {
                 setPassedStages(function add(current): readonly string[] {
                     return current.includes(stage()?.id ?? "")
@@ -134,7 +138,9 @@ export function ProjectWorkspace(): JSX.Element {
                 });
             }
         } catch (error) {
-            setRuntimeError(error instanceof Error ? error.message : "The project checks could not run.");
+            setRuntimeError(
+                error instanceof Error ? error.message : "The project checks could not run.",
+            );
         } finally {
             setRunning(false);
         }
@@ -166,7 +172,9 @@ export function ProjectWorkspace(): JSX.Element {
             });
             setSavedRevision(revision.project.currentRevision);
         } catch (error) {
-            setRevisionError(error instanceof Error ? error.message : "The revision could not be saved.");
+            setRevisionError(
+                error instanceof Error ? error.message : "The revision could not be saved.",
+            );
         }
     }
 
@@ -232,7 +240,9 @@ export function ProjectWorkspace(): JSX.Element {
                                         {index() + 1}. {item.title}
                                     </span>
                                     <span class="method-tab__detail">
-                                        {passedStages().includes(item.id) ? "Passed" : "Not yet passed"}
+                                        {passedStages().includes(item.id)
+                                            ? "Passed"
+                                            : "Not yet passed"}
                                     </span>
                                 </button>
                             );
@@ -274,7 +284,9 @@ export function ProjectWorkspace(): JSX.Element {
                             language={editorLanguage(activeFile())}
                             label={`${activeFile()} editor`}
                             onChange={function change(value): void {
-                                setFiles(function update(current): Readonly<Record<string, string>> {
+                                setFiles(function update(current): Readonly<
+                                    Record<string, string>
+                                > {
                                     return { ...current, [activeFile()]: value };
                                 });
                             }}
@@ -283,22 +295,35 @@ export function ProjectWorkspace(): JSX.Element {
                             }}
                         />
                         <div class="row">
-                            <button type="button" class="button" disabled={running()} onClick={function run(): void {
-                                void runStage();
-                            }}>
+                            <button
+                                type="button"
+                                class="button"
+                                disabled={running()}
+                                onClick={function run(): void {
+                                    void runStage();
+                                }}
+                            >
                                 {running() ? "Running stage checks" : "Run stage checks"}
                             </button>
-                            <button type="button" class="button button--secondary" onClick={function complete(): void {
-                                void completeIfReady();
-                            }}>
+                            <button
+                                type="button"
+                                class="button button--secondary"
+                                onClick={function complete(): void {
+                                    void completeIfReady();
+                                }}
+                            >
                                 Record completion
                             </button>
                         </div>
                         <Show when={learning.user() !== undefined}>
                             <div class="row">
-                                <button type="button" class="button button--secondary button--small" onClick={function save(): void {
-                                    void saveRevision();
-                                }}>
+                                <button
+                                    type="button"
+                                    class="button button--secondary button--small"
+                                    onClick={function save(): void {
+                                        void saveRevision();
+                                    }}
+                                >
                                     Save revision to account
                                 </button>
                                 <Show when={savedRevision() !== undefined}>
@@ -347,8 +372,13 @@ export function ProjectWorkspace(): JSX.Element {
                                                         </Show>
                                                     </td>
                                                     <td>
-                                                        <span class={`status ${item.passed ? "status--success" : "status--error"}`}>
-                                                            <span class="status__mark" aria-hidden="true" />
+                                                        <span
+                                                            class={`status ${item.passed ? "status--success" : "status--error"}`}
+                                                        >
+                                                            <span
+                                                                class="status__mark"
+                                                                aria-hidden="true"
+                                                            />
                                                             {item.passed ? "Pass" : "Fail"}
                                                         </span>
                                                     </td>
@@ -377,9 +407,13 @@ export function ProjectWorkspace(): JSX.Element {
                                 }}
                             </For>
                         </div>
-                        <button type="button" class="button button--secondary" onClick={function save(): void {
-                            void learning.saveProjectDraft(project.id, files());
-                        }}>
+                        <button
+                            type="button"
+                            class="button button--secondary"
+                            onClick={function save(): void {
+                                void learning.saveProjectDraft(project.id, files());
+                            }}
+                        >
                             Save draft
                         </button>
                     </div>
