@@ -51,8 +51,16 @@ export type StepResponse =
           readonly failedTests: readonly string[];
           readonly totalTests: number;
       }
-    | { readonly kind: "git"; readonly checks: Readonly<Record<string, boolean>>; readonly log: readonly string[] }
-    | { readonly kind: "terminal"; readonly completedObjectiveIds: readonly string[]; readonly transcript: readonly string[] }
+    | {
+          readonly kind: "git";
+          readonly checks: Readonly<Record<string, boolean>>;
+          readonly log: readonly string[];
+      }
+    | {
+          readonly kind: "terminal";
+          readonly completedObjectiveIds: readonly string[];
+          readonly transcript: readonly string[];
+      }
     | { readonly kind: "test-design"; readonly selected: readonly string[] }
     | { readonly kind: "explain"; readonly selected: readonly string[] };
 
@@ -190,7 +198,9 @@ function evaluateRule(step: RuleStep, response: StepResponse): StepEvaluation {
         stepId: step.id,
         passed,
         score: passed ? 1 : 0,
-        detail: passed ? step.explanation : "That rule does not produce the required outcome for every input.",
+        detail: passed
+            ? step.explanation
+            : "That rule does not produce the required outcome for every input.",
         answerKey: response.ruleId,
     };
 }
@@ -206,7 +216,9 @@ function evaluateLoop(step: LoopStep, response: StepResponse): StepEvaluation {
         stepId: step.id,
         passed,
         score: clampScore((repeatOk ? 0.5 : 0) + (bodyOk ? 0.5 : 0)),
-        detail: passed ? step.explanation : "Check both the number of repetitions and the order of the repeated work.",
+        detail: passed
+            ? step.explanation
+            : "Check both the number of repetitions and the order of the repeated work.",
         answerKey: `${response.repeat}:${response.body.join(",")}`,
     };
 }
@@ -245,7 +257,11 @@ function evaluateDebug(step: DebugStep, response: StepResponse): StepEvaluation 
         stepId: step.id,
         passed,
         score: clampScore((buggyOk ? 0.5 : 0) + (fixOk ? 0.5 : 0)),
-        detail: passed ? step.explanation : buggyOk ? "The instruction is right, but the replacement is not." : "That instruction still behaves correctly.",
+        detail: passed
+            ? step.explanation
+            : buggyOk
+              ? "The instruction is right, but the replacement is not."
+              : "That instruction still behaves correctly.",
         answerKey: `${response.buggyId}:${response.fixId}`,
     };
 }
@@ -268,7 +284,9 @@ function evaluateBinary(step: BinaryStep, response: StepResponse): StepEvaluatio
         stepId: step.id,
         passed,
         score: clampScore(length === 0 ? 1 : correct / length),
-        detail: passed ? step.explanation : "Compare each byte with the reference table. Bits are read from left to right.",
+        detail: passed
+            ? step.explanation
+            : "Compare each byte with the reference table. Bits are read from left to right.",
         answerKey: actual,
     };
 }
@@ -300,7 +318,9 @@ function evaluateNetwork(step: NetworkStep, response: StepResponse): StepEvaluat
         stepId: step.id,
         passed,
         score: clampScore(prefix / step.correctPath.length),
-        detail: passed ? step.explanation : "The request leaves the correct starting point, but the route is not right.",
+        detail: passed
+            ? step.explanation
+            : "The request leaves the correct starting point, but the route is not right.",
         answerKey: response.path.join(">"),
     };
 }
@@ -334,12 +354,15 @@ function evaluateReview(step: ReviewStep, response: StepResponse): StepEvaluatio
     }
     const verdictOk = response.verdict === step.correctVerdict;
     const passed = truePositives === correctFindings.length && falsePositives === 0 && verdictOk;
-    const findingScore = Math.max(0, truePositives - falsePositives) / Math.max(1, correctFindings.length);
+    const findingScore =
+        Math.max(0, truePositives - falsePositives) / Math.max(1, correctFindings.length);
     return {
         stepId: step.id,
         passed,
         score: clampScore(findingScore * 0.75 + (verdictOk ? 0.25 : 0)),
-        detail: passed ? step.explanation : "Re-examine the evidence. Some findings are missing or not supported.",
+        detail: passed
+            ? step.explanation
+            : "Re-examine the evidence. Some findings are missing or not supported.",
         answerKey: `${response.verdict}:${response.findings.join(",")}`,
     };
 }
@@ -348,11 +371,16 @@ function evaluateCode(step: CodeStep, response: StepResponse): StepEvaluation {
     if (response.kind !== "code") {
         return mismatch(step.id, "Run the tests against your code.");
     }
-    const passed = response.totalTests > 0 && response.failedTests.length === 0 && response.passedTests.length === response.totalTests;
+    const passed =
+        response.totalTests > 0 &&
+        response.failedTests.length === 0 &&
+        response.passedTests.length === response.totalTests;
     return {
         stepId: step.id,
         passed,
-        score: clampScore(response.totalTests === 0 ? 0 : response.passedTests.length / response.totalTests),
+        score: clampScore(
+            response.totalTests === 0 ? 0 : response.passedTests.length / response.totalTests,
+        ),
         detail: passed
             ? "All tests pass. Passing tests are evidence, not proof that every possible behavior is correct."
             : `${response.failedTests.length} of ${response.totalTests} tests still fail.`,
@@ -410,7 +438,9 @@ function evaluateTestDesign(step: TestDesignStep, response: StepResponse): StepE
         stepId: step.id,
         passed,
         score: passed ? 1 : 0,
-        detail: passed ? step.explanation : "A useful test suite covers boundaries and ordinary cases, without redundant copies.",
+        detail: passed
+            ? step.explanation
+            : "A useful test suite covers boundaries and ordinary cases, without redundant copies.",
         answerKey: response.selected.join(","),
     };
 }
@@ -431,7 +461,9 @@ function evaluateExplain(step: ExplainStep, response: StepResponse): StepEvaluat
         stepId: step.id,
         passed,
         score: passed ? 1 : 0,
-        detail: passed ? step.explanation : "At least one selected statement is inaccurate or incomplete.",
+        detail: passed
+            ? step.explanation
+            : "At least one selected statement is inaccurate or incomplete.",
         answerKey: response.selected.join(","),
     };
 }
@@ -559,7 +591,9 @@ export function evaluateMission(
     };
 }
 
-export function assistanceForHints(hintsUsed: number): "independent" | "hint-1" | "hint-2" | "hint-3" | "hint-4" {
+export function assistanceForHints(
+    hintsUsed: number,
+): "independent" | "hint-1" | "hint-2" | "hint-3" | "hint-4" {
     if (hintsUsed <= 0) {
         return "independent";
     }
