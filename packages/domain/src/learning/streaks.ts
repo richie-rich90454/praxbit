@@ -13,9 +13,13 @@ function dayDifference(later: string, earlier: string): number {
 }
 
 export function computeStreak(activityDates: readonly string[], today: string): StreakResult {
-    const unique = [...new Set(activityDates.map(function toDay(value: string): string {
-        return value.slice(0, 10);
-    }))].sort();
+    const unique = [
+        ...new Set(
+            activityDates.map(function toDay(value: string): string {
+                return value.slice(0, 10);
+            }),
+        ),
+    ].sort();
 
     let longest = 0;
     let run = 0;
