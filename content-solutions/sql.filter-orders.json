@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "high-value": {
+            "files": {
+                "query.sql": "SELECT id, total_cents FROM orders WHERE total_cents >= 5000 ORDER BY total_cents DESC;\n"
+            }
+        }
+    }
+}
