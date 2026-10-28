@@ -5,23 +5,14 @@
     "courseId": "before-code",
     "title": "Can we trust the result?",
     "summary": "Design tests for a stock rule and review an AI claim that a patch is safe.",
-    "skills": [
-        "concept.testing",
-        "concept.responsibility",
-        "testing.boundaries"
-    ],
-    "prerequisites": [
-        "concept.debugging"
-    ],
+    "skills": ["concept.testing", "concept.responsibility", "testing.boundaries"],
+    "prerequisites": ["concept.debugging"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "review",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "curated-ai",
-            "no-model-inference"
-        ]
+        "capabilities": ["curated-ai", "no-model-inference"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "choose-tests",
             "description": "Choose tests that cover boundaries without redundant copies.",
-            "stepIds": [
-                "test-cases"
-            ]
+            "stepIds": ["test-cases"]
         },
         {
             "id": "review-claim",
             "description": "Evaluate the patch and the evidence behind the claim.",
-            "stepIds": [
-                "patch-review"
-            ]
+            "stepIds": ["patch-review"]
         },
         {
             "id": "responsibility",
             "description": "Explain responsibility for delegated work.",
-            "stepIds": [
-                "responsibility-check"
-            ]
+            "stepIds": ["responsibility-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:shield"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:shield"],
     "hints": [
         "Test the ordinary case and both edges: zero, exact stock, and too many.",
         "One happy-path test does not cover quantities at or below zero.",
@@ -244,9 +224,7 @@
     },
     "rewards": {
         "experience": 100,
-        "unlocks": [
-            "campus.page-with-no-identity"
-        ]
+        "unlocks": ["campus.page-with-no-identity"]
     },
     "persistence": {
         "kind": "world-action",
@@ -259,9 +237,5 @@
         "screenReaderNotes": "The artifact is announced as a code block. Each finding is read with its full text. Feedback lists which findings were missed or unsupported."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "ai",
-        "web"
-    ]
+    "tags": ["professional", "ai", "web"]
 }
