@@ -63,6 +63,10 @@ export function StepView(props: StepViewProps): JSX.Element {
         case "explain":
             return <MultiSelectView step={step} onResult={props.onResult} />;
         default:
-            return <p class="feedback feedback--error">This step type is not available in this client.</p>;
+            return (
+                <p class="feedback feedback--error">
+                    This step type is not available in this client.
+                </p>
+            );
     }
 }
