@@ -1,0 +1,227 @@
+{
+    "id": "campus.page-with-no-identity",
+    "version": 1,
+    "sequence": 13,
+    "courseId": "campus",
+    "title": "A page with no identity",
+    "summary": "Repair the storefront HTML so its structure communicates meaning to browsers and assistive technology.",
+    "skills": [
+        "web.html",
+        "web.accessibility"
+    ],
+    "prerequisites": [
+        "concept.instructions",
+        "concept.decomposition"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-html",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "dom-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "unstructured-page",
+        "briefing": "The storefront renders as a wall of text. Screen readers cannot find headings or navigation, and product cards are anonymous divs. Rebuild the structure without changing the content."
+    },
+    "objectives": [
+        {
+            "id": "semantic-structure",
+            "description": "Give the page a header, navigation, main content, and articles.",
+            "stepIds": [
+                "repair-html"
+            ]
+        },
+        {
+            "id": "accessible-controls",
+            "description": "Provide meaningful alternative text and labeled actions.",
+            "stepIds": [
+                "repair-html"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:page"
+    ],
+    "hints": [
+        "Start with header, nav, main, and article instead of div elements.",
+        "Each product can be an article with class product. Add one h1 for the store name.",
+        "Images need alt text. Buttons need a data-action attribute for the order logic.",
+        "Use header h1 Campus store, nav with three links, two article.product blocks, images with alt text, and buttons with data-action=\"add\"."
+    ],
+    "misconceptions": [
+        {
+            "id": "div-soup",
+            "description": "Treating visual layout as sufficient structure.",
+            "stepId": "repair-html",
+            "feedback": "Styling cannot tell assistive technology what a region means. Use header, nav, main, and article elements."
+        },
+        {
+            "id": "alt-decoration",
+            "description": "Leaving images without alternative text.",
+            "stepId": "repair-html",
+            "feedback": "Every meaningful image needs alt text describing its purpose. Decorative images use an empty alt, but product images carry information."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "HTML describes meaning",
+                "body": "HTML elements name the role of content: header for introductory material, nav for navigation, main for the page's central content, article for a self-contained item. Browsers and assistive technology use these roles."
+            },
+            {
+                "title": "Structure is not appearance",
+                "body": "CSS decides how the page looks. HTML decides what the content is. A page made entirely of div elements can look fine and still be difficult to navigate with a keyboard or screen reader."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Semantic element",
+                "definition": "An element whose name describes meaning, such as nav or article."
+            },
+            {
+                "term": "Alternative text",
+                "definition": "A text description of an image for people who cannot see it."
+            },
+            {
+                "term": "Landmark",
+                "definition": "A region assistive technology can jump to, such as main or nav."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "repair-html",
+            "title": "Repair the storefront structure",
+            "prompt": "Edit index.html. Use header, nav, main, article.product, and meaningful controls. Run the structure tests when done. CSS is provided and should not need changes.",
+            "evidence": "construction",
+            "language": "html",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Campus store</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <div class=\"brand\">Campus store</div>\n  <div class=\"links\"><a href=\"/supplies\">Supplies</a><a href=\"/orders\">Orders</a><a href=\"/help\">Help</a></div>\n  <div class=\"content\">\n    <div class=\"intro\">Fresh supplies for every desk.</div>\n    <div class=\"product\">\n      <img src=\"pencils.svg\">\n      <div>Pencil box</div>\n      <button>Add to cart</button>\n    </div>\n    <div class=\"product\">\n      <img src=\"notebook.svg\">\n      <div>Notebook</div>\n      <button>Add to cart</button>\n    </div>\n  </div>\n</body>\n</html>\n",
+                    "editable": true,
+                    "language": "html"
+                },
+                {
+                    "path": "styles.css",
+                    "content": "body { font-family: \"Noto Sans\", sans-serif; margin: 0; padding: 24px; color: #000; background: #fff; }\n.brand { font-size: 28px; margin-bottom: 16px; }\n.links { display: flex; gap: 16px; margin-bottom: 24px; }\n.content { display: grid; gap: 16px; max-width: 720px; }\n.product { border: 1px solid #D6D6D6; border-radius: 5px; padding: 16px; }\n.product img { max-width: 120px; display: block; margin-bottom: 8px; }\nbutton { border: 1px solid #B54131; background: #B54131; color: #fff; border-radius: 5px; padding: 8px 12px; font: inherit; }\n",
+                    "editable": false,
+                    "language": "css"
+                }
+            ],
+            "entry": "index.html",
+            "preview": "html",
+            "tests": [
+                {
+                    "kind": "dom",
+                    "description": "A header landmark contains the store heading.",
+                    "selector": "header h1",
+                    "property": "text",
+                    "expected": "Campus store"
+                },
+                {
+                    "kind": "dom",
+                    "description": "Navigation contains three links.",
+                    "selector": "nav a",
+                    "property": "count",
+                    "expected": 3
+                },
+                {
+                    "kind": "dom",
+                    "description": "The page has a main landmark.",
+                    "selector": "main",
+                    "property": "exists",
+                    "expected": true
+                },
+                {
+                    "kind": "dom",
+                    "description": "Both products are articles with the product class.",
+                    "selector": "main article.product",
+                    "property": "count",
+                    "expected": 2
+                },
+                {
+                    "kind": "dom",
+                    "description": "Product images have alternative text.",
+                    "selector": "article.product img",
+                    "property": "attribute",
+                    "attribute": "alt",
+                    "expected": "not-empty"
+                },
+                {
+                    "kind": "dom",
+                    "description": "Both add buttons expose the add action.",
+                    "selector": "button[data-action=\"add\"]",
+                    "property": "count",
+                    "expected": 2
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "html-claims",
+            "title": "Structure and appearance",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "roles",
+                    "label": "HTML elements communicate roles to browsers and assistive technology.",
+                    "correct": true
+                },
+                {
+                    "id": "css-structure",
+                    "label": "CSS alone can replace missing document structure for screen readers.",
+                    "correct": false
+                },
+                {
+                    "id": "alt",
+                    "label": "Meaningful images need text alternatives.",
+                    "correct": true
+                },
+                {
+                    "id": "div-bad",
+                    "label": "A div can never be part of a correct page.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Semantic elements and text alternatives carry meaning. Div elements are appropriate for generic grouping, but not as a substitute for every meaningful role."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": [
+            "campus.everything-is-misplaced"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "publish-storefront",
+        "system": "storefront"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and the HTML preview runs sandboxed. Test results are listed as text.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move from the editor to results and preview.",
+        "screenReaderNotes": "The code editor announces its language and line numbers. Tests report pass or fail with the checked requirement."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
