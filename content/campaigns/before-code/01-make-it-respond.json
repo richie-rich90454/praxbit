@@ -1,0 +1,260 @@
+{
+    "id": "before-code.make-it-respond",
+    "version": 1,
+    "sequence": 1,
+    "courseId": "before-code",
+    "title": "Make it respond",
+    "summary": "Operate a small machine, notice its rule, and predict what it will do next.",
+    "skills": [
+        "concept.computation"
+    ],
+    "prerequisites": [],
+    "difficulty": "beginner",
+    "estimatedMinutes": 3,
+    "interaction": "machine",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "interactive-simulation",
+            "keyboard",
+            "screen-reader"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "first-day",
+        "briefing": "The campus print shop has an old stamp press. Nobody left instructions. Your job is to work out what it does by trying it, then predict a result you have not seen."
+    },
+    "objectives": [
+        {
+            "id": "run-machine",
+            "description": "Run the press with more than one input.",
+            "stepIds": [
+                "stamp"
+            ]
+        },
+        {
+            "id": "predict-output",
+            "description": "Predict an unseen output from the observed rule.",
+            "stepIds": [
+                "stamp"
+            ]
+        },
+        {
+            "id": "name-parts",
+            "description": "Identify input, processing, and output in a new machine.",
+            "stepIds": [
+                "parts"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:storefront",
+        "icon:bit"
+    ],
+    "hints": [
+        "Change the number, run the press, and count the marks that appear.",
+        "Look for a relationship between the number you enter and the number of marks.",
+        "The press prints one mark for each pulse. Try a pulse count of four in your head.",
+        "Set the dial to four and press run. You should see four marks. The machine does not add hidden extras."
+    ],
+    "misconceptions": [
+        {
+            "id": "counts-output-not-input",
+            "description": "Counting the existing marks instead of the input value.",
+            "stepId": "stamp",
+            "answer": "3",
+            "feedback": "The press does not remember the previous run. Reset the press, set the dial, and count only the new marks."
+        },
+        {
+            "id": "input-is-processing",
+            "description": "Treating a sensor or button as the processing step.",
+            "stepId": "parts",
+            "feedback": "The sensor produces information. Processing is the decision or calculation made from that information."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Every program has three parts",
+                "body": "A machine receives input, performs processing, and produces output. The stamp press receives the dial value as input, applies a rule, and prints marks as output. The rule is the processing. Programs are precise descriptions of processing."
+            },
+            {
+                "title": "A rule you can predict",
+                "body": "Once you observe a reliable relationship between input and output, you can predict new cases. Prediction is stronger evidence of understanding than clicking through a demo, because it tests the rule in your head rather than the machine's behavior."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Input",
+                "definition": "Information a system receives."
+            },
+            {
+                "term": "Processing",
+                "definition": "The rule or calculation applied to input."
+            },
+            {
+                "term": "Output",
+                "definition": "The visible or stored result of processing."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "machine",
+            "id": "stamp",
+            "title": "The unlabeled stamp press",
+            "prompt": "Set the pulse dial and run the press at least twice. Then answer both questions.",
+            "evidence": "prediction",
+            "machine": {
+                "kind": "dot-stamp",
+                "inputs": [
+                    {
+                        "id": "count",
+                        "label": "Pulse dial",
+                        "type": "number",
+                        "min": 1,
+                        "max": 6,
+                        "placeholder": "1 to 6"
+                    }
+                ],
+                "outputLabel": "Printed marks",
+                "minRuns": 2
+            },
+            "prediction": {
+                "prompt": "You reset the press and set the pulse dial to 4. How many marks will appear?",
+                "options": [
+                    {
+                        "id": "3",
+                        "label": "3 marks"
+                    },
+                    {
+                        "id": "4",
+                        "label": "4 marks"
+                    },
+                    {
+                        "id": "5",
+                        "label": "5 marks"
+                    }
+                ],
+                "correctId": "4",
+                "explanation": "The press prints exactly one mark for each pulse, so four pulses produce four marks."
+            },
+            "transfer": {
+                "prompt": "A different machine takes the text campus and uppercases every letter. What is its output?",
+                "options": [
+                    {
+                        "id": "campus",
+                        "label": "campus"
+                    },
+                    {
+                        "id": "CAMPUS",
+                        "label": "CAMPUS"
+                    },
+                    {
+                        "id": "Campus",
+                        "label": "Campus"
+                    }
+                ],
+                "correctId": "CAMPUS",
+                "explanation": "The rule is uppercase every letter. The input is lowercase campus, so the output is CAMPUS."
+            },
+            "hints": [
+                "Try pulse values 1, 2, and 3. Watch what changes.",
+                "Compare the number on the dial with the number of marks.",
+                "The number of marks equals the dial value. Now apply that rule to four.",
+                "Reset, choose four, and run. The output is four marks; the transfer machine changes letter case instead of printing."
+            ]
+        },
+        {
+            "kind": "lesson",
+            "id": "parts",
+            "title": "Name the three parts",
+            "prompt": "Read the explanation, then check your understanding with a new machine.",
+            "hints": [
+                "Input is what goes in. Output is what comes out.",
+                "Processing is the decision or calculation in between.",
+                "A sensor detects. A controller decides. A light shows.",
+                "The sensor supplies input, the controller performs processing, and the light produces output."
+            ],
+            "sections": [
+                {
+                    "title": "Input, processing, output",
+                    "body": "Input is information the system receives. Processing is what the system does with it. Output is the result. The same idea appears in a search box, a traffic light, and a calculator."
+                },
+                {
+                    "title": "Inputs can be hidden",
+                    "body": "A motion sensor is an input device even though a person does not type anything. A clock, a temperature reading, or a file can also be input. Do not confuse who or what supplies the input with the processing that follows."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Device",
+                    "definition": "A physical component that supplies or displays information."
+                },
+                {
+                    "term": "Controller",
+                    "definition": "The part that applies a rule to input and decides an output."
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "parts-check",
+            "title": "Which part processes?",
+            "prompt": "A motion sensor detects a person. A controller decides the room is now occupied and switches on a light. Which part performs the processing?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the processing step.",
+                "options": [
+                    {
+                        "id": "sensor",
+                        "label": "The motion sensor"
+                    },
+                    {
+                        "id": "controller",
+                        "label": "The controller deciding the room is occupied"
+                    },
+                    {
+                        "id": "light",
+                        "label": "The light switching on"
+                    }
+                ],
+                "correctId": "controller",
+                "explanation": "The sensor supplies input, the controller applies a rule, and the light is output."
+            },
+            "hints": [
+                "Which part receives information from the world?",
+                "Which part makes a decision?",
+                "The controller turns a detection into a decision.",
+                "Processing is the controller's decision. The sensor is input and the light is output."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 50,
+        "unlocks": [
+            "before-code.give-better-instructions"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The machine can be operated with a number field and buttons. All results are also announced as text.",
+        "keyboardNotes": "Use Tab to reach the dial, Enter or Space to run, and arrow keys to change number values.",
+        "screenReaderNotes": "The printed marks are announced as a count and described as output. The prediction options are ordinary radio buttons."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "everything",
+        "web"
+    ]
+}
