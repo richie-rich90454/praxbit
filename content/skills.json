@@ -1,83 +1,629 @@
 {
     "version": 1,
     "skills": [
-        { "id": "concept.computation", "name": "Computation", "description": "Turning inputs into useful outputs by following defined steps.", "kind": "concept", "parents": [], "interests": ["everything"] },
-        { "id": "concept.instructions", "name": "Instructions and algorithms", "description": "Precise ordered steps that a machine or person can follow.", "kind": "concept", "parents": ["concept.computation"], "interests": ["everything", "systems"] },
-        { "id": "concept.state", "name": "State and memory", "description": "Remembering values so later steps can use them.", "kind": "concept", "parents": ["concept.instructions"], "interests": ["everything", "systems"] },
-        { "id": "concept.conditions", "name": "Conditions", "description": "Choosing behavior based on evidence.", "kind": "concept", "parents": ["concept.state"], "interests": ["everything", "web"] },
-        { "id": "concept.boolean", "name": "Boolean logic", "description": "Combining true and false values with and, or, and not.", "kind": "concept", "parents": ["concept.conditions"], "interests": ["everything", "systems"] },
-        { "id": "concept.iteration", "name": "Iteration", "description": "Repeating work under a clear rule.", "kind": "concept", "parents": ["concept.conditions"], "interests": ["everything", "games"] },
-        { "id": "concept.tracing", "name": "Execution tracing", "description": "Following values line by line as a program runs.", "kind": "concept", "parents": ["concept.iteration"], "interests": ["everything", "systems"] },
-        { "id": "concept.debugging", "name": "Debugging", "description": "Finding the cause of wrong behavior with evidence.", "kind": "concept", "parents": ["concept.tracing"], "interests": ["everything", "professional"] },
-        { "id": "concept.binary", "name": "Binary and encoding", "description": "Representing information with bits and agreed encodings.", "kind": "concept", "parents": ["concept.computation"], "interests": ["systems", "games"] },
-        { "id": "concept.data", "name": "Data representation", "description": "Storing facts in structures that support useful operations.", "kind": "concept", "parents": ["concept.binary"], "interests": ["systems", "ai"] },
-        { "id": "concept.filesystems", "name": "Filesystems", "description": "Organizing files and directories and controlling access.", "kind": "concept", "parents": ["concept.computation"], "interests": ["systems", "professional"] },
-        { "id": "concept.networks", "name": "Networks", "description": "Moving messages between machines through agreed protocols.", "kind": "concept", "parents": ["concept.computation"], "interests": ["systems", "web"] },
-        { "id": "concept.decomposition", "name": "Decomposition", "description": "Breaking a problem into parts that can be solved and checked.", "kind": "concept", "parents": ["concept.instructions"], "interests": ["everything"] },
-        { "id": "concept.testing", "name": "Testing", "description": "Checking behavior with cases chosen to reveal mistakes.", "kind": "concept", "parents": ["concept.debugging"], "interests": ["professional", "everything"] },
-        { "id": "concept.responsibility", "name": "Responsible software", "description": "Considering who is affected by what software does.", "kind": "concept", "parents": ["concept.testing"], "interests": ["professional", "ai"] },
-        { "id": "concept.ai-limits", "name": "AI capabilities and limits", "description": "Knowing when generated work must be verified.", "kind": "concept", "parents": ["concept.responsibility"], "interests": ["ai", "professional"] },
-        { "id": "concept.algorithms", "name": "Algorithms", "description": "General procedures that solve a class of problems.", "kind": "concept", "parents": ["concept.decomposition", "concept.instructions"], "interests": ["systems", "professional"] },
-        { "id": "concept.security", "name": "Security foundations", "description": "Protecting data and systems from foreseeable misuse.", "kind": "concept", "parents": ["concept.networks", "concept.responsibility"], "interests": ["systems", "professional"] },
-        { "id": "web.html", "name": "HTML structure", "description": "Describing the meaning and hierarchy of page content.", "kind": "language", "parents": ["concept.instructions"], "interests": ["web", "games"] },
-        { "id": "web.css", "name": "CSS presentation", "description": "Controlling layout, spacing, and visual hierarchy.", "kind": "language", "parents": ["web.html"], "interests": ["web", "games"] },
-        { "id": "web.accessibility", "name": "Web accessibility", "description": "Making interfaces usable with keyboards, screen readers, and assistive technology.", "kind": "engineering", "parents": ["web.html"], "interests": ["web", "professional"] },
-        { "id": "js.variables", "name": "JavaScript variables", "description": "Naming and changing stored values.", "kind": "language", "parents": ["concept.state"], "interests": ["web", "games"] },
-        { "id": "js.functions", "name": "JavaScript functions", "description": "Packaging behavior behind a named interface.", "kind": "language", "parents": ["js.variables", "concept.instructions"], "interests": ["web", "games"] },
-        { "id": "js.conditions", "name": "JavaScript conditions", "description": "Branching with comparisons and boolean expressions.", "kind": "language", "parents": ["js.functions", "concept.conditions"], "interests": ["web", "games"] },
-        { "id": "js.events", "name": "JavaScript events", "description": "Responding to user actions in the browser.", "kind": "language", "parents": ["web.html", "js.functions"], "interests": ["web", "games"] },
-        { "id": "js.loops", "name": "JavaScript loops", "description": "Repeating work over values and collections.", "kind": "language", "parents": ["js.conditions", "concept.iteration"], "interests": ["web", "games"] },
-        { "id": "js.arrays", "name": "JavaScript arrays", "description": "Holding ordered collections and transforming them.", "kind": "language", "parents": ["js.variables"], "interests": ["web", "games"] },
-        { "id": "js.types", "name": "JavaScript types", "description": "Understanding numbers, strings, booleans, and coercion.", "kind": "language", "parents": ["js.variables"], "interests": ["web", "professional"] },
-        { "id": "js.objects", "name": "JavaScript objects", "description": "Grouping related fields into structured records.", "kind": "language", "parents": ["js.types", "js.arrays"], "interests": ["web", "professional"] },
-        { "id": "js.debugging", "name": "JavaScript debugging", "description": "Reading stack traces and isolating runtime failures.", "kind": "language", "parents": ["concept.debugging", "js.functions"], "interests": ["web", "professional"] },
-        { "id": "ts.types", "name": "TypeScript types", "description": "Describing data shapes so mistakes surface before running.", "kind": "language", "parents": ["js.objects", "concept.data"], "interests": ["web", "professional"] },
-        { "id": "git.basics", "name": "Git fundamentals", "description": "Recording versions and recovering earlier work.", "kind": "engineering", "parents": ["concept.filesystems"], "interests": ["professional"] },
-        { "id": "git.branches", "name": "Git branches", "description": "Developing changes in parallel and merging intent.", "kind": "engineering", "parents": ["git.basics"], "interests": ["professional"] },
-        { "id": "http.basics", "name": "HTTP and JSON", "description": "Request and response messages with structured data.", "kind": "engineering", "parents": ["concept.networks"], "interests": ["web", "professional"] },
-        { "id": "api.validation", "name": "API validation", "description": "Rejecting invalid requests and preventing duplicate effects.", "kind": "engineering", "parents": ["http.basics", "js.conditions"], "interests": ["web", "professional"] },
-        { "id": "ai.review", "name": "Reviewing AI output", "description": "Evaluating generated changes with independent evidence.", "kind": "engineering", "parents": ["concept.testing", "concept.ai-limits"], "interests": ["ai", "professional"] },
-        { "id": "ops.processes", "name": "Processes and logs", "description": "Inspecting running services and their evidence.", "kind": "engineering", "parents": ["concept.filesystems"], "interests": ["systems", "professional"] },
-        { "id": "ops.permissions", "name": "Filesystem permissions", "description": "Granting the least access needed to do a job.", "kind": "engineering", "parents": ["ops.processes"], "interests": ["systems", "professional"] },
-        { "id": "ops.deployment", "name": "Deployment and recovery", "description": "Releasing changes safely and restoring known-good state.", "kind": "engineering", "parents": ["ops.processes", "git.branches"], "interests": ["systems", "professional"] },
-        { "id": "testing.integration", "name": "Integration testing", "description": "Verifying that connected systems agree with each other.", "kind": "engineering", "parents": ["concept.testing", "http.basics"], "interests": ["professional", "web"] },
-        { "id": "engineering.incident", "name": "Incident response", "description": "Diagnosing and recovering a system under pressure.", "kind": "engineering", "parents": ["testing.integration", "ai.review", "ops.deployment"], "interests": ["professional", "systems"] },
-        { "id": "python.basics", "name": "Python fundamentals", "description": "Values, names, and simple expressions in Python.", "kind": "language", "parents": ["concept.state"], "interests": ["ai", "professional"] },
-        { "id": "python.control", "name": "Python control flow", "description": "Conditions and loops written in Python.", "kind": "language", "parents": ["python.basics", "concept.conditions"], "interests": ["ai", "professional"] },
-        { "id": "python.functions", "name": "Python functions", "description": "Reusable behavior with parameters and return values.", "kind": "language", "parents": ["python.basics"], "interests": ["ai", "professional"] },
-        { "id": "sql.queries", "name": "SQL queries", "description": "Selecting and filtering rows from relational tables.", "kind": "language", "parents": ["concept.data"], "interests": ["professional", "web"] },
-        { "id": "sql.joins", "name": "SQL joins", "description": "Combining related tables without losing meaning.", "kind": "language", "parents": ["sql.queries"], "interests": ["professional", "web"] },
-        { "id": "sql.modeling", "name": "Relational modeling", "description": "Choosing tables, keys, constraints, and indexes.", "kind": "engineering", "parents": ["sql.queries"], "interests": ["professional"] },
-        { "id": "algorithms.arrays", "name": "Array algorithms", "description": "Searching and transforming ordered data.", "kind": "language", "parents": ["js.arrays"], "interests": ["professional", "systems"] },
-        { "id": "algorithms.complexity", "name": "Complexity analysis", "description": "Reasoning about growth in time and space.", "kind": "mathematics", "parents": ["algorithms.arrays", "concept.decomposition"], "interests": ["professional"] },
-        { "id": "algorithms.sorting", "name": "Sorting", "description": "Ordering data with algorithms that have different trade-offs.", "kind": "language", "parents": ["algorithms.arrays", "algorithms.complexity"], "interests": ["professional"] },
-        { "id": "algorithms.hashing", "name": "Hash tables", "description": "Mapping keys to values with expected constant-time lookup.", "kind": "language", "parents": ["algorithms.arrays"], "interests": ["professional"] },
-        { "id": "algorithms.recursion", "name": "Recursion", "description": "Solving a problem through smaller instances of itself.", "kind": "language", "parents": ["js.functions", "concept.decomposition"], "interests": ["professional"] },
-        { "id": "algorithms.graphs", "name": "Graph algorithms", "description": "Traversing relationships between connected nodes.", "kind": "language", "parents": ["algorithms.hashing"], "interests": ["professional"] },
-        { "id": "algorithms.dp", "name": "Dynamic programming", "description": "Reusing solved subproblems instead of repeating work.", "kind": "language", "parents": ["algorithms.recursion", "algorithms.complexity"], "interests": ["professional"] },
-        { "id": "security.injection", "name": "Injection defense", "description": "Keeping untrusted data out of commands and queries.", "kind": "engineering", "parents": ["sql.queries", "http.basics"], "interests": ["professional"] },
-        { "id": "security.auth", "name": "Authentication and sessions", "description": "Proving identity and protecting session state.", "kind": "engineering", "parents": ["http.basics"], "interests": ["professional", "web"] },
-        { "id": "ai.foundations", "name": "How language models work", "description": "Next-token prediction, limits, and appropriate use.", "kind": "engineering", "parents": ["concept.computation", "concept.responsibility"], "interests": ["ai"] },
-        { "id": "ai.prompting", "name": "Prompt construction", "description": "Specifying context, constraints, and success criteria.", "kind": "engineering", "parents": ["ai.foundations"], "interests": ["ai"] },
-        { "id": "ai.evaluation", "name": "AI evaluation", "description": "Measuring generated work against independent evidence.", "kind": "engineering", "parents": ["ai.foundations", "concept.testing"], "interests": ["ai", "professional"] },
-        { "id": "ai.agents", "name": "Tool-using agents", "description": "Bounded delegation with explicit permissions and review.", "kind": "engineering", "parents": ["ai.prompting"], "interests": ["ai"] },
-        { "id": "ai.rag", "name": "Retrieval", "description": "Grounding answers in relevant, trusted documents.", "kind": "engineering", "parents": ["ai.foundations", "concept.data"], "interests": ["ai"] },
-        { "id": "devops.linux", "name": "Linux operations", "description": "Working with processes, files, and services.", "kind": "engineering", "parents": ["ops.processes"], "interests": ["systems"] },
-        { "id": "devops.networking", "name": "Service networking", "description": "DNS, proxies, and the path a request takes.", "kind": "engineering", "parents": ["concept.networks", "http.basics"], "interests": ["systems"] },
-        { "id": "devops.containers", "name": "Containers", "description": "Packaging an application with its runtime and limits.", "kind": "engineering", "parents": ["devops.linux", "ops.deployment"], "interests": ["systems"] },
-        { "id": "devops.ci", "name": "CI pipelines", "description": "Running repeatable checks before release.", "kind": "engineering", "parents": ["git.branches", "ops.deployment"], "interests": ["professional"] },
-        { "id": "architecture.modularity", "name": "Modular architecture", "description": "Separating responsibilities behind stable interfaces.", "kind": "engineering", "parents": ["js.functions", "testing.integration"], "interests": ["professional"] },
-        { "id": "architecture.distributed", "name": "Distributed systems", "description": "Reasoning about partial failure and consistency between services.", "kind": "engineering", "parents": ["concept.networks", "testing.integration"], "interests": ["professional", "systems"] },
-        { "id": "react.components", "name": "React components", "description": "Composing interfaces from reusable functions.", "kind": "framework", "parents": ["js.functions", "web.html"], "interests": ["web"] },
-        { "id": "react.state", "name": "React state", "description": "Managing component state and rendering predictable updates.", "kind": "framework", "parents": ["react.components", "concept.state"], "interests": ["web"] },
-        { "id": "node.hono", "name": "Hono services", "description": "Building small typed HTTP services.", "kind": "framework", "parents": ["js.functions", "http.basics"], "interests": ["web", "professional"] },
-        { "id": "node.middleware", "name": "Middleware pipelines", "description": "Composing validation, authentication, and error handling.", "kind": "framework", "parents": ["node.hono", "security.auth"], "interests": ["web", "professional"] },
-        { "id": "java.oop", "name": "Java objects", "description": "Classes, interfaces, and composition in Java.", "kind": "language", "parents": ["js.functions"], "interests": ["professional"] },
-        { "id": "go.concurrency", "name": "Go concurrency", "description": "Goroutines and channels for concurrent work.", "kind": "language", "parents": ["js.functions", "concept.iteration"], "interests": ["systems", "professional"] },
-        { "id": "rust.ownership", "name": "Rust ownership", "description": "Memory safety through ownership and borrowing.", "kind": "language", "parents": ["concept.state", "concept.data"], "interests": ["systems"] },
-        { "id": "c.memory", "name": "C memory", "description": "Explicit memory, pointers, and undefined behavior.", "kind": "language", "parents": ["concept.data"], "interests": ["systems"] },
-        { "id": "testing.boundaries", "name": "Boundary testing", "description": "Choosing cases at the edges where mistakes hide.", "kind": "engineering", "parents": ["concept.testing"], "interests": ["professional"] },
-        { "id": "performance.measure", "name": "Performance measurement", "description": "Using measurements rather than guesses to find slow paths.", "kind": "engineering", "parents": ["algorithms.complexity"], "interests": ["professional"] },
-        { "id": "compilers.basics", "name": "Compilation", "description": "Transforming source code into executable instructions.", "kind": "engineering", "parents": ["concept.instructions", "concept.data"], "interests": ["systems"] }
+        {
+            "id": "concept.computation",
+            "name": "Computation",
+            "description": "Turning inputs into useful outputs by following defined steps.",
+            "kind": "concept",
+            "parents": [],
+            "interests": ["everything"]
+        },
+        {
+            "id": "concept.instructions",
+            "name": "Instructions and algorithms",
+            "description": "Precise ordered steps that a machine or person can follow.",
+            "kind": "concept",
+            "parents": ["concept.computation"],
+            "interests": ["everything", "systems"]
+        },
+        {
+            "id": "concept.state",
+            "name": "State and memory",
+            "description": "Remembering values so later steps can use them.",
+            "kind": "concept",
+            "parents": ["concept.instructions"],
+            "interests": ["everything", "systems"]
+        },
+        {
+            "id": "concept.conditions",
+            "name": "Conditions",
+            "description": "Choosing behavior based on evidence.",
+            "kind": "concept",
+            "parents": ["concept.state"],
+            "interests": ["everything", "web"]
+        },
+        {
+            "id": "concept.boolean",
+            "name": "Boolean logic",
+            "description": "Combining true and false values with and, or, and not.",
+            "kind": "concept",
+            "parents": ["concept.conditions"],
+            "interests": ["everything", "systems"]
+        },
+        {
+            "id": "concept.iteration",
+            "name": "Iteration",
+            "description": "Repeating work under a clear rule.",
+            "kind": "concept",
+            "parents": ["concept.conditions"],
+            "interests": ["everything", "games"]
+        },
+        {
+            "id": "concept.tracing",
+            "name": "Execution tracing",
+            "description": "Following values line by line as a program runs.",
+            "kind": "concept",
+            "parents": ["concept.iteration"],
+            "interests": ["everything", "systems"]
+        },
+        {
+            "id": "concept.debugging",
+            "name": "Debugging",
+            "description": "Finding the cause of wrong behavior with evidence.",
+            "kind": "concept",
+            "parents": ["concept.tracing"],
+            "interests": ["everything", "professional"]
+        },
+        {
+            "id": "concept.binary",
+            "name": "Binary and encoding",
+            "description": "Representing information with bits and agreed encodings.",
+            "kind": "concept",
+            "parents": ["concept.computation"],
+            "interests": ["systems", "games"]
+        },
+        {
+            "id": "concept.data",
+            "name": "Data representation",
+            "description": "Storing facts in structures that support useful operations.",
+            "kind": "concept",
+            "parents": ["concept.binary"],
+            "interests": ["systems", "ai"]
+        },
+        {
+            "id": "concept.filesystems",
+            "name": "Filesystems",
+            "description": "Organizing files and directories and controlling access.",
+            "kind": "concept",
+            "parents": ["concept.computation"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "concept.networks",
+            "name": "Networks",
+            "description": "Moving messages between machines through agreed protocols.",
+            "kind": "concept",
+            "parents": ["concept.computation"],
+            "interests": ["systems", "web"]
+        },
+        {
+            "id": "concept.decomposition",
+            "name": "Decomposition",
+            "description": "Breaking a problem into parts that can be solved and checked.",
+            "kind": "concept",
+            "parents": ["concept.instructions"],
+            "interests": ["everything"]
+        },
+        {
+            "id": "concept.testing",
+            "name": "Testing",
+            "description": "Checking behavior with cases chosen to reveal mistakes.",
+            "kind": "concept",
+            "parents": ["concept.debugging"],
+            "interests": ["professional", "everything"]
+        },
+        {
+            "id": "concept.responsibility",
+            "name": "Responsible software",
+            "description": "Considering who is affected by what software does.",
+            "kind": "concept",
+            "parents": ["concept.testing"],
+            "interests": ["professional", "ai"]
+        },
+        {
+            "id": "concept.ai-limits",
+            "name": "AI capabilities and limits",
+            "description": "Knowing when generated work must be verified.",
+            "kind": "concept",
+            "parents": ["concept.responsibility"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "concept.algorithms",
+            "name": "Algorithms",
+            "description": "General procedures that solve a class of problems.",
+            "kind": "concept",
+            "parents": ["concept.decomposition", "concept.instructions"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "concept.security",
+            "name": "Security foundations",
+            "description": "Protecting data and systems from foreseeable misuse.",
+            "kind": "concept",
+            "parents": ["concept.networks", "concept.responsibility"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "web.html",
+            "name": "HTML structure",
+            "description": "Describing the meaning and hierarchy of page content.",
+            "kind": "language",
+            "parents": ["concept.instructions"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "web.css",
+            "name": "CSS presentation",
+            "description": "Controlling layout, spacing, and visual hierarchy.",
+            "kind": "language",
+            "parents": ["web.html"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "web.accessibility",
+            "name": "Web accessibility",
+            "description": "Making interfaces usable with keyboards, screen readers, and assistive technology.",
+            "kind": "engineering",
+            "parents": ["web.html"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "js.variables",
+            "name": "JavaScript variables",
+            "description": "Naming and changing stored values.",
+            "kind": "language",
+            "parents": ["concept.state"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "js.functions",
+            "name": "JavaScript functions",
+            "description": "Packaging behavior behind a named interface.",
+            "kind": "language",
+            "parents": ["js.variables", "concept.instructions"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "js.conditions",
+            "name": "JavaScript conditions",
+            "description": "Branching with comparisons and boolean expressions.",
+            "kind": "language",
+            "parents": ["js.functions", "concept.conditions"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "js.events",
+            "name": "JavaScript events",
+            "description": "Responding to user actions in the browser.",
+            "kind": "language",
+            "parents": ["web.html", "js.functions"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "js.loops",
+            "name": "JavaScript loops",
+            "description": "Repeating work over values and collections.",
+            "kind": "language",
+            "parents": ["js.conditions", "concept.iteration"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "js.arrays",
+            "name": "JavaScript arrays",
+            "description": "Holding ordered collections and transforming them.",
+            "kind": "language",
+            "parents": ["js.variables"],
+            "interests": ["web", "games"]
+        },
+        {
+            "id": "js.types",
+            "name": "JavaScript types",
+            "description": "Understanding numbers, strings, booleans, and coercion.",
+            "kind": "language",
+            "parents": ["js.variables"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "js.objects",
+            "name": "JavaScript objects",
+            "description": "Grouping related fields into structured records.",
+            "kind": "language",
+            "parents": ["js.types", "js.arrays"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "js.debugging",
+            "name": "JavaScript debugging",
+            "description": "Reading stack traces and isolating runtime failures.",
+            "kind": "language",
+            "parents": ["concept.debugging", "js.functions"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "ts.types",
+            "name": "TypeScript types",
+            "description": "Describing data shapes so mistakes surface before running.",
+            "kind": "language",
+            "parents": ["js.objects", "concept.data"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "git.basics",
+            "name": "Git fundamentals",
+            "description": "Recording versions and recovering earlier work.",
+            "kind": "engineering",
+            "parents": ["concept.filesystems"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "git.branches",
+            "name": "Git branches",
+            "description": "Developing changes in parallel and merging intent.",
+            "kind": "engineering",
+            "parents": ["git.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "http.basics",
+            "name": "HTTP and JSON",
+            "description": "Request and response messages with structured data.",
+            "kind": "engineering",
+            "parents": ["concept.networks"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "api.validation",
+            "name": "API validation",
+            "description": "Rejecting invalid requests and preventing duplicate effects.",
+            "kind": "engineering",
+            "parents": ["http.basics", "js.conditions"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "ai.review",
+            "name": "Reviewing AI output",
+            "description": "Evaluating generated changes with independent evidence.",
+            "kind": "engineering",
+            "parents": ["concept.testing", "concept.ai-limits"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "ops.processes",
+            "name": "Processes and logs",
+            "description": "Inspecting running services and their evidence.",
+            "kind": "engineering",
+            "parents": ["concept.filesystems"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "ops.permissions",
+            "name": "Filesystem permissions",
+            "description": "Granting the least access needed to do a job.",
+            "kind": "engineering",
+            "parents": ["ops.processes"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "ops.deployment",
+            "name": "Deployment and recovery",
+            "description": "Releasing changes safely and restoring known-good state.",
+            "kind": "engineering",
+            "parents": ["ops.processes", "git.branches"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "testing.integration",
+            "name": "Integration testing",
+            "description": "Verifying that connected systems agree with each other.",
+            "kind": "engineering",
+            "parents": ["concept.testing", "http.basics"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "engineering.incident",
+            "name": "Incident response",
+            "description": "Diagnosing and recovering a system under pressure.",
+            "kind": "engineering",
+            "parents": ["testing.integration", "ai.review", "ops.deployment"],
+            "interests": ["professional", "systems"]
+        },
+        {
+            "id": "python.basics",
+            "name": "Python fundamentals",
+            "description": "Values, names, and simple expressions in Python.",
+            "kind": "language",
+            "parents": ["concept.state"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "python.control",
+            "name": "Python control flow",
+            "description": "Conditions and loops written in Python.",
+            "kind": "language",
+            "parents": ["python.basics", "concept.conditions"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "python.functions",
+            "name": "Python functions",
+            "description": "Reusable behavior with parameters and return values.",
+            "kind": "language",
+            "parents": ["python.basics"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "sql.queries",
+            "name": "SQL queries",
+            "description": "Selecting and filtering rows from relational tables.",
+            "kind": "language",
+            "parents": ["concept.data"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "sql.joins",
+            "name": "SQL joins",
+            "description": "Combining related tables without losing meaning.",
+            "kind": "language",
+            "parents": ["sql.queries"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "sql.modeling",
+            "name": "Relational modeling",
+            "description": "Choosing tables, keys, constraints, and indexes.",
+            "kind": "engineering",
+            "parents": ["sql.queries"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "algorithms.arrays",
+            "name": "Array algorithms",
+            "description": "Searching and transforming ordered data.",
+            "kind": "language",
+            "parents": ["js.arrays"],
+            "interests": ["professional", "systems"]
+        },
+        {
+            "id": "algorithms.complexity",
+            "name": "Complexity analysis",
+            "description": "Reasoning about growth in time and space.",
+            "kind": "mathematics",
+            "parents": ["algorithms.arrays", "concept.decomposition"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "algorithms.sorting",
+            "name": "Sorting",
+            "description": "Ordering data with algorithms that have different trade-offs.",
+            "kind": "language",
+            "parents": ["algorithms.arrays", "algorithms.complexity"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "algorithms.hashing",
+            "name": "Hash tables",
+            "description": "Mapping keys to values with expected constant-time lookup.",
+            "kind": "language",
+            "parents": ["algorithms.arrays"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "algorithms.recursion",
+            "name": "Recursion",
+            "description": "Solving a problem through smaller instances of itself.",
+            "kind": "language",
+            "parents": ["js.functions", "concept.decomposition"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "algorithms.graphs",
+            "name": "Graph algorithms",
+            "description": "Traversing relationships between connected nodes.",
+            "kind": "language",
+            "parents": ["algorithms.hashing"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "algorithms.dp",
+            "name": "Dynamic programming",
+            "description": "Reusing solved subproblems instead of repeating work.",
+            "kind": "language",
+            "parents": ["algorithms.recursion", "algorithms.complexity"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "security.injection",
+            "name": "Injection defense",
+            "description": "Keeping untrusted data out of commands and queries.",
+            "kind": "engineering",
+            "parents": ["sql.queries", "http.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "security.auth",
+            "name": "Authentication and sessions",
+            "description": "Proving identity and protecting session state.",
+            "kind": "engineering",
+            "parents": ["http.basics"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "ai.foundations",
+            "name": "How language models work",
+            "description": "Next-token prediction, limits, and appropriate use.",
+            "kind": "engineering",
+            "parents": ["concept.computation", "concept.responsibility"],
+            "interests": ["ai"]
+        },
+        {
+            "id": "ai.prompting",
+            "name": "Prompt construction",
+            "description": "Specifying context, constraints, and success criteria.",
+            "kind": "engineering",
+            "parents": ["ai.foundations"],
+            "interests": ["ai"]
+        },
+        {
+            "id": "ai.evaluation",
+            "name": "AI evaluation",
+            "description": "Measuring generated work against independent evidence.",
+            "kind": "engineering",
+            "parents": ["ai.foundations", "concept.testing"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "ai.agents",
+            "name": "Tool-using agents",
+            "description": "Bounded delegation with explicit permissions and review.",
+            "kind": "engineering",
+            "parents": ["ai.prompting"],
+            "interests": ["ai"]
+        },
+        {
+            "id": "ai.rag",
+            "name": "Retrieval",
+            "description": "Grounding answers in relevant, trusted documents.",
+            "kind": "engineering",
+            "parents": ["ai.foundations", "concept.data"],
+            "interests": ["ai"]
+        },
+        {
+            "id": "devops.linux",
+            "name": "Linux operations",
+            "description": "Working with processes, files, and services.",
+            "kind": "engineering",
+            "parents": ["ops.processes"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "devops.networking",
+            "name": "Service networking",
+            "description": "DNS, proxies, and the path a request takes.",
+            "kind": "engineering",
+            "parents": ["concept.networks", "http.basics"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "devops.containers",
+            "name": "Containers",
+            "description": "Packaging an application with its runtime and limits.",
+            "kind": "engineering",
+            "parents": ["devops.linux", "ops.deployment"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "devops.ci",
+            "name": "CI pipelines",
+            "description": "Running repeatable checks before release.",
+            "kind": "engineering",
+            "parents": ["git.branches", "ops.deployment"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "architecture.modularity",
+            "name": "Modular architecture",
+            "description": "Separating responsibilities behind stable interfaces.",
+            "kind": "engineering",
+            "parents": ["js.functions", "testing.integration"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "architecture.distributed",
+            "name": "Distributed systems",
+            "description": "Reasoning about partial failure and consistency between services.",
+            "kind": "engineering",
+            "parents": ["concept.networks", "testing.integration"],
+            "interests": ["professional", "systems"]
+        },
+        {
+            "id": "react.components",
+            "name": "React components",
+            "description": "Composing interfaces from reusable functions.",
+            "kind": "framework",
+            "parents": ["js.functions", "web.html"],
+            "interests": ["web"]
+        },
+        {
+            "id": "react.state",
+            "name": "React state",
+            "description": "Managing component state and rendering predictable updates.",
+            "kind": "framework",
+            "parents": ["react.components", "concept.state"],
+            "interests": ["web"]
+        },
+        {
+            "id": "node.hono",
+            "name": "Hono services",
+            "description": "Building small typed HTTP services.",
+            "kind": "framework",
+            "parents": ["js.functions", "http.basics"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "node.middleware",
+            "name": "Middleware pipelines",
+            "description": "Composing validation, authentication, and error handling.",
+            "kind": "framework",
+            "parents": ["node.hono", "security.auth"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "java.oop",
+            "name": "Java objects",
+            "description": "Classes, interfaces, and composition in Java.",
+            "kind": "language",
+            "parents": ["js.functions"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "go.concurrency",
+            "name": "Go concurrency",
+            "description": "Goroutines and channels for concurrent work.",
+            "kind": "language",
+            "parents": ["js.functions", "concept.iteration"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "rust.ownership",
+            "name": "Rust ownership",
+            "description": "Memory safety through ownership and borrowing.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.data"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "c.memory",
+            "name": "C memory",
+            "description": "Explicit memory, pointers, and undefined behavior.",
+            "kind": "language",
+            "parents": ["concept.data"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "testing.boundaries",
+            "name": "Boundary testing",
+            "description": "Choosing cases at the edges where mistakes hide.",
+            "kind": "engineering",
+            "parents": ["concept.testing"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "performance.measure",
+            "name": "Performance measurement",
+            "description": "Using measurements rather than guesses to find slow paths.",
+            "kind": "engineering",
+            "parents": ["algorithms.complexity"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "compilers.basics",
+            "name": "Compilation",
+            "description": "Transforming source code into executable instructions.",
+            "kind": "engineering",
+            "parents": ["concept.instructions", "concept.data"],
+            "interests": ["systems"]
+        }
     ]
 }
