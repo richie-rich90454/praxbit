@@ -5,24 +5,14 @@
     "courseId": "campus",
     "title": "Repeating the same work",
     "summary": "Use a loop over an array to calculate available stock.",
-    "skills": [
-        "js.loops",
-        "js.arrays"
-    ],
-    "prerequisites": [
-        "js.events",
-        "concept.iteration"
-    ],
+    "skills": ["js.loops", "js.arrays"],
+    "prerequisites": ["js.events", "concept.iteration"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,24 +24,20 @@
         {
             "id": "loop-total",
             "description": "Compute available stock by iterating over all items.",
-            "stepIds": [
-                "available-total"
-            ]
+            "stepIds": ["available-total"]
         },
         {
             "id": "clamp-negative",
             "description": "Prevent a reserved count from producing negative availability.",
-            "stepIds": [
-                "available-total"
-            ]
+            "stepIds": ["available-total"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["loop-values", "loop-claims"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:storefront",
-        "icon:loop"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:storefront", "icon:loop"],
     "hints": [
         "Start a total at zero and visit each item in the array.",
         "For each item, availability is stock minus reserved.",
@@ -139,9 +125,7 @@
                     "kind": "function",
                     "description": "An empty array totals zero.",
                     "name": "sumAvailable",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": 0
                 },
                 {
@@ -292,9 +276,7 @@
     },
     "rewards": {
         "experience": 135,
-        "unlocks": [
-            "campus.incorrect-totals"
-        ]
+        "unlocks": ["campus.incorrect-totals"]
     },
     "persistence": {
         "kind": "world-action",
@@ -307,8 +289,5 @@
         "screenReaderNotes": "The trace announces each line, the product values, and the running total."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
