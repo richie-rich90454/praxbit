@@ -1,0 +1,257 @@
+{
+    "id": "security.injection",
+    "version": 1,
+    "sequence": 40,
+    "courseId": "security",
+    "title": "The borrowed name",
+    "summary": "Recognize SQL injection and choose evidence that tests the boundary.",
+    "skills": [
+        "security.injection"
+    ],
+    "prerequisites": [
+        "sql.queries",
+        "http.basics"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "code-review",
+            "no-execution"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "injection-review",
+        "briefing": "A search endpoint builds SQL by inserting the user's name into the query text. Review the change and choose tests that would expose the vulnerability."
+    },
+    "objectives": [
+        {
+            "id": "identify-injection",
+            "description": "Identify string-interpolated query construction.",
+            "stepIds": [
+                "injection-review"
+            ]
+        },
+        {
+            "id": "adversarial-tests",
+            "description": "Choose tests that include hostile input.",
+            "stepIds": [
+                "injection-tests"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:shield"
+    ],
+    "hints": [
+        "Look at how name is inserted into the SQL string.",
+        "A quote in the input can end the string literal and add SQL.",
+        "The test suite must include quotes, comments, and a normal case.",
+        "Use parameterized queries and test hostile strings such as ' OR '1'='1."
+    ],
+    "misconceptions": [
+        {
+            "id": "validation-enough",
+            "description": "Believing input validation alone makes string-built SQL safe.",
+            "stepId": "injection-review",
+            "feedback": "Validation helps, but parameterized queries keep data separate from SQL syntax. Both are useful; the query construction must be safe."
+        },
+        {
+            "id": "happy-tests",
+            "description": "Testing only friendly input.",
+            "stepId": "injection-tests",
+            "feedback": "Security tests must include hostile strings that try to change the query structure."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Injection changes syntax",
+                "body": "String interpolation mixes data into command syntax. If a value contains a quote or separator, it can end the intended literal and introduce new SQL. The database executes the resulting text with the application's permissions."
+            },
+            {
+                "title": "Separate data from commands",
+                "body": "Parameterized queries send SQL structure and values separately, so quotes in data remain data. Test with malicious strings and keep least privilege on the database account. Validation and parameterization solve different parts of the problem."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Injection",
+                "definition": "Untrusted data changing the structure of a command."
+            },
+            {
+                "term": "Parameterized query",
+                "definition": "A query with placeholders whose values are supplied separately."
+            },
+            {
+                "term": "Least privilege",
+                "definition": "Using the minimum permissions needed."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "injection-review",
+            "title": "Review the search endpoint",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Customer search",
+                "caption": "Submitted as a small internal search feature.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "async function findCustomer(db, name) {\n  const sql = `SELECT id, name FROM customers WHERE name = '${name}'`;\n  return db.query(sql);\n}\n\n// Validation: name must be a string under 80 characters."
+            },
+            "findings": [
+                {
+                    "id": "interpolation",
+                    "label": "User input is interpolated into SQL syntax.",
+                    "correct": true
+                },
+                {
+                    "id": "quote",
+                    "label": "A quote in the name can change the query structure.",
+                    "correct": true
+                },
+                {
+                    "id": "parameter",
+                    "label": "A parameterized query would keep the value separate from SQL.",
+                    "correct": true
+                },
+                {
+                    "id": "length",
+                    "label": "The 80-character limit prevents injection.",
+                    "correct": false
+                },
+                {
+                    "id": "internal",
+                    "label": "Internal endpoints do not need injection protection.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the endpoint"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until the SQL uses parameters and adversarial tests exist"
+                },
+                {
+                    "id": "rename",
+                    "label": "Rename the function"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "Length validation does not make interpolation safe. The value must be bound as a query parameter."
+        },
+        {
+            "kind": "test-design",
+            "id": "injection-tests",
+            "title": "Choose adversarial tests",
+            "prompt": "Select the test inputs you would keep for the search endpoint.",
+            "evidence": "testing",
+            "cases": [
+                {
+                    "id": "normal",
+                    "label": "Ada → returns Ada",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "or",
+                    "label": "' OR '1'='1 → must not return every customer",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "comment",
+                    "label": "'; DROP TABLE customers; -- → must be handled as data",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "quote",
+                    "label": "O'Brien → still searches literally",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "empty",
+                    "label": "Empty string → no rows",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "looks",
+                    "label": "Read the function and decide it looks fine",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "duplicate",
+                    "label": "Ada → returns Ada (duplicate of normal)",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "A security test suite includes ordinary data, quotes, SQL keywords, and comment syntax. Reading code is not a test."
+        },
+        {
+            "kind": "explain",
+            "id": "injection-check",
+            "title": "Defense in depth",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "parameters",
+                    "label": "Parameterized queries separate values from SQL structure.",
+                    "correct": true
+                },
+                {
+                    "id": "privilege",
+                    "label": "A database account should have only the permissions it needs.",
+                    "correct": true
+                },
+                {
+                    "id": "validation",
+                    "label": "Input validation alone makes interpolation safe.",
+                    "correct": false
+                },
+                {
+                    "id": "hostile",
+                    "label": "Hostile input belongs in the test suite.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Parameterization is the primary defense. Least privilege limits damage, and hostile tests catch regressions."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": [
+            "security.sessions"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The artifact, findings, test cases, and statements are text with standard form controls.",
+        "keyboardNotes": "Space selects findings and tests; arrow keys choose the verdict.",
+        "screenReaderNotes": "The code block is read with line breaks. Tests announce whether each selected case is appropriate."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web",
+        "systems"
+    ]
+}
