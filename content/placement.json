@@ -1,0 +1,107 @@
+{
+    "version": 1,
+    "questions": [
+        {
+            "id": "variable",
+            "prompt": "What does a variable do?",
+            "options": [
+                { "id": "store", "label": "Stores a value under a name" },
+                { "id": "compile", "label": "Compiles the program" },
+                { "id": "network", "label": "Sends data to another machine" }
+            ],
+            "correctId": "store",
+            "skillId": "js.variables",
+            "level": "beginner"
+        },
+        {
+            "id": "loop",
+            "prompt": "What is the main purpose of a loop?",
+            "options": [
+                { "id": "repeat", "label": "Repeat work under a stopping rule" },
+                { "id": "style", "label": "Change the page colors" },
+                { "id": "store", "label": "Store a value permanently" }
+            ],
+            "correctId": "repeat",
+            "skillId": "concept.iteration",
+            "level": "beginner"
+        },
+        {
+            "id": "html",
+            "prompt": "What does HTML describe?",
+            "options": [
+                { "id": "structure", "label": "The meaning and structure of content" },
+                { "id": "layout", "label": "Layout and colors only" },
+                { "id": "database", "label": "Database tables" }
+            ],
+            "correctId": "structure",
+            "skillId": "web.html",
+            "level": "beginner"
+        },
+        {
+            "id": "http",
+            "prompt": "A response has status 404. What does it mean?",
+            "options": [
+                { "id": "missing", "label": "The requested resource was not found" },
+                { "id": "success", "label": "The request succeeded" },
+                { "id": "server", "label": "The server crashed" }
+            ],
+            "correctId": "missing",
+            "skillId": "http.basics",
+            "level": "developing"
+        },
+        {
+            "id": "git",
+            "prompt": "What does a Git commit record?",
+            "options": [
+                { "id": "snapshot", "label": "A project snapshot with a message and parent history" },
+                { "id": "deploy", "label": "A deployment to production" },
+                { "id": "test", "label": "A passing test suite" }
+            ],
+            "correctId": "snapshot",
+            "skillId": "git.basics",
+            "level": "developing"
+        },
+        {
+            "id": "boundary",
+            "prompt": "Why test values at a boundary?",
+            "options": [
+                { "id": "edges", "label": "Mistakes often appear at the edges of valid ranges" },
+                { "id": "speed", "label": "Boundary values make tests run faster" },
+                { "id": "random", "label": "Boundaries are chosen at random" }
+            ],
+            "correctId": "edges",
+            "skillId": "testing.boundaries",
+            "level": "developing"
+        },
+        {
+            "id": "idempotency",
+            "prompt": "What makes a retried operation idempotent?",
+            "options": [
+                { "id": "same", "label": "Repeating it with the same key has no additional effect" },
+                { "id": "faster", "label": "It runs faster on the second attempt" },
+                { "id": "logged", "label": "It writes a log entry" }
+            ],
+            "correctId": "same",
+            "skillId": "api.validation",
+            "level": "advanced"
+        },
+        {
+            "id": "types",
+            "prompt": "Does a TypeScript interface validate JSON at runtime?",
+            "options": [
+                { "id": "no", "label": "No, interfaces are erased and runtime validation is separate" },
+                { "id": "yes", "label": "Yes, the interface checks incoming data" },
+                { "id": "sometimes", "label": "Only when the JSON is local" }
+            ],
+            "correctId": "no",
+            "skillId": "ts.types",
+            "level": "advanced"
+        }
+    ],
+    "recommendations": [
+        { "minCorrect": 7, "missionId": "campus.the-mysterious-exception" },
+        { "minCorrect": 5, "missionId": "campus.page-with-no-identity" },
+        { "minCorrect": 3, "missionId": "before-code.everything-is-information" },
+        { "minCorrect": 0, "missionId": "before-code.make-it-respond" }
+    ]
+}
