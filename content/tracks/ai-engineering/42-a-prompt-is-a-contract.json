@@ -1,0 +1,190 @@
+{
+    "id": "ai.prompt-contract",
+    "version": 1,
+    "sequence": 42,
+    "courseId": "ai-engineering",
+    "title": "A prompt is a contract",
+    "summary": "Structure a prompt around a goal, context, constraints, and verifiable success.",
+    "skills": [
+        "ai.prompting"
+    ],
+    "prerequisites": [
+        "ai.foundations"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "order",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "curated-exercise",
+            "no-model-inference"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "prompt-design",
+        "briefing": "The team wants an AI colleague to draft a function. A vague request produces confident guesses. Arrange the parts of a prompt that can be evaluated."
+    },
+    "objectives": [
+        {
+            "id": "prompt-order",
+            "description": "Order the parts of an evaluable prompt.",
+            "stepIds": [
+                "prompt-parts"
+            ]
+        },
+        {
+            "id": "prompt-checks",
+            "description": "Explain what makes a prompt testable.",
+            "stepIds": [
+                "prompt-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:ai"
+    ],
+    "hints": [
+        "Start with the task and the context the model actually needs.",
+        "Constraints and non-goals prevent unwanted changes.",
+        "Success criteria and output format make the result checkable.",
+        "Order: goal, trusted context, constraints, success criteria, output format."
+    ],
+    "misconceptions": [
+        {
+            "id": "more-text",
+            "description": "Believing a longer prompt is automatically better.",
+            "stepId": "prompt-parts",
+            "feedback": "Length is not specification. A short prompt with clear constraints and tests can be stronger than a long vague one."
+        },
+        {
+            "id": "model-tests",
+            "description": "Expecting the model to verify its own correctness.",
+            "stepId": "prompt-check",
+            "feedback": "The prompt can request tests, but independent execution and review are still required."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "State the job precisely",
+                "body": "A useful prompt names the goal, supplies only relevant context, states constraints and non-goals, and defines what success looks like. Output format belongs in the contract when another tool or person must consume the result."
+            },
+            {
+                "title": "Prompts do not replace verification",
+                "body": "A clear prompt improves the chance of useful output but cannot guarantee correctness. The engineer still reviews the result, runs tests, and checks assumptions against evidence."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Prompt contract",
+                "definition": "A prompt with explicit goal, context, constraints, and success criteria."
+            },
+            {
+                "term": "Non-goal",
+                "definition": "A change intentionally excluded from the task."
+            },
+            {
+                "term": "Output format",
+                "definition": "The required shape of the response."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "order",
+            "id": "prompt-parts",
+            "title": "Arrange the prompt",
+            "prompt": "Order the sections of a prompt for drafting a stock-check function.",
+            "evidence": "construction",
+            "items": [
+                {
+                    "id": "goal",
+                    "label": "Goal: implement canFulfill(stock, quantity)"
+                },
+                {
+                    "id": "context",
+                    "label": "Context: function is used by the checkout service"
+                },
+                {
+                    "id": "constraints",
+                    "label": "Constraints: no new dependencies, reject non-integer quantities, preserve existing callers"
+                },
+                {
+                    "id": "success",
+                    "label": "Success: boundary tests for 0, negative, exact stock, and over-stock pass"
+                },
+                {
+                    "id": "format",
+                    "label": "Output: one JavaScript function plus its test cases"
+                }
+            ],
+            "correctOrder": [
+                "goal",
+                "context",
+                "constraints",
+                "success",
+                "format"
+            ],
+            "explanation": "Goal and context establish the task. Constraints narrow acceptable solutions. Success criteria and output format make the result checkable."
+        },
+        {
+            "kind": "explain",
+            "id": "prompt-check",
+            "title": "What makes a prompt useful?",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "criteria",
+                    "label": "Success criteria make output easier to evaluate.",
+                    "correct": true
+                },
+                {
+                    "id": "constraints",
+                    "label": "Constraints reduce unintended changes.",
+                    "correct": true
+                },
+                {
+                    "id": "self-check",
+                    "label": "Requesting tests from the model removes the need to run them.",
+                    "correct": false
+                },
+                {
+                    "id": "context",
+                    "label": "Relevant context helps more than unrelated background.",
+                    "correct": true
+                }
+            ],
+            "explanation": "A prompt contract improves direction, but execution and independent review remain the engineer's responsibility."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": [
+            "ai.evaluate-output"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Prompt sections can be reordered with buttons and are read as an ordered list.",
+        "keyboardNotes": "Use move up and move down buttons. Drag and drop is optional.",
+        "screenReaderNotes": "Each section announces its position and full text after every move."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "ai",
+        "professional"
+    ]
+}
