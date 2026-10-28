@@ -1,0 +1,34 @@
+{
+    "projects": {
+        "projects.campus-status-board": {
+            "files": {
+                "index.html": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Campus status</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <a class=\"skip\" href=\"#main\">Skip to status</a>\n  <header>\n    <h1>Campus status</h1>\n    <p>Live state of the systems the community relies on.</p>\n  </header>\n  <main id=\"main\">\n    <section class=\"status-grid\" aria-label=\"Systems\">\n      <article class=\"panel\"><h2>Storefront</h2><p>Healthy</p></article>\n      <article class=\"panel\"><h2>Orders API</h2><p>Healthy</p></article>\n      <article class=\"panel\"><h2>Inventory database</h2><p>Degraded</p></article>\n    </section>\n    <section aria-labelledby=\"incidents-heading\">\n      <h2 id=\"incidents-heading\">Open incidents</h2>\n      <table>\n        <caption>Service status</caption>\n        <thead><tr><th scope=\"col\">Service</th><th scope=\"col\">State</th><th scope=\"col\">Owner</th></tr></thead>\n        <tbody>\n          <tr><th scope=\"row\">Inventory database</th><td>Degraded</td><td>Data team</td></tr>\n          <tr><th scope=\"row\">Storefront</th><td>Healthy</td><td>Web team</td></tr>\n          <tr><th scope=\"row\">Orders API</th><td>Healthy</td><td>Service team</td></tr>\n        </tbody>\n      </table>\n      <p><a class=\"primary\" href=\"/incidents\">Review incidents</a></p>\n    </section>\n  </main>\n</body>\n</html>\n",
+                "styles.css": ":root {\n  --ink: #000000;\n  --paper: #FFFFFF;\n  --accent: #B54131;\n  --border: #D6D6D6;\n  --support: #555555;\n  --radius: 5px;\n  --space: 16px;\n}\n\nbody { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font-family: \"Noto Sans\", sans-serif; }\n.skip { display: inline-block; margin-bottom: 16px; color: var(--accent); }\nheader { max-width: 880px; margin-bottom: 24px; }\nmain { max-width: 880px; }\n.status-grid { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }\n.panel { padding: var(--space); border: 1px solid var(--border); border-radius: var(--radius); }\ntable { width: 100%; border-collapse: collapse; margin-top: var(--space); }\nth, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }\n.primary { color: var(--accent); }\n@media (max-width: 700px) {\n  .status-grid { grid-template-columns: 1fr; }\n}\n"
+            }
+        },
+        "projects.inventory-service": {
+            "files": {
+                "inventory.js": "function canFulfill(stock, quantity) {\n  return Number.isInteger(stock) && Number.isInteger(quantity) && stock >= 0 && quantity >= 1 && quantity <= stock;\n}\n\nfunction quoteOrder(items) {\n  let totalCents = 0;\n  for (const item of items) {\n    if (!Number.isInteger(item.quantity) || item.quantity < 1) {\n      return null;\n    }\n    if (!Number.isInteger(item.unitCents) || item.unitCents < 0) {\n      return null;\n    }\n    totalCents += item.unitCents * item.quantity;\n  }\n  return totalCents;\n}\n\nfunction placeOrder(inventory, order) {\n  const seen = new Set();\n  const next = { ...inventory };\n  let totalCents = 0;\n  for (const item of order.items) {\n    if (seen.has(item.id)) {\n      return { ok: false, error: \"duplicate-item\", inventory: { ...inventory } };\n    }\n    seen.add(item.id);\n    if (!Object.prototype.hasOwnProperty.call(inventory, item.id)) {\n      return { ok: false, error: \"unknown-item\", inventory: { ...inventory } };\n    }\n    if (!Number.isInteger(item.quantity) || item.quantity < 1) {\n      return { ok: false, error: \"invalid-quantity\", inventory: { ...inventory } };\n    }\n    if (!Number.isInteger(item.unitCents) || item.unitCents < 0) {\n      return { ok: false, error: \"invalid-price\", inventory: { ...inventory } };\n    }\n    if (next[item.id] < item.quantity) {\n      return { ok: false, error: \"insufficient-stock\", inventory: { ...inventory } };\n    }\n    next[item.id] -= item.quantity;\n    totalCents += item.unitCents * item.quantity;\n  }\n  return { ok: true, inventory: next, totalCents: totalCents };\n}\n"
+            }
+        },
+        "projects.query-lab": {
+            "stages": {
+                "filter": {
+                    "files": {
+                        "query.sql": "SELECT id, total_cents FROM orders WHERE total_cents >= 5000 ORDER BY total_cents DESC;\n"
+                    }
+                },
+                "join": {
+                    "files": {
+                        "query.sql": "SELECT o.id, c.name, o.total_cents\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nORDER BY o.id;\n"
+                    }
+                },
+                "aggregate": {
+                    "files": {
+                        "query.sql": "SELECT c.name, COUNT(*) AS order_count, SUM(o.total_cents) AS revenue_cents\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nGROUP BY c.id, c.name\nORDER BY revenue_cents DESC;\n"
+                    }
+                }
+            }
+        }
+    }
+}
