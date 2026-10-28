@@ -1,0 +1,238 @@
+{
+    "id": "campus.everything-is-misplaced",
+    "version": 1,
+    "sequence": 14,
+    "courseId": "campus",
+    "title": "Everything is misplaced",
+    "summary": "Repair storefront layout with a responsive grid and a consistent design token palette.",
+    "skills": [
+        "web.css"
+    ],
+    "prerequisites": [
+        "web.html"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-css",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "computed-style-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "broken-layout",
+        "briefing": "The product cards overlap and the call to action disappears. Repair styles.css using the campus design tokens. Keep the page usable at narrow widths."
+    },
+    "objectives": [
+        {
+            "id": "grid-layout",
+            "description": "Lay out product cards with the catalog grid.",
+            "stepIds": [
+                "repair-css"
+            ]
+        },
+        {
+            "id": "tokens",
+            "description": "Apply the border radius and accent tokens.",
+            "stepIds": [
+                "repair-css"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:layout"
+    ],
+    "hints": [
+        "Set .catalog to display grid with a 16px gap.",
+        "Give .card a 1px neutral border and a 5px radius.",
+        "The call to action uses the accent background and white text.",
+        "Use display: grid; gap: 16px; .card { border: 1px solid #D6D6D6; border-radius: 5px; } .cta { background: #B54131; color: #fff; } and add a max-width media query."
+    ],
+    "misconceptions": [
+        {
+            "id": "css-changes-content",
+            "description": "Believing CSS rewrites the document's meaning.",
+            "stepId": "css-check",
+            "feedback": "CSS changes presentation. The document structure and text remain HTML."
+        },
+        {
+            "id": "fixed-width",
+            "description": "Using a fixed card width instead of a responsive layout.",
+            "stepId": "repair-css",
+            "feedback": "A fixed width overflows small screens. Use a responsive grid and a media query that stacks cards."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Layout is a system",
+                "body": "CSS grid places items in rows and columns. A gap token keeps spacing consistent. A border and 5px radius make cards recognizable without shadows. The accent color marks a primary action and is used sparingly."
+            },
+            {
+                "title": "Responsive means adaptable",
+                "body": "A media query changes layout rules when the viewport is narrow. Stacking cards in one column prevents horizontal overflow. Test the page at desktop, tablet, and phone widths rather than only at your current window size."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Grid",
+                "definition": "A two-dimensional layout system."
+            },
+            {
+                "term": "Media query",
+                "definition": "A CSS rule that applies only under specified conditions."
+            },
+            {
+                "term": "Token",
+                "definition": "A named design value used consistently across a system."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "repair-css",
+            "title": "Repair the catalog layout",
+            "prompt": "Edit styles.css. Keep the provided tokens. Make the catalog a 16px grid, give cards a 1px neutral border and 5px radius, style .cta with accent #B54131 and white text, and stack cards below 700px.",
+            "evidence": "construction",
+            "language": "css",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Campus store catalog</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <header><h1>Campus store</h1></header>\n  <main>\n    <section class=\"catalog\" aria-label=\"Products\">\n      <article class=\"card\"><h2>Pencil box</h2><p>Twelve pencils for the studio.</p><button class=\"cta\">Add to cart</button></article>\n      <article class=\"card\"><h2>Notebook</h2><p>Lined pages for lab notes.</p><button class=\"cta\">Add to cart</button></article>\n      <article class=\"card\"><h2>Desk lamp</h2><p>Warm light for late sessions.</p><button class=\"cta\">Add to cart</button></article>\n    </section>\n  </main>\n</body>\n</html>\n",
+                    "editable": false,
+                    "language": "html"
+                },
+                {
+                    "path": "styles.css",
+                    "content": ":root {\n  --ink: #000000;\n  --paper: #FFFFFF;\n  --accent: #B54131;\n  --border: #D6D6D6;\n  --support: #555555;\n  --radius: 5px;\n  --space: 16px;\n}\n\nbody { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font-family: \"Noto Sans\", sans-serif; }\n.card { padding: var(--space); }\n.cta { padding: 8px 12px; }\n",
+                    "editable": true,
+                    "language": "css"
+                }
+            ],
+            "entry": "styles.css",
+            "preview": "css",
+            "tests": [
+                {
+                    "kind": "css",
+                    "description": "The catalog uses a grid layout.",
+                    "selector": ".catalog",
+                    "property": "display",
+                    "expected": "grid"
+                },
+                {
+                    "kind": "css",
+                    "description": "Catalog items are separated by 16px.",
+                    "selector": ".catalog",
+                    "property": "gap",
+                    "expected": "16px"
+                },
+                {
+                    "kind": "css",
+                    "description": "Cards use a 5px corner radius.",
+                    "selector": ".card",
+                    "property": "border-top-left-radius",
+                    "expected": "5px"
+                },
+                {
+                    "kind": "css",
+                    "description": "Cards have a 1px neutral top border.",
+                    "selector": ".card",
+                    "property": "border-top-width",
+                    "expected": "1px"
+                },
+                {
+                    "kind": "css",
+                    "description": "Cards use the neutral border color.",
+                    "selector": ".card",
+                    "property": "border-top-color",
+                    "expected": "rgb(214, 214, 214)"
+                },
+                {
+                    "kind": "css",
+                    "description": "The call to action uses the accent background.",
+                    "selector": ".cta",
+                    "property": "background-color",
+                    "expected": "rgb(181, 65, 49)"
+                },
+                {
+                    "kind": "css",
+                    "description": "The call to action text is white.",
+                    "selector": ".cta",
+                    "property": "color",
+                    "expected": "rgb(255, 255, 255)"
+                },
+                {
+                    "kind": "regex",
+                    "description": "A narrow-screen media query stacks the cards.",
+                    "file": "styles.css",
+                    "pattern": "@media[^{]*max-width",
+                    "flags": "i"
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "css-check",
+            "title": "What CSS can change",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "html",
+                    "label": "CSS changes presentation, not the HTML document's meaning.",
+                    "correct": true
+                },
+                {
+                    "id": "responsive",
+                    "label": "A media query can change layout at narrow widths.",
+                    "correct": true
+                },
+                {
+                    "id": "radius",
+                    "label": "A consistent radius token keeps corners consistent.",
+                    "correct": true
+                },
+                {
+                    "id": "shadows",
+                    "label": "Shadows are required to establish hierarchy.",
+                    "correct": false
+                }
+            ],
+            "explanation": "CSS controls layout and appearance. Hierarchy can come from spacing, typography, and borders without shadows."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": [
+            "campus.the-button-does-nothing"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "publish-storefront",
+        "system": "storefront"
+    },
+    "accessibility": {
+        "summary": "The editor and live preview are keyboard reachable. Computed-style test results are text.",
+        "keyboardNotes": "Ctrl+Enter runs tests. The preview can be reached with Tab and scrolled with arrow keys.",
+        "screenReaderNotes": "The preview is labeled Storefront preview. Each test announces the selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "games"
+    ]
+}
