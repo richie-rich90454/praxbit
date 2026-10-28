@@ -1,0 +1,288 @@
+{
+    "id": "campus.the-missing-property",
+    "version": 1,
+    "sequence": 19,
+    "courseId": "campus",
+    "title": "The missing property",
+    "summary": "Repair a TypeScript data model and a function that reads it.",
+    "skills": [
+        "js.objects",
+        "ts.types"
+    ],
+    "prerequisites": [
+        "js.types",
+        "js.loops"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": [
+            "source-editing",
+            "syntax-diagnostics",
+            "transpiled-tests",
+            "structural-checks"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "missing-order-items",
+        "briefing": "An order type claims orders have only an id and customer name. The API sends items, and itemCount crashes. Extend the model and make the function sum quantities."
+    },
+    "objectives": [
+        {
+            "id": "extend-model",
+            "description": "Describe the items array in the Order interface.",
+            "stepIds": [
+                "repair-types"
+            ]
+        },
+        {
+            "id": "count-items",
+            "description": "Return the total quantity across items.",
+            "stepIds": [
+                "repair-types"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:type"
+    ],
+    "hints": [
+        "An order item has a quantity, and the order holds an array of items.",
+        "Add items to the interface with a type of { quantity: number }[].",
+        "itemCount must add every quantity, not just count array entries.",
+        "interface OrderItem { quantity: number } interface Order { id: string; customerName: string; items: OrderItem[]; } Then loop and sum item.quantity."
+    ],
+    "misconceptions": [
+        {
+            "id": "counts-lines",
+            "description": "Counting item rows instead of quantities.",
+            "stepId": "repair-types",
+            "feedback": "An item row can have quantity 3. The total must sum quantities, not count rows."
+        },
+        {
+            "id": "types-runtime",
+            "description": "Expecting a TypeScript interface to validate runtime JSON.",
+            "stepId": "types-check",
+            "answer": "runtime",
+            "feedback": "Interfaces are erased at runtime. They describe code to the compiler; external JSON still needs runtime validation."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Objects group related facts",
+                "body": "An order contains an id, a customer name, and a list of items. Each item has a name and quantity. Objects make those relationships explicit, and arrays hold repeated values such as items."
+            },
+            {
+                "title": "Types describe expectations",
+                "body": "TypeScript checks that code uses declared properties consistently. Interfaces disappear from the running program, so they cannot validate incoming JSON by themselves. A runtime schema is still needed at a trust boundary."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Interface",
+                "definition": "A named description of an object's properties and types."
+            },
+            {
+                "term": "Property",
+                "definition": "A named value inside an object."
+            },
+            {
+                "term": "Type erasure",
+                "definition": "Removal of type information when compiling to JavaScript."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "repair-types",
+            "title": "Repair the order model",
+            "prompt": "Edit order.ts. Extend Order with items, define an item type, and make itemCount return the summed quantity. Run the tests.",
+            "evidence": "debugging",
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "order.ts",
+                    "content": "interface Order {\n  id: string;\n  customerName: string;\n}\n\nfunction itemCount(order: Order): number {\n  let total = 0;\n  for (const item of order.items) {\n    total += item.quantity;\n  }\n  return total;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "order.ts",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Quantities across items are summed.",
+                    "name": "itemCount",
+                    "args": [
+                        {
+                            "id": "A1",
+                            "customerName": "Ada",
+                            "items": [
+                                {
+                                    "name": "Pencil",
+                                    "quantity": 2
+                                },
+                                {
+                                    "name": "Notebook",
+                                    "quantity": 3
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": 5
+                },
+                {
+                    "kind": "function",
+                    "description": "An order with no items totals zero.",
+                    "name": "itemCount",
+                    "args": [
+                        {
+                            "id": "A2",
+                            "customerName": "Bo",
+                            "items": []
+                        }
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "A single item is counted.",
+                    "name": "itemCount",
+                    "args": [
+                        {
+                            "id": "A3",
+                            "customerName": "Cy",
+                            "items": [
+                                {
+                                    "name": "Lamp",
+                                    "quantity": 1
+                                }
+                            ]
+                        }
+                    ],
+                    "expected": 1
+                },
+                {
+                    "kind": "static",
+                    "description": "The Order interface declares items.",
+                    "file": "order.ts",
+                    "includes": [
+                        "interface Order",
+                        "items"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Item quantity is typed as a number.",
+                    "file": "order.ts",
+                    "includes": [
+                        "quantity: number"
+                    ],
+                    "excludes": []
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "types-check",
+            "title": "Do types validate JSON?",
+            "prompt": "The API sends an order where items is a string. The TypeScript interface says items is an array. What happens at runtime after compilation?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the best answer.",
+                "options": [
+                    {
+                        "id": "runtime",
+                        "label": "The program runs without an automatic interface check; the bad data can still break the function."
+                    },
+                    {
+                        "id": "throws",
+                        "label": "TypeScript throws a validation error at runtime."
+                    },
+                    {
+                        "id": "fixes",
+                        "label": "The interface converts the string into an array."
+                    },
+                    {
+                        "id": "network",
+                        "label": "The network request is rejected before JavaScript runs."
+                    }
+                ],
+                "correctId": "runtime",
+                "explanation": "Interfaces are erased. Runtime validation of external data must be implemented with a schema or explicit checks."
+            },
+            "hints": [
+                "Think about what remains after TypeScript compiles.",
+                "Interfaces are not present in the JavaScript output.",
+                "Nothing automatically checks the JSON shape.",
+                "The program runs and the bad data can cause a runtime failure."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "types-claims",
+            "title": "Types and trust boundaries",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "compile",
+                    "label": "Types catch some mistakes before the program runs.",
+                    "correct": true
+                },
+                {
+                    "id": "runtime",
+                    "label": "Interfaces alone do not validate external JSON.",
+                    "correct": true
+                },
+                {
+                    "id": "erase",
+                    "label": "Runtime data still needs validation at trust boundaries.",
+                    "correct": true
+                },
+                {
+                    "id": "guarantee",
+                    "label": "A compiled TypeScript program cannot have runtime errors.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Static types and runtime validation solve different problems. Both are needed at boundaries."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 145,
+        "unlocks": [
+            "campus.the-mysterious-exception"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "integrate-systems",
+        "system": "api"
+    },
+    "accessibility": {
+        "summary": "The TypeScript editor is keyboard accessible and structural checks are described in text.",
+        "keyboardNotes": "Ctrl+Enter runs tests. Standard editor shortcuts work.",
+        "screenReaderNotes": "Each test announces whether it is behavioral or structural, plus the expected result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
