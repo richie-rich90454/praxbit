@@ -5,22 +5,14 @@
     "courseId": "campus",
     "title": "Everything is misplaced",
     "summary": "Repair storefront layout with a responsive grid and a consistent design token palette.",
-    "skills": [
-        "web.css"
-    ],
-    "prerequisites": [
-        "web.html"
-    ],
+    "skills": ["web.css"],
+    "prerequisites": ["web.html"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-css",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "computed-style-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "computed-style-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "grid-layout",
             "description": "Lay out product cards with the catalog grid.",
-            "stepIds": [
-                "repair-css"
-            ]
+            "stepIds": ["repair-css"]
         },
         {
             "id": "tokens",
             "description": "Apply the border radius and accent tokens.",
-            "stepIds": [
-                "repair-css"
-            ]
+            "stepIds": ["repair-css"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["css-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:layout"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:layout"],
     "hints": [
         "Set .catalog to display grid with a 16px gap.",
         "Give .card a 1px neutral border and a 5px radius.",
@@ -216,9 +204,7 @@
     },
     "rewards": {
         "experience": 115,
-        "unlocks": [
-            "campus.the-button-does-nothing"
-        ]
+        "unlocks": ["campus.the-button-does-nothing"]
     },
     "persistence": {
         "kind": "world-action",
@@ -231,8 +217,5 @@
         "screenReaderNotes": "The preview is labeled Storefront preview. Each test announces the selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "games"
-    ]
+    "tags": ["web", "games"]
 }
