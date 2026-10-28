@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "shipping": {
+            "files": {
+                "shipping.py": "def shipping_cost(total_cents):\n    if total_cents >= 5000:\n        return 0\n    return 500\n"
+            }
+        }
+    }
+}
