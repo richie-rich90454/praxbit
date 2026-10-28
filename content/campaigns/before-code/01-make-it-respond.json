@@ -5,20 +5,14 @@
     "courseId": "before-code",
     "title": "Make it respond",
     "summary": "Operate a small machine, notice its rule, and predict what it will do next.",
-    "skills": [
-        "concept.computation"
-    ],
+    "skills": ["concept.computation"],
     "prerequisites": [],
     "difficulty": "beginner",
     "estimatedMinutes": 3,
     "interaction": "machine",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "interactive-simulation",
-            "keyboard",
-            "screen-reader"
-        ]
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
     },
     "scenario": {
         "world": "campus",
@@ -30,31 +24,25 @@
         {
             "id": "run-machine",
             "description": "Run the press with more than one input.",
-            "stepIds": [
-                "stamp"
-            ]
+            "stepIds": ["stamp"]
         },
         {
             "id": "predict-output",
             "description": "Predict an unseen output from the observed rule.",
-            "stepIds": [
-                "stamp"
-            ]
+            "stepIds": ["stamp"]
         },
         {
             "id": "name-parts",
             "description": "Identify input, processing, and output in a new machine.",
-            "stepIds": [
-                "parts"
-            ]
+            "stepIds": ["parts"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["parts-check"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:storefront",
-        "icon:bit"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:storefront", "icon:bit"],
     "hints": [
         "Change the number, run the press, and count the marks that appear.",
         "Look for a relationship between the number you enter and the number of marks.",
@@ -240,9 +228,7 @@
     },
     "rewards": {
         "experience": 50,
-        "unlocks": [
-            "before-code.give-better-instructions"
-        ]
+        "unlocks": ["before-code.give-better-instructions"]
     },
     "persistence": {
         "kind": "none"
@@ -253,8 +239,5 @@
         "screenReaderNotes": "The printed marks are announced as a count and described as output. The prediction options are ordinary radio buttons."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "everything",
-        "web"
-    ]
+    "tags": ["everything", "web"]
 }
