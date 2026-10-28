@@ -1,244 +1,215 @@
 # Deployment
 
-Praxbit targets one lightweight Hono process on a shared VPS, static files through the existing Caddy or Nginx, PostgreSQL 16+, and no server-side learner compilation. The templates in `infra/` are examples. They have not been applied to a production host from this repository.
+Praxbit deploys from a direct clone of this repository with one project-root `.env` and one Node.js process. The same steps work on Windows, macOS, and Linux. The Hono process serves the API and the built web application, so a reverse proxy is optional unless you need TLS or a public hostname. No service manager is required; `pnpm start` runs the process directly.
 
 ## Topology
 
 ```text
-Internet
-  -> existing Caddy or Nginx (TLS, static files, /api proxy)
-       -> /opt/praxbit/current/apps/web/dist        static Vite build
-       -> 127.0.0.1:8787                            one Hono Node.js process
-            -> PostgreSQL 16+                       local or external
-            -> optional AI provider                 external HTTPS
-
-systemd: praxbit.service
-  - unprivileged user praxbit
-  - EnvironmentFile=/etc/praxbit/praxbit.env
-  - MemoryHigh=256M, MemoryMax=384M, CPUQuota=80%
-  - Restart=on-failure
+Browser
+  -> Hono process on HOST:PORT
+       -> apps/web/dist            static web application and service worker
+       -> /api/v1/*                JSON API
+       -> PostgreSQL 16+           local or external
+       -> optional AI provider     external HTTPS
 ```
 
-Do not add Redis, Kafka, Kubernetes, a Docker daemon requirement, a second JVM, a persistent compiler service, or a local LLM for the initial deployment. Do not run arbitrary learner code on this host.
+Do not add Redis, Kafka, Kubernetes, a container runtime requirement, a second JVM, or a persistent compiler service for this deployment. Do not run arbitrary learner code on the server.
 
-## Host assumptions
+## Prerequisites
 
-The production host is expected to have:
+- Node.js 22.12 or newer.
+- pnpm 12.14.0 through Corepack.
+- PostgreSQL 16 or newer, running and reachable from the application host.
+- A writable checkout of this repository.
 
-- 2 vCPUs and 2 GB RAM.
-- Existing Spring Boot and Node.js services.
-- An existing Caddy or Nginx installation and TLS certificates.
-- Node.js 22.12+ available as `/usr/bin/node`.
-- PostgreSQL 16+ reachable with a dedicated role and database.
-- `systemd`, `curl`, `tar`, `rsync` (for off-box backups), and standard PostgreSQL client tools.
+Windows, macOS, and Linux all support the same Node.js and PostgreSQL clients. Install PostgreSQL with the platform installer or package manager, then create a role and database:
 
-Measure the host before deploying. The memory values in the unit are a ceiling, not a promise that the host has room. If PostgreSQL runs on the same host, leave additional headroom and consider an external database.
+```sql
+CREATE ROLE praxbit LOGIN PASSWORD 'replace-this-password';
+CREATE DATABASE praxbit OWNER praxbit;
+```
 
-## Build the artifact
+The commands below use `createdb` and `psql`, which are included with PostgreSQL on every platform.
 
-Build in CI, not on the production host:
+## First deployment
 
 ```bash
+git clone <repository-url> praxbit
+cd praxbit
+```
+
+Create the environment file:
+
+```bash
+# macOS or Linux
+cp .env.example .env
+```
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+Edit `.env` in the project root. At minimum:
+
+```dotenv
+DATABASE_URL=postgresql://praxbit:replace-this-password@127.0.0.1:5432/praxbit
+HOST=0.0.0.0
+PORT=8787
+NODE_ENV=production
+PUBLIC_ORIGIN=http://localhost:8787
+COOKIE_SECURE=0
+```
+
+Set `COOKIE_SECURE=1` only when the browser reaches the site over HTTPS. Set `TRUST_PROXY=1` only when a trusted reverse proxy sets `X-Forwarded-For`. Leave `CORS_ORIGINS` empty for same-origin deployment.
+
+Install, migrate, build, and start:
+
+```bash
+corepack enable
 pnpm install --frozen-lockfile
+pnpm db:migrate
 pnpm build
+pnpm start
 ```
 
-Create a flat artifact containing:
+`pnpm bootstrap` performs install, migration, and build in one cross-platform command. Use `pnpm bootstrap --skip-install` or `--skip-build` when those steps are already complete; migrations always run.
 
-```text
-apps/server/dist/main.js
-apps/web/dist/
-apps/companion/dist/main.js   (optional)
-content/                      (if CONTENT_DIR points inside the release)
-package.json
-```
+The server loads `.env` from the project root automatically. `pnpm db:migrate` and `pnpm db:rollback` use the same loader. Shell variables take precedence over the file. Set `PRAXBIT_ENV_FILE` to use a different file.
 
-Example:
+Open `http://localhost:8787`. The process serves:
+
+- `/` and the single-page fallback for every client route.
+- `/assets/*`, `sw.js`, the manifest, and other build files.
+- `/healthz` and `/readyz`.
+- `/api/v1/*`.
+
+## Platform notes
+
+### Windows
+
+Use PowerShell for the copy command. Run the server from the repository root so the default paths resolve. If the process must survive sign-out, run it under Task Scheduler, NSSM, or another service wrapper with the repository root as the working directory. The server handles `SIGINT` and `SIGTERM` where the process manager provides them.
+
+### macOS
+
+Use `brew install postgresql@16` or the official installer. Run the process under `launchd` or a process manager when it must survive logout. The repository commands are otherwise identical.
+
+### Linux
+
+Use the distribution packages or the official PostgreSQL repository. Run the process from the repository root. Root is allowed; the application does not drop privileges or require a dedicated user. For long-running operation, use a process supervisor of your choice, such as PM2, supervisord, or a terminal multiplexer. systemd is not required.
+
+## Process management
+
+The simplest supported operation is:
 
 ```bash
-tar -czf praxbit-release.tar.gz \
-  apps/server/dist \
-  apps/web/dist \
-  apps/companion/dist \
-  content \
-  package.json
+pnpm start
 ```
 
-The deploy script requires a flat artifact. Do not wrap everything in an extra top-level directory.
+Run it from the repository root so the default web, content, and environment paths resolve. If the process must survive logout or reboot, use a cross-platform supervisor of your choice, such as PM2, supervisord, or a terminal multiplexer.
 
-## First-time setup
+The process reads `.env` itself. Running as root is allowed; no application-level user check exists. If you run as root, protect the checkout and `.env` with filesystem permissions appropriate to your host.
 
-Create the service account and directories:
+## HTTPS and reverse proxies
 
-```bash
-sudo useradd --system --home /opt/praxbit --shell /usr/sbin/nologin praxbit
-sudo install -d -o praxbit -g praxbit -m 0755 /opt/praxbit /opt/praxbit/releases
-sudo install -d -o root -g praxbit -m 0750 /etc/praxbit
-sudo install -d -o praxbit -g praxbit -m 0700 /var/backups/praxbit
-```
+For a public site, terminate TLS at Caddy, Nginx, Cloudflare, or another trusted proxy and forward all traffic to `127.0.0.1:8787`. The Node process already serves static files, so the proxy does not need a separate static root.
 
-Install the environment file:
+Requirements:
 
-```bash
-sudo install -o root -g praxbit -m 0640 \
-  infra/env/praxbit.env.example /etc/praxbit/praxbit.env
-sudo editor /etc/praxbit/praxbit.env
-```
+- Forward the original host and protocol.
+- Set `TRUST_PROXY=1` and `COOKIE_SECURE=1` when the proxy terminates TLS.
+- Do not cache `/api/*` responses.
+- Keep request bodies under `BODY_LIMIT_BYTES`.
+- Preserve the `/api` path prefix.
 
-Replace every placeholder. Do not copy a real environment file into the repository.
-
-Install the unit:
-
-```bash
-sudo install -o root -g root -m 0644 infra/systemd/praxbit.service /etc/systemd/system/praxbit.service
-sudo systemctl daemon-reload
-sudo systemctl enable praxbit
-```
-
-The first start needs a release at `/opt/praxbit/current` and migrations already applied. Do not enable and start before those steps if the health check would fail.
-
-## Database migrations
-
-Migrations are explicit and are not run by `deploy.sh`.
-
-1. Take a backup before a schema change that can lose or rewrite data.
-2. Run migrations from a controlled checkout or CI runner with the same `DATABASE_URL` the server uses.
-3. Verify the server starts and `/readyz` returns `200`.
-4. Deploy the matching application artifact.
-
-```bash
-DATABASE_URL=postgres://praxbit:…@db-host:5432/praxbit pnpm db:migrate
-```
-
-Do not run `pnpm db:rollback` on production without understanding the down migration and having a backup. Prefer forward-only, expand/contract migrations:
-
-1. Add the new nullable column or table.
-2. Deploy code that writes both shapes and reads the old one.
-3. Backfill.
-4. Switch reads.
-5. Remove the old shape in a later release.
-
-The migration directory is `database/migrations`. Do not edit a migration that has shipped.
-
-## Proxy
-
-Use the existing proxy. The examples are:
+The example files remain useful:
 
 - `infra/caddy/Caddyfile.example`
 - `infra/nginx/praxbit.conf.example`
 
-Key requirements:
+Validate and reload the proxy with its own tooling. This repository does not issue certificates.
 
-- Serve `/opt/praxbit/current/apps/web/dist` as static files.
-- `try_files {path} /index.html` for the SPA fallback.
-- Proxy `/api/*` to `127.0.0.1:8787` while preserving the `/api` prefix.
-- Set `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-For`, and `X-Real-IP`.
-- Cache hashed assets for a long time; do not cache `/api/*`.
-- Set security headers. Add a Content-Security-Policy only after testing the bundle, Pyodide worker, and sandboxed previews.
-- Do not replace unrelated server blocks or upstreams.
+## Database migrations
 
-Caddy:
+1. Take a backup before a schema change that can lose or rewrite data.
+2. Run `pnpm db:migrate` with the deployment `.env`.
+3. Verify `/readyz`.
+4. Start or restart the matching application build.
 
 ```bash
-sudo caddy validate --config /etc/caddy/Caddyfile
-sudo systemctl reload caddy
+pnpm db:migrate
 ```
 
-Nginx:
+Rollback is explicit and destructive:
 
 ```bash
-sudo nginx -t
-sudo systemctl reload nginx
+pnpm db:rollback
 ```
 
-## Deploy a release
+Do not run a rollback without understanding the down migration and having a backup. Prefer forward-only, expand/contract migrations.
 
-```bash
-RELEASE_ARTIFACT=/tmp/praxbit-release.tar.gz \
-GIT_SHA="$GITHUB_SHA" \
-HEALTH_URL=https://praxbit.example/readyz \
-bash infra/scripts/deploy.sh
-```
-
-The script:
-
-1. Takes a lock.
-2. Copies or extracts the artifact into a new release directory.
-3. Verifies `apps/server/dist/main.js` and `apps/web/dist/index.html`.
-4. Switches `/opt/praxbit/current` atomically.
-5. Restarts only the `praxbit` service.
-6. Polls the health URL.
-7. Rolls back the symlink and restarts the previous release on failure.
-8. Keeps the last `KEEP_RELEASES` releases (default 5).
-
-It never prints environment values, never runs migrations, and never touches another service.
-
-If the service fails to restart and no previous release exists, the script stops `praxbit` and exits nonzero. That is safer than leaving a broken release serving traffic.
+The migration directory is `database/migrations`. Do not edit a migration that has shipped.
 
 ## Verify a deployment
 
 - `curl -fsS http://127.0.0.1:8787/healthz` returns `{ "status": "ok" }`.
 - `curl -fsS http://127.0.0.1:8787/readyz` returns `{ "status": "ready" }`.
-- The public site loads with a fresh cache and the service worker updates.
-- A guest can open a cached mission and keep progress after refresh.
+- The root page returns the built application, not a directory listing or API 404.
+- A client route such as `/learn` returns the application shell.
+- A guest can open a mission and keep progress after refresh.
 - A test account can register, sign in, start an attempt, submit evidence, sync, and load the world.
-- `systemctl status praxbit` is active, and `journalctl -u praxbit` has no repeated errors.
-- `systemctl show praxbit -p MemoryCurrent` and `systemd-cgtop` show the process within budget.
-- Existing services on the host remain healthy. Check their health endpoints and memory after the deploy.
+- The browser console has no content-security-policy errors for scripts, workers, Pyodide, or the sandboxed preview.
 
-Do not declare success from the health check alone. Exercise the login and sync path.
+Exercise the login and sync path; do not declare success from the health check alone.
+
+## Updating a deployment
+
+Pull the new revision, install dependencies, migrate, build, and restart the process:
+
+```bash
+git pull
+pnpm install --frozen-lockfile
+pnpm db:migrate
+pnpm build
+pnpm start
+```
+
+For a process supervisor, restart through that supervisor. Keep the previous checkout or build until the new one passes `/readyz` and a login-and-sync check.
 
 ## Rollback
 
-Automatic rollback happens when restart or health check fails. Manual rollback:
+Check out the previous commit or release, run `pnpm install --frozen-lockfile`, `pnpm build`, and restart the process. The database schema may not be backward-compatible; restore the backup or roll forward with a fix when it is not.
+
+## Backups
+
+Use `infra/backup/backup-postgres.sh` on Linux or the equivalent `pg_dump` command on any platform:
 
 ```bash
-sudo -u praxbit readlink -f /opt/praxbit/current
-ls -1dt /opt/praxbit/releases/*
-sudo -u praxbit ln -sfn /opt/praxbit/releases/<previous> /opt/praxbit/current.next
-sudo -u praxbit mv -Tf /opt/praxbit/current.next /opt/praxbit/current
-sudo systemctl restart praxbit
-curl -fsS http://127.0.0.1:8787/readyz
+pg_dump --format=custom --file=praxbit.dump "$DATABASE_URL"
+pg_restore --clean --if-exists --dbname="$DATABASE_URL" praxbit.dump
 ```
 
-Rollback caveats:
-
-- A database migration may not be backward-compatible. If the old code cannot read the new schema, restore the backup or roll forward with a fix.
-- Do not roll back by deleting the current release before switching the symlink.
-- Do not force-push or rewrite a release directory.
-- Record the failed release id and the reason.
+A backup is not verified until it has been restored into a disposable database. Keep backups outside the repository and outside the web root.
 
 ## Resource budget
 
 | Resource | Target | How to check |
 | --- | --- | --- |
-| Hono idle RSS | 100–150 MB preferred | `ps -o pid,rss,cmd -C node`, `systemctl show -p MemoryCurrent` |
-| Hono active RSS | under 200 MB preferred | Load test plus `systemd-cgtop` |
+| Hono idle RSS | 100–150 MB preferred | Task Manager, Activity Monitor, `ps` |
+| Hono active RSS | under 200 MB preferred | load test plus platform monitoring |
 | PostgreSQL pool | 2–4 connections | `DB_POOL_SIZE`; `pg_stat_activity` |
-| CPU | under 80% of one core in normal use | `systemd-cgtop`, `pidstat` |
-| Disk | release + backups + journal with headroom | `df -h`, `du -sh` |
-| Journal | bounded | configure `SystemMaxUse` in `journald.conf` |
+| CPU | under 80% of one core in normal use | platform monitoring |
+| Disk | release, build output, and backups with headroom | `df -h`, Explorer, Finder |
 
-These are budgets from the product plan, not measured production guarantees. Record the actual numbers from your host. If memory approaches the ceiling, reduce the release size, cache, or concurrency; do not raise the limit without checking the other services.
+These are budgets, not measured guarantees. Record the actual numbers.
 
 ## Logs
 
-The service logs structured JSON to journald. Read recent logs:
-
-```bash
-journalctl -u praxbit -n 200 --no-pager
-journalctl -u praxbit -f
-```
-
-Bound journal disk use in `/etc/systemd/journald.conf`, for example `SystemMaxUse=200M`, then restart journald during a maintenance window. Do not delete another service's logs.
-
-Proxy access logs are configured separately. Keep retention finite and do not log request bodies, cookies, or authorization headers.
+The server writes structured JSON to standard output. Use the process manager or service wrapper to retain and rotate it. Do not log request bodies, cookies, or authorization headers. Proxy access logs are configured separately.
 
 ## What is not automated
 
-- No production deployment has been performed from this repository.
-- No TLS certificate is issued by this repository; use the existing proxy's ACME setup.
-- No external uptime monitor is provisioned.
-- No container image is published.
-- No app-store build is produced.
+- No public production host or DNS record is provisioned.
+- No TLS certificate is issued by this repository.
+- No Windows service, macOS launch agent, or container image is installed by this repository.
 - No PostgreSQL high-availability or failover is configured.
