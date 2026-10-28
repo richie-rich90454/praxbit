@@ -5,23 +5,14 @@
     "courseId": "before-code",
     "title": "Everything is information",
     "summary": "Encode text as bits and see how a machine decodes a message.",
-    "skills": [
-        "concept.binary",
-        "concept.data"
-    ],
-    "prerequisites": [
-        "concept.computation"
-    ],
+    "skills": ["concept.binary", "concept.data"],
+    "prerequisites": ["concept.computation"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "binary",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "interactive-simulation",
-            "keyboard",
-            "screen-reader"
-        ]
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,20 @@
         {
             "id": "encode-hi",
             "description": "Encode HI as two bytes.",
-            "stepIds": [
-                "encode"
-            ]
+            "stepIds": ["encode"]
         },
         {
             "id": "bit-reasoning",
             "description": "Explain why bit positions have different values.",
-            "stepIds": [
-                "binary-check"
-            ]
+            "stepIds": ["binary-check"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["binary-transfer"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:bits"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:bits"],
     "hints": [
         "Each character uses eight bits. Start with H.",
         "Read the reference table row for H, then the row for I.",
@@ -201,9 +188,7 @@
     },
     "rewards": {
         "experience": 80,
-        "unlocks": [
-            "before-code.find-the-file"
-        ]
+        "unlocks": ["before-code.find-the-file"]
     },
     "persistence": {
         "kind": "world-action",
@@ -216,8 +201,5 @@
         "screenReaderNotes": "Each toggle announces its character, byte, bit position, and current value. The encoded bytes are read as digits."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "games"
-    ]
+    "tags": ["systems", "games"]
 }
