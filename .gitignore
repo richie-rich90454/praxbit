@@ -1,1 +1,16 @@
 PLAN.md
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+.pnpm-store/
+apps/web/dev-dist/
+apps/web/public/pyodide/
