@@ -11,13 +11,16 @@ export interface SkillGraphIssue {
 export class SkillGraph {
     private readonly skillsById: Map<string, SkillDefinition>;
     private readonly childrenById: ReadonlyMap<string, readonly SkillDefinition[]>;
+    private readonly duplicateIds: readonly string[];
 
     public constructor(document: SkillGraphDocument) {
         this.skillsById = new Map<string, SkillDefinition>();
         const children = new Map<string, SkillDefinition[]>();
+        const duplicates: string[] = [];
 
         for (const skill of document.skills) {
             if (this.skillsById.has(skill.id)) {
+                duplicates.push(skill.id);
                 continue;
             }
             this.skillsById.set(skill.id, skill);
@@ -32,6 +35,7 @@ export class SkillGraph {
         }
 
         this.childrenById = children;
+        this.duplicateIds = duplicates;
     }
 
     public get size(): number {
@@ -79,12 +83,18 @@ export class SkillGraph {
     }
 
     public getConceptAncestors(skillId: string): readonly SkillDefinition[] {
-        return this.getAncestors(skillId).filter(function isConcept(skill: SkillDefinition): boolean {
+        return this.getAncestors(skillId).filter(function isConcept(
+            skill: SkillDefinition,
+        ): boolean {
             return skill.kind === "concept";
         });
     }
 
-    public getEligibility(skillId: string, mastery: Readonly<Record<string, number>>, threshold: number): boolean {
+    public getEligibility(
+        skillId: string,
+        mastery: Readonly<Record<string, number>>,
+        threshold: number,
+    ): boolean {
         const skill = this.requireSkill(skillId);
         for (const parentId of skill.parents) {
             const parentScore = mastery[parentId] ?? 0;
@@ -100,14 +110,30 @@ export class SkillGraph {
         const seen = new Set<string>();
         const edges = new Map<string, readonly string[]>();
 
+        for (const duplicateId of this.duplicateIds) {
+            issues.push({
+                kind: "duplicate",
+                skillId: duplicateId,
+                message: "Skill id appears more than once.",
+            });
+        }
+
         for (const skill of this.skillsById.values()) {
             if (seen.has(skill.id)) {
-                issues.push({ kind: "duplicate", skillId: skill.id, message: "Skill id appears more than once." });
+                issues.push({
+                    kind: "duplicate",
+                    skillId: skill.id,
+                    message: "Skill id appears more than once.",
+                });
             }
             seen.add(skill.id);
             for (const parentId of skill.parents) {
                 if (parentId === skill.id) {
-                    issues.push({ kind: "self-parent", skillId: skill.id, message: "Skill lists itself as a prerequisite." });
+                    issues.push({
+                        kind: "self-parent",
+                        skillId: skill.id,
+                        message: "Skill lists itself as a prerequisite.",
+                    });
                 }
                 if (!this.skillsById.has(parentId)) {
                     issues.push({
@@ -128,7 +154,11 @@ export class SkillGraph {
                 return;
             }
             if (visiting.has(skillId)) {
-                issues.push({ kind: "cycle", skillId, message: "The prerequisite graph contains a cycle." });
+                issues.push({
+                    kind: "cycle",
+                    skillId,
+                    message: "The prerequisite graph contains a cycle.",
+                });
                 return;
             }
             visiting.add(skillId);
