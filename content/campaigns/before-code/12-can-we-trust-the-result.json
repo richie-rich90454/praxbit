@@ -1,0 +1,267 @@
+{
+    "id": "before-code.can-we-trust-the-result",
+    "version": 1,
+    "sequence": 12,
+    "courseId": "before-code",
+    "title": "Can we trust the result?",
+    "summary": "Design tests for a stock rule and review an AI claim that a patch is safe.",
+    "skills": [
+        "concept.testing",
+        "concept.responsibility",
+        "testing.boundaries"
+    ],
+    "prerequisites": [
+        "concept.debugging"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "review",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "curated-ai",
+            "no-model-inference"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "ai-patch-review",
+        "briefing": "An AI colleague proposed a stock patch and says one passing test proves it is safe. You own the outcome. Choose tests that would catch boundary failures and decide whether to accept the patch."
+    },
+    "objectives": [
+        {
+            "id": "choose-tests",
+            "description": "Choose tests that cover boundaries without redundant copies.",
+            "stepIds": [
+                "test-cases"
+            ]
+        },
+        {
+            "id": "review-claim",
+            "description": "Evaluate the patch and the evidence behind the claim.",
+            "stepIds": [
+                "patch-review"
+            ]
+        },
+        {
+            "id": "responsibility",
+            "description": "Explain responsibility for delegated work.",
+            "stepIds": [
+                "responsibility-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:shield"
+    ],
+    "hints": [
+        "Test the ordinary case and both edges: zero, exact stock, and too many.",
+        "One happy-path test does not cover quantities at or below zero.",
+        "The patch accepts zero and negative quantities. Reject the claim until those cases are tested.",
+        "Select the three valid boundary cases, the zero case, and the negative case. Reject the patch because it accepts impossible quantities."
+    ],
+    "misconceptions": [
+        {
+            "id": "one-test-proves-all",
+            "description": "Treating one passing example as proof of universal correctness.",
+            "stepId": "patch-review",
+            "feedback": "A test checks a case, not every case. The patch still accepts zero and negative quantities."
+        },
+        {
+            "id": "boundary-is-optional",
+            "description": "Skipping edge cases because the happy path works.",
+            "stepId": "test-cases",
+            "feedback": "Boundaries are where counts and comparisons change behavior. Testing only the ordinary case hides off-by-one and zero/negative mistakes."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Tests are evidence, not proof",
+                "body": "A test exercises a specific input and checks an expected result. A passing suite supports confidence, but it cannot prove every possible behavior unless the cases genuinely cover the rule. Edge cases at zero, exact limits, and just past the limit are especially revealing."
+            },
+            {
+                "title": "Delegation does not transfer responsibility",
+                "body": "You may ask an AI to write a patch. You still decide whether the patch is safe. That decision needs independent evidence: reading the change, running meaningful tests, and checking the boundary cases the claim ignored."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Test case",
+                "definition": "An input with an expected result."
+            },
+            {
+                "term": "Boundary",
+                "definition": "An edge value where behavior often changes."
+            },
+            {
+                "term": "Verification",
+                "definition": "Independent evidence that a claim is true."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "test-design",
+            "id": "test-cases",
+            "title": "Choose the tests",
+            "prompt": "The rule is: allow a shipment only when quantity is between 1 and available stock, inclusive. Select the cases you would keep.",
+            "evidence": "testing",
+            "cases": [
+                {
+                    "id": "normal",
+                    "label": "stock 5, quantity 3 → allow",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "exact",
+                    "label": "stock 5, quantity 5 → allow",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "over",
+                    "label": "stock 5, quantity 6 → reject",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "zero",
+                    "label": "stock 5, quantity 0 → reject",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "negative",
+                    "label": "stock 5, quantity -1 → reject",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "duplicate",
+                    "label": "stock 5, quantity 3 again → allow (duplicate of normal)",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "looks",
+                    "label": "Read the function and confirm it looks reasonable",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The suite covers an ordinary value, both sides of the upper boundary, zero, and a negative quantity. Repeating the ordinary case and reading code are not additional tests."
+        },
+        {
+            "kind": "review",
+            "id": "patch-review",
+            "title": "Review the AI patch",
+            "prompt": "Inspect the patch and the claim. Select every finding supported by the evidence, then choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "AI colleague patch",
+                "caption": "Proposed change to canFulfill plus the message that accompanied it.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "function canFulfill(stock, quantity) {\n  return quantity <= stock;\n}\n\nAI message:\n\"Fixed the stock bug. Test: canFulfill(5, 3) returns true.\nAll checks pass. Safe to deploy.\""
+            },
+            "findings": [
+                {
+                    "id": "zero-negative",
+                    "label": "The patch accepts zero and negative quantities.",
+                    "correct": true
+                },
+                {
+                    "id": "thin-evidence",
+                    "label": "The claim relies on one ordinary example.",
+                    "correct": true
+                },
+                {
+                    "id": "overclaim",
+                    "label": "\"All checks pass\" overstates the evidence because no boundary cases were run.",
+                    "correct": true
+                },
+                {
+                    "id": "type-check",
+                    "label": "The patch rejects non-numeric input because it uses <=.",
+                    "correct": false
+                },
+                {
+                    "id": "safe",
+                    "label": "The patch is safe to deploy as written.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept and deploy"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until zero, negative, exact-stock, and over-stock cases are tested and fixed"
+                },
+                {
+                    "id": "ask",
+                    "label": "Ask the AI to test it again without changing anything"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The comparison permits quantity 0 and negatives, and one passing ordinary case cannot support the claim. The patch needs a lower bound and a real boundary suite."
+        },
+        {
+            "kind": "explain",
+            "id": "responsibility-check",
+            "title": "Who owns the outcome?",
+            "prompt": "Select every statement that reflects responsible engineering.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "delegate",
+                    "label": "You may delegate implementation but remain responsible for the outcome.",
+                    "correct": true
+                },
+                {
+                    "id": "evidence",
+                    "label": "A serious claim needs evidence proportional to its impact.",
+                    "correct": true
+                },
+                {
+                    "id": "compile",
+                    "label": "Code that compiles is automatically correct.",
+                    "correct": false
+                },
+                {
+                    "id": "ai-authority",
+                    "label": "AI output should be trusted when it sounds confident.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Confidence and compilation are not verification. Responsibility stays with the person who accepts the change."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": [
+            "campus.page-with-no-identity"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "secure-service",
+        "system": "api"
+    },
+    "accessibility": {
+        "summary": "Test cases are checkboxes, findings are checkboxes, and the verdict is a radio group. The patch is available as selectable code.",
+        "keyboardNotes": "Use Tab and Space to select cases and findings. Arrow keys change the verdict.",
+        "screenReaderNotes": "The artifact is announced as a code block. Each finding is read with its full text. Feedback lists which findings were missed or unsupported."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "ai",
+        "web"
+    ]
+}
