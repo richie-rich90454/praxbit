@@ -28,7 +28,13 @@ export const EvidenceCategorySchema = z.enum([
 ]);
 export type EvidenceCategory = z.infer<typeof EvidenceCategorySchema>;
 
-export const AssistanceLevelSchema = z.enum(["independent", "hint-1", "hint-2", "hint-3", "hint-4"]);
+export const AssistanceLevelSchema = z.enum([
+    "independent",
+    "hint-1",
+    "hint-2",
+    "hint-3",
+    "hint-4",
+]);
 export type AssistanceLevel = z.infer<typeof AssistanceLevelSchema>;
 
 export const EvidenceOutcomeSchema = z.enum(["success", "failure"]);
