@@ -1,6 +1,12 @@
 import git, { Errors, type FsClient } from "isomorphic-git";
 import FS from "@isomorphic-git/lightning-fs";
+import { Buffer } from "buffer";
 import type { GitStep } from "@praxbit/contracts";
+
+const globalScope = globalThis as typeof globalThis & { Buffer?: typeof Buffer };
+if (globalScope.Buffer === undefined) {
+    globalScope.Buffer = Buffer;
+}
 
 const AUTHOR = { name: "Campus team", email: "team@campus.example" };
 const DIR = "/repo";
@@ -30,7 +36,7 @@ export class GitExercise {
     public constructor(exercise: GitStep) {
         this.exercise = exercise;
         this.fs = new FS(`praxbit-git-${crypto.randomUUID()}`, { wipe: true });
-        this.gitfs = this.fs as unknown as FsClient;
+        this.gitfs = this.fs;
     }
 
     public async initialize(): Promise<void> {
@@ -89,7 +95,10 @@ export class GitExercise {
                 case "diff":
                     return { output: await this.diff(), changed: false };
                 default:
-                    return { output: `git: '${subcommand}' is not supported in this exercise.`, changed: false };
+                    return {
+                        output: `git: '${subcommand}' is not supported in this exercise.`,
+                        changed: false,
+                    };
             }
         } catch (error) {
             return {
@@ -154,7 +163,9 @@ export class GitExercise {
                 } catch {
                     content = "";
                 }
-                checks[`file:${path}`] = fragments.every(function included(fragment: string): boolean {
+                checks[`file:${path}`] = fragments.every(function included(
+                    fragment: string,
+                ): boolean {
                     return content.includes(fragment);
                 });
             }
@@ -167,7 +178,9 @@ export class GitExercise {
                 } catch {
                     content = "";
                 }
-                checks[`exclude:${path}`] = fragments.every(function absent(fragment: string): boolean {
+                checks[`exclude:${path}`] = fragments.every(function absent(
+                    fragment: string,
+                ): boolean {
                     return !content.includes(fragment);
                 });
             }
@@ -365,7 +378,13 @@ export class GitExercise {
 
     private async commit(args: readonly string[]): Promise<string> {
         const messageIndex = args.indexOf("-m");
-        const message = messageIndex >= 0 ? args.slice(messageIndex + 1).join(" ").replace(/^["']|["']$/g, "") : "";
+        const message =
+            messageIndex >= 0
+                ? args
+                      .slice(messageIndex + 1)
+                      .join(" ")
+                      .replace(/^["']|["']$/g, "")
+                : "";
         if (message.length === 0) {
             return "fatal: commit message required with -m";
         }
@@ -381,7 +400,8 @@ export class GitExercise {
             ...(parents.length === 0 ? {} : { parent: parents }),
         });
         this.pendingMerge = undefined;
-        return `[${await git.currentBranch({ fs: this.gitfs, dir: DIR, fullname: false })} ${oid.slice(0, 7)}] ${message}`;
+        const branch = await git.currentBranch({ fs: this.gitfs, dir: DIR, fullname: false });
+        return `[${branch ?? "HEAD"} ${oid.slice(0, 7)}] ${message}`;
     }
 
     private async merge(args: readonly string[]): Promise<string> {
@@ -389,7 +409,8 @@ export class GitExercise {
         if (target === undefined) {
             return "fatal: branch name required";
         }
-        const current = (await git.currentBranch({ fs: this.gitfs, dir: DIR, fullname: false })) ?? undefined;
+        const current =
+            (await git.currentBranch({ fs: this.gitfs, dir: DIR, fullname: false })) ?? undefined;
         if (current === undefined) {
             return "fatal: not on a branch";
         }
@@ -447,4 +468,3 @@ export class GitExercise {
             .join("\n");
     }
 }
-
