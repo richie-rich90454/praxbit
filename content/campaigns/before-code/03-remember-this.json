@@ -1,0 +1,246 @@
+{
+    "id": "before-code.remember-this",
+    "version": 1,
+    "sequence": 3,
+    "courseId": "before-code",
+    "title": "Remember this",
+    "summary": "Use memory cells to store values, change them, and retrieve them later.",
+    "skills": [
+        "concept.state"
+    ],
+    "prerequisites": [
+        "concept.instructions"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "state",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "interactive-simulation",
+            "keyboard",
+            "screen-reader"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "pickup-desk",
+        "briefing": "The pickup desk stores an order code and a box count. The clerk needs the shelf label to read A7 and the count to reach 3 before the next step can run."
+    },
+    "objectives": [
+        {
+            "id": "reach-target",
+            "description": "Store the required values in memory.",
+            "stepIds": [
+                "memory"
+            ]
+        },
+        {
+            "id": "predict-state",
+            "description": "Predict the value after an assignment.",
+            "stepIds": [
+                "assignment-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:storefront",
+        "icon:memory"
+    ],
+    "hints": [
+        "Each operation changes one or both cells. Watch the cells after every click.",
+        "Set the code directly, then set the count and add one.",
+        "You need pickupCode A7 and boxCount 3. Set the count to 2, then use the operation that adds one.",
+        "Run: store A7, set boxCount to 2, add 1 to boxCount."
+    ],
+    "misconceptions": [
+        {
+            "id": "assignment-is-equality",
+            "description": "Treating assignment as a permanent mathematical equality.",
+            "stepId": "assignment-check",
+            "answer": "forever",
+            "feedback": "Assignment stores the current value. A later assignment can replace it. The cell is not locked to that number forever."
+        },
+        {
+            "id": "add-before-set",
+            "description": "Adding before initializing the count.",
+            "stepId": "memory",
+            "feedback": "The count started at 0. Adding one produces 1, not 3. Set the intended starting value first."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "State is remembered information",
+                "body": "A memory cell holds a value that later instructions can read or replace. The pickup code and box count are state. Without state, every instruction would start from nothing."
+            },
+            {
+                "title": "Assignment changes state",
+                "body": "The operation set boxCount to 2 stores 2. Add one reads the current value, computes 3, and stores the result back. Assignment is not the same as mathematical equality: a later step can assign a different value."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "State",
+                "definition": "Values a system remembers between steps."
+            },
+            {
+                "term": "Assignment",
+                "definition": "Storing a value into a named cell."
+            },
+            {
+                "term": "Retrieval",
+                "definition": "Reading a stored value for later use."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "state",
+            "id": "memory",
+            "title": "Set the pickup desk memory",
+            "prompt": "Apply operations until the memory matches the target. Operations may be applied in a useful order; each click changes state.",
+            "evidence": "construction",
+            "cells": [
+                {
+                    "id": "pickupCode",
+                    "label": "Pickup code",
+                    "initial": "none"
+                },
+                {
+                    "id": "boxCount",
+                    "label": "Box count",
+                    "initial": "0"
+                }
+            ],
+            "operations": [
+                {
+                    "id": "set-code",
+                    "label": "Store A7 in pickupCode",
+                    "effects": {
+                        "pickupCode": "A7"
+                    }
+                },
+                {
+                    "id": "set-two",
+                    "label": "Set boxCount to 2",
+                    "effects": {
+                        "boxCount": "2"
+                    }
+                },
+                {
+                    "id": "add-one",
+                    "label": "Add 1 to boxCount",
+                    "effects": {
+                        "boxCount": "3"
+                    }
+                },
+                {
+                    "id": "clear",
+                    "label": "Reset both cells",
+                    "effects": {
+                        "pickupCode": "none",
+                        "boxCount": "0"
+                    }
+                }
+            ],
+            "target": {
+                "pickupCode": "A7",
+                "boxCount": "3"
+            },
+            "explanation": "The final state holds A7 and 3. The operations changed memory one step at a time."
+        },
+        {
+            "kind": "quiz",
+            "id": "assignment-check",
+            "title": "What remains after assignment?",
+            "prompt": "A program runs: bagCount = 2, then bagCount = 5. What does bagCount hold afterwards?",
+            "evidence": "prediction",
+            "quiz": {
+                "prompt": "Choose the value after both assignments.",
+                "options": [
+                    {
+                        "id": "two",
+                        "label": "2"
+                    },
+                    {
+                        "id": "five",
+                        "label": "5"
+                    },
+                    {
+                        "id": "seven",
+                        "label": "7"
+                    },
+                    {
+                        "id": "forever",
+                        "label": "Both 2 and 5 forever"
+                    }
+                ],
+                "correctId": "five",
+                "explanation": "The second assignment replaces the stored value. The cell holds 5 after the program reaches that line."
+            },
+            "hints": [
+                "Read the assignments from top to bottom.",
+                "The second assignment happens later.",
+                "The later value replaces the earlier one.",
+                "bagCount holds 5. The 2 was overwritten."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "state-claims",
+            "title": "State and correctness",
+            "prompt": "Select the accurate statements about state.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "remember",
+                    "label": "State lets later steps reuse earlier results.",
+                    "correct": true
+                },
+                {
+                    "id": "overwrite",
+                    "label": "A later assignment can replace an earlier value.",
+                    "correct": true
+                },
+                {
+                    "id": "invisible",
+                    "label": "Stored values cannot affect output.",
+                    "correct": false
+                },
+                {
+                    "id": "same",
+                    "label": "Two programs with different state must behave identically.",
+                    "correct": false
+                }
+            ],
+            "explanation": "State carries information forward and can change. Two systems starting from different state can produce different output."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 60,
+        "unlocks": [
+            "before-code.make-a-decision"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Each memory cell is exposed as a labeled value. Operations are normal buttons and the target is always visible as text.",
+        "keyboardNotes": "Tab to an operation and press Enter or Space. The updated cells are announced politely.",
+        "screenReaderNotes": "The target reads pickupCode A7 and boxCount 3. Cell changes are announced after every operation."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "everything",
+        "web"
+    ]
+}
