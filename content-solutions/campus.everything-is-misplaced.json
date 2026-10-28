@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-css": {
+            "files": {
+                "styles.css": ":root {\n  --ink: #000000;\n  --paper: #FFFFFF;\n  --accent: #B54131;\n  --border: #D6D6D6;\n  --support: #555555;\n  --radius: 5px;\n  --space: 16px;\n}\n\nbody { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font-family: \"Noto Sans\", sans-serif; }\n.catalog { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }\n.card { padding: var(--space); border: 1px solid var(--border); border-radius: var(--radius); background: var(--paper); }\n.card h2 { margin: 0 0 8px; font-size: 20px; }\n.cta { padding: 8px 12px; border: 0; border-radius: var(--radius); background: var(--accent); color: var(--paper); font: inherit; }\n@media (max-width: 640px) {\n  .catalog { grid-template-columns: 1fr; }\n}\n"
+            }
+        }
+    }
+}
