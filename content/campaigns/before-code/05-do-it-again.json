@@ -1,0 +1,268 @@
+{
+    "id": "before-code.do-it-again",
+    "version": 1,
+    "sequence": 5,
+    "courseId": "before-code",
+    "title": "Do it again",
+    "summary": "Automate repeated work with a loop and check the number of repetitions.",
+    "skills": [
+        "concept.iteration"
+    ],
+    "prerequisites": [
+        "concept.conditions"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "loop",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "interactive-simulation",
+            "keyboard",
+            "screen-reader"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "delivery",
+        "initialState": "packing-line",
+        "briefing": "Five parcels wait at the packing line. The robot arm repeats one labeled cycle for every parcel. A wrong count leaves a parcel unpacked or runs an extra cycle."
+    },
+    "objectives": [
+        {
+            "id": "set-repetitions",
+            "description": "Choose the correct number of repetitions.",
+            "stepIds": [
+                "packing-loop"
+            ]
+        },
+        {
+            "id": "order-body",
+            "description": "Order the actions inside the repeated block.",
+            "stepIds": [
+                "packing-loop"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:delivery",
+        "icon:loop"
+    ],
+    "hints": [
+        "Count the parcels that need packing.",
+        "Each cycle should label, seal, and scan one parcel.",
+        "Five parcels means five cycles. Inside a cycle, the label goes on before sealing.",
+        "Repeat 5 times. Each cycle: apply label, seal the box, scan the label."
+    ],
+    "misconceptions": [
+        {
+            "id": "off-by-one",
+            "description": "One repetition short because counting starts at zero.",
+            "stepId": "packing-loop",
+            "feedback": "There are five parcels. The loop must run five times. Starting an index at zero does not reduce the number of parcels."
+        },
+        {
+            "id": "seal-before-label",
+            "description": "Sealing before attaching the label.",
+            "stepId": "packing-loop",
+            "feedback": "The scanner reads the label, so the label must be attached before sealing and scanning. Order matters inside the loop body."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Loops repeat a block",
+                "body": "A loop runs the same block of steps more than once. The loop needs a stopping rule, such as a fixed count or a condition that becomes false. The block should leave the system in a valid state after each pass."
+            },
+            {
+                "title": "Counts and boundaries",
+                "body": "Repeating five times means exactly five passes. An off-by-one error produces four or six. When you write loops later, test the first and last iteration because those boundaries reveal counting mistakes."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Loop",
+                "definition": "A repeated block of instructions."
+            },
+            {
+                "term": "Iteration",
+                "definition": "One pass through a loop body."
+            },
+            {
+                "term": "Loop body",
+                "definition": "The steps repeated on each pass."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "loop",
+            "id": "packing-loop",
+            "title": "Program the packing cycle",
+            "prompt": "Choose the repetition count and arrange the block. The robot runs the block once per pass.",
+            "evidence": "construction",
+            "repeatChoices": [
+                3,
+                4,
+                5,
+                6
+            ],
+            "correctRepeat": 5,
+            "bodyItems": [
+                {
+                    "id": "label",
+                    "label": "Apply the address label"
+                },
+                {
+                    "id": "seal",
+                    "label": "Seal the box"
+                },
+                {
+                    "id": "scan",
+                    "label": "Scan the label"
+                }
+            ],
+            "correctBody": [
+                "label",
+                "seal",
+                "scan"
+            ],
+            "explanation": "Five parcels need five cycles. Each cycle labels, seals, and then scans one parcel."
+        },
+        {
+            "kind": "trace",
+            "id": "loop-trace",
+            "title": "Trace two passes",
+            "prompt": "Follow the loop for two iterations. Then enter the final values of packed and boxesLeft.",
+            "evidence": "prediction",
+            "lines": [
+                {
+                    "id": "start",
+                    "code": "packed = 0"
+                },
+                {
+                    "id": "left",
+                    "code": "boxesLeft = 5"
+                },
+                {
+                    "id": "loop",
+                    "code": "repeat 2 times:"
+                },
+                {
+                    "id": "body1",
+                    "code": "  packed = packed + 1"
+                },
+                {
+                    "id": "body2",
+                    "code": "  boxesLeft = boxesLeft - 1"
+                }
+            ],
+            "watches": [
+                {
+                    "id": "packed",
+                    "label": "packed",
+                    "initial": "0"
+                },
+                {
+                    "id": "boxesLeft",
+                    "label": "boxesLeft",
+                    "initial": "5"
+                }
+            ],
+            "snapshots": [
+                {
+                    "lineId": "start",
+                    "values": {
+                        "packed": "0",
+                        "boxesLeft": "5"
+                    }
+                },
+                {
+                    "lineId": "left",
+                    "values": {
+                        "packed": "0",
+                        "boxesLeft": "5"
+                    }
+                },
+                {
+                    "lineId": "loop",
+                    "values": {
+                        "packed": "0",
+                        "boxesLeft": "5"
+                    },
+                    "note": "The loop body runs twice."
+                },
+                {
+                    "lineId": "body2",
+                    "values": {
+                        "packed": "2",
+                        "boxesLeft": "3"
+                    },
+                    "note": "After two passes, two boxes are packed."
+                }
+            ],
+            "explanation": "Each pass adds one to packed and subtracts one from boxesLeft. Two passes produce packed 2 and boxesLeft 3."
+        },
+        {
+            "kind": "quiz",
+            "id": "loop-transfer",
+            "title": "A different repetition",
+            "prompt": "A water tank starts with 40 liters. A pump adds 5 liters per minute for 6 minutes. Which loop describes the process?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the correct repetition plan.",
+                "options": [
+                    {
+                        "id": "six",
+                        "label": "Repeat 6 times: add 5 liters"
+                    },
+                    {
+                        "id": "five",
+                        "label": "Repeat 5 times: add 6 liters"
+                    },
+                    {
+                        "id": "once",
+                        "label": "Add 30 liters once, without a loop"
+                    },
+                    {
+                        "id": "forever",
+                        "label": "Repeat forever: add 5 liters"
+                    }
+                ],
+                "correctId": "six",
+                "explanation": "Six minutes at five liters per minute means six repetitions of add five liters. A single addition could produce the same total but no longer describes the timed process."
+            },
+            "hints": [
+                "How many minutes pass?",
+                "How much is added per minute?",
+                "Repeat once per minute.",
+                "Six repetitions, each adding 5 liters."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 70,
+        "unlocks": [
+            "before-code.one-step-at-a-time"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The repetition count is a group of buttons and the body order uses move buttons. The trace exposes each watched value as text.",
+        "keyboardNotes": "Choose a repetition count with arrow keys or buttons. Move body actions with the up and down buttons.",
+        "screenReaderNotes": "The loop is announced as a block that repeats the selected number of times. Each trace step announces the line and updated values."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "everything",
+        "games"
+    ]
+}
