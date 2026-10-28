@@ -1,0 +1,223 @@
+{
+    "id": "before-code.everything-is-information",
+    "version": 1,
+    "sequence": 8,
+    "courseId": "before-code",
+    "title": "Everything is information",
+    "summary": "Encode text as bits and see how a machine decodes a message.",
+    "skills": [
+        "concept.binary",
+        "concept.data"
+    ],
+    "prerequisites": [
+        "concept.computation"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "binary",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "interactive-simulation",
+            "keyboard",
+            "screen-reader"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "control-message",
+        "briefing": "The robotics lab only accepts bytes. Send the two-letter message HI using the reference table. One wrong bit changes the command."
+    },
+    "objectives": [
+        {
+            "id": "encode-hi",
+            "description": "Encode HI as two bytes.",
+            "stepIds": [
+                "encode"
+            ]
+        },
+        {
+            "id": "bit-reasoning",
+            "description": "Explain why bit positions have different values.",
+            "stepIds": [
+                "binary-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:bits"
+    ],
+    "hints": [
+        "Each character uses eight bits. Start with H.",
+        "Read the reference table row for H, then the row for I.",
+        "The first byte is 01001000 and the second is 01001001.",
+        "Set the first byte to 01001000 and the second to 01001001."
+    ],
+    "misconceptions": [
+        {
+            "id": "bit-order",
+            "description": "Reading bits in the wrong order.",
+            "stepId": "encode",
+            "answer": "0001001000010010",
+            "feedback": "The table reads left to right from the most significant bit. Reversing each byte changes every character."
+        },
+        {
+            "id": "decimal-equals-bits",
+            "description": "Treating a decimal digit as one bit.",
+            "stepId": "binary-check",
+            "feedback": "A byte has eight bits. The decimal number 8 is not the same as one bit."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Bits are a choice of two states",
+                "body": "A bit stores one of two values, often written 0 and 1. A group of eight bits is a byte and can represent 256 different patterns. Text, images, and instructions are all encoded as patterns with agreed meanings."
+            },
+            {
+                "title": "Encoding needs an agreement",
+                "body": "The pattern 01001000 means H only because both sides agree on an encoding such as ASCII. A different encoding could assign a different character. Data without context is just bits."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Bit",
+                "definition": "A value with exactly two possible states."
+            },
+            {
+                "term": "Byte",
+                "definition": "Eight bits treated as one unit."
+            },
+            {
+                "term": "Encoding",
+                "definition": "An agreed mapping between symbols and patterns."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "binary",
+            "id": "encode",
+            "title": "Encode the control message",
+            "prompt": "Set every bit so the two bytes encode the message HI. Use the reference table.",
+            "evidence": "construction",
+            "message": "HI",
+            "bitsPerChar": 8,
+            "expectedBits": "0100100001001001",
+            "reference": [
+                {
+                    "char": "A",
+                    "bits": "01000001"
+                },
+                {
+                    "char": "B",
+                    "bits": "01000010"
+                },
+                {
+                    "char": "H",
+                    "bits": "01001000"
+                },
+                {
+                    "char": "I",
+                    "bits": "01001001"
+                }
+            ],
+            "explanation": "H is 01001000 and I is 01001001 in ASCII. The lab receives two complete bytes."
+        },
+        {
+            "kind": "explain",
+            "id": "binary-check",
+            "title": "What do the bits mean?",
+            "prompt": "Select every accurate statement about bits and encoding.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "two-states",
+                    "label": "A bit can represent exactly two states.",
+                    "correct": true
+                },
+                {
+                    "id": "context",
+                    "label": "Bits need an encoding agreement to become text.",
+                    "correct": true
+                },
+                {
+                    "id": "one-digit",
+                    "label": "The decimal digit 8 is the same thing as one bit.",
+                    "correct": false
+                },
+                {
+                    "id": "always-text",
+                    "label": "A byte always represents one letter.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Bits hold two states. A byte can encode a letter under an agreement, but it can also hold a number, part of an image, or a machine instruction."
+        },
+        {
+            "kind": "quiz",
+            "id": "binary-transfer",
+            "title": "Why eight bits?",
+            "prompt": "Eight bits can form 256 distinct patterns. Why does that matter for encoding?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the best explanation.",
+                "options": [
+                    {
+                        "id": "space",
+                        "label": "It gives enough distinct patterns for many common characters and control codes."
+                    },
+                    {
+                        "id": "speed",
+                        "label": "It makes every message exactly eight times faster."
+                    },
+                    {
+                        "id": "decimal",
+                        "label": "It matches the decimal number 256 exactly."
+                    },
+                    {
+                        "id": "random",
+                        "label": "The number eight has no special meaning."
+                    }
+                ],
+                "correctId": "space",
+                "explanation": "A larger set of patterns can represent more symbols. 256 is enough for ASCII and many control codes, though not every writing system."
+            },
+            "hints": [
+                "Count the possible patterns from eight bits: two choices each.",
+                "More patterns means more possible symbols.",
+                "256 different patterns is enough for a common character set.",
+                "The number of distinct patterns determines how many symbols the encoding can cover."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 80,
+        "unlocks": [
+            "before-code.find-the-file"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "enable-robotics",
+        "system": "robotics"
+    },
+    "accessibility": {
+        "summary": "Each bit is a checkbox with a visible 0 or 1 label. The reference table is real table markup.",
+        "keyboardNotes": "Tab through the bit toggles and press Space to change a bit.",
+        "screenReaderNotes": "Each toggle announces its character, byte, bit position, and current value. The encoded bytes are read as digits."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "games"
+    ]
+}
