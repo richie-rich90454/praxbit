@@ -1,0 +1,229 @@
+{
+    "id": "python.loops",
+    "version": 1,
+    "sequence": 33,
+    "courseId": "python-foundations",
+    "title": "Stock totals in Python",
+    "summary": "Loop over a list of dictionaries and accumulate a total.",
+    "skills": [
+        "python.functions",
+        "python.control"
+    ],
+    "prerequisites": [
+        "python.control"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-python",
+        "capabilities": [
+            "pyodide-wasm",
+            "source-editing",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "python-stock-total",
+        "briefing": "A Python automation script reports stock from a list of product dictionaries. It currently returns the last quantity instead of the total."
+    },
+    "objectives": [
+        {
+            "id": "total",
+            "description": "Sum quantities across a list.",
+            "stepIds": [
+                "stock-total"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:python"
+    ],
+    "hints": [
+        "Initialize total to 0 before the loop.",
+        "Use for item in items and add item[\"quantity\"].",
+        "Return the accumulated total after the loop.",
+        "total = 0; for item in items: total += item[\"quantity\"]; return total"
+    ],
+    "misconceptions": [
+        {
+            "id": "returns-last",
+            "description": "Returning the last item instead of the accumulator.",
+            "stepId": "stock-total",
+            "feedback": "The loop must add each quantity to a total, then return that total."
+        },
+        {
+            "id": "key-error",
+            "description": "Reading a missing dictionary key.",
+            "stepId": "stock-total",
+            "feedback": "The provided data uses the key quantity. Access it with item[\"quantity\"]."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Python lists and dictionaries",
+                "body": "A list holds ordered values. A dictionary maps keys to values. A list of dictionaries is a common shape for JSON-like data. Iterating with for gives each dictionary a name inside the loop body."
+            },
+            {
+                "title": "Accumulate, then return",
+                "body": "A total starts at zero. Each iteration adds one value. The return happens after the loop so it includes every item. Returning inside the loop exits after the first or last value."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "List",
+                "definition": "An ordered Python collection."
+            },
+            {
+                "term": "Dictionary",
+                "definition": "A collection of key-value pairs."
+            },
+            {
+                "term": "Accumulator",
+                "definition": "A variable collecting a result across iterations."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "stock-total",
+            "title": "Sum stock quantities",
+            "prompt": "Edit stock.py. total_stock(items) returns the sum of every quantity.",
+            "evidence": "construction",
+            "language": "python",
+            "files": [
+                {
+                    "path": "stock.py",
+                    "content": "def total_stock(items):\n    total = 0\n    for item in items:\n        total = item[\"quantity\"]\n    return total\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "stock.py",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Two products are summed.",
+                    "name": "total_stock",
+                    "args": [
+                        [
+                            {
+                                "name": "Pencil",
+                                "quantity": 3
+                            },
+                            {
+                                "name": "Notebook",
+                                "quantity": 2
+                            }
+                        ]
+                    ],
+                    "expected": 5
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty list totals zero.",
+                    "name": "total_stock",
+                    "args": [
+                        []
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "A single product is counted.",
+                    "name": "total_stock",
+                    "args": [
+                        [
+                            {
+                                "name": "Lamp",
+                                "quantity": 4
+                            }
+                        ]
+                    ],
+                    "expected": 4
+                },
+                {
+                    "kind": "function",
+                    "description": "Many products accumulate correctly.",
+                    "name": "total_stock",
+                    "args": [
+                        [
+                            {
+                                "name": "A",
+                                "quantity": 1
+                            },
+                            {
+                                "name": "B",
+                                "quantity": 2
+                            },
+                            {
+                                "name": "C",
+                                "quantity": 3
+                            }
+                        ]
+                    ],
+                    "expected": 6
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "python-loop-check",
+            "title": "Loop semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "indent",
+                    "label": "The indented block runs once per list item.",
+                    "correct": true
+                },
+                {
+                    "id": "return",
+                    "label": "A return inside the loop exits the function immediately.",
+                    "correct": true
+                },
+                {
+                    "id": "empty",
+                    "label": "A loop over an empty list still runs once.",
+                    "correct": false
+                },
+                {
+                    "id": "accumulate",
+                    "label": "The accumulator must not be reset on every iteration.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Indentation defines the loop body. Returning early or resetting the accumulator changes the result."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Python editor and tests are keyboard accessible. Data shapes are described as text.",
+        "keyboardNotes": "Ctrl+Enter runs tests. The runtime status is announced.",
+        "screenReaderNotes": "Tests announce the list contents, expected total, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "ai"
+    ]
+}
