@@ -1,0 +1,21 @@
+{
+    "version": 1,
+    "events": [
+        {
+            "id": "campus.duplicate-orders",
+            "title": "The duplicated delivery",
+            "summary": "A club member retries an order after a timeout. Sixty orders are charged twice. Which guard prevents this without blocking legitimate new orders?",
+            "weekOf": "2026-10-26",
+            "skillIds": ["api.validation", "concept.state"],
+            "options": [
+                { "id": "idempotency-key", "label": "Use a stable idempotency key and record the accepted result before the irreversible side effect." },
+                { "id": "sleep", "label": "Wait five seconds before every order." },
+                { "id": "disable", "label": "Disable order retries entirely." },
+                { "id": "log", "label": "Log each request and hope the operator notices." }
+            ],
+            "answerHash": "7da48834878d9507345aaeaf6aaecc7f64d1993633fc17c43273d927c7f59fb2",
+            "answerSalt": "praxbit-campus-2026",
+            "points": 100
+        }
+    ]
+}
