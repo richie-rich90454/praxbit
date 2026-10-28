@@ -1,0 +1,277 @@
+{
+    "id": "algorithms.frequency-map",
+    "version": 1,
+    "sequence": 38,
+    "courseId": "algorithms",
+    "title": "Frequency map",
+    "summary": "Count values with a Map and return the most frequent one deterministically.",
+    "skills": [
+        "algorithms.hashing"
+    ],
+    "prerequisites": [
+        "algorithms.arrays"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "frequency-lab",
+        "briefing": "The campus analytics desk needs the most frequent value in a list. Ties must resolve to the lexicographically smallest value so reports are deterministic."
+    },
+    "objectives": [
+        {
+            "id": "count",
+            "description": "Count occurrences with a Map.",
+            "stepIds": [
+                "mode-code"
+            ]
+        },
+        {
+            "id": "tie",
+            "description": "Resolve ties deterministically.",
+            "stepIds": [
+                "mode-code"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:database",
+        "icon:hash"
+    ],
+    "hints": [
+        "Create a Map from value to count.",
+        "Loop over values and increment the stored count.",
+        "Track the best value and break ties with localeCompare or <.",
+        "For each value, update its count; if count is higher, or equal and the value sorts earlier, replace the best."
+    ],
+    "misconceptions": [
+        {
+            "id": "object-keys",
+            "description": "Using a plain object for arbitrary key values.",
+            "stepId": "mode-code",
+            "feedback": "A Map handles any key type without prototype collisions and preserves clear counting semantics."
+        },
+        {
+            "id": "nondeterministic-tie",
+            "description": "Returning whichever value happens to be seen first on a tie.",
+            "stepId": "mode-code",
+            "feedback": "Input order should not silently decide a tie. Use the documented lexical rule."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Count with a hash map",
+                "body": "A Map stores key-value pairs. Counting assigns each distinct value a number, giving expected O(1) lookup per element and O(n) total work. This is faster than comparing every pair."
+            },
+            {
+                "title": "Determinism is part of correctness",
+                "body": "When several values share the highest count, a report needs a rule. Choosing the lexicographically smallest makes output reproducible regardless of input order or language implementation details."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Hash map",
+                "definition": "A key-value structure with fast lookup."
+            },
+            {
+                "term": "Frequency",
+                "definition": "How many times a value occurs."
+            },
+            {
+                "term": "Deterministic",
+                "definition": "Producing the same result for the same input."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "mode-code",
+            "title": "Find the most frequent value",
+            "prompt": "Edit frequencies.js. mode(values) returns the most frequent string, breaking ties lexicographically.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "frequencies.js",
+                    "content": "function mode(values) {\n  return values[0];\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "frequencies.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Returns the clear winner.",
+                    "name": "mode",
+                    "args": [
+                        [
+                            "pen",
+                            "lamp",
+                            "pen",
+                            "notebook"
+                        ]
+                    ],
+                    "expected": "pen"
+                },
+                {
+                    "kind": "function",
+                    "description": "Resolves a two-way tie lexicographically.",
+                    "name": "mode",
+                    "args": [
+                        [
+                            "lamp",
+                            "pen",
+                            "lamp",
+                            "pen"
+                        ]
+                    ],
+                    "expected": "lamp"
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles a single value.",
+                    "name": "mode",
+                    "args": [
+                        [
+                            "desk"
+                        ]
+                    ],
+                    "expected": "desk"
+                },
+                {
+                    "kind": "function",
+                    "description": "Tie between three values picks the smallest.",
+                    "name": "mode",
+                    "args": [
+                        [
+                            "z",
+                            "a",
+                            "m"
+                        ]
+                    ],
+                    "expected": "a"
+                },
+                {
+                    "kind": "function",
+                    "description": "Counts across repeated groups.",
+                    "name": "mode",
+                    "args": [
+                        [
+                            "a",
+                            "b",
+                            "b",
+                            "a",
+                            "a",
+                            "c"
+                        ]
+                    ],
+                    "expected": "a"
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "complexity-check",
+            "title": "Why a Map?",
+            "prompt": "Counting n values with a Map takes expected O(n) work. What would comparing every pair cost?",
+            "evidence": "prediction",
+            "quiz": {
+                "prompt": "Choose the closest growth.",
+                "options": [
+                    {
+                        "id": "n2",
+                        "label": "O(n²)"
+                    },
+                    {
+                        "id": "n",
+                        "label": "O(n)"
+                    },
+                    {
+                        "id": "log",
+                        "label": "O(log n)"
+                    },
+                    {
+                        "id": "one",
+                        "label": "O(1)"
+                    }
+                ],
+                "correctId": "n2",
+                "explanation": "Comparing each element with every other is quadratic. A frequency map avoids the repeated scan."
+            },
+            "hints": [
+                "Nested loops multiply work.",
+                "Each of n elements compares with up to n others.",
+                "The growth is n times n.",
+                "O(n²)."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "map-check",
+            "title": "Hash map trade-offs",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "lookup",
+                    "label": "A Map gives expected constant-time lookup.",
+                    "correct": true
+                },
+                {
+                    "id": "space",
+                    "label": "A frequency map uses additional memory proportional to distinct values.",
+                    "correct": true
+                },
+                {
+                    "id": "order",
+                    "label": "A Map guarantees sorted key order.",
+                    "correct": false
+                },
+                {
+                    "id": "tie",
+                    "label": "Tie-breaking must be explicit for deterministic output.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Hash maps trade memory for fast lookup. They do not provide sorted iteration."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 125,
+        "unlocks": [
+            "algorithms.complexity"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The JS editor and tests are keyboard accessible. Complexity choices are radio buttons.",
+        "keyboardNotes": "Ctrl+Enter runs tests. Arrow keys change complexity options.",
+        "screenReaderNotes": "Tests announce the values, expected mode, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
