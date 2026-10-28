@@ -1,0 +1,195 @@
+{
+    "version": 1,
+    "projects": [
+        {
+            "id": "projects.campus-status-board",
+            "title": "Campus status board",
+            "summary": "Build an accessible status board with a semantic table, responsive layout, and design tokens.",
+            "difficulty": "beginner",
+            "skills": ["web.html", "web.css", "web.accessibility"],
+            "estimatedMinutes": 45,
+            "runtime": "browser-html",
+            "brief": [
+                "The campus operations desk needs a status board that works on a wall display and on a phone.",
+                "Build the structure first, then the layout, then check the accessible table semantics.",
+                "Use only Noto Sans, the five-pixel radius token, neutral borders, and the accent color for the one primary action."
+            ],
+            "files": {
+                "index.html": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Campus status</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <header>\n    <h1>Campus status</h1>\n    <p>Live state of the systems the community relies on.</p>\n  </header>\n  <main id=\"main\">\n    <section class=\"status-grid\" aria-label=\"Systems\">\n      <article class=\"panel\"><h2>Storefront</h2><p>Healthy</p></article>\n      <article class=\"panel\"><h2>Orders API</h2><p>Healthy</p></article>\n      <article class=\"panel\"><h2>Inventory database</h2><p>Degraded</p></article>\n    </section>\n    <section aria-labelledby=\"incidents-heading\">\n      <h2 id=\"incidents-heading\">Open incidents</h2>\n      <table>\n        <caption>Service status</caption>\n        <thead><tr><th scope=\"col\">Service</th><th scope=\"col\">State</th><th scope=\"col\">Owner</th></tr></thead>\n        <tbody>\n          <tr><th scope=\"row\">Inventory database</th><td>Degraded</td><td>Data team</td></tr>\n          <tr><th scope=\"row\">Storefront</th><td>Healthy</td><td>Web team</td></tr>\n          <tr><th scope=\"row\">Orders API</th><td>Healthy</td><td>Service team</td></tr>\n        </tbody>\n      </table>\n      <p><a class=\"primary\" href=\"/incidents\">Review incidents</a></p>\n    </section>\n  </main>\n</body>\n</html>\n",
+                "styles.css": ":root {\n  --ink: #000000;\n  --paper: #FFFFFF;\n  --accent: #B54131;\n  --border: #D6D6D6;\n  --support: #555555;\n  --radius: 5px;\n  --space: 16px;\n}\n\nbody { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font-family: \"Noto Sans\", sans-serif; }\nheader { max-width: 880px; margin-bottom: 24px; }\nmain { max-width: 880px; }\n.panel { padding: var(--space); border: 1px solid var(--border); border-radius: var(--radius); }\ntable { width: 100%; border-collapse: collapse; margin-top: var(--space); }\nth, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); }\n.primary { color: var(--accent); }\n"
+            },
+            "entry": "index.html",
+            "language": "html",
+            "preview": "html",
+            "stages": [
+                {
+                    "id": "structure",
+                    "title": "Build the board structure",
+                    "description": "Keep the existing content but ensure the board has a header, two main sections, a captioned status table, and one row header per incident.",
+                    "tests": [
+                        { "kind": "dom", "description": "The board has a main heading.", "selector": "header h1", "property": "text", "expected": "Campus status" },
+                        { "kind": "dom", "description": "The two content sections are present.", "selector": "main section", "property": "count", "expected": 2 },
+                        { "kind": "dom", "description": "The table has a caption.", "selector": "table caption", "property": "text", "expected": "Service status" },
+                        { "kind": "dom", "description": "There are three incident rows.", "selector": "tbody tr", "property": "count", "expected": 3 },
+                        { "kind": "dom", "description": "Each row begins with a row header.", "selector": "tbody th[scope=\"row\"]", "property": "count", "expected": 3 }
+                    ]
+                },
+                {
+                    "id": "accessibility",
+                    "title": "Make the table readable",
+                    "description": "Add column headers and a skip link to the main landmark.",
+                    "tests": [
+                        { "kind": "dom", "description": "The table has three column headers.", "selector": "thead th[scope=\"col\"]", "property": "count", "expected": 3 },
+                        { "kind": "dom", "description": "The main landmark has an id.", "selector": "main#main", "property": "exists", "expected": true },
+                        { "kind": "dom", "description": "A skip link points to the main landmark.", "selector": "a[href=\"#main\"]", "property": "exists", "expected": true },
+                        { "kind": "dom", "description": "The primary action is present.", "selector": "a.primary", "property": "text", "expected": "Review incidents" }
+                    ]
+                },
+                {
+                    "id": "layout",
+                    "title": "Lay out the panels",
+                    "description": "Use the design tokens: a grid with 16px gaps, 5px panel corners, and a one-column layout below 700px.",
+                    "tests": [
+                        { "kind": "css", "description": "The status grid uses grid layout.", "selector": ".status-grid", "property": "display", "expected": "grid" },
+                        { "kind": "css", "description": "Panels are separated by 16px.", "selector": ".status-grid", "property": "gap", "expected": "16px" },
+                        { "kind": "css", "description": "Panels use a 5px radius.", "selector": ".panel", "property": "border-top-left-radius", "expected": "5px" },
+                        { "kind": "regex", "description": "A narrow-screen media query is present.", "file": "styles.css", "pattern": "@media[^{]*max-width", "flags": "i" }
+                    ]
+                }
+            ],
+            "explanation": [
+                "Semantic structure makes the board understandable without sight. The table has a caption, column headers, and row headers.",
+                "The layout uses tokens rather than one-off values. A media query keeps the panels readable on a narrow screen.",
+                "A completed project is recorded as evidence of construction and accessibility, not as automatic mastery of every CSS feature."
+            ]
+        },
+        {
+            "id": "projects.inventory-service",
+            "title": "Inventory service",
+            "summary": "Implement availability, quoting, and all-or-nothing order placement for a small inventory service.",
+            "difficulty": "developing",
+            "skills": ["js.conditions", "js.loops", "js.objects", "testing.integration"],
+            "estimatedMinutes": 60,
+            "runtime": "browser-javascript",
+            "brief": [
+                "The campus storefront needs one inventory module that rejects impossible orders before changing stock.",
+                "Build it in three stages: availability, quote, then atomic order placement.",
+                "Passing tests are evidence for the cases they cover. Read the code and consider what the tests do not cover."
+            ],
+            "files": {
+                "inventory.js": "function canFulfill(stock, quantity) {\n  return quantity <= stock;\n}\n\nfunction quoteOrder(items) {\n  let totalCents = 0;\n  for (const item of items) {\n    totalCents += item.unitCents * item.quantity;\n  }\n  return totalCents;\n}\n\nfunction placeOrder(inventory, order) {\n  for (const item of order.items) {\n    inventory[item.id] -= item.quantity;\n  }\n  return { ok: true, inventory: inventory, totalCents: quoteOrder(order.items) };\n}\n"
+            },
+            "entry": "inventory.js",
+            "language": "javascript",
+            "preview": "console",
+            "stages": [
+                {
+                    "id": "availability",
+                    "title": "Availability",
+                    "description": "Accept only whole quantities from 1 through stock.",
+                    "tests": [
+                        { "kind": "function", "description": "Ordinary order.", "name": "canFulfill", "args": [5, 2], "expected": true },
+                        { "kind": "function", "description": "Exact stock.", "name": "canFulfill", "args": [5, 5], "expected": true },
+                        { "kind": "function", "description": "Over stock.", "name": "canFulfill", "args": [5, 6], "expected": false },
+                        { "kind": "function", "description": "Zero quantity.", "name": "canFulfill", "args": [5, 0], "expected": false },
+                        { "kind": "function", "description": "Negative quantity.", "name": "canFulfill", "args": [5, -1], "expected": false }
+                    ]
+                },
+                {
+                    "id": "quote",
+                    "title": "Quote",
+                    "description": "Return an integer cent total and reject invalid line items.",
+                    "tests": [
+                        { "kind": "function", "description": "Two lines total correctly.", "name": "quoteOrder", "args": [[{ "quantity": 2, "unitCents": 125 }, { "quantity": 1, "unitCents": 250 }]], "expected": 500 },
+                        { "kind": "function", "description": "An empty order totals zero.", "name": "quoteOrder", "args": [[]], "expected": 0 },
+                        { "kind": "function", "description": "Invalid quantities are rejected with null.", "name": "quoteOrder", "args": [[{ "quantity": 0, "unitCents": 100 }]], "expected": null },
+                        { "kind": "function", "description": "Invalid prices are rejected with null.", "name": "quoteOrder", "args": [[{ "quantity": 1, "unitCents": -5 }]], "expected": null }
+                    ]
+                },
+                {
+                    "id": "atomic-order",
+                    "title": "Atomic order",
+                    "description": "Validate every line, then return a new inventory and total. Failures return the original inventory and a stable error.",
+                    "tests": [
+                        { "kind": "function", "description": "Valid order updates stock.", "name": "placeOrder", "args": [{ "pencil": 5 }, { "items": [{ "id": "pencil", "quantity": 2, "unitCents": 100 }] }], "expected": { "ok": true, "inventory": { "pencil": 3 }, "totalCents": 200 } },
+                        { "kind": "function", "description": "Insufficient stock changes nothing.", "name": "placeOrder", "args": [{ "pencil": 1 }, { "items": [{ "id": "pencil", "quantity": 2, "unitCents": 100 }] }], "expected": { "ok": false, "error": "insufficient-stock", "inventory": { "pencil": 1 } } },
+                        { "kind": "function", "description": "Unknown products are rejected.", "name": "placeOrder", "args": [{ "pencil": 1 }, { "items": [{ "id": "lamp", "quantity": 1, "unitCents": 100 }] }], "expected": { "ok": false, "error": "unknown-item", "inventory": { "pencil": 1 } } },
+                        { "kind": "function", "description": "Duplicate lines are rejected.", "name": "placeOrder", "args": [{ "pencil": 3 }, { "items": [{ "id": "pencil", "quantity": 1, "unitCents": 100 }, { "id": "pencil", "quantity": 1, "unitCents": 100 }] }], "expected": { "ok": false, "error": "duplicate-item", "inventory": { "pencil": 3 } } }
+                    ]
+                }
+            ],
+            "explanation": [
+                "The three stages depend on one another: an order cannot be atomic if availability and quoting are inconsistent.",
+                "Returning a new inventory avoids mutating caller state. Stable error codes let the storefront respond predictably.",
+                "The service is small enough to reason about and complete with tests, which is a better demonstration of competence than a larger untested codebase."
+            ]
+        },
+        {
+            "id": "projects.query-lab",
+            "title": "Query lab",
+            "summary": "Answer real questions about orders, customers, and revenue with SQL.",
+            "difficulty": "developing",
+            "skills": ["sql.queries", "sql.joins", "sql.modeling"],
+            "estimatedMinutes": 40,
+            "runtime": "browser-sql",
+            "brief": [
+                "The campus data team keeps customers and orders in a small relational database.",
+                "Write one query per stage. The result rows are compared exactly, including order.",
+                "The database runs in your browser with SQLite semantics. PostgreSQL-specific syntax is not part of this project."
+            ],
+            "files": {
+                "query.sql": "-- Stage 1: high-value orders (total_cents >= 5000),\n-- newest first by order id descending? Read the stage description.\nSELECT id, total_cents FROM orders;\n"
+            },
+            "entry": "query.sql",
+            "language": "sql",
+            "preview": "sql",
+            "database": {
+                "schemaSql": "CREATE TABLE customers (id TEXT PRIMARY KEY, name TEXT NOT NULL, city TEXT NOT NULL);\nCREATE TABLE orders (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL REFERENCES customers(id), total_cents INTEGER NOT NULL CHECK (total_cents >= 0), placed_at TEXT NOT NULL);\n",
+                "seedSql": "INSERT INTO customers (id, name, city) VALUES ('c1', 'Ada', 'North'), ('c2', 'Bo', 'West'), ('c3', 'Cy', 'South');\nINSERT INTO orders (id, customer_id, total_cents, placed_at) VALUES ('o1', 'c1', 2500, '2026-10-01'), ('o2', 'c1', 7500, '2026-10-02'), ('o3', 'c2', 12900, '2026-10-03'), ('o4', 'c3', 4000, '2026-10-04'), ('o5', 'c2', 5200, '2026-10-05'), ('o6', 'c1', 9900, '2026-10-06');\n"
+            },
+            "stages": [
+                {
+                    "id": "filter",
+                    "title": "High-value orders",
+                    "description": "Return id and total_cents for orders totalling at least 5000 cents, highest total first.",
+                    "tests": [
+                        {
+                            "kind": "sql",
+                            "description": "Only orders at or above 5000 are returned.",
+                            "expectedRows": [["o3", 12900], ["o6", 9900], ["o2", 7500], ["o5", 5200]]
+                        }
+                    ]
+                },
+                {
+                    "id": "join",
+                    "title": "Customer names",
+                    "description": "Return order id, customer name, and total_cents for every order, ordered by order id.",
+                    "tests": [
+                        {
+                            "kind": "sql",
+                            "description": "Every order is joined to its customer.",
+                            "expectedRows": [["o1", "Ada", 2500], ["o2", "Ada", 7500], ["o3", "Bo", 12900], ["o4", "Cy", 4000], ["o5", "Bo", 5200], ["o6", "Ada", 9900]]
+                        }
+                    ]
+                },
+                {
+                    "id": "aggregate",
+                    "title": "Revenue by customer",
+                    "description": "Return customer name, order count, and summed total_cents, highest revenue first. Name the aggregate columns order_count and revenue_cents.",
+                    "tests": [
+                        {
+                            "kind": "sql",
+                            "description": "Revenue is grouped and ordered correctly.",
+                            "expectedRows": [["Ada", 3, 19900], ["Bo", 2, 18100], ["Cy", 1, 4000]]
+                        }
+                    ]
+                }
+            ],
+            "explanation": [
+                "Filtering, joining, and aggregating are different operations with different correctness risks.",
+                "Exact result rows make the expected answer visible to the learner and make the evaluation deterministic.",
+                "SQLite is used as a learning runtime here. Production Praxbit stores authoritative data in PostgreSQL."
+            ]
+        }
+    ]
+}
