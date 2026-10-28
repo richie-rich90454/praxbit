@@ -5,22 +5,14 @@
     "courseId": "ai-engineering",
     "title": "Evaluate the answer",
     "summary": "Check an AI answer against supplied evidence and reject unsupported claims.",
-    "skills": [
-        "ai.evaluation"
-    ],
-    "prerequisites": [
-        "ai.foundations",
-        "concept.testing"
-    ],
+    "skills": ["ai.evaluation"],
+    "prerequisites": ["ai.foundations", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "curated-ai",
-            "no-model-inference"
-        ]
+        "capabilities": ["curated-ai", "no-model-inference"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "find-unsupported",
             "description": "Identify claims not supported by the sources.",
-            "stepIds": [
-                "evaluate-answer"
-            ]
+            "stepIds": ["evaluate-answer"]
         },
         {
             "id": "evaluation-method",
             "description": "Explain a reliable evaluation method.",
-            "stepIds": [
-                "evaluation-check"
-            ]
+            "stepIds": ["evaluation-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:dev-team",
-        "icon:ai"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:dev-team", "icon:ai"],
     "hints": [
         "Compare each sentence with the source text.",
         "The 30-day window is stated. The 14-day exception is not in the sources.",
@@ -191,9 +174,7 @@
     },
     "rewards": {
         "experience": 110,
-        "unlocks": [
-            "ai.agent-permissions"
-        ]
+        "unlocks": ["ai.agent-permissions"]
     },
     "persistence": {
         "kind": "none"
@@ -204,8 +185,5 @@
         "screenReaderNotes": "Source numbers are announced so claims can be compared with evidence."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "ai",
-        "professional"
-    ]
+    "tags": ["ai", "professional"]
 }
