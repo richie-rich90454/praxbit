@@ -5,25 +5,14 @@
     "courseId": "campus",
     "title": "Nothing works together",
     "summary": "Make an order and inventory calculation validate first, then update state atomically.",
-    "skills": [
-        "testing.integration",
-        "api.validation",
-        "concept.state"
-    ],
-    "prerequisites": [
-        "http.basics",
-        "testing.boundaries"
-    ],
+    "skills": ["testing.integration", "api.validation", "concept.state"],
+    "prerequisites": ["http.basics", "testing.boundaries"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -35,31 +24,25 @@
         {
             "id": "validate-first",
             "description": "Validate every line before changing inventory.",
-            "stepIds": [
-                "integrate-order"
-            ]
+            "stepIds": ["integrate-order"]
         },
         {
             "id": "atomic-update",
             "description": "Apply all valid changes to a copy of inventory.",
-            "stepIds": [
-                "integrate-order"
-            ]
+            "stepIds": ["integrate-order"]
         },
         {
             "id": "contract-errors",
             "description": "Return stable errors for bad orders.",
-            "stepIds": [
-                "integrate-order"
-            ]
+            "stepIds": ["integrate-order"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["integration-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:integration"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:integration"],
     "hints": [
         "A failed order must leave inventory unchanged.",
         "Check every line first: known id, positive integer quantity, nonnegative unit price.",
@@ -339,9 +322,7 @@
     },
     "rewards": {
         "experience": 210,
-        "unlocks": [
-            "campus.the-campus-incident"
-        ]
+        "unlocks": ["campus.the-campus-incident"]
     },
     "persistence": {
         "kind": "world-action",
@@ -354,8 +335,5 @@
         "screenReaderNotes": "Test output announces validation errors and inventory values as structured text."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
