@@ -1,10 +1,12 @@
 import { serve } from "@hono/node-server";
 import type { ServerType } from "@hono/node-server";
+import { resolve as resolvePath } from "node:path";
 import { loadConfiguration, type ServerConfig } from "./config.ts";
 import { loadContent } from "./content/loader.ts";
 import { initializeDatabase } from "./content/seed.ts";
 import { createDatabasePool } from "./db/pool.ts";
 import { createApplication } from "./app.ts";
+import { loadProjectEnvironment, projectRoot } from "./environment.ts";
 
 interface Runtime {
     readonly server: ServerType;
@@ -23,7 +25,15 @@ async function start(config: ServerConfig): Promise<Runtime> {
         await pool.query("SELECT 1");
         await initializeDatabase(pool, content, config.adminHandles);
 
-        const app = createApplication({ config, pool, content });
+        const app = createApplication({
+            config,
+            pool,
+            content,
+            webDirectory:
+                config.webDirectory === undefined
+                    ? resolvePath(projectRoot(), "apps", "web", "dist")
+                    : resolvePath(projectRoot(), config.webDirectory),
+        });
         const server = serve({
             fetch: app.fetch,
             hostname: config.host,
@@ -65,6 +75,7 @@ async function start(config: ServerConfig): Promise<Runtime> {
 }
 
 async function main(): Promise<void> {
+    loadProjectEnvironment();
     let config: ServerConfig;
     try {
         config = loadConfiguration();
