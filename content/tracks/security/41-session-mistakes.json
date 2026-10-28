@@ -1,0 +1,210 @@
+{
+    "id": "security.sessions",
+    "version": 1,
+    "sequence": 41,
+    "courseId": "security",
+    "title": "Session mistakes",
+    "summary": "Review cookie attributes and browser storage choices for a session token.",
+    "skills": [
+        "security.auth"
+    ],
+    "prerequisites": [
+        "http.basics",
+        "concept.security"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "configuration-review",
+            "no-execution"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "session-review",
+        "briefing": "A proposed login stores an opaque session token in a cookie and also in localStorage. Review the attributes and storage choice before the feature ships."
+    },
+    "objectives": [
+        {
+            "id": "review-cookie",
+            "description": "Identify unsafe session cookie attributes and storage.",
+            "stepIds": [
+                "session-review"
+            ]
+        },
+        {
+            "id": "explain-session",
+            "description": "Explain session protection principles.",
+            "stepIds": [
+                "session-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:lock"
+    ],
+    "hints": [
+        "An HttpOnly cookie is not readable by page scripts.",
+        "Secure limits the cookie to HTTPS. SameSite limits cross-site sending.",
+        "localStorage is readable by scripts, so an XSS flaw can steal the token.",
+        "Add HttpOnly, Secure, and SameSite, and keep the web session out of localStorage."
+    ],
+    "misconceptions": [
+        {
+            "id": "localstorage-secure",
+            "description": "Treating localStorage as a secure credential store.",
+            "stepId": "session-review",
+            "feedback": "Any script running in the page can read localStorage. An XSS bug then becomes session theft."
+        },
+        {
+            "id": "httponly-enough",
+            "description": "Believing HttpOnly alone protects a session.",
+            "stepId": "session-check",
+            "feedback": "HttpOnly blocks script reads, but transport security, SameSite, and CSRF protection are also part of session safety."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Cookies carry attributes with consequences",
+                "body": "HttpOnly prevents page scripts from reading a cookie. Secure restricts it to HTTPS. SameSite controls whether cross-site requests include it. These attributes reduce different risks; none is a complete session design by itself."
+            },
+            {
+                "title": "XSS changes the threat model",
+                "body": "If an attacker can run script in the page, localStorage is readable. HttpOnly cookies are not. Server-side verification, revocation, and CSRF protection still matter because a browser can be tricked into sending requests."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "HttpOnly",
+                "definition": "A cookie attribute that blocks access from page scripts."
+            },
+            {
+                "term": "SameSite",
+                "definition": "A cookie attribute controlling cross-site requests."
+            },
+            {
+                "term": "CSRF",
+                "definition": "Cross-site request forgery, where a browser is tricked into sending an authenticated request."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "session-review",
+            "title": "Review the session design",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Proposed session handling",
+                "caption": "Login response and client storage plan.",
+                "kind": "code",
+                "language": "http",
+                "content": "Set-Cookie: session=opaque-token; Path=/; Max-Age=2592000\n\nClient:\nlocalStorage.setItem(\"session\", token);\nfetch(\"/api/v1/me\", { headers: { Authorization: `Bearer ${token}` } });\n\nCSRF: not applicable because the client does not use cookies."
+            },
+            "findings": [
+                {
+                    "id": "httponly",
+                    "label": "The session cookie lacks HttpOnly.",
+                    "correct": true
+                },
+                {
+                    "id": "secure",
+                    "label": "The session cookie lacks Secure.",
+                    "correct": true
+                },
+                {
+                    "id": "samesite",
+                    "label": "The session cookie lacks SameSite.",
+                    "correct": true
+                },
+                {
+                    "id": "localstorage",
+                    "label": "Storing the token in localStorage exposes it to page scripts.",
+                    "correct": true
+                },
+                {
+                    "id": "csrf",
+                    "label": "The claim that CSRF is irrelevant is fully correct.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the design"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until cookie attributes, storage, and CSRF handling are safe"
+                },
+                {
+                    "id": "expire",
+                    "label": "Only shorten the expiry time"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The cookie is script-accessible, transport-unprotected, and cross-site sendable. The token is also copied into localStorage."
+        },
+        {
+            "kind": "explain",
+            "id": "session-check",
+            "title": "Session safety",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "httponly",
+                    "label": "HttpOnly prevents page scripts from reading the cookie.",
+                    "correct": true
+                },
+                {
+                    "id": "secure",
+                    "label": "Secure restricts the cookie to HTTPS.",
+                    "correct": true
+                },
+                {
+                    "id": "same",
+                    "label": "SameSite reduces some cross-site request risks.",
+                    "correct": true
+                },
+                {
+                    "id": "local",
+                    "label": "localStorage is a safe place for session tokens.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Session safety combines cookie attributes, transport security, CSRF defenses, and care about script access."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 135,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The cookie configuration is plain text; findings and verdict use standard controls.",
+        "keyboardNotes": "Use Space for findings and arrow keys for the verdict.",
+        "screenReaderNotes": "Cookie attributes are read as text. Findings announce their evidence after submission."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional",
+        "systems"
+    ]
+}
