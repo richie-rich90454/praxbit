@@ -1,0 +1,266 @@
+{
+    "id": "before-code.one-step-at-a-time",
+    "version": 1,
+    "sequence": 6,
+    "courseId": "before-code",
+    "title": "One step at a time",
+    "summary": "Trace a program line by line and record the values it leaves behind.",
+    "skills": [
+        "concept.tracing"
+    ],
+    "prerequisites": [
+        "concept.iteration"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "trace",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "interactive-simulation",
+            "keyboard",
+            "screen-reader"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "price-check",
+        "briefing": "A receipt program adds two prices. The register is slow, so you must follow the values yourself and predict the final receipt total."
+    },
+    "objectives": [
+        {
+            "id": "trace-final",
+            "description": "Trace the watched values to the final line.",
+            "stepIds": [
+                "receipt-trace"
+            ]
+        },
+        {
+            "id": "trace-order",
+            "description": "Identify when a value changes.",
+            "stepIds": [
+                "trace-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:storefront",
+        "icon:steps"
+    ],
+    "hints": [
+        "Start with total 0 and price 4. Advance one line at a time.",
+        "Line 3 adds the current price to total.",
+        "After line 3 total is 4. Then price becomes 7, and line 5 adds it again.",
+        "Advance through every line. Final values: total 11, price 7."
+    ],
+    "misconceptions": [
+        {
+            "id": "uses-new-price-too-early",
+            "description": "Using the reassigned price in the earlier addition.",
+            "stepId": "receipt-trace",
+            "feedback": "At line 3 the price is still 4. The assignment price = 7 happens later, so the first addition uses 4."
+        },
+        {
+            "id": "final-line-confusion",
+            "description": "Believing the assignment line itself adds to total.",
+            "stepId": "trace-check",
+            "answer": "line4",
+            "feedback": "price = 7 changes price only. total changes on the addition lines."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Tracing is controlled reading",
+                "body": "To trace a program, keep a table of each variable and update it one line at a time. Do not jump ahead or use a value before the line that assigns it. Tracing turns code into a sequence of observable state changes."
+            },
+            {
+                "title": "State changes have causes",
+                "body": "When a value changes, you should be able to point to the exact instruction responsible. Debugging and reviewing code depend on this skill. A stack trace or console log is useful only if you can connect it to the state that produced it."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Trace",
+                "definition": "A line-by-line record of execution and state."
+            },
+            {
+                "term": "Watch",
+                "definition": "A value being followed during a trace."
+            },
+            {
+                "term": "Snapshot",
+                "definition": "The state after a particular line runs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "trace",
+            "id": "receipt-trace",
+            "title": "Trace the receipt",
+            "prompt": "Advance through the program, watching total and price. Then enter both final values.",
+            "evidence": "prediction",
+            "lines": [
+                {
+                    "id": "l1",
+                    "code": "total = 0"
+                },
+                {
+                    "id": "l2",
+                    "code": "price = 4"
+                },
+                {
+                    "id": "l3",
+                    "code": "total = total + price"
+                },
+                {
+                    "id": "l4",
+                    "code": "price = 7"
+                },
+                {
+                    "id": "l5",
+                    "code": "total = total + price"
+                }
+            ],
+            "watches": [
+                {
+                    "id": "total",
+                    "label": "total",
+                    "initial": "0"
+                },
+                {
+                    "id": "price",
+                    "label": "price",
+                    "initial": "4"
+                }
+            ],
+            "snapshots": [
+                {
+                    "lineId": "l1",
+                    "values": {
+                        "total": "0",
+                        "price": "4"
+                    }
+                },
+                {
+                    "lineId": "l3",
+                    "values": {
+                        "total": "4",
+                        "price": "4"
+                    },
+                    "note": "The first addition uses price 4."
+                },
+                {
+                    "lineId": "l4",
+                    "values": {
+                        "total": "4",
+                        "price": "7"
+                    },
+                    "note": "price changes but total does not."
+                },
+                {
+                    "lineId": "l5",
+                    "values": {
+                        "total": "11",
+                        "price": "7"
+                    },
+                    "note": "The second addition uses price 7."
+                }
+            ],
+            "explanation": "total becomes 4, then 11. The final value of price is 7 because it was not changed again."
+        },
+        {
+            "kind": "quiz",
+            "id": "trace-check",
+            "title": "Which line changes total?",
+            "prompt": "In the receipt program, which line first makes total different from zero?",
+            "evidence": "prediction",
+            "quiz": {
+                "prompt": "Choose the line.",
+                "options": [
+                    {
+                        "id": "line1",
+                        "label": "total = 0"
+                    },
+                    {
+                        "id": "line2",
+                        "label": "price = 4"
+                    },
+                    {
+                        "id": "line3",
+                        "label": "total = total + price"
+                    },
+                    {
+                        "id": "line4",
+                        "label": "price = 7"
+                    }
+                ],
+                "correctId": "line3",
+                "explanation": "The addition assigns 4 to total. The previous lines only initialize values."
+            },
+            "hints": [
+                "Which line assigns to total using another value?",
+                "Look for total on both sides of the equals sign.",
+                "The expression total + price is stored back into total.",
+                "Line 3: total = total + price."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "trace-claims",
+            "title": "What tracing proves",
+            "prompt": "Select the accurate statements.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "table",
+                    "label": "A trace records how state changes over time.",
+                    "correct": true
+                },
+                {
+                    "id": "future",
+                    "label": "A line can use a value assigned on a later line.",
+                    "correct": false
+                },
+                {
+                    "id": "cause",
+                    "label": "Every changed value should have an instruction that caused it.",
+                    "correct": true
+                },
+                {
+                    "id": "compile",
+                    "label": "If code compiles, its runtime values are automatically correct.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Tracing follows the actual order of assignment. Compilation does not prove runtime correctness."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 70,
+        "unlocks": [
+            "before-code.fix-the-instructions"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The trace can be advanced with a button and each line and watched value is plain text.",
+        "keyboardNotes": "Use Next line to advance and Tab to the final value fields.",
+        "screenReaderNotes": "Each step announces the executed line and the current total and price."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "everything",
+        "professional"
+    ]
+}
