@@ -17,7 +17,10 @@ export interface CheckRunResult {
     readonly outcomes: readonly CheckOutcome[];
     readonly stdout: string;
     readonly stderr: string;
-    readonly diagnostics: readonly { readonly message: string; readonly severity: "error" | "warning" }[];
+    readonly diagnostics: readonly {
+        readonly message: string;
+        readonly severity: "error" | "warning";
+    }[];
 }
 
 export interface CheckRunInput {
@@ -46,7 +49,7 @@ function normalizeJson(value: unknown): string {
     try {
         return JSON.stringify(value);
     } catch {
-        return String(value);
+        return "[unserializable value]";
     }
 }
 
@@ -75,7 +78,10 @@ function pathValue(root: unknown, path: readonly (string | number)[]): unknown {
     return cursor;
 }
 
-function staticChecks(files: Readonly<Record<string, string>>, tests: readonly CodeTest[]): CheckOutcome[] {
+function staticChecks(
+    files: Readonly<Record<string, string>>,
+    tests: readonly CodeTest[],
+): CheckOutcome[] {
     const outcomes: CheckOutcome[] = [];
     for (const test of tests) {
         if (test.kind === "static") {
@@ -83,7 +89,9 @@ function staticChecks(files: Readonly<Record<string, string>>, tests: readonly C
             const includesOk = test.includes.every(function included(fragment: string): boolean {
                 return content.includes(fragment);
             });
-            const excludesOk = (test.excludes ?? []).every(function absent(fragment: string): boolean {
+            const excludesOk = (test.excludes ?? []).every(function absent(
+                fragment: string,
+            ): boolean {
                 return !content.includes(fragment);
             });
             outcomes.push({
@@ -158,7 +166,12 @@ async function executeJavaScript(
     }
     const report = await runJavaScriptTests({
         source: sourceForJavaScript(input.files, input.entry),
-        tests: functionTests.map(function toWorkerTest(test): { description: string; name: string; args: readonly unknown[]; expected: unknown } {
+        tests: functionTests.map(function toWorkerTest(test): {
+            description: string;
+            name: string;
+            args: readonly unknown[];
+            expected: unknown;
+        } {
             return {
                 description: test.description,
                 name: test.name,
@@ -167,16 +180,18 @@ async function executeJavaScript(
             };
         }),
     });
-    const outcomes: CheckOutcome[] = report.outcomes.map(function toOutcome(outcome, index): CheckOutcome {
-        const test = functionTests[index];
-        return {
-            description: outcome.description,
-            passed: outcome.passed,
-            ...(test === undefined ? {} : { expected: normalizeJson(test.expected) }),
-            ...(outcome.actual === undefined ? {} : { actual: outcome.actual }),
-            ...(outcome.error === undefined ? {} : { error: outcome.error }),
-        };
-    });
+    const outcomes: CheckOutcome[] = report.outcomes.map(
+        function toOutcome(outcome, index): CheckOutcome {
+            const test = functionTests[index];
+            return {
+                description: outcome.description,
+                passed: outcome.passed,
+                ...(test === undefined ? {} : { expected: normalizeJson(test.expected) }),
+                ...(outcome.actual === undefined ? {} : { actual: outcome.actual }),
+                ...(outcome.error === undefined ? {} : { error: outcome.error }),
+            };
+        },
+    );
     return {
         outcomes: [...outcomes, ...staticOutcomes],
         stdout: report.stdout,
@@ -196,10 +211,14 @@ async function executeTypeScript(input: CheckRunInput): Promise<CheckRunResult> 
         },
         reportDiagnostics: true,
     });
-    const diagnostics = (result.diagnostics ?? []).map(function toDiagnostic(diagnostic): { message: string; severity: "error" | "warning" } {
+    const diagnostics = (result.diagnostics ?? []).map(function toDiagnostic(diagnostic): {
+        message: string;
+        severity: "error" | "warning";
+    } {
         return {
             message: typescript.flattenDiagnosticMessageText(diagnostic.messageText, "\n"),
-            severity: diagnostic.category === typescript.DiagnosticCategory.Error ? "error" : "warning",
+            severity:
+                diagnostic.category === typescript.DiagnosticCategory.Error ? "error" : "warning",
         };
     });
     const hasErrors = diagnostics.some(function error(item): boolean {
@@ -208,14 +227,21 @@ async function executeTypeScript(input: CheckRunInput): Promise<CheckRunResult> 
     if (hasErrors) {
         return {
             outcomes: input.tests.map(function failed(test): CheckOutcome {
-                return { description: test.description, passed: false, error: "TypeScript syntax diagnostics must be fixed first." };
+                return {
+                    description: test.description,
+                    passed: false,
+                    error: "TypeScript syntax diagnostics must be fixed first.",
+                };
             }),
             stdout: "",
             stderr: "",
             diagnostics,
         };
     }
-    return executeJavaScript({ ...input, files: { ...input.files, [input.entry]: result.outputText } }, diagnostics);
+    return executeJavaScript(
+        { ...input, files: { ...input.files, [input.entry]: result.outputText } },
+        diagnostics,
+    );
 }
 
 async function executePreview(input: CheckRunInput): Promise<CheckRunResult> {
@@ -244,14 +270,16 @@ async function executePreview(input: CheckRunInput): Promise<CheckRunResult> {
         }
     }
     const previewReport = await runPreviewChecks(input.files, checks);
-    const outcomes: CheckOutcome[] = previewReport.outcomes.map(function toOutcome(outcome): CheckOutcome {
-        return {
-            description: outcome.description,
-            passed: outcome.passed,
-            ...(outcome.actual === undefined ? {} : { actual: outcome.actual }),
-            ...(outcome.error === undefined ? {} : { error: outcome.error }),
-        };
-    });
+    const outcomes: CheckOutcome[] = previewReport.outcomes.map(
+        function toOutcome(outcome): CheckOutcome {
+            return {
+                description: outcome.description,
+                passed: outcome.passed,
+                ...(outcome.actual === undefined ? {} : { actual: outcome.actual }),
+                ...(outcome.error === undefined ? {} : { error: outcome.error }),
+            };
+        },
+    );
     return {
         outcomes: [...outcomes, ...staticChecks(input.files, input.tests)],
         stdout: "",
@@ -262,9 +290,22 @@ async function executePreview(input: CheckRunInput): Promise<CheckRunResult> {
 
 async function executePython(input: CheckRunInput): Promise<CheckRunResult> {
     const functionTests = input.tests.filter(isFunctionTest);
-    const report = await runPythonTests(input.files[input.entry] ?? "", functionTests.map(function toTest(test): { description: string; name: string; args: readonly unknown[]; expected: unknown } {
-        return { description: test.description, name: test.name, args: test.args, expected: test.expected };
-    }));
+    const report = await runPythonTests(
+        input.files[input.entry] ?? "",
+        functionTests.map(function toTest(test): {
+            description: string;
+            name: string;
+            args: readonly unknown[];
+            expected: unknown;
+        } {
+            return {
+                description: test.description,
+                name: test.name,
+                args: test.args,
+                expected: test.expected,
+            };
+        }),
+    );
     return {
         outcomes: [
             ...report.outcomes.map(function toOutcome(outcome, index): CheckOutcome {
@@ -289,7 +330,11 @@ async function executeSql(input: CheckRunInput): Promise<CheckRunResult> {
     if (input.database === undefined) {
         return {
             outcomes: input.tests.map(function failed(test): CheckOutcome {
-                return { description: test.description, passed: false, error: "No database fixture is defined." };
+                return {
+                    description: test.description,
+                    passed: false,
+                    error: "No database fixture is defined.",
+                };
             }),
             stdout: "",
             stderr: "",
@@ -300,7 +345,11 @@ async function executeSql(input: CheckRunInput): Promise<CheckRunResult> {
     const report = await runSqlChecks(
         input.files[input.entry] ?? "",
         input.database,
-        sqlTests.map(function toCheck(test): { description: string; verify?: string; expectedRows: readonly (readonly unknown[])[] } {
+        sqlTests.map(function toCheck(test): {
+            description: string;
+            verify?: string;
+            expectedRows: readonly (readonly unknown[])[];
+        } {
             return {
                 description: test.description,
                 ...(test.verify === undefined ? {} : { verify: test.verify }),
@@ -347,4 +396,3 @@ export async function executeChecks(input: CheckRunInput): Promise<CheckRunResul
         diagnostics: [],
     };
 }
-
