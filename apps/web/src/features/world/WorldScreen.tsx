@@ -1,4 +1,13 @@
-import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount, type JSX } from "solid-js";
+import {
+    For,
+    Show,
+    createEffect,
+    createMemo,
+    createSignal,
+    onCleanup,
+    onMount,
+    type JSX,
+} from "solid-js";
 import type { WorldSystemId } from "@praxbit/contracts";
 import type { CampusRenderer } from "@praxbit/game";
 import { worldHealth } from "@praxbit/domain";
@@ -6,7 +15,13 @@ import { useLearning } from "../learning/learning-store.tsx";
 import { Pip } from "../../design/Pip.tsx";
 
 function statusLabel(status: string): string {
-    return status === "healthy" ? "Healthy" : status === "degraded" ? "Degraded" : status === "down" ? "Down" : "Offline";
+    return status === "healthy"
+        ? "Healthy"
+        : status === "degraded"
+          ? "Degraded"
+          : status === "down"
+            ? "Down"
+            : "Offline";
 }
 
 function statusClass(status: string): string {
@@ -44,7 +59,11 @@ export function WorldScreen(): JSX.Element {
             }
             try {
                 const game = await import("@praxbit/game");
-                renderer = await game.mountCampusWorld(canvasContainer, learning.world(), setSelected);
+                renderer = await game.mountCampusWorld(
+                    canvasContainer,
+                    learning.world(),
+                    setSelected,
+                );
             } catch (error) {
                 setPixiError(
                     error instanceof Error
@@ -85,15 +104,19 @@ export function WorldScreen(): JSX.Element {
                 <div class="page-header__text">
                     <h1>World</h1>
                     <p class="lede">
-                        The campus storefront, services, data, people, and machines share one deterministic state.
-                        Missions change it, and recovery actions here are recorded.
+                        The campus storefront, services, data, people, and machines share one
+                        deterministic state. Missions change it, and recovery actions here are
+                        recorded.
                     </p>
                 </div>
                 <div class="row">
                     <span class="meta">
                         {health().healthy} of {health().total} systems healthy
                     </span>
-                    <Pip pose={health().healthy === health().total ? "celebrating" : "alert"} size={72} />
+                    <Pip
+                        pose={health().healthy === health().total ? "celebrating" : "alert"}
+                        size={72}
+                    />
                 </div>
             </div>
 
@@ -102,13 +125,20 @@ export function WorldScreen(): JSX.Element {
                     <div class="surface__header">
                         <div>
                             <h2>Campus systems</h2>
-                            <p class="meta">Select a system in the map or in the accessible list to inspect its evidence.</p>
+                            <p class="meta">
+                                Select a system in the map or in the accessible list to inspect its
+                                evidence.
+                            </p>
                         </div>
                     </div>
                     <Show when={pixiError().length > 0}>
                         <p class="notice notice--error">{pixiError()}</p>
                     </Show>
-                    <div ref={canvasContainer} style={{ "min-height": "520px" }} aria-hidden="true" />
+                    <div
+                        ref={canvasContainer}
+                        style={{ "min-height": "520px" }}
+                        aria-hidden="true"
+                    />
                 </div>
 
                 <div class="grid grid--two">
@@ -130,8 +160,13 @@ export function WorldScreen(): JSX.Element {
                                             >
                                                 <span class="row row--between">
                                                     <strong>{item.name}</strong>
-                                                    <span class={`status ${statusClass(item.status)}`}>
-                                                        <span class="status__mark" aria-hidden="true" />
+                                                    <span
+                                                        class={`status ${statusClass(item.status)}`}
+                                                    >
+                                                        <span
+                                                            class="status__mark"
+                                                            aria-hidden="true"
+                                                        />
                                                         {statusLabel(item.status)}
                                                     </span>
                                                 </span>
@@ -170,12 +205,16 @@ export function WorldScreen(): JSX.Element {
                                 <div class="stack stack--tight">
                                     <h3>Depends on</h3>
                                     <p class="small muted">
-                                        {selectedSystem()?.dependsOn
-                                            .map(function dependency(id): string {
+                                        {selectedSystem()
+                                            ?.dependsOn.map(function dependency(id): string {
                                                 return (
-                                                    learning.world().systems.find(function find(system): boolean {
-                                                        return system.id === id;
-                                                    })?.name ?? id
+                                                    learning
+                                                        .world()
+                                                        .systems.find(
+                                                            function find(system): boolean {
+                                                                return system.id === id;
+                                                            },
+                                                        )?.name ?? id
                                                 );
                                             })
                                             .join(", ") || "No internal dependencies"}
@@ -183,9 +222,14 @@ export function WorldScreen(): JSX.Element {
                                 </div>
                                 <Show when={selectedSystem()?.status !== "healthy"}>
                                     <div class="row">
-                                        <button type="button" class="button" disabled={busy()} onClick={function restart(): void {
-                                            void restartSystem();
-                                        }}>
+                                        <button
+                                            type="button"
+                                            class="button"
+                                            disabled={busy()}
+                                            onClick={function restart(): void {
+                                                void restartSystem();
+                                            }}
+                                        >
                                             {busy() ? "Restarting" : "Restart service"}
                                         </button>
                                     </div>
@@ -199,7 +243,12 @@ export function WorldScreen(): JSX.Element {
                     <h2 id="world-log-heading">World changes</h2>
                     <Show
                         when={learning.world().log.length > 0}
-                        fallback={<p class="muted">No accepted world changes yet. Missions and recovery actions appear here.</p>}
+                        fallback={
+                            <p class="muted">
+                                No accepted world changes yet. Missions and recovery actions appear
+                                here.
+                            </p>
+                        }
                     >
                         <ol class="stack stack--tight">
                             <For each={[...learning.world().log].reverse().slice(0, 12)}>
