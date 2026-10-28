@@ -32,11 +32,29 @@ export function Pip(props: PipProps): JSX.Element {
             <rect x="42" y="52" width="6" height="6" fill="#FFF8EE" />
             <rect x="72" y="52" width="6" height="6" fill="#FFF8EE" />
             {pose === "celebrating" ? (
-                <path d="M48 72q6 8 12 0q6 8 12 0" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" />
+                <path
+                    d="M48 72q6 8 12 0q6 8 12 0"
+                    fill="none"
+                    stroke="#000000"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                />
             ) : pose === "alert" ? (
-                <path d="M52 74h16" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" />
+                <path
+                    d="M52 74h16"
+                    fill="none"
+                    stroke="#000000"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                />
             ) : (
-                <path d="M48 76q12 6 24 0" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round" />
+                <path
+                    d="M48 76q12 6 24 0"
+                    fill="none"
+                    stroke="#000000"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                />
             )}
             <rect x="24" y="94" width="14" height="12" fill="#B54131" />
             <rect x="82" y="94" width="14" height="12" fill="#B54131" />
