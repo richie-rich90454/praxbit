@@ -5,22 +5,14 @@
     "courseId": "before-code",
     "title": "Remember this",
     "summary": "Use memory cells to store values, change them, and retrieve them later.",
-    "skills": [
-        "concept.state"
-    ],
-    "prerequisites": [
-        "concept.instructions"
-    ],
+    "skills": ["concept.state"],
+    "prerequisites": ["concept.instructions"],
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "state",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "interactive-simulation",
-            "keyboard",
-            "screen-reader"
-        ]
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "reach-target",
             "description": "Store the required values in memory.",
-            "stepIds": [
-                "memory"
-            ]
+            "stepIds": ["memory"]
         },
         {
             "id": "predict-state",
             "description": "Predict the value after an assignment.",
-            "stepIds": [
-                "assignment-check"
-            ]
+            "stepIds": ["assignment-check"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["state-claims"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:storefront",
-        "icon:memory"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:storefront", "icon:memory"],
     "hints": [
         "Each operation changes one or both cells. Watch the cells after every click.",
         "Set the code directly, then set the count and add one.",
@@ -226,9 +214,7 @@
     },
     "rewards": {
         "experience": 60,
-        "unlocks": [
-            "before-code.make-a-decision"
-        ]
+        "unlocks": ["before-code.make-a-decision"]
     },
     "persistence": {
         "kind": "none"
@@ -239,8 +225,5 @@
         "screenReaderNotes": "The target reads pickupCode A7 and boxCount 3. Cell changes are announced after every operation."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "everything",
-        "web"
-    ]
+    "tags": ["everything", "web"]
 }
