@@ -5,7 +5,9 @@ function context(): AudioContext | undefined {
         return undefined;
     }
     if (audioContext === undefined) {
-        const Constructor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        const Constructor =
+            window.AudioContext ??
+            (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
         if (Constructor === undefined) {
             return undefined;
         }
