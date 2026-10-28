@@ -1,4 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createApplication } from "../../../apps/server/src/app.ts";
 import { ClubSchema, ProjectDetailSchema } from "../../../packages/contracts/src/index.ts";
 import { closeTestContext, createTestContext, type TestContext } from "./helpers/database.ts";
 import { TestClient, expectApiError, field, readJson, register } from "./helpers/client.ts";
@@ -157,5 +161,44 @@ describe("catalog, health, and transport protections", function catalogSuite(): 
         const response = await anonymous.get("/api/v1/clubs");
         expect(response.status).toBe(200);
         expect(ClubSchema.array().parse(await readJson(response)).length).toBe(0);
+    });
+
+    it("serves the built web shell, assets, and SPA fallback without capturing API 404s", async function testStaticSite(): Promise<void> {
+        const webDirectory = await mkdtemp(join(tmpdir(), "praxbit-web-"));
+        try {
+            await writeFile(
+                join(webDirectory, "index.html"),
+                '<!doctype html><html><head><title>Praxbit shell</title></head><body><div id="app"></div></body></html>',
+                "utf8",
+            );
+            await writeFile(join(webDirectory, "app.js"), "console.log('praxbit');", "utf8");
+            const app = createApplication({
+                config: context.config,
+                pool: context.pool,
+                content: context.content,
+                webDirectory,
+            });
+            const client = new TestClient(app);
+
+            const home = await client.get("/");
+            const homeText = await home.text();
+            expect(home.status, homeText).toBe(200);
+            expect(homeText).toContain("Praxbit shell");
+            expect(home.headers.get("content-security-policy")).toContain("script-src 'self'");
+
+            const asset = await client.get("/app.js");
+            expect(asset.status).toBe(200);
+            expect(await asset.text()).toContain("praxbit");
+
+            const clientRoute = await client.get("/learn");
+            expect(clientRoute.status).toBe(200);
+            expect(await clientRoute.text()).toContain("Praxbit shell");
+
+            const missingApi = await client.get("/api/v1/does-not-exist");
+            expect(missingApi.status).toBe(404);
+            expectApiError(await readJson(missingApi), "not_found");
+        } finally {
+            await rm(webDirectory, { recursive: true, force: true });
+        }
     });
 });
