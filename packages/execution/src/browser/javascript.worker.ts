@@ -27,7 +27,12 @@ interface WorkerResponse {
 }
 
 function canonicalize(value: unknown, seen: Set<object>): unknown {
-    if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    if (
+        value === null ||
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+    ) {
         if (typeof value === "number" && !Number.isFinite(value)) {
             return `__number:${String(value)}`;
         }
@@ -88,6 +93,15 @@ function installNetworkBlocks(): void {
     }
 }
 
+function evaluateSource(source: string): unknown {
+    // eslint-disable-next-line no-new-func, @typescript-eslint/no-implied-eval -- The worker exists to execute learner source; this is the intended execution boundary, bounded by a timeout and no DOM access.
+    const factory: unknown = new Function(source);
+    if (typeof factory !== "function") {
+        throw new Error("The exercise source did not produce a callable function.");
+    }
+    return Reflect.apply(factory, undefined, []);
+}
+
 self.onmessage = async function handleMessage(event: MessageEvent<WorkerRequest>): Promise<void> {
     installNetworkBlocks();
     const request = event.data;
@@ -136,10 +150,9 @@ self.onmessage = async function handleMessage(event: MessageEvent<WorkerRequest>
 
     for (const test of request.tests) {
         try {
-            const factory = new Function(
+            const fn = evaluateSource(
                 `${request.source}\n;return typeof ${test.name} === "function" ? ${test.name} : undefined;`,
             );
-            const fn = factory() as ((...args: unknown[]) => unknown) | undefined;
             if (typeof fn !== "function") {
                 outcomes.push({
                     description: test.description,
@@ -148,13 +161,19 @@ self.onmessage = async function handleMessage(event: MessageEvent<WorkerRequest>
                 });
                 continue;
             }
-            const actual = await Promise.resolve(fn(...test.args));
+            const actual: unknown = await Promise.resolve(
+                Reflect.apply(fn, undefined, [...test.args]),
+            );
             const passed = normalizedJson(actual) === normalizedJson(test.expected);
             outcomes.push({
                 description: test.description,
                 passed,
                 actual: normalizedJson(actual),
-                ...(passed ? {} : { error: `Expected ${normalizedJson(test.expected)}, received ${normalizedJson(actual)}.` }),
+                ...(passed
+                    ? {}
+                    : {
+                          error: `Expected ${normalizedJson(test.expected)}, received ${normalizedJson(actual)}.`,
+                      }),
             });
         } catch (error) {
             outcomes.push({
