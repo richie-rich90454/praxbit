@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "mode-code": {
+            "files": {
+                "frequencies.js": "function mode(values) {\n  const counts = new Map();\n  let best = values[0];\n  let bestCount = 0;\n  for (const value of values) {\n    const count = (counts.get(value) ?? 0) + 1;\n    counts.set(value, count);\n    if (count > bestCount || (count === bestCount && value < best)) {\n      best = value;\n      bestCount = count;\n    }\n  }\n  return best;\n}\n"
+            }
+        }
+    }
+}
