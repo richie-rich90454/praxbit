@@ -5,22 +5,14 @@
     "courseId": "ai-engineering",
     "title": "Agent permissions",
     "summary": "Review a tool-using agent plan and apply least privilege and explicit approval.",
-    "skills": [
-        "ai.agents"
-    ],
-    "prerequisites": [
-        "ai.prompting",
-        "security.auth"
-    ],
+    "skills": ["ai.agents"],
+    "prerequisites": ["ai.prompting", "security.auth"],
     "difficulty": "advanced",
     "estimatedMinutes": 7,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "curated-ai",
-            "no-model-inference"
-        ]
+        "capabilities": ["curated-ai", "no-model-inference"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "find-permissions",
             "description": "Identify unsafe agent capabilities.",
-            "stepIds": [
-                "agent-review"
-            ]
+            "stepIds": ["agent-review"]
         },
         {
             "id": "agent-principles",
             "description": "Explain least privilege and approval boundaries.",
-            "stepIds": [
-                "agent-check"
-            ]
+            "stepIds": ["agent-check"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:server-room",
-        "icon:agent"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:agent"],
     "hints": [
         "Production write access is not needed to read logs for triage.",
         "Automatic deployment removes human review for consequential changes.",
@@ -202,9 +185,5 @@
         "screenReaderNotes": "Capabilities are announced as a list. Findings indicate support after submission."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "ai",
-        "systems",
-        "professional"
-    ]
+    "tags": ["ai", "systems", "professional"]
 }
