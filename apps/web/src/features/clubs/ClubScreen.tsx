@@ -89,7 +89,9 @@ export function ClubScreen(): JSX.Element {
                 setDetail(await api.getClub(current.club.id));
             }
         } catch (caught) {
-            setSubmissionMessage(caught instanceof Error ? caught.message : "The submission could not be verified.");
+            setSubmissionMessage(
+                caught instanceof Error ? caught.message : "The submission could not be verified.",
+            );
         }
     }
 
@@ -103,8 +105,9 @@ export function ClubScreen(): JSX.Element {
                 <div class="page-header__text">
                     <h1>Club</h1>
                     <p class="lede">
-                        Work through a weekly incident with a small team. Clubs are invitation-based, have no public
-                        chat, and show only verified submissions on the leaderboard.
+                        Work through a weekly incident with a small team. Clubs are
+                        invitation-based, have no public chat, and show only verified submissions on
+                        the leaderboard.
                     </p>
                 </div>
                 <Pip pose="explaining" size={78} />
@@ -116,9 +119,9 @@ export function ClubScreen(): JSX.Element {
                     <div class="surface stack">
                         <h2>Clubs need an account</h2>
                         <p>
-                            Club membership, invitations, and verified results require an account so the server can
-                            authorize members and record evidence. Your guest progress can be uploaded when you create
-                            one.
+                            Club membership, invitations, and verified results require an account so
+                            the server can authorize members and record evidence. Your guest
+                            progress can be uploaded when you create one.
                         </p>
                         <div class="row">
                             <A class="button" href="/settings">
@@ -191,7 +194,11 @@ export function ClubScreen(): JSX.Element {
                         <h2 id="club-list-heading">Your clubs</h2>
                         <Show
                             when={clubs().length > 0}
-                            fallback={<p class="muted">No memberships yet. Create a club or use an invite code.</p>}
+                            fallback={
+                                <p class="muted">
+                                    No memberships yet. Create a club or use an invite code.
+                                </p>
+                            }
                         >
                             <div class="row">
                                 <For each={clubs()}>
@@ -223,12 +230,16 @@ export function ClubScreen(): JSX.Element {
                                             <div>
                                                 <h2>{current()?.club.name}</h2>
                                                 <p class="meta">
-                                                    {current()?.club.memberCount} members · role {current()?.club.role}
+                                                    {current()?.club.memberCount} members · role{" "}
+                                                    {current()?.club.role}
                                                 </p>
                                             </div>
                                             <Show when={current()?.club.inviteCode !== undefined}>
                                                 <span class="meta">
-                                                    Invite code: <code class="inline-code">{current()?.club.inviteCode}</code>
+                                                    Invite code:{" "}
+                                                    <code class="inline-code">
+                                                        {current()?.club.inviteCode}
+                                                    </code>
                                                 </span>
                                             </Show>
                                         </div>
@@ -240,7 +251,9 @@ export function ClubScreen(): JSX.Element {
                                                         return (
                                                             <li class="row row--between">
                                                                 <span>{item.displayName}</span>
-                                                                <span class="meta">{item.role}</span>
+                                                                <span class="meta">
+                                                                    {item.role}
+                                                                </span>
                                                             </li>
                                                         );
                                                     }}
@@ -249,8 +262,13 @@ export function ClubScreen(): JSX.Element {
                                         </div>
                                     </section>
 
-                                    <section class="surface stack" aria-labelledby="club-events-heading">
-                                        <h2 id="club-events-heading">Weekly engineering incidents</h2>
+                                    <section
+                                        class="surface stack"
+                                        aria-labelledby="club-events-heading"
+                                    >
+                                        <h2 id="club-events-heading">
+                                            Weekly engineering incidents
+                                        </h2>
                                         <For each={current()?.events ?? []}>
                                             {function event(item): JSX.Element {
                                                 return (
@@ -264,14 +282,33 @@ export function ClubScreen(): JSX.Element {
                                                                         <input
                                                                             type="radio"
                                                                             name={`event-${item.id}`}
-                                                                            checked={answers()[item.id] === choice.id}
+                                                                            checked={
+                                                                                answers()[
+                                                                                    item.id
+                                                                                ] === choice.id
+                                                                            }
                                                                             onChange={function choose(): void {
-                                                                                setAnswers(function update(currentAnswers): Readonly<Record<string, string>> {
-                                                                                    return { ...currentAnswers, [item.id]: choice.id };
-                                                                                });
+                                                                                setAnswers(
+                                                                                    function update(
+                                                                                        currentAnswers,
+                                                                                    ): Readonly<
+                                                                                        Record<
+                                                                                            string,
+                                                                                            string
+                                                                                        >
+                                                                                    > {
+                                                                                        return {
+                                                                                            ...currentAnswers,
+                                                                                            [item.id]:
+                                                                                                choice.id,
+                                                                                        };
+                                                                                    },
+                                                                                );
                                                                             }}
                                                                         />
-                                                                        <span class="choice__text">{choice.label}</span>
+                                                                        <span class="choice__text">
+                                                                            {choice.label}
+                                                                        </span>
                                                                     </label>
                                                                 );
                                                             }}
@@ -280,29 +317,40 @@ export function ClubScreen(): JSX.Element {
                                                             <button
                                                                 type="button"
                                                                 class="button button--small"
-                                                                disabled={answers()[item.id] === undefined}
+                                                                disabled={
+                                                                    answers()[item.id] === undefined
+                                                                }
                                                                 onClick={function submit(): void {
                                                                     void submitEvent(item.id);
                                                                 }}
                                                             >
                                                                 Submit verified answer
                                                             </button>
-                                                            <span class="meta">{item.points} points</span>
+                                                            <span class="meta">
+                                                                {item.points} points
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 );
                                             }}
                                         </For>
                                         <Show when={submissionMessage().length > 0}>
-                                            <p class="feedback feedback--info">{submissionMessage()}</p>
+                                            <p class="feedback feedback--info">
+                                                {submissionMessage()}
+                                            </p>
                                         </Show>
                                     </section>
 
-                                    <section class="surface stack" aria-labelledby="leaderboard-heading">
+                                    <section
+                                        class="surface stack"
+                                        aria-labelledby="leaderboard-heading"
+                                    >
                                         <h2 id="leaderboard-heading">Verified leaderboard</h2>
                                         <Show
                                             when={(current()?.leaderboard.length ?? 0) > 0}
-                                            fallback={<p class="muted">No verified submissions yet.</p>}
+                                            fallback={
+                                                <p class="muted">No verified submissions yet.</p>
+                                            }
                                         >
                                             <table class="data-table">
                                                 <thead>
@@ -320,7 +368,9 @@ export function ClubScreen(): JSX.Element {
                                                                     <td>{item.displayName}</td>
                                                                     <td>{item.points}</td>
                                                                     <td class="meta">
-                                                                        {new Date(item.verifiedAt).toLocaleString()}
+                                                                        {new Date(
+                                                                            item.verifiedAt,
+                                                                        ).toLocaleString()}
                                                                     </td>
                                                                 </tr>
                                                             );
