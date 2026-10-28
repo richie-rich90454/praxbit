@@ -54,7 +54,13 @@ export function LearnScreen(): JSX.Element {
                     {function recommendation(mission): JSX.Element {
                         return (
                             <section class="surface stack" aria-labelledby="recommended-heading">
-                                <div class="row" style={{ "align-items": "flex-start", "justify-content": "space-between" }}>
+                                <div
+                                    class="row"
+                                    style={{
+                                        "align-items": "flex-start",
+                                        "justify-content": "space-between",
+                                    }}
+                                >
                                     <div class="stack stack--tight">
                                         <span class="meta">Next meaningful action</span>
                                         <h2 id="recommended-heading">{mission().title}</h2>
@@ -74,7 +80,8 @@ export function LearnScreen(): JSX.Element {
                                 <div class="row row--between">
                                     <span class="meta">
                                         {mission().estimatedMinutes} min · {mission().difficulty} ·{" "}
-                                        {mission().skills.length} skills
+                                        {mission().skills.length}{" "}
+                                        {mission().skills.length === 1 ? "skill" : "skills"}
                                     </span>
                                     <div class="row">
                                         <A class="button" href={`/missions/${mission().id}`}>
@@ -95,7 +102,10 @@ export function LearnScreen(): JSX.Element {
                         <div class="surface__header">
                             <div>
                                 <h2 id="review-heading">Review due</h2>
-                                <p class="meta">A short revisit keeps a skill available. Missing a day is not punished.</p>
+                                <p class="meta">
+                                    A short revisit keeps a skill available. Missing a day is not
+                                    punished.
+                                </p>
                             </div>
                             <A class="button button--secondary button--small" href="/practice">
                                 Start review
@@ -107,7 +117,9 @@ export function LearnScreen(): JSX.Element {
                                     return (
                                         <li class="row row--between">
                                             <span>{skillName(item.skillId)}</span>
-                                            <span class="meta">due {new Date(item.dueAt).toLocaleDateString()}</span>
+                                            <span class="meta">
+                                                due {new Date(item.dueAt).toLocaleDateString()}
+                                            </span>
                                         </li>
                                     );
                                 }}
@@ -121,8 +133,9 @@ export function LearnScreen(): JSX.Element {
                         <div class="page-header__text">
                             <h2 id="map-heading">Learning map</h2>
                             <p class="meta">
-                                Rectangles are missions. Lines show the order of the story, not a single mandatory path.
-                                Locked nodes name the skills that open them.
+                                Rectangles are missions. Lines show the order of the story, not a
+                                single mandatory path. Locked nodes name the skills that open them.
+                                Scroll a track horizontally to see every mission.
                             </p>
                         </div>
                     </div>
@@ -144,9 +157,17 @@ export function LearnScreen(): JSX.Element {
                                         <h3>{item.title}</h3>
                                         <p class="small muted">{item.summary}</p>
                                         <div class="row row--between">
-                                            <span class="meta">{item.missionIds.length} missions</span>
+                                            <span class="meta">
+                                                {item.missionIds.length}{" "}
+                                                {item.missionIds.length === 1
+                                                    ? "mission"
+                                                    : "missions"}
+                                            </span>
                                             <Show when={first !== undefined}>
-                                                <A class="button button--secondary button--small" href={`/missions/${first}`}>
+                                                <A
+                                                    class="button button--secondary button--small"
+                                                    href={`/missions/${first}`}
+                                                >
                                                     Open track
                                                 </A>
                                             </Show>
