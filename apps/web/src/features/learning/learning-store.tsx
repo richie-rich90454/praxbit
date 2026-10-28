@@ -36,7 +36,6 @@ import {
     levelForExperience,
     recordPractice,
     recommendMission,
-    type ChallengeLevel,
     type PracticePlan,
     type SessionLength,
     type StepEvaluation,
@@ -103,10 +102,22 @@ export interface LearningContextValue {
     readonly syncMessage: Accessor<string | undefined>;
     readonly outboxCount: Accessor<number>;
     readonly online: Accessor<boolean>;
-    readonly recordStepEvidence: (mission: Mission, step: MissionStep, evaluation: StepEvaluation, hintsUsed: number) => Promise<void>;
-    readonly completeMission: (mission: Mission, attemptId: string, hintsByStep: Readonly<Record<string, number>>) => Promise<CompletionOutcome>;
+    readonly recordStepEvidence: (
+        mission: Mission,
+        step: MissionStep,
+        evaluation: StepEvaluation,
+        hintsUsed: number,
+    ) => Promise<void>;
+    readonly completeMission: (
+        mission: Mission,
+        attemptId: string,
+        hintsByStep: Readonly<Record<string, number>>,
+    ) => Promise<CompletionOutcome>;
     readonly recordPracticeReview: (mission: Mission) => Promise<void>;
-    readonly recordProjectCompletion: (project: ProjectDefinition, passedStages: number) => Promise<CompletionOutcome>;
+    readonly recordProjectCompletion: (
+        project: ProjectDefinition,
+        passedStages: number,
+    ) => Promise<CompletionOutcome>;
     readonly savePreferences: (next: Preferences) => Promise<void>;
     readonly applyPlacement: (state: PlacementState) => Promise<void>;
     readonly setOnboarded: (value: boolean) => Promise<void>;
@@ -119,8 +130,13 @@ export interface LearningContextValue {
     readonly deleteAccount: () => Promise<void>;
     readonly exportData: () => Promise<void>;
     readonly refreshWorld: () => Promise<void>;
-    readonly saveProjectDraft: (projectId: string, files: Readonly<Record<string, string>>) => Promise<void>;
-    readonly loadProjectDraft: (projectId: string) => Promise<Readonly<Record<string, string>> | undefined>;
+    readonly saveProjectDraft: (
+        projectId: string,
+        files: Readonly<Record<string, string>>,
+    ) => Promise<void>;
+    readonly loadProjectDraft: (
+        projectId: string,
+    ) => Promise<Readonly<Record<string, string>> | undefined>;
 }
 
 const LearningContext = createContext<LearningContextValue>();
@@ -179,9 +195,12 @@ function languagePrefixes(evidence: readonly EvidenceRecord[]): readonly string[
 
 function evidenceWeight(record: EvidenceRecord, skillId: string): number {
     const mission = getMission(record.missionId);
-    const fullSkills = mission?.skills ?? projects.find(function match(project): boolean {
-        return project.id === record.missionId;
-    })?.skills ?? [];
+    const fullSkills =
+        mission?.skills ??
+        projects.find(function match(project): boolean {
+            return project.id === record.missionId;
+        })?.skills ??
+        [];
     return fullSkills.includes(skillId) ? 1 : 0.25;
 }
 
@@ -201,24 +220,34 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
     const [syncStatus, setSyncStatus] = createSignal<SyncStatus>("idle");
     const [syncMessage, setSyncMessage] = createSignal<string | undefined>(undefined);
     const [outboxCount, setOutboxCount] = createSignal(0);
-    const [online, setOnline] = createSignal(typeof navigator === "undefined" ? true : navigator.onLine);
+    const [online, setOnline] = createSignal(
+        typeof navigator === "undefined" ? true : navigator.onLine,
+    );
 
     const completedMissionIds = createMemo(function completedSet(): ReadonlySet<string> {
-        return new Set(completions().map(function idOf(item: CompletionRow): string {
-            return item.missionId;
-        }));
+        return new Set(
+            completions().map(function idOf(item: CompletionRow): string {
+                return item.missionId;
+            }),
+        );
     });
 
     const dueReviews = createMemo(function dueNow(): readonly ReviewItem[] {
         return scheduler.due(reviews(), new Date());
     });
 
-    const recommendation = createMemo(function recommend(): { id: string; reasons: readonly string[] } {
+    const recommendation = createMemo(function recommend(): {
+        id: string;
+        reasons: readonly string[];
+    } {
         const completedSequences: Record<string, number> = {};
         for (const completion of completions()) {
             const mission = getMission(completion.missionId);
             if (mission !== undefined) {
-                completedSequences[mission.courseId] = Math.max(completedSequences[mission.courseId] ?? 0, mission.sequence);
+                completedSequences[mission.courseId] = Math.max(
+                    completedSequences[mission.courseId] ?? 0,
+                    mission.sequence,
+                );
             }
         }
         const failedMissionIds = new Set(
@@ -250,8 +279,13 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             mastery: masteryScores,
             reviews: reviews(),
             interests: preferences().interests,
-            challenge: preferences().challenge as ChallengeLevel,
+            challenge: preferences().challenge,
             completedMissionIds: [...completedMissionIds()],
+            completedMissionSkills: [...completedMissionIds()].flatMap(
+                function skillsOf(missionId): readonly string[] {
+                    return getMission(missionId)?.skills ?? [];
+                },
+            ),
             completedSequences,
             misconceptionSkills,
             recentFailureSkills: failureSkills,
@@ -271,29 +305,40 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             return;
         }
         const root = document.documentElement;
-        root.dataset["textScale"] = next.textScale >= 1.2 ? "large" : next.textScale <= 0.95 ? "small" : "normal";
+        root.dataset["textScale"] =
+            next.textScale >= 1.2 ? "large" : next.textScale <= 0.95 ? "small" : "normal";
         root.dataset["motion"] = next.motion === "reduce" ? "reduce" : "system";
     }
 
     async function reloadLocalState(): Promise<void> {
-        const [progressRow, evidenceRows, masteryRows, reviewRows, worldRow, preferenceRow, completionRows, metaRows] =
-            await Promise.all([
-                loadProgress(db),
-                db.evidence.toArray(),
-                db.mastery.toArray(),
-                db.reviews.toArray(),
-                db.world.get("campus"),
-                loadPreferences(db),
-                db.completions.toArray(),
-                db.meta.toArray(),
-            ]);
+        const [
+            progressRow,
+            evidenceRows,
+            masteryRows,
+            reviewRows,
+            worldRow,
+            preferenceRow,
+            completionRows,
+            metaRows,
+        ] = await Promise.all([
+            loadProgress(db),
+            db.evidence.toArray(),
+            db.mastery.toArray(),
+            db.reviews.toArray(),
+            db.world.get("campus"),
+            loadPreferences(db),
+            db.completions.toArray(),
+            db.meta.toArray(),
+        ]);
 
         setProgress(progressRow);
         setEvidence(evidenceRows);
         setMastery(
-            Object.fromEntries(masteryRows.map(function entry(snapshot): [string, SkillMastery] {
-                return [snapshot.skillId, snapshot];
-            })),
+            Object.fromEntries(
+                masteryRows.map(function entry(snapshot): [string, SkillMastery] {
+                    return [snapshot.skillId, snapshot];
+                }),
+            ),
         );
         setReviews(reviewRows);
         setWorld(worldRow?.state ?? createInitialWorld());
@@ -301,9 +346,11 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         applyPresentation(preferenceRow);
         setCompletions(completionRows);
 
-        const meta = new Map(metaRows.map(function entry(row): [string, string] {
-            return [row.key, row.value];
-        }));
+        const meta = new Map(
+            metaRows.map(function entry(row): [string, string] {
+                return [row.key, row.value];
+            }),
+        );
         setOnboardedSignal(meta.get("onboarded") === "true");
         const placementRaw = meta.get("placement");
         if (placementRaw !== undefined) {
@@ -318,9 +365,11 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             try {
                 const parsed = JSON.parse(projectsRaw) as unknown;
                 if (Array.isArray(parsed)) {
-                    setCompletedProjectIds(parsed.filter(function isString(value): value is string {
-                        return typeof value === "string";
-                    }));
+                    setCompletedProjectIds(
+                        parsed.filter(function isString(value): value is string {
+                            return typeof value === "string";
+                        }),
+                    );
                 }
             } catch {
                 setCompletedProjectIds([]);
@@ -340,16 +389,18 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             } catch {
                 // Storage may be unavailable in private modes; the session cookie still works for this load.
             }
-            const completionRows: CompletionRow[] = me.completions.map(function toRow(completion): CompletionRow {
-                return {
-                    id: completionRowId(completion.missionId, completion.missionVersion),
-                    missionId: completion.missionId,
-                    version: completion.missionVersion,
-                    attemptId: completion.attemptId,
-                    completedAt: completion.completedAt,
-                    independent: completion.independent,
-                };
-            });
+            const completionRows: CompletionRow[] = me.completions.map(
+                function toRow(completion): CompletionRow {
+                    return {
+                        id: completionRowId(completion.missionId, completion.missionVersion),
+                        missionId: completion.missionId,
+                        version: completion.missionVersion,
+                        attemptId: completion.attemptId,
+                        completedAt: completion.completedAt,
+                        independent: completion.independent,
+                    };
+                },
+            );
             await db.completions.bulkPut(completionRows);
             await syncManager.flush(50);
             const snapshot = await api.sync({ operations: [] });
@@ -367,7 +418,9 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
                 return;
             }
             setSyncStatus("failed");
-            setSyncMessage(error instanceof Error ? error.message : "Could not load account progress.");
+            setSyncMessage(
+                error instanceof Error ? error.message : "Could not load account progress.",
+            );
         }
     }
 
@@ -413,7 +466,10 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         });
     });
 
-    async function recomputeMastery(rows: readonly EvidenceRecord[], affected: readonly string[]): Promise<void> {
+    async function recomputeMastery(
+        rows: readonly EvidenceRecord[],
+        affected: readonly string[],
+    ): Promise<void> {
         const now = new Date();
         const next = { ...mastery() };
         for (const skillId of new Set(affected)) {
@@ -469,7 +525,10 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         step: MissionStep,
         evaluation: StepEvaluation,
         hintsUsed: number,
-        options?: { readonly attemptId?: string; readonly categoryOverride?: "testing" | "transfer" },
+        options?: {
+            readonly attemptId?: string;
+            readonly categoryOverride?: "testing" | "transfer";
+        },
     ): Promise<void> {
         const draft = buildEvidenceDraft({
             id: crypto.randomUUID(),
@@ -479,12 +538,18 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             hintsUsed,
             now: new Date(),
             ...(options?.attemptId === undefined ? {} : { attemptId: options.attemptId }),
-            ...(options?.categoryOverride === undefined ? {} : { category: options.categoryOverride }),
+            ...(options?.categoryOverride === undefined
+                ? {}
+                : { category: options.categoryOverride }),
         });
         const expanded = [...expandEvidenceSkills(skillGraph, mission.skills).keys()];
         await persistEvidence({ ...draft, skills: expanded });
 
-        if (step.kind === "machine" && evaluation.passed && options?.categoryOverride === undefined) {
+        if (
+            step.kind === "machine" &&
+            evaluation.passed &&
+            options?.categoryOverride === undefined
+        ) {
             const transferDraft = buildEvidenceDraft({
                 id: crypto.randomUUID(),
                 mission,
@@ -523,10 +588,14 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             clubEventsCompleted: 0,
             worldRecovered: isWorldRecovered(world()) || world().flags["incidentResolved"] === true,
             languagesDemonstrated: languagePrefixes(evidence()),
-            hiddenBoundaryFound: evidence().some(function boundary(record: EvidenceRecord): boolean {
+            hiddenBoundaryFound: evidence().some(function boundary(
+                record: EvidenceRecord,
+            ): boolean {
                 return record.category === "testing" && record.outcome === "success";
             }),
-            difficultDebuggingRecovered: evidence().some(function debugging(record: EvidenceRecord): boolean {
+            difficultDebuggingRecovered: evidence().some(function debugging(
+                record: EvidenceRecord,
+            ): boolean {
                 return record.category === "debugging" && record.outcome === "success";
             }),
             teammateHelped: false,
@@ -540,9 +609,11 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         );
         if (newAchievements.length > 0) {
             const now = new Date().toISOString();
-            const records: AchievementRecord[] = newAchievements.map(function record(achievement): AchievementRecord {
-                return { achievementId: achievement.id, earnedAt: now };
-            });
+            const records: AchievementRecord[] = newAchievements.map(
+                function record(achievement): AchievementRecord {
+                    return { achievementId: achievement.id, earnedAt: now };
+                },
+            );
             const next: LocalProgress = {
                 ...progress(),
                 achievements: [...progress().achievements, ...records],
@@ -581,7 +652,9 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         const previousStreak: StreakRecord = {
             streakDays: progress().streakDays,
             longestStreak: progress().longestStreak,
-            ...(progress().lastPracticeOn === undefined ? {} : { lastPracticeOn: progress().lastPracticeOn }),
+            ...(progress().lastPracticeOn === undefined
+                ? {}
+                : { lastPracticeOn: progress().lastPracticeOn }),
         };
         const streak = recordPractice(previousStreak, today);
         const experience = progress().experience + reward.experience;
@@ -611,10 +684,15 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
 
         let nextWorld = world();
         let worldChanged = false;
-        if (mission.persistence.kind === "world-action" && mission.persistence.action !== undefined) {
+        if (
+            mission.persistence.kind === "world-action" &&
+            mission.persistence.action !== undefined
+        ) {
             const action: WorldAction = {
                 id: mission.persistence.action,
-                ...(mission.persistence.system === undefined ? {} : { systemId: mission.persistence.system }),
+                ...(mission.persistence.system === undefined
+                    ? {}
+                    : { systemId: mission.persistence.system }),
             };
             const expectedVersion = nextWorld.version;
             const result = applyWorldAction(nextWorld, action);
@@ -710,7 +788,10 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         }
     }
 
-    async function recordProjectCompletion(project: ProjectDefinition, passedStages: number): Promise<CompletionOutcome> {
+    async function recordProjectCompletion(
+        project: ProjectDefinition,
+        passedStages: number,
+    ): Promise<CompletionOutcome> {
         if (completedProjectIds().includes(project.id)) {
             return {
                 alreadyCompleted: true,
@@ -802,8 +883,13 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
                 mastery: masteryScores,
                 reviews: reviews(),
                 interests: preferences().interests,
-                challenge: preferences().challenge as ChallengeLevel,
+                challenge: preferences().challenge,
                 completedMissionIds: [...completedMissionIds()],
+                completedMissionSkills: [...completedMissionIds()].flatMap(
+                    function skillsOf(missionId): readonly string[] {
+                        return getMission(missionId)?.skills ?? [];
+                    },
+                ),
                 completedSequences: {},
                 misconceptionSkills: [],
                 recentFailureSkills: [],
@@ -887,7 +973,20 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
     async function clearLocalAccountData(): Promise<void> {
         await db.transaction(
             "rw",
-            [db.progress, db.evidence, db.mastery, db.reviews, db.world, db.outbox, db.completions, db.preferences, db.attempts],
+            [
+                db.progress,
+                db.evidence,
+                db.mastery,
+                db.reviews,
+                db.world,
+                db.outbox,
+                db.completions,
+                db.preferences,
+                db.attempts,
+                db.projects,
+                db.drafts,
+                db.meta,
+            ],
             async function clearTables(): Promise<void> {
                 await Promise.all([
                     db.progress.clear(),
@@ -899,6 +998,9 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
                     db.completions.clear(),
                     db.preferences.clear(),
                     db.attempts.clear(),
+                    db.projects.clear(),
+                    db.drafts.clear(),
+                    db.meta.clear(),
                 ]);
             },
         );
@@ -910,11 +1012,19 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         setEvidence([]);
         setWorld(createInitialWorld());
         setPreferences(DEFAULT_PREFERENCES);
+        setCompletedProjectIds([]);
+        setPlacement(undefined);
+        setOnboardedSignal(false);
         applyPresentation(DEFAULT_PREFERENCES);
         await saveWorld(db, createInitialWorld());
         await saveProgress(db, defaultProgress());
         setOutboxCount(0);
         setSyncStatus("idle");
+        try {
+            localStorage.removeItem("praxbit-account");
+        } catch {
+            // No stored marker to remove.
+        }
     }
 
     async function logout(): Promise<void> {
@@ -944,7 +1054,10 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         await saveWorld(db, response.world);
     }
 
-    async function saveProjectDraft(projectId: string, files: Readonly<Record<string, string>>): Promise<void> {
+    async function saveProjectDraft(
+        projectId: string,
+        files: Readonly<Record<string, string>>,
+    ): Promise<void> {
         const existing = await db.projects.get(projectId);
         await db.projects.put({
             id: projectId,
@@ -954,7 +1067,9 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         });
     }
 
-    async function loadProjectDraft(projectId: string): Promise<Readonly<Record<string, string>> | undefined> {
+    async function loadProjectDraft(
+        projectId: string,
+    ): Promise<Readonly<Record<string, string>> | undefined> {
         const row = await db.projects.get(projectId);
         return row?.files;
     }
