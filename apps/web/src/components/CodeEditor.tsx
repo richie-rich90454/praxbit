@@ -1,6 +1,13 @@
 import { createEffect, onCleanup, onMount, type JSX } from "solid-js";
 import { EditorState } from "@codemirror/state";
-import { EditorView, keymap, lineNumbers, highlightActiveLine, highlightSpecialChars, drawSelection } from "@codemirror/view";
+import {
+    EditorView,
+    keymap,
+    lineNumbers,
+    highlightActiveLine,
+    highlightSpecialChars,
+    drawSelection,
+} from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { bracketMatching, defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
@@ -46,7 +53,7 @@ const editorTheme = EditorView.theme({
         fontSize: "14px",
     },
     ".cm-content": {
-        fontFamily: "\"Noto Sans Mono\", monospace",
+        fontFamily: '"Noto Sans Mono", monospace',
         padding: "12px 0",
         caretColor: "#B54131",
     },
@@ -98,7 +105,13 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
                 highlightActiveLine(),
                 highlightSelectionMatches(),
                 syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-                keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap, ...searchKeymap, indentWithTab]),
+                keymap.of([
+                    ...closeBracketsKeymap,
+                    ...defaultKeymap,
+                    ...historyKeymap,
+                    ...searchKeymap,
+                    indentWithTab,
+                ]),
                 runKeymap,
                 EditorView.lineWrapping,
                 EditorState.readOnly.of(props.readOnly === true),
