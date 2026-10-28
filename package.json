@@ -12,7 +12,7 @@
         "dev": "pnpm --parallel --filter @praxbit/web --filter @praxbit/server dev",
         "dev:web": "pnpm --filter @praxbit/web dev",
         "dev:server": "pnpm --filter @praxbit/server dev",
-        "start": "node apps/server/dist/main.js",
+        "start": "node scripts/start.mjs",
         "bootstrap": "node scripts/bootstrap.mjs",
         "build": "pnpm --filter @praxbit/web build && pnpm --filter @praxbit/server build && pnpm --filter @praxbit/companion build",
         "format": "oxfmt .",
