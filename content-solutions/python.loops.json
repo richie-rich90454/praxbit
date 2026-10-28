@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "stock-total": {
+            "files": {
+                "stock.py": "def total_stock(items):\n    total = 0\n    for item in items:\n        total += item[\"quantity\"]\n    return total\n"
+            }
+        }
+    }
+}
