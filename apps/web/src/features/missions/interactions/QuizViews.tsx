@@ -9,7 +9,10 @@ import type {
 } from "@praxbit/contracts";
 import type { InteractionProps } from "./types.ts";
 
-export function LessonView(props: { readonly step: LessonStep; readonly onResult: InteractionProps["onResult"] }): JSX.Element {
+export function LessonView(props: {
+    readonly step: LessonStep;
+    readonly onResult: InteractionProps["onResult"];
+}): JSX.Element {
     return (
         <div class="stack">
             <For each={props.step.sections}>
@@ -78,16 +81,17 @@ export function QuizView(props: { readonly step: QuizStep } & InteractionProps):
     );
 }
 
-export function MultiSelectView(
-    props: {
-        readonly step: ExplainStep | TestDesignStep;
-        readonly onResult: InteractionProps["onResult"];
-    },
-): JSX.Element {
+export function MultiSelectView(props: {
+    readonly step: ExplainStep | TestDesignStep;
+    readonly onResult: InteractionProps["onResult"];
+}): JSX.Element {
     const [selected, setSelected] = createSignal<readonly string[]>([]);
     const options = createMemo(function optionsList(): readonly { id: string; label: string }[] {
         if (props.step.kind === "explain") {
-            return props.step.statements.map(function mapStatement(statement): { id: string; label: string } {
+            return props.step.statements.map(function mapStatement(statement): {
+                id: string;
+                label: string;
+            } {
                 return { id: statement.id, label: statement.label };
             });
         }
@@ -231,7 +235,10 @@ export function ReviewView(props: { readonly step: ReviewStep } & InteractionPro
                 Submit review
             </button>
             <Show when={props.step.artifact.kind === "diff"}>
-                <p class="meta">The artifact is a diff. Lines beginning with minus were removed; plus lines were added.</p>
+                <p class="meta">
+                    The artifact is a diff. Lines beginning with minus were removed; plus lines were
+                    added.
+                </p>
             </Show>
         </div>
     );
