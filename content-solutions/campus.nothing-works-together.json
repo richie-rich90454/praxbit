@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "integrate-order": {
+            "files": {
+                "orders.js": "function placeOrder(inventory, order) {\n  const seen = new Set();\n  const next = { ...inventory };\n  let totalCents = 0;\n  for (const item of order.items) {\n    if (seen.has(item.id)) {\n      return { ok: false, error: \"duplicate-item\", inventory: { ...inventory } };\n    }\n    seen.add(item.id);\n    if (!Object.prototype.hasOwnProperty.call(inventory, item.id)) {\n      return { ok: false, error: \"unknown-item\", inventory: { ...inventory } };\n    }\n    if (!Number.isInteger(item.quantity) || item.quantity < 1) {\n      return { ok: false, error: \"invalid-quantity\", inventory: { ...inventory } };\n    }\n    if (next[item.id] < item.quantity) {\n      return { ok: false, error: \"insufficient-stock\", inventory: { ...inventory } };\n    }\n    next[item.id] -= item.quantity;\n    totalCents += item.unitCents * item.quantity;\n  }\n  return { ok: true, inventory: next, totalCents: totalCents };\n}\n"
+            }
+        }
+    }
+}
