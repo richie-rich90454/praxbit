@@ -157,7 +157,7 @@ pnpm build
 pnpm start
 ```
 
-Open `http://localhost:8787`. The Hono process serves both the API and the built web application, including the service worker and the single-page fallback. Only one process is required on Windows, macOS, or Linux.
+Open `http://localhost:8787`. The Hono process serves both the API and the built web application, including the service worker and the single-page fallback. Only one process is required on Windows, macOS, or Linux. If the build output is missing, `pnpm start` builds it first.
 
 The build produces the static web client in `apps/web/dist`, the server bundle in `apps/server/dist`, and the companion in `apps/companion/dist/main.js`. The server build is a Node bundle; do not run `tsx watch` or Vite in production.
 
