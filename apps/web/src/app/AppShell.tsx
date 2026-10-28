@@ -21,7 +21,13 @@ export function AppShell(props: { readonly children?: JSX.Element }): JSX.Elemen
 
     return (
         <div class="app-shell">
-            <a class="skip-link" href="#main">
+            <a
+                class="skip-link"
+                href="#main"
+                onClick={function focusMain(): void {
+                    document.getElementById("main")?.focus();
+                }}
+            >
                 Skip to main content
             </a>
             <header class="site-header">
@@ -50,7 +56,13 @@ export function AppShell(props: { readonly children?: JSX.Element }): JSX.Elemen
                 </div>
             </header>
 
-            <Show when={!learning.online() || learning.syncStatus() === "conflict" || learning.syncStatus() === "failed"}>
+            <Show
+                when={
+                    !learning.online() ||
+                    learning.syncStatus() === "conflict" ||
+                    learning.syncStatus() === "failed"
+                }
+            >
                 <div
                     class={`notice ${learning.syncStatus() === "failed" ? "notice--error" : ""}`}
                     style={{ "border-radius": "0", "border-left": "0", "border-right": "0" }}
@@ -58,7 +70,10 @@ export function AppShell(props: { readonly children?: JSX.Element }): JSX.Elemen
                 >
                     <div class="page" style={{ padding: "8px 20px" }}>
                         <Show when={!learning.online()}>
-                            <span class="small">You are offline. Progress is saved on this device and will sync later.</span>
+                            <span class="small">
+                                You are offline. Progress is saved on this device and will sync
+                                later.
+                            </span>
                         </Show>
                         <Show when={learning.online() && learning.syncStatus() === "conflict"}>
                             <span class="small">
@@ -68,7 +83,8 @@ export function AppShell(props: { readonly children?: JSX.Element }): JSX.Elemen
                         </Show>
                         <Show when={learning.online() && learning.syncStatus() === "failed"}>
                             <span class="small">
-                                {learning.syncMessage() ?? "Sync failed. Progress remains saved on this device."}
+                                {learning.syncMessage() ??
+                                    "Sync failed. Progress remains saved on this device."}
                             </span>
                         </Show>
                     </div>
@@ -79,9 +95,14 @@ export function AppShell(props: { readonly children?: JSX.Element }): JSX.Elemen
                 {props.children}
             </div>
 
-            <footer class="site-header" style={{ "border-top": "1px solid var(--border)", "border-bottom": "0" }}>
+            <footer
+                class="site-header"
+                style={{ "border-top": "1px solid var(--border)", "border-bottom": "0" }}
+            >
                 <div class="site-header__inner row row--between">
-                    <span class="meta">Praxbit. Learn how computers work. Build what you imagine.</span>
+                    <span class="meta">
+                        Praxbit. Learn how computers work. Build what you imagine.
+                    </span>
                     <span class="row">
                         <A class="small" href="/settings">
                             Settings and account
