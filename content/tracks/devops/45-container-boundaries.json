@@ -5,22 +5,14 @@
     "courseId": "devops",
     "title": "Container boundaries",
     "summary": "Review a container definition for user, version, health, and resource boundaries.",
-    "skills": [
-        "devops.containers"
-    ],
-    "prerequisites": [
-        "devops.linux",
-        "ops.deployment"
-    ],
+    "skills": ["devops.containers"],
+    "prerequisites": ["ops.deployment"],
     "difficulty": "advanced",
     "estimatedMinutes": 7,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "configuration-review",
-            "no-execution"
-        ]
+        "capabilities": ["configuration-review", "no-execution"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "container-risks",
             "description": "Identify unsafe container defaults.",
-            "stepIds": [
-                "container-review"
-            ]
+            "stepIds": ["container-review"]
         },
         {
             "id": "container-practice",
             "description": "Explain reproducible and bounded container practice.",
-            "stepIds": [
-                "container-check"
-            ]
+            "stepIds": ["container-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:server-room",
-        "icon:container"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:container"],
     "hints": [
         "A floating latest tag makes builds unreproducible.",
         "Running as root increases the impact of a compromise.",
@@ -191,9 +174,7 @@
     },
     "rewards": {
         "experience": 135,
-        "unlocks": [
-            "devops.pipeline-checks"
-        ]
+        "unlocks": ["devops.pipeline-checks"]
     },
     "persistence": {
         "kind": "none"
@@ -204,8 +185,5 @@
         "screenReaderNotes": "The Dockerfile is read as code. Findings announce support after submission."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
