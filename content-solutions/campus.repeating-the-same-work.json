@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "available-total": {
+            "files": {
+                "stock.js": "function sumAvailable(items) {\n  let total = 0;\n  for (const item of items) {\n    const available = item.stock - item.reserved;\n    if (available > 0) {\n      total += available;\n    }\n  }\n  return total;\n}\n"
+            }
+        }
+    }
+}
