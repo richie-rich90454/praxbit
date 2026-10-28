@@ -1,0 +1,211 @@
+{
+    "id": "devops.container-limits",
+    "version": 1,
+    "sequence": 45,
+    "courseId": "devops",
+    "title": "Container boundaries",
+    "summary": "Review a container definition for user, version, health, and resource boundaries.",
+    "skills": [
+        "devops.containers"
+    ],
+    "prerequisites": [
+        "devops.linux",
+        "ops.deployment"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 7,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "configuration-review",
+            "no-execution"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "container-review",
+        "briefing": "The orders API is moving into a container. Review the definition before it reaches the shared two-vCPU server."
+    },
+    "objectives": [
+        {
+            "id": "container-risks",
+            "description": "Identify unsafe container defaults.",
+            "stepIds": [
+                "container-review"
+            ]
+        },
+        {
+            "id": "container-practice",
+            "description": "Explain reproducible and bounded container practice.",
+            "stepIds": [
+                "container-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:server-room",
+        "icon:container"
+    ],
+    "hints": [
+        "A floating latest tag makes builds unreproducible.",
+        "Running as root increases the impact of a compromise.",
+        "A health check and resource limits protect the shared host.",
+        "Reject until it uses a pinned base, a non-root user, a health check, and CPU/memory limits."
+    ],
+    "misconceptions": [
+        {
+            "id": "latest-tag",
+            "description": "Assuming latest is a stable version.",
+            "stepId": "container-review",
+            "feedback": "latest moves. Pin a specific version or digest so builds are reproducible."
+        },
+        {
+            "id": "host-limits",
+            "description": "Assuming a container cannot exhaust the host.",
+            "stepId": "container-check",
+            "feedback": "Without limits, a container can consume host CPU and memory. Set bounded resources and monitor them."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A container is a process with boundaries",
+                "body": "Containers package an application and its runtime, but they are not a security boundary by themselves. A pinned base image, non-root user, read-only filesystem where possible, and minimal installed tools reduce risk."
+            },
+            {
+                "title": "Resources must be bounded",
+                "body": "On a shared server, an unbounded container can starve other services. CPU and memory limits, a health check, and logs with retention turn a dangerous process into an operable one."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Base image",
+                "definition": "The starting filesystem for a container image."
+            },
+            {
+                "term": "Non-root user",
+                "definition": "A process account without administrative privileges."
+            },
+            {
+                "term": "Resource limit",
+                "definition": "A cap on CPU, memory, or other host resources."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "container-review",
+            "title": "Review the container",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Proposed Dockerfile",
+                "caption": "For the orders API on the shared campus host.",
+                "kind": "code",
+                "language": "dockerfile",
+                "content": "FROM node:latest\nWORKDIR /app\nCOPY . .\nRUN npm install\nEXPOSE 8080\nCMD [\"node\", \"server.js\"]\n\n# No USER, HEALTHCHECK, memory limit, or CPU limit."
+            },
+            "findings": [
+                {
+                    "id": "latest",
+                    "label": "The node:latest base is not pinned.",
+                    "correct": true
+                },
+                {
+                    "id": "root",
+                    "label": "The container runs as root by default.",
+                    "correct": true
+                },
+                {
+                    "id": "install",
+                    "label": "npm install without a lockfile strategy is not reproducible.",
+                    "correct": true
+                },
+                {
+                    "id": "health",
+                    "label": "There is no health check.",
+                    "correct": true
+                },
+                {
+                    "id": "safe",
+                    "label": "The container is safe because it is isolated from the host.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the container"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until the base is pinned, a non-root user is set, installs are reproducible, health is checked, and resources are bounded"
+                },
+                {
+                    "id": "tag",
+                    "label": "Add a version label and ship"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "Reproducibility, privilege, install command, health, and resources are all unaddressed. A container still consumes the shared host."
+        },
+        {
+            "kind": "explain",
+            "id": "container-check",
+            "title": "Operable containers",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "pin",
+                    "label": "Pinned base images make builds reproducible.",
+                    "correct": true
+                },
+                {
+                    "id": "root",
+                    "label": "Running as root increases the impact of a compromise.",
+                    "correct": true
+                },
+                {
+                    "id": "limits",
+                    "label": "Resource limits protect other services on the host.",
+                    "correct": true
+                },
+                {
+                    "id": "isolation",
+                    "label": "A container is a complete security boundary by itself.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Containers improve packaging and deployment; they do not remove the need for privilege, resource, and image controls."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 135,
+        "unlocks": [
+            "devops.pipeline-checks"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Dockerfile is plain text and review controls are labeled.",
+        "keyboardNotes": "Use Space for findings and arrow keys for the verdict.",
+        "screenReaderNotes": "The Dockerfile is read as code. Findings announce support after submission."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
