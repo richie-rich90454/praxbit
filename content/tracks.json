@@ -54,11 +54,7 @@
             "title": "Python foundations",
             "summary": "Values, decisions, and loops in a language used for data work and automation.",
             "kind": "language",
-            "missionIds": [
-                "python.values",
-                "python.decisions",
-                "python.loops"
-            ],
+            "missionIds": ["python.values", "python.decisions", "python.loops"],
             "interests": ["ai", "professional"]
         },
         {
@@ -66,11 +62,7 @@
             "title": "SQL and data",
             "summary": "Ask precise questions of relational data and keep results trustworthy.",
             "kind": "language",
-            "missionIds": [
-                "sql.filter-orders",
-                "sql.join-customers",
-                "sql.review-model"
-            ],
+            "missionIds": ["sql.filter-orders", "sql.join-customers", "sql.review-model"],
             "interests": ["professional", "web"]
         },
         {
@@ -90,10 +82,7 @@
             "title": "Security",
             "summary": "Injection, sessions, and the boundaries where trust must stop.",
             "kind": "discipline",
-            "missionIds": [
-                "security.injection",
-                "security.sessions"
-            ],
+            "missionIds": ["security.injection", "security.sessions"],
             "interests": ["systems", "professional", "web"]
         },
         {
@@ -101,11 +90,7 @@
             "title": "AI engineering",
             "summary": "Prompts, evaluation, and bounded delegation that keeps responsibility with the engineer.",
             "kind": "discipline",
-            "missionIds": [
-                "ai.prompt-contract",
-                "ai.evaluate-output",
-                "ai.agent-permissions"
-            ],
+            "missionIds": ["ai.prompt-contract", "ai.evaluate-output", "ai.agent-permissions"],
             "interests": ["ai", "professional"]
         },
         {
@@ -113,10 +98,7 @@
             "title": "DevOps",
             "summary": "Containers, pipelines, and releases that can be verified and reversed.",
             "kind": "discipline",
-            "missionIds": [
-                "devops.container-limits",
-                "devops.pipeline-checks"
-            ],
+            "missionIds": ["devops.container-limits", "devops.pipeline-checks"],
             "interests": ["systems", "professional"]
         },
         {
@@ -124,9 +106,7 @@
             "title": "TypeScript",
             "summary": "Narrowing, contracts, and types that survive contact with external data.",
             "kind": "language",
-            "missionIds": [
-                "typescript.narrowing"
-            ],
+            "missionIds": ["typescript.narrowing"],
             "interests": ["web", "professional"]
         },
         {
@@ -134,9 +114,7 @@
             "title": "Node services",
             "summary": "Middleware order, validation, and error boundaries in Hono services.",
             "kind": "framework",
-            "missionIds": [
-                "node.middleware-order"
-            ],
+            "missionIds": ["node.middleware-order"],
             "interests": ["web", "professional"]
         }
     ]
