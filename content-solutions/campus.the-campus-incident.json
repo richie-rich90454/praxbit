@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-replay": {
+            "files": {
+                "replay.js": "function reconcileInventory(initial, events) {\n  const inventory = { ...initial };\n  const seen = new Set();\n  for (const event of events) {\n    if (seen.has(event.id)) {\n      continue;\n    }\n    seen.add(event.id);\n    for (const item of event.items) {\n      if (!Object.prototype.hasOwnProperty.call(inventory, item.id)) {\n        continue;\n      }\n      if (event.type === \"sale\") {\n        inventory[item.id] = Math.max(0, inventory[item.id] - item.quantity);\n      } else if (event.type === \"return\") {\n        inventory[item.id] += item.quantity;\n      }\n    }\n  }\n  return inventory;\n}\n"
+            }
+        }
+    }
+}
