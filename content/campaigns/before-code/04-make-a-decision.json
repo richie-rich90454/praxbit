@@ -1,0 +1,255 @@
+{
+    "id": "before-code.make-a-decision",
+    "version": 1,
+    "sequence": 4,
+    "courseId": "before-code",
+    "title": "Make a decision",
+    "summary": "Configure a rule that opens a gate only when every required condition is true.",
+    "skills": [
+        "concept.conditions",
+        "concept.boolean"
+    ],
+    "prerequisites": [
+        "concept.state"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "rule",
+    "runtime": {
+        "kind": "none",
+        "capabilities": [
+            "interactive-simulation",
+            "keyboard",
+            "screen-reader"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "gate-policy",
+        "briefing": "The server room gate needs a rule. Access is allowed only when the badge is valid and it has not expired. Anything else must be rejected."
+    },
+    "objectives": [
+        {
+            "id": "configure-rule",
+            "description": "Choose a rule that matches every access case.",
+            "stepIds": [
+                "gate-rule"
+            ]
+        },
+        {
+            "id": "boolean-reasoning",
+            "description": "Explain how AND differs from OR.",
+            "stepIds": [
+                "boolean-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:server-room",
+        "icon:gate"
+    ],
+    "hints": [
+        "Test each candidate rule against all four badge cases.",
+        "The word and means both facts must hold.",
+        "An expired valid badge is still a reject. An invalid active badge is also a reject.",
+        "Choose the rule that requires valid and not expired. Only the first case is allowed."
+    ],
+    "misconceptions": [
+        {
+            "id": "or-instead-of-and",
+            "description": "Using OR when both conditions are required.",
+            "stepId": "gate-rule",
+            "answer": "either",
+            "feedback": "OR allows access when only one condition holds. That lets expired or invalid badges through. The policy needs both conditions."
+        },
+        {
+            "id": "and-equals-or",
+            "description": "Confusing AND with OR in natural language.",
+            "stepId": "boolean-check",
+            "feedback": "AND is true only when both sides are true. OR is true when at least one side is true."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Conditions choose a path",
+                "body": "A condition tests evidence and selects an outcome. The gate checks two facts: whether the badge is valid and whether it has expired. The result depends on both."
+            },
+            {
+                "title": "AND and OR are different",
+                "body": "AND requires every part to be true. OR requires at least one part to be true. Access rules are often security-sensitive, so a small logical mistake can admit the wrong person."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Condition",
+                "definition": "A test that produces true or false."
+            },
+            {
+                "term": "AND",
+                "definition": "True only when both operands are true."
+            },
+            {
+                "term": "OR",
+                "definition": "True when at least one operand is true."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "rule",
+            "id": "gate-rule",
+            "title": "Configure the gate",
+            "prompt": "Choose the rule that produces the required outcome for every badge case.",
+            "evidence": "construction",
+            "inputs": [
+                {
+                    "id": "valid-active",
+                    "label": "Valid badge, not expired → allow"
+                },
+                {
+                    "id": "valid-expired",
+                    "label": "Valid badge, expired → reject"
+                },
+                {
+                    "id": "invalid-active",
+                    "label": "Invalid badge, not expired → reject"
+                },
+                {
+                    "id": "invalid-expired",
+                    "label": "Invalid badge, expired → reject"
+                }
+            ],
+            "rules": [
+                {
+                    "id": "valid-only",
+                    "label": "Allow when the badge is valid"
+                },
+                {
+                    "id": "active-only",
+                    "label": "Allow when the badge has not expired"
+                },
+                {
+                    "id": "either",
+                    "label": "Allow when the badge is valid OR not expired"
+                },
+                {
+                    "id": "valid-and-active",
+                    "label": "Allow when the badge is valid AND not expired"
+                }
+            ],
+            "expected": [
+                {
+                    "inputId": "valid-active",
+                    "outcome": "allow"
+                },
+                {
+                    "inputId": "valid-expired",
+                    "outcome": "reject"
+                },
+                {
+                    "inputId": "invalid-active",
+                    "outcome": "reject"
+                },
+                {
+                    "inputId": "invalid-expired",
+                    "outcome": "reject"
+                }
+            ],
+            "correctRuleId": "valid-and-active",
+            "explanation": "Only the AND rule allows the valid, active badge and rejects the other three cases."
+        },
+        {
+            "kind": "explain",
+            "id": "boolean-check",
+            "title": "AND or OR?",
+            "prompt": "Select every statement that is true.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "and-both",
+                    "label": "A AND B is true only when both A and B are true.",
+                    "correct": true
+                },
+                {
+                    "id": "or-one",
+                    "label": "A OR B can be true when only A is true.",
+                    "correct": true
+                },
+                {
+                    "id": "either-true",
+                    "label": "A AND B is true when either one is true.",
+                    "correct": false
+                },
+                {
+                    "id": "not-inverse",
+                    "label": "NOT simply reverses true and false.",
+                    "correct": true
+                }
+            ],
+            "explanation": "AND requires both operands. OR needs at least one. NOT reverses the value."
+        },
+        {
+            "kind": "quiz",
+            "id": "gate-transfer",
+            "title": "A different policy",
+            "prompt": "The delivery dock opens when a parcel is expected OR a courier is present, but never after quiet hours. Quiet hours are a separate rejection check. Which shape does this policy have?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the closest description.",
+                "options": [
+                    {
+                        "id": "or-then-not",
+                        "label": "(expected OR courier present) AND NOT quiet hours"
+                    },
+                    {
+                        "id": "and-only",
+                        "label": "expected AND courier present AND quiet hours"
+                    },
+                    {
+                        "id": "always",
+                        "label": "Always open"
+                    },
+                    {
+                        "id": "not",
+                        "label": "NOT expected"
+                    }
+                ],
+                "correctId": "or-then-not",
+                "explanation": "Either arrival condition can open the dock, and the quiet-hours rejection must also be false."
+            },
+            "hints": [
+                "Find the two alternatives that each allow entry.",
+                "Quiet hours must block both alternatives.",
+                "Combine the alternatives with OR, then require NOT quiet hours.",
+                "The policy is (expected OR courier) AND NOT quiet hours."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 65,
+        "unlocks": [
+            "before-code.do-it-again"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Rules are radio options with their full text. The expected outcomes table is a real table with headers.",
+        "keyboardNotes": "Use arrow keys within the radio group, then Tab to the test button.",
+        "screenReaderNotes": "Every rule announces its full wording. Results state which cases allow and which reject."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "everything",
+        "systems"
+    ]
+}
