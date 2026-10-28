@@ -155,7 +155,7 @@ packages/game       PixiJS campus renderer
 content             Authored missions, tracks, projects, skills, events
 database            node-pg-migrate migrations
 docs                Architecture, API, operations, product, curriculum
-infra               systemd, proxy, backup, deploy templates
+infra               proxy, backup, and deployment templates
 scripts             Build and load-test entry points
 tests               Unit, content, integration, security, browser suites
 ```
