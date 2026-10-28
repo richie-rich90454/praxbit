@@ -1,27 +1,50 @@
-import type { AchievementRecord, CompletionRecord, Progress, ReviewItem, SkillMastery, WorldState } from "@praxbit/contracts";
+import type {
+    AchievementRecord,
+    CompletionRecord,
+    Progress,
+    ReviewItem,
+    SkillMastery,
+    WorldState,
+} from "@praxbit/contracts";
 import type { PraxbitDatabase } from "../persistence/index.ts";
 import { loadProgress, saveProgress } from "../persistence/index.ts";
 
-export async function setMastery(db: PraxbitDatabase, rows: readonly SkillMastery[]): Promise<void> {
-    await db.mastery.bulkPut(rows.map(function copy(row): SkillMastery { return { ...row }; }));
+export async function setMastery(
+    db: PraxbitDatabase,
+    rows: readonly SkillMastery[],
+): Promise<void> {
+    await db.mastery.bulkPut(
+        rows.map(function copy(row): SkillMastery {
+            return { ...row };
+        }),
+    );
 }
 
 export async function setReviews(db: PraxbitDatabase, rows: readonly ReviewItem[]): Promise<void> {
-    await db.reviews.bulkPut(rows.map(function copy(row): ReviewItem { return { ...row }; }));
+    await db.reviews.bulkPut(
+        rows.map(function copy(row): ReviewItem {
+            return { ...row };
+        }),
+    );
 }
 
 export async function setProgress(db: PraxbitDatabase, progress: Progress): Promise<void> {
     await saveProgress(db, progress);
 }
 
-export async function setAchievements(db: PraxbitDatabase, achievements: readonly AchievementRecord[]): Promise<void> {
+export async function setAchievements(
+    db: PraxbitDatabase,
+    achievements: readonly AchievementRecord[],
+): Promise<void> {
     if (achievements.length === 0) {
         return;
     }
     const progress = await loadProgress(db);
-    const existing = new Set(progress.achievements.map(function idOf(item): string {
-        return item.achievementId;
-    }));
+    const existing = new Set(
+        progress.achievements.map(function idOf(item): string {
+            return item.achievementId;
+        }),
+    );
     const merged = [...progress.achievements];
     for (const achievement of achievements) {
         if (!existing.has(achievement.achievementId)) {
@@ -35,7 +58,10 @@ export async function setWorld(db: PraxbitDatabase, state: WorldState): Promise<
     await db.world.put({ id: "campus", state, updatedAt: new Date().toISOString() });
 }
 
-export async function setCompletions(db: PraxbitDatabase, completions: readonly CompletionRecord[]): Promise<void> {
+export async function setCompletions(
+    db: PraxbitDatabase,
+    completions: readonly CompletionRecord[],
+): Promise<void> {
     if (completions.length === 0) {
         return;
     }
