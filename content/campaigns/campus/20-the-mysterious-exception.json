@@ -1,0 +1,263 @@
+{
+    "id": "campus.the-mysterious-exception",
+    "version": 1,
+    "sequence": 20,
+    "courseId": "campus",
+    "title": "The mysterious exception",
+    "summary": "Read a runtime stack trace, find the failing access, and repair the function.",
+    "skills": [
+        "js.debugging"
+    ],
+    "prerequisites": [
+        "js.objects",
+        "js.functions"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "undefined-customer",
+        "briefing": "customerLabel crashes for guest orders. The stack trace points at a property access. Repair the function so missing customer data produces Guest while real names are preserved."
+    },
+    "objectives": [
+        {
+            "id": "locate-exception",
+            "description": "Identify the failing property access.",
+            "stepIds": [
+                "find-exception"
+            ]
+        },
+        {
+            "id": "repair-safe-access",
+            "description": "Handle missing customer data without hiding real names.",
+            "stepIds": [
+                "repair-label"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:api",
+        "icon:error"
+    ],
+    "hints": [
+        "The trace says it cannot read a property of undefined.",
+        "order.customer may be missing for guest orders.",
+        "Guard customer before reading name, and fall back to Guest.",
+        "Use optional chaining and nullish fallback: const name = order.customer?.name ?? \"Guest\"; return name."
+    ],
+    "misconceptions": [
+        {
+            "id": "blames-network",
+            "description": "Assuming a network fault because the data is remote.",
+            "stepId": "find-exception",
+            "feedback": "The stack trace points to a local property access. The network delivered data without a customer, but the crash happens in this function."
+        },
+        {
+            "id": "hides-all-errors",
+            "description": "Swallowing every error to stop the crash.",
+            "stepId": "repair-label",
+            "feedback": "Blanket suppression hides real faults. Handle the specific missing-value case and keep other failures visible."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Stack traces point to evidence",
+                "body": "A runtime error includes a message and a stack trace. The message names the operation that failed; the trace lists the call path. Start at the topmost line in your own code and inspect the values that reach it."
+            },
+            {
+                "title": "Handle the expected case precisely",
+                "body": "Guest orders legitimately lack a customer record. That case can default to Guest. A broad try/catch around everything would also hide programming errors, making future defects harder to find."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Exception",
+                "definition": "A runtime condition that interrupts normal execution."
+            },
+            {
+                "term": "Stack trace",
+                "definition": "A report of the call path that led to an error."
+            },
+            {
+                "term": "Optional chaining",
+                "definition": "A syntax that stops a property access when the base is missing."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "debug",
+            "id": "find-exception",
+            "title": "Find the failing line",
+            "prompt": "Given the stack trace and function, choose the faulty instruction and the smallest repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "read",
+                    "label": "const name = order.customer.name;"
+                },
+                {
+                    "id": "return",
+                    "label": "return name;"
+                },
+                {
+                    "id": "format",
+                    "label": "return String(name);"
+                },
+                {
+                    "id": "guard",
+                    "label": "if (!order) return \"Guest\";"
+                }
+            ],
+            "buggyId": "read",
+            "fixes": [
+                {
+                    "id": "safe",
+                    "label": "const name = order.customer?.name ?? \"Guest\";"
+                },
+                {
+                    "id": "catch-all",
+                    "label": "Wrap the function body in try { } catch { return \"Guest\"; }"
+                },
+                {
+                    "id": "ignore",
+                    "label": "Remove the function and return \"Guest\" every time"
+                }
+            ],
+            "correctFixId": "safe",
+            "explanation": "The crash happens when order.customer is missing. Optional chaining plus a nullish fallback handles that case without hiding unrelated faults."
+        },
+        {
+            "kind": "code",
+            "id": "repair-label",
+            "title": "Repair customerLabel",
+            "prompt": "Edit labels.js. Return the customer name when it exists, otherwise Guest. Run the tests.",
+            "evidence": "debugging",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "labels.js",
+                    "content": "function customerLabel(order) {\n  const name = order.customer.name;\n  return name;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "labels.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A named customer is preserved.",
+                    "name": "customerLabel",
+                    "args": [
+                        {
+                            "customer": {
+                                "name": "Ada"
+                            }
+                        }
+                    ],
+                    "expected": "Ada"
+                },
+                {
+                    "kind": "function",
+                    "description": "A missing customer becomes Guest.",
+                    "name": "customerLabel",
+                    "args": [
+                        {}
+                    ],
+                    "expected": "Guest"
+                },
+                {
+                    "kind": "function",
+                    "description": "A null customer becomes Guest.",
+                    "name": "customerLabel",
+                    "args": [
+                        {
+                            "customer": null
+                        }
+                    ],
+                    "expected": "Guest"
+                },
+                {
+                    "kind": "function",
+                    "description": "A customer without a name becomes Guest.",
+                    "name": "customerLabel",
+                    "args": [
+                        {
+                            "customer": {}
+                        }
+                    ],
+                    "expected": "Guest"
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "debug-claims",
+            "title": "Handle the case, not everything",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "trace",
+                    "label": "A stack trace narrows the call path but does not by itself prove the root cause.",
+                    "correct": true
+                },
+                {
+                    "id": "specific",
+                    "label": "Handling a known missing value is better than suppressing every exception.",
+                    "correct": true
+                },
+                {
+                    "id": "catch",
+                    "label": "A broad catch block is always the safest repair.",
+                    "correct": false
+                },
+                {
+                    "id": "reproduce",
+                    "label": "Reproducing the failing input makes the bug easier to verify.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Specific handling preserves evidence of unexpected faults. Reproduction gives a reliable way to confirm the repair."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": [
+            "campus.changes-nobody-can-find"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "restart-service",
+        "system": "api"
+    },
+    "accessibility": {
+        "summary": "The stack trace and instructions are plain text. Fault and repair choices use radio groups.",
+        "keyboardNotes": "Choose the line and repair with arrow keys. Ctrl+Enter runs code tests.",
+        "screenReaderNotes": "The stack trace is read as a code block. Each test announces its input case and expected label."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
