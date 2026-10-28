@@ -73,12 +73,31 @@ export function securityHeadersMiddleware(config: ServerConfig): MiddlewareHandl
             "permissions-policy",
             "camera=(), microphone=(), geolocation=(), payment=()",
         );
-        context.header(
-            "content-security-policy",
-            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
-        );
         if (context.req.path.startsWith("/api/")) {
+            context.header(
+                "content-security-policy",
+                "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+            );
             context.header("cache-control", "no-store");
+        } else {
+            context.header(
+                "content-security-policy",
+                [
+                    "default-src 'self'",
+                    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+                    "style-src 'self' 'unsafe-inline'",
+                    "img-src 'self' data: blob:",
+                    "font-src 'self' data:",
+                    "connect-src 'self'",
+                    "worker-src 'self' blob:",
+                    "child-src 'self' blob: data:",
+                    "frame-src 'self' blob: data:",
+                    "manifest-src 'self'",
+                    "object-src 'none'",
+                    "base-uri 'none'",
+                    "frame-ancestors 'none'",
+                ].join("; "),
+            );
         }
         if (config.cookieSecure) {
             context.header("strict-transport-security", "max-age=31536000; includeSubDomains");
