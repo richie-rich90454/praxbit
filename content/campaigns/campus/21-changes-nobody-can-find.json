@@ -1,0 +1,225 @@
+{
+    "id": "campus.changes-nobody-can-find",
+    "version": 1,
+    "sequence": 21,
+    "courseId": "campus",
+    "title": "Changes nobody can find",
+    "summary": "Use Git history to restore a file to a known-good commit.",
+    "skills": [
+        "git.basics"
+    ],
+    "prerequisites": [
+        "concept.filesystems"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "git",
+    "runtime": {
+        "kind": "browser-git",
+        "capabilities": [
+            "isomorphic-git",
+            "in-memory-repository",
+            "real-commits"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "lost-file-version",
+        "briefing": "A commit replaced the storefront status with broken text. The previous version is in history. Find the good commit and restore only the affected file without discarding other work."
+    },
+    "objectives": [
+        {
+            "id": "inspect-history",
+            "description": "Inspect the repository history.",
+            "stepIds": [
+                "restore-file"
+            ]
+        },
+        {
+            "id": "restore-known-good",
+            "description": "Restore the file to its earlier content.",
+            "stepIds": [
+                "restore-file"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:dev-team",
+        "icon:git"
+    ],
+    "hints": [
+        "Run git log --oneline to see the commits.",
+        "The earlier commit contains the working version of src/store.js.",
+        "Check out that file from the earlier commit instead of resetting the whole repository.",
+        "Run git log --oneline, then git checkout HEAD~1 -- src/store.js, then git status."
+    ],
+    "misconceptions": [
+        {
+            "id": "hard-reset",
+            "description": "Resetting the whole repository to fix one file.",
+            "stepId": "restore-file",
+            "feedback": "A hard reset discards unrelated work. Restore only the affected file unless the evidence justifies a broader change."
+        },
+        {
+            "id": "history-is-optional",
+            "description": "Believing version control only stores the latest version.",
+            "stepId": "git-check",
+            "feedback": "Git commits form history. Earlier versions can be inspected and restored."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Commits are snapshots with history",
+                "body": "A Git commit records a version of the project and points to its parent. The log shows the chain. Branches are movable names for commits, and HEAD is where the working tree currently sits."
+            },
+            {
+                "title": "Restore deliberately",
+                "body": "Checking out one file from a commit changes that file without moving the branch. A hard reset moves the branch and can discard work. The right operation depends on how much state should change, not on which command sounds strongest."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Commit",
+                "definition": "A recorded project snapshot with an identity and message."
+            },
+            {
+                "term": "HEAD",
+                "definition": "The commit currently checked out."
+            },
+            {
+                "term": "Working tree",
+                "definition": "The files currently present in the project folder."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "git",
+            "id": "restore-file",
+            "title": "Restore the known-good file",
+            "prompt": "Use the terminal. Inspect history, restore src/store.js from the previous commit, and check status.",
+            "evidence": "construction",
+            "initialBranch": "main",
+            "seedCommits": [
+                {
+                    "message": "Add storefront status",
+                    "files": {
+                        "src/store.js": "function status() {\n  return \"ok\";\n}\n",
+                        "README.md": "# Campus store\n"
+                    }
+                },
+                {
+                    "message": "Change status label",
+                    "files": {
+                        "src/store.js": "function status() {\n  return \"broken\";\n}\n"
+                    }
+                }
+            ],
+            "extraBranches": [],
+            "checks": {
+                "fileIncludes": {
+                    "src/store.js": [
+                        "\"ok\""
+                    ]
+                },
+                "logIncludes": [
+                    "Add storefront status"
+                ]
+            },
+            "explanation": "The first commit contains the working status. Checking out that file version restores the known-good content without resetting the branch."
+        },
+        {
+            "kind": "quiz",
+            "id": "git-check",
+            "title": "What does checkout do?",
+            "prompt": "You run git checkout HEAD~1 -- src/store.js. What changes?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the result.",
+                "options": [
+                    {
+                        "id": "file",
+                        "label": "Only src/store.js is restored from the parent commit."
+                    },
+                    {
+                        "id": "all",
+                        "label": "The entire project is reset to the parent commit."
+                    },
+                    {
+                        "id": "delete",
+                        "label": "The repository history is deleted."
+                    },
+                    {
+                        "id": "remote",
+                        "label": "The file is fetched from a remote server."
+                    }
+                ],
+                "correctId": "file",
+                "explanation": "The -- path form checks out that file from the specified commit and leaves the branch and other files alone."
+            },
+            "hints": [
+                "The command names a file after the double dash.",
+                "Only that path is affected.",
+                "The branch does not move.",
+                "src/store.js is restored from HEAD~1."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "git-claims",
+            "title": "History and recovery",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "snapshot",
+                    "label": "A commit records a version of the project.",
+                    "correct": true
+                },
+                {
+                    "id": "file",
+                    "label": "A single file can be restored without discarding unrelated changes.",
+                    "correct": true
+                },
+                {
+                    "id": "reset",
+                    "label": "A hard reset is always the safest repair.",
+                    "correct": false
+                },
+                {
+                    "id": "parent",
+                    "label": "Commits refer to parent commits, forming history.",
+                    "correct": true
+                }
+            ],
+            "explanation": "History makes earlier versions recoverable. The narrowest correct operation preserves unrelated work."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 155,
+        "unlocks": [
+            "campus.two-developers-disagree"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Git terminal is a labeled text input with an output log. Suggested commands are visible as text.",
+        "keyboardNotes": "Type a command and press Enter. The output log can be scrolled with arrow keys.",
+        "screenReaderNotes": "The prompt announces the repository and branch. Command output is read in order, and checks report pass or fail."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "systems"
+    ]
+}
