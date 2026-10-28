@@ -95,7 +95,7 @@ export class TerminalSimulator {
             }),
             processes: (initial.processes ?? []).map(
                 function copyProcess(process): SimulatedProcess {
-                    return { ...process };
+                    return Object.assign({}, process);
                 },
             ),
             transcript: [],
@@ -257,14 +257,13 @@ export class TerminalSimulator {
 
     private list(args: readonly string[]): string {
         const long = args.includes("-l");
-        const positional = args.filter(function notFlag(arg: string): boolean {
+        const positional = args.find(function notFlag(arg: string): boolean {
             return !arg.startsWith("-");
         });
-        const target =
-            positional[0] === undefined ? this.state.cwd : this.relativePath(positional[0]);
+        const target = positional === undefined ? this.state.cwd : this.relativePath(positional);
         const resolved = this.resolveSymlinks(target);
         if (!this.isDirectory(target)) {
-            return `ls: cannot access '${positional[0] ?? target}': Not a directory`;
+            return `ls: cannot access '${positional ?? target}': Not a directory`;
         }
 
         const entries = new Map<string, "file" | "directory" | "link">();
