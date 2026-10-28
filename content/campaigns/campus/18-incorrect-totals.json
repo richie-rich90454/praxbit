@@ -1,0 +1,268 @@
+{
+    "id": "campus.incorrect-totals",
+    "version": 1,
+    "sequence": 18,
+    "courseId": "campus",
+    "title": "Incorrect totals",
+    "summary": "Diagnose string concatenation and floating-point rounding in a receipt total.",
+    "skills": [
+        "js.types"
+    ],
+    "prerequisites": [
+        "js.loops",
+        "js.functions"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "string-prices",
+        "briefing": "Prices arrive from JSON as strings. The receipt shows 12.500.99 instead of 13.49, and small decimal amounts drift. Return an integer number of cents."
+    },
+    "objectives": [
+        {
+            "id": "convert-types",
+            "description": "Convert string prices to numbers before arithmetic.",
+            "stepIds": [
+                "repair-total"
+            ]
+        },
+        {
+            "id": "round-cents",
+            "description": "Return a stable integer cent total.",
+            "stepIds": [
+                "repair-total"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:storefront",
+        "icon:receipt"
+    ],
+    "hints": [
+        "The plus operator concatenates strings when one side is text.",
+        "Convert each price with Number before multiplying by 100.",
+        "Multiplying a decimal by 100 can still produce floating error. Round the final cents total.",
+        "Keep an integer totalCents, add Math.round(Number(price) * 100) for each price, and return it."
+    ],
+    "misconceptions": [
+        {
+            "id": "string-concatenation",
+            "description": "Adding prices without converting them to numbers.",
+            "stepId": "repair-total",
+            "feedback": "When one operand is a string, + joins text. Convert prices to numbers before arithmetic."
+        },
+        {
+            "id": "float-cents",
+            "description": "Assuming decimal arithmetic is exact.",
+            "stepId": "repair-total",
+            "feedback": "Binary floating point cannot represent every decimal exactly. For money, work in integer cents or round a carefully computed cent value."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Types decide operation meaning",
+                "body": "The + operator adds numbers but concatenates strings. Values from JSON, form fields, and URLs arrive as text. Converting to the intended type is part of validating input, not an optional detail."
+            },
+            {
+                "title": "Money needs integer care",
+                "body": "Decimal fractions such as 0.1 cannot all be represented exactly in binary floating point. Storing and computing money in integer cents avoids most visible drift. If a computation must use decimals, round at a documented boundary."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Type conversion",
+                "definition": "Changing a value from one type to another."
+            },
+            {
+                "term": "Floating point",
+                "definition": "A binary representation of fractional numbers with limited precision."
+            },
+            {
+                "term": "Integer cents",
+                "definition": "Money stored as whole hundredths of a currency unit."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "repair-total",
+            "title": "Repair the receipt total",
+            "prompt": "Edit receipt.js. orderTotalCents(prices) receives string prices and returns an integer cent total. Run the tests.",
+            "evidence": "debugging",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "receipt.js",
+                    "content": "function orderTotalCents(prices) {\n  let total = 0;\n  for (const price of prices) {\n    total += price;\n  }\n  return total;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "receipt.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Two decimal prices add correctly.",
+                    "name": "orderTotalCents",
+                    "args": [
+                        [
+                            "12.50",
+                            "0.99"
+                        ]
+                    ],
+                    "expected": 1349
+                },
+                {
+                    "kind": "function",
+                    "description": "Small decimals do not drift.",
+                    "name": "orderTotalCents",
+                    "args": [
+                        [
+                            "0.10",
+                            "0.20"
+                        ]
+                    ],
+                    "expected": 30
+                },
+                {
+                    "kind": "function",
+                    "description": "A single price is converted.",
+                    "name": "orderTotalCents",
+                    "args": [
+                        [
+                            "19.99"
+                        ]
+                    ],
+                    "expected": 1999
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty receipt is zero.",
+                    "name": "orderTotalCents",
+                    "args": [
+                        []
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "A whole-dollar string is accepted.",
+                    "name": "orderTotalCents",
+                    "args": [
+                        [
+                            "5"
+                        ]
+                    ],
+                    "expected": 500
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "type-check",
+            "title": "What does + do?",
+            "prompt": "What is the value of \"2\" + 3 in JavaScript?",
+            "evidence": "prediction",
+            "quiz": {
+                "prompt": "Choose the result.",
+                "options": [
+                    {
+                        "id": "five",
+                        "label": "5, the number"
+                    },
+                    {
+                        "id": "text",
+                        "label": "\"23\", a string"
+                    },
+                    {
+                        "id": "error",
+                        "label": "A syntax error"
+                    },
+                    {
+                        "id": "undefined",
+                        "label": "undefined"
+                    }
+                ],
+                "correctId": "text",
+                "explanation": "One operand is a string, so + concatenates: \"2\" + 3 becomes \"23\"."
+            },
+            "hints": [
+                "One side is text.",
+                "JavaScript converts the other side to text for +.",
+                "The result is the characters 2 and 3 together.",
+                "The result is the string \"23\"."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "type-claims",
+            "title": "Types and money",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "convert",
+                    "label": "External data must be converted and validated before arithmetic.",
+                    "correct": true
+                },
+                {
+                    "id": "cents",
+                    "label": "Integer cents avoid most decimal rounding drift.",
+                    "correct": true
+                },
+                {
+                    "id": "exact",
+                    "label": "Every decimal fraction is represented exactly in binary floating point.",
+                    "correct": false
+                },
+                {
+                    "id": "coerce",
+                    "label": "JavaScript never changes types automatically.",
+                    "correct": false
+                }
+            ],
+            "explanation": "JavaScript performs implicit conversions, which can hide mistakes. Explicit conversion and integer cents make money calculations predictable."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": [
+            "campus.the-missing-property"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "repair-inventory",
+        "system": "storefront"
+    },
+    "accessibility": {
+        "summary": "All code and test results are text. Inputs and expected outputs are announced for each test.",
+        "keyboardNotes": "Ctrl+Enter runs tests. CodeMirror supports standard keyboard editing.",
+        "screenReaderNotes": "Test results include the function name, input arguments, expected value, and actual value."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
