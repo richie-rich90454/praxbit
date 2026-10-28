@@ -5,22 +5,14 @@
     "courseId": "before-code",
     "title": "Do it again",
     "summary": "Automate repeated work with a loop and check the number of repetitions.",
-    "skills": [
-        "concept.iteration"
-    ],
-    "prerequisites": [
-        "concept.conditions"
-    ],
+    "skills": ["concept.iteration"],
+    "prerequisites": ["concept.conditions"],
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "loop",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "interactive-simulation",
-            "keyboard",
-            "screen-reader"
-        ]
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "set-repetitions",
             "description": "Choose the correct number of repetitions.",
-            "stepIds": [
-                "packing-loop"
-            ]
+            "stepIds": ["packing-loop"]
         },
         {
             "id": "order-body",
             "description": "Order the actions inside the repeated block.",
-            "stepIds": [
-                "packing-loop"
-            ]
+            "stepIds": ["packing-loop"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["loop-trace", "loop-transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:delivery",
-        "icon:loop"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:delivery", "icon:loop"],
     "hints": [
         "Count the parcels that need packing.",
         "Each cycle should label, seal, and scan one parcel.",
@@ -103,12 +91,7 @@
             "title": "Program the packing cycle",
             "prompt": "Choose the repetition count and arrange the block. The robot runs the block once per pass.",
             "evidence": "construction",
-            "repeatChoices": [
-                3,
-                4,
-                5,
-                6
-            ],
+            "repeatChoices": [3, 4, 5, 6],
             "correctRepeat": 5,
             "bodyItems": [
                 {
@@ -124,11 +107,7 @@
                     "label": "Scan the label"
                 }
             ],
-            "correctBody": [
-                "label",
-                "seal",
-                "scan"
-            ],
+            "correctBody": ["label", "seal", "scan"],
             "explanation": "Five parcels need five cycles. Each cycle labels, seals, and then scans one parcel."
         },
         {
@@ -248,9 +227,7 @@
     },
     "rewards": {
         "experience": 70,
-        "unlocks": [
-            "before-code.one-step-at-a-time"
-        ]
+        "unlocks": ["before-code.one-step-at-a-time"]
     },
     "persistence": {
         "kind": "none"
@@ -261,8 +238,5 @@
         "screenReaderNotes": "The loop is announced as a block that repeats the selected number of times. Each trace step announces the line and updated values."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "everything",
-        "games"
-    ]
+    "tags": ["everything", "games"]
 }
