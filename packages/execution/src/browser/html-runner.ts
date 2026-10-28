@@ -32,8 +32,31 @@ export interface PreviewTestReport {
 }
 
 const HARNESS_SCRIPT = String.raw`
-<script>
+<script id="praxbit-harness">
 (function () {
+    var initialMarkup = null;
+    function captureInitialMarkup() {
+        var clone = document.body.cloneNode(true);
+        var harness = clone.querySelector("#praxbit-harness");
+        if (harness) {
+            harness.remove();
+        }
+        initialMarkup = clone.innerHTML;
+    }
+    function resetDocument() {
+        if (initialMarkup === null) {
+            return;
+        }
+        document.body.innerHTML = initialMarkup;
+        var scripts = document.body.querySelectorAll("script");
+        for (var index = 0; index < scripts.length; index += 1) {
+            try {
+                new Function(scripts[index].textContent || "")();
+            } catch (error) {
+                // A script that failed during reset is reported by the next check.
+            }
+        }
+    }
     function normalizeText(value) {
         return String(value == null ? "" : value).replace(/\s+/g, " ").trim();
     }
@@ -92,6 +115,9 @@ const HARNESS_SCRIPT = String.raw`
         }
         var results = [];
         for (var index = 0; index < event.data.checks.length; index += 1) {
+            if (index > 0) {
+                resetDocument();
+            }
             try {
                 results.push(runCheck(event.data.checks[index]));
             } catch (error) {
@@ -104,15 +130,23 @@ const HARNESS_SCRIPT = String.raw`
         }
         parent.postMessage({ type: "praxbit-preview-result", outcomes: results }, "*");
     });
+    captureInitialMarkup();
 })();
 </script>
 `;
+
+function escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 export function buildPreviewDocument(files: Readonly<Record<string, string>>): string {
     const entryName = Object.keys(files).find(function isHtml(path: string): boolean {
         return path.endsWith(".html");
     });
-    let html = entryName === undefined ? "<!doctype html><html><body></body></html>" : (files[entryName] ?? "");
+    let html =
+        entryName === undefined
+            ? "<!doctype html><html><body></body></html>"
+            : (files[entryName] ?? "");
 
     for (const [path, content] of Object.entries(files)) {
         if (path.endsWith(".css")) {
@@ -121,8 +155,9 @@ export function buildPreviewDocument(files: Readonly<Record<string, string>>): s
                 "gi",
             );
             if (linkPattern.test(html)) {
+                linkPattern.lastIndex = 0;
                 html = html.replace(linkPattern, `<style>${content}</style>`);
-            } else if (!html.includes(`/* ${path} */`)) {
+            } else {
                 html = html.replace("</head>", `<style>${content}</style></head>`);
             }
         }
@@ -132,8 +167,9 @@ export function buildPreviewDocument(files: Readonly<Record<string, string>>): s
                 "gi",
             );
             if (scriptPattern.test(html)) {
+                scriptPattern.lastIndex = 0;
                 html = html.replace(scriptPattern, `<script>${content}</script>`);
-            } else if (!html.includes(`// ${path}`)) {
+            } else {
                 html = html.replace("</body>", `<script>${content}</script></body>`);
             }
         }
@@ -145,15 +181,11 @@ export function buildPreviewDocument(files: Readonly<Record<string, string>>): s
     return `${html}${HARNESS_SCRIPT}`;
 }
 
-function escapeRegExp(value: string): string {
-    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-export async function runPreviewChecks(
+async function runSinglePreviewCheck(
     files: Readonly<Record<string, string>>,
-    checks: readonly PreviewCheck[],
-    timeoutMs = 5000,
-): Promise<PreviewTestReport> {
+    check: PreviewCheck,
+    timeoutMs: number,
+): Promise<{ readonly outcome: PreviewCheckOutcome; readonly timedOut: boolean }> {
     const iframe = document.createElement("iframe");
     iframe.setAttribute("sandbox", "allow-scripts");
     iframe.setAttribute("title", "Exercise preview");
@@ -165,10 +197,10 @@ export async function runPreviewChecks(
     iframe.style.top = "0";
     iframe.srcdoc = buildPreviewDocument(files);
 
-    return await new Promise<PreviewTestReport>(function executor(resolve): void {
+    return await new Promise(function executor(resolve): void {
         let settled = false;
 
-        function finish(report: PreviewTestReport): void {
+        function finish(outcome: PreviewCheckOutcome, timedOut: boolean): void {
             if (settled) {
                 return;
             }
@@ -176,35 +208,63 @@ export async function runPreviewChecks(
             window.removeEventListener("message", onMessage);
             clearTimeout(timer);
             iframe.remove();
-            resolve(report);
+            resolve({ outcome, timedOut });
         }
 
-        function onMessage(event: MessageEvent<{ type: string; outcomes: readonly PreviewCheckOutcome[] }>): void {
-            if (event.source !== iframe.contentWindow || event.data.type !== "praxbit-preview-result") {
+        function onMessage(
+            event: MessageEvent<{ type: string; outcomes: readonly PreviewCheckOutcome[] }>,
+        ): void {
+            if (
+                event.source !== iframe.contentWindow ||
+                event.data.type !== "praxbit-preview-result"
+            ) {
                 return;
             }
-            finish({ outcomes: event.data.outcomes, timedOut: false });
+            const outcome = event.data.outcomes[0] ?? {
+                description: check.description,
+                passed: false,
+                error: "The preview returned no result.",
+            };
+            finish(outcome, false);
         }
 
         const timer = setTimeout(function onTimeout(): void {
-            finish({
-                outcomes: checks.map(function timedOut(check): PreviewCheckOutcome {
-                    return { description: check.description, passed: false, error: "Preview timed out." };
-                }),
-                timedOut: true,
-            });
+            finish(
+                { description: check.description, passed: false, error: "Preview timed out." },
+                true,
+            );
         }, timeoutMs);
 
         window.addEventListener("message", onMessage);
         iframe.addEventListener(
             "load",
             function onLoad(): void {
-                iframe.contentWindow?.postMessage({ type: "praxbit-preview-run", checks }, "*");
+                iframe.contentWindow?.postMessage(
+                    { type: "praxbit-preview-run", checks: [check] },
+                    "*",
+                );
             },
             { once: true },
         );
         document.body.appendChild(iframe);
     });
+}
+
+export async function runPreviewChecks(
+    files: Readonly<Record<string, string>>,
+    checks: readonly PreviewCheck[],
+    timeoutMs = 5000,
+): Promise<PreviewTestReport> {
+    const outcomes: PreviewCheckOutcome[] = [];
+    let timedOut = false;
+    for (const check of checks) {
+        const result = await runSinglePreviewCheck(files, check, timeoutMs);
+        outcomes.push(result.outcome);
+        if (result.timedOut) {
+            timedOut = true;
+        }
+    }
+    return { outcomes, timedOut };
 }
 
 export function mountPreview(
