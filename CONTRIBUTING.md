@@ -7,7 +7,7 @@ Thank you for improving Praxbit. This project is a learning product, not a demo.
 - Read [ENGINEERING.md](ENGINEERING.md), [DESIGN.md](DESIGN.md), [SECURITY.md](SECURITY.md), and [CURRICULUM.md](CURRICULUM.md) for the area you are changing.
 - Search existing issues and pull requests before starting a large change.
 - For a new mission, project, or track, open an issue with the learning objective, target skills, interaction, runtime, and assessment plan first. A mission without a validated objective is not ready to author.
-- Do not commit credentials, provider keys, production database URLs, session tokens, or learner data. Use the example files under `infra/env/`.
+- Do not commit credentials, provider keys, production database URLs, session tokens, or learner data. Use the project-root `.env.example` and keep the real `.env` untracked.
 - Do not edit another package's public contract to make a local build pass. Fix the source and regenerate the dependent output.
 - Do not change the product name, palette, fonts, navigation model, or licensing without an explicit decision recorded in `docs/architecture/decisions.md`.
 
@@ -20,17 +20,19 @@ corepack enable
 pnpm install --frozen-lockfile
 ```
 
-Create a development database and run migrations:
+Create a development database, copy `.env.example` to `.env`, and run migrations:
 
 ```bash
 createdb praxbit_dev
-DATABASE_URL=postgres://localhost/praxbit_dev pnpm db:migrate
+cp .env.example .env
+# Set DATABASE_URL in .env.
+pnpm db:migrate
 ```
 
 Start the app:
 
 ```bash
-DATABASE_URL=postgres://localhost/praxbit_dev pnpm dev
+pnpm dev
 ```
 
 The web client is at `http://127.0.0.1:5173`; the API is at `http://127.0.0.1:8787`. Vite proxies `/api` to the API.
