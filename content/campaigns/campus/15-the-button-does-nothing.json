@@ -1,0 +1,226 @@
+{
+    "id": "campus.the-button-does-nothing",
+    "version": 1,
+    "sequence": 15,
+    "courseId": "campus",
+    "title": "The button does nothing",
+    "summary": "Wire a browser event so the storefront cart responds to a real click.",
+    "skills": [
+        "js.events",
+        "js.functions"
+    ],
+    "prerequisites": [
+        "web.html",
+        "concept.state",
+        "concept.conditions"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "dom-event-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "dead-button",
+        "briefing": "The Add to cart button has a listener, but the handler does nothing. Make each click update the cart count and status text. Keep the button usable by keyboard."
+    },
+    "objectives": [
+        {
+            "id": "click-updates",
+            "description": "Update count and status when the button is clicked.",
+            "stepIds": [
+                "wire-button"
+            ]
+        },
+        {
+            "id": "event-model",
+            "description": "Explain the relationship between events, handlers, and state.",
+            "stepIds": [
+                "event-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:click"
+    ],
+    "hints": [
+        "The button already has addEventListener. Implement the function it calls.",
+        "Inside addItem, increase count, then update both text elements.",
+        "Set countLabel.textContent to the new count. Build the status message from the count.",
+        "count = count + 1; countLabel.textContent = String(count); status.textContent = count + (count === 1 ? \" item in cart\" : \" items in cart\");"
+    ],
+    "misconceptions": [
+        {
+            "id": "forgets-state",
+            "description": "Updating the label without changing stored count.",
+            "stepId": "wire-button",
+            "feedback": "The visible label must reflect the stored count. If the count never changes, every click shows the same value."
+        },
+        {
+            "id": "listener-is-state",
+            "description": "Believing registering a listener performs the action.",
+            "stepId": "event-check",
+            "feedback": "Registering a listener tells the browser what to call later. The handler performs the action when the event occurs."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Events connect input to code",
+                "body": "The browser emits an event when a user clicks, types, or presses a key. A listener registers a handler function for that event. The handler reads state, updates it, and changes the page."
+            },
+            {
+                "title": "State must stay consistent",
+                "body": "The count variable and the visible text are two representations of the same fact. Updating one without the other produces a lie on screen. In larger applications, keeping state and rendering in step is a central design concern."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Event",
+                "definition": "A signal that something happened in the browser."
+            },
+            {
+                "term": "Listener",
+                "definition": "A registration that associates an event with a handler."
+            },
+            {
+                "term": "Handler",
+                "definition": "The function that runs when an event fires."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "wire-button",
+            "title": "Make the button respond",
+            "prompt": "Edit script.js so each click adds one item. The count and status must update, including singular and plural wording. Run the browser tests.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Notebook cart</title>\n</head>\n<body>\n  <main>\n    <h1>Campus notebook</h1>\n    <p>Lined pages for lab notes.</p>\n    <button id=\"add-to-cart\" type=\"button\">Add to cart</button>\n    <p>Items in cart: <span id=\"cart-count\">0</span></p>\n    <p id=\"cart-status\" role=\"status\">Cart empty</p>\n  </main>\n  <script src=\"script.js\"></script>\n</body>\n</html>\n",
+                    "editable": false,
+                    "language": "html"
+                },
+                {
+                    "path": "script.js",
+                    "content": "const addButton = document.querySelector(\"#add-to-cart\");\nconst countLabel = document.querySelector(\"#cart-count\");\nconst status = document.querySelector(\"#cart-status\");\n\nlet count = 0;\n\nfunction addItem() {\n  // Update count, countLabel, and status.\n}\n\naddButton.addEventListener(\"click\", addItem);\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "script.js",
+            "preview": "html",
+            "tests": [
+                {
+                    "kind": "dom",
+                    "description": "One click shows one item.",
+                    "selector": "#cart-count",
+                    "property": "text",
+                    "click": "#add-to-cart",
+                    "expected": "1"
+                },
+                {
+                    "kind": "dom",
+                    "description": "One click announces the singular status.",
+                    "selector": "#cart-status",
+                    "property": "text",
+                    "click": "#add-to-cart",
+                    "expected": "1 item in cart"
+                },
+                {
+                    "kind": "dom",
+                    "description": "Three clicks show three items.",
+                    "selector": "#cart-count",
+                    "property": "text",
+                    "click": "#add-to-cart",
+                    "clickCount": 3,
+                    "expected": "3"
+                },
+                {
+                    "kind": "dom",
+                    "description": "Three clicks announce the plural status.",
+                    "selector": "#cart-status",
+                    "property": "text",
+                    "click": "#add-to-cart",
+                    "clickCount": 3,
+                    "expected": "3 items in cart"
+                },
+                {
+                    "kind": "regex",
+                    "description": "The button uses a real event listener.",
+                    "file": "script.js",
+                    "pattern": "addEventListener\\(\\s*[\"']click[\"']",
+                    "flags": "i"
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "event-check",
+            "title": "What happens on click?",
+            "prompt": "Select every accurate statement about the cart.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "handler",
+                    "label": "The click event calls the registered handler.",
+                    "correct": true
+                },
+                {
+                    "id": "state",
+                    "label": "The count variable stores the current number of items.",
+                    "correct": true
+                },
+                {
+                    "id": "register",
+                    "label": "Adding a listener immediately adds an item to the cart.",
+                    "correct": false
+                },
+                {
+                    "id": "render",
+                    "label": "The visible text must be updated when state changes.",
+                    "correct": true
+                }
+            ],
+            "explanation": "A listener waits for an event. When it fires, the handler changes state and updates the page."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 125,
+        "unlocks": [
+            "campus.inventory-went-negative"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "publish-storefront",
+        "system": "storefront"
+    },
+    "accessibility": {
+        "summary": "The control is a native button, the status uses role=status, and tests can be run from the keyboard.",
+        "keyboardNotes": "Tab to Add to cart and press Enter or Space. Ctrl+Enter runs the tests.",
+        "screenReaderNotes": "The status text is announced politely after it changes. Test results list each requirement and outcome."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "games"
+    ]
+}
