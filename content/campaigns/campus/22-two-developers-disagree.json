@@ -5,22 +5,14 @@
     "courseId": "campus",
     "title": "Two developers disagree",
     "summary": "Merge a conflicting branch while preserving both genuine intentions.",
-    "skills": [
-        "git.branches"
-    ],
-    "prerequisites": [
-        "git.basics"
-    ],
+    "skills": ["git.branches"],
+    "prerequisites": ["git.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "git",
     "runtime": {
         "kind": "browser-git",
-        "capabilities": [
-            "isomorphic-git",
-            "in-memory-repository",
-            "merge-conflicts"
-        ]
+        "capabilities": ["isomorphic-git", "in-memory-repository", "merge-conflicts"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "merge-branch",
             "description": "Merge main into the feature branch.",
-            "stepIds": [
-                "resolve-conflict"
-            ]
+            "stepIds": ["resolve-conflict"]
         },
         {
             "id": "preserve-intent",
             "description": "Keep both rounding and the new rate in the resolved file.",
-            "stepIds": [
-                "resolve-conflict"
-            ]
+            "stepIds": ["resolve-conflict"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["merge-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:dev-team",
-        "icon:branches"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:dev-team", "icon:branches"],
     "hints": [
         "Check out feature/tax, then run git merge main.",
         "Git reports a conflict in src/pricing.js and inserts conflict markers.",
@@ -136,22 +124,13 @@
             "checks": {
                 "branch": "feature/tax",
                 "fileIncludes": {
-                    "src/pricing.js": [
-                        "Math.round",
-                        "0.2"
-                    ]
+                    "src/pricing.js": ["Math.round", "0.2"]
                 },
                 "fileExcludes": {
-                    "src/pricing.js": [
-                        "<<<<<<<",
-                        "=======",
-                        ">>>>>>>"
-                    ]
+                    "src/pricing.js": ["<<<<<<<", "=======", ">>>>>>>"]
                 },
                 "mergeCommit": true,
-                "logIncludes": [
-                    "Resolve tax merge"
-                ]
+                "logIncludes": ["Resolve tax merge"]
             },
             "explanation": "The resolved function rounds the result of amount * 0.2, preserving both the rounding commit and the rate change. The merge commit records both parents."
         },
@@ -192,9 +171,7 @@
     },
     "rewards": {
         "experience": 160,
-        "unlocks": [
-            "campus.the-broken-request"
-        ]
+        "unlocks": ["campus.the-broken-request"]
     },
     "persistence": {
         "kind": "world-action",
@@ -207,7 +184,5 @@
         "screenReaderNotes": "The command output reports branch, conflict paths, and status. Conflicts are announced with line numbers."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
