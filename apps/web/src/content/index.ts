@@ -14,15 +14,33 @@ import {
 } from "@praxbit/contracts";
 import { SkillGraph } from "@praxbit/domain";
 
-const missionModules = import.meta.glob(["../../../../content/campaigns/**/*.json", "../../../../content/tracks/**/*.json"], {
+const missionModules = import.meta.glob(
+    ["../../../../content/campaigns/**/*.json", "../../../../content/tracks/**/*.json"],
+    {
+        eager: true,
+        import: "default",
+    },
+);
+const skillsModule = import.meta.glob("../../../../content/skills.json", {
     eager: true,
     import: "default",
 });
-const skillsModule = import.meta.glob("../../../../content/skills.json", { eager: true, import: "default" });
-const tracksModule = import.meta.glob("../../../../content/tracks.json", { eager: true, import: "default" });
-const placementModule = import.meta.glob("../../../../content/placement.json", { eager: true, import: "default" });
-const projectsModule = import.meta.glob("../../../../content/projects.json", { eager: true, import: "default" });
-const achievementsModule = import.meta.glob("../../../../content/achievements.json", { eager: true, import: "default" });
+const tracksModule = import.meta.glob("../../../../content/tracks.json", {
+    eager: true,
+    import: "default",
+});
+const placementModule = import.meta.glob("../../../../content/placement.json", {
+    eager: true,
+    import: "default",
+});
+const projectsModule = import.meta.glob("../../../../content/projects.json", {
+    eager: true,
+    import: "default",
+});
+const achievementsModule = import.meta.glob("../../../../content/achievements.json", {
+    eager: true,
+    import: "default",
+});
 
 function singleModule(modules: Record<string, unknown>, name: string): unknown {
     const values = Object.values(modules);
@@ -34,9 +52,13 @@ function singleModule(modules: Record<string, unknown>, name: string): unknown {
 
 const skillsDocument = SkillGraphDocumentSchema.parse(singleModule(skillsModule, "skills"));
 const tracksDocument = TracksDocumentSchema.parse(singleModule(tracksModule, "tracks"));
-const placementDocument: PlacementDocument = PlacementDocumentSchema.parse(singleModule(placementModule, "placement"));
+const placementDocument: PlacementDocument = PlacementDocumentSchema.parse(
+    singleModule(placementModule, "placement"),
+);
 const projectsDocument = ProjectsDocumentSchema.parse(singleModule(projectsModule, "projects"));
-const achievementsDocument = AchievementsDocumentSchema.parse(singleModule(achievementsModule, "achievements"));
+const achievementsDocument = AchievementsDocumentSchema.parse(
+    singleModule(achievementsModule, "achievements"),
+);
 
 const parsedMissions: Mission[] = [];
 for (const [path, value] of Object.entries(missionModules)) {
@@ -55,9 +77,11 @@ for (const mission of parsedMissions) {
     uniqueMissionIds.add(mission.id);
 }
 
-export const missions: readonly Mission[] = parsedMissions.sort(function bySequence(left, right): number {
-    return left.sequence - right.sequence;
-});
+export const missions: readonly Mission[] = parsedMissions.sort(
+    function bySequence(left, right): number {
+        return left.sequence - right.sequence;
+    },
+);
 
 export const missionsById: ReadonlyMap<string, Mission> = new Map(
     missions.map(function toEntry(mission: Mission): [string, Mission] {
@@ -116,7 +140,9 @@ export function nextMission(missionId: string): Mission | undefined {
         return undefined;
     }
     return missions.find(function follows(candidate: Mission): boolean {
-        return candidate.courseId === mission.courseId && candidate.sequence === mission.sequence + 1;
+        return (
+            candidate.courseId === mission.courseId && candidate.sequence === mission.sequence + 1
+        );
     });
 }
 
