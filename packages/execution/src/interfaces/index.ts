@@ -32,7 +32,14 @@ export interface CodeRunner {
 export interface RuntimeCapability {
     readonly id: string;
     readonly label: string;
-    readonly kind: "real-execution" | "simulation" | "static-analysis" | "structural-analysis" | "guided-prediction" | "local-toolchain" | "remote-isolated";
+    readonly kind:
+        | "real-execution"
+        | "simulation"
+        | "static-analysis"
+        | "structural-analysis"
+        | "guided-prediction"
+        | "local-toolchain"
+        | "remote-isolated";
     readonly offline: boolean;
     readonly description: string;
 }
@@ -43,14 +50,16 @@ export const RUNTIME_CAPABILITIES: readonly RuntimeCapability[] = [
         label: "Browser JavaScript worker",
         kind: "real-execution",
         offline: true,
-        description: "Runs learner JavaScript in a dedicated Web Worker with a timeout and no DOM access. Best-effort isolation, not a security boundary.",
+        description:
+            "Runs learner JavaScript in a dedicated Web Worker with a timeout and no DOM access. Best-effort isolation, not a security boundary.",
     },
     {
         id: "browser-html",
         label: "Sandboxed HTML preview",
         kind: "real-execution",
         offline: true,
-        description: "Renders HTML and CSS in a sandboxed iframe and checks DOM structure and computed styles.",
+        description:
+            "Renders HTML and CSS in a sandboxed iframe and checks DOM structure and computed styles.",
     },
     {
         id: "browser-css",
@@ -64,35 +73,40 @@ export const RUNTIME_CAPABILITIES: readonly RuntimeCapability[] = [
         label: "Transpiled TypeScript",
         kind: "real-execution",
         offline: true,
-        description: "Transpiles TypeScript in the browser, reports syntax diagnostics, and runs behavioral tests. Full type checking is available in the local companion.",
+        description:
+            "Transpiles TypeScript in the browser, reports syntax diagnostics, and runs behavioral tests. Full type checking is available in the local companion.",
     },
     {
         id: "browser-python",
         label: "Pyodide WebAssembly Python",
         kind: "real-execution",
         offline: true,
-        description: "Downloads and caches the Pyodide runtime on demand, then runs Python and its tests in a worker.",
+        description:
+            "Downloads and caches the Pyodide runtime on demand, then runs Python and its tests in a worker.",
     },
     {
         id: "browser-sql",
         label: "SQLite WebAssembly",
         kind: "real-execution",
         offline: true,
-        description: "Runs SQL against SQLite compiled to WebAssembly. PostgreSQL-specific behavior is taught separately and labeled.",
+        description:
+            "Runs SQL against SQLite compiled to WebAssembly. PostgreSQL-specific behavior is taught separately and labeled.",
     },
     {
         id: "browser-git",
         label: "isomorphic-git",
         kind: "real-execution",
         offline: true,
-        description: "Runs Git operations against an in-browser repository. Commits and merges are real within that repository.",
+        description:
+            "Runs Git operations against an in-browser repository. Commits and merges are real within that repository.",
     },
     {
         id: "simulated-linux",
         label: "Deterministic Linux simulation",
         kind: "simulation",
         offline: true,
-        description: "A constrained filesystem, process, and service simulator. It is not a real Linux host and never claims to be.",
+        description:
+            "A constrained filesystem, process, and service simulator. It is not a real Linux host and never claims to be.",
     },
     {
         id: "static-analysis",
@@ -106,6 +120,7 @@ export const RUNTIME_CAPABILITIES: readonly RuntimeCapability[] = [
         label: "Guided simulation",
         kind: "guided-prediction",
         offline: true,
-        description: "Interactive state simulation for toolchains that cannot run safely in the browser. Clearly labeled as simulated.",
+        description:
+            "Interactive state simulation for toolchains that cannot run safely in the browser. Clearly labeled as simulated.",
     },
 ];
