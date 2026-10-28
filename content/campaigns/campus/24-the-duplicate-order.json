@@ -5,23 +5,14 @@
     "courseId": "campus",
     "title": "The duplicate order",
     "summary": "Model idempotent processing so a retried request does not charge a customer twice.",
-    "skills": [
-        "api.validation",
-        "concept.state"
-    ],
-    "prerequisites": [
-        "http.basics",
-        "concept.state"
-    ],
+    "skills": ["api.validation", "concept.state"],
+    "prerequisites": ["http.basics", "concept.state"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "review",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "curated-ai",
-            "state-simulation"
-        ]
+        "capabilities": ["curated-ai", "state-simulation"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,20 @@
         {
             "id": "model-dedupe",
             "description": "Model accepted order ids and the accepted count.",
-            "stepIds": [
-                "dedupe-state"
-            ]
+            "stepIds": ["dedupe-state"]
         },
         {
             "id": "review-retry",
             "description": "Find the ordering flaw in the proposed patch.",
-            "stepIds": [
-                "dedupe-review"
-            ]
+            "stepIds": ["dedupe-review"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["idempotency-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:retry"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:retry"],
     "hints": [
         "Process A1 once, try A1 again, then process B2.",
         "A duplicate must not increase the accepted count.",
@@ -250,9 +237,7 @@
     },
     "rewards": {
         "experience": 170,
-        "unlocks": [
-            "campus.the-ai-says-it-is-fixed"
-        ]
+        "unlocks": ["campus.the-ai-says-it-is-fixed"]
     },
     "persistence": {
         "kind": "world-action",
@@ -265,9 +250,5 @@
         "screenReaderNotes": "Each operation announces its effect. Findings list whether they are supported after submission, and the verdict feedback is read."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional",
-        "ai"
-    ]
+    "tags": ["web", "professional", "ai"]
 }
