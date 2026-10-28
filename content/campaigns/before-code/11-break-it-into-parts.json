@@ -10,7 +10,10 @@
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "order",
-    "runtime": { "kind": "none", "capabilities": ["interactive-simulation", "keyboard", "screen-reader"] },
+    "runtime": {
+        "kind": "none",
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
+    },
     "scenario": {
         "world": "campus",
         "system": "dev-team",
@@ -18,8 +21,21 @@
         "briefing": "The development team wants a small storefront. The work needs a sensible order: decide the purpose, separate concerns, build, then verify. You are arranging the plan."
     },
     "objectives": [
-        { "id": "plan-parts", "description": "Order a decomposition-driven project plan.", "stepIds": ["project-plan"] },
-        { "id": "module-boundary", "description": "Identify a useful module boundary.", "stepIds": ["boundary-check"] }
+        {
+            "id": "plan-parts",
+            "description": "Order a decomposition-driven project plan.",
+            "stepIds": ["project-plan"]
+        },
+        {
+            "id": "module-boundary",
+            "description": "Identify a useful module boundary.",
+            "stepIds": ["boundary-check"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["decomposition-claims"]
+        }
     ],
     "assets": ["pip:thinking", "scene:campus", "system:dev-team", "icon:parts"],
     "hints": [
@@ -56,9 +72,18 @@
             }
         ],
         "vocabulary": [
-            { "term": "Decomposition", "definition": "Breaking a problem into smaller parts." },
-            { "term": "Module", "definition": "A part with a defined responsibility and interface." },
-            { "term": "Concern", "definition": "A distinct aspect of a system, such as structure or styling." }
+            {
+                "term": "Decomposition",
+                "definition": "Breaking a problem into smaller parts."
+            },
+            {
+                "term": "Module",
+                "definition": "A part with a defined responsibility and interface."
+            },
+            {
+                "term": "Concern",
+                "definition": "A distinct aspect of a system, such as structure or styling."
+            }
         ]
     },
     "steps": [
@@ -69,11 +94,26 @@
             "prompt": "Put the project phases in a sensible order.",
             "evidence": "construction",
             "items": [
-                { "id": "purpose", "label": "Decide what the page must help a customer do" },
-                { "id": "structure", "label": "Build the content structure with meaningful sections" },
-                { "id": "style", "label": "Style the structure for clarity and layout" },
-                { "id": "behavior", "label": "Add interactive behavior for the order button" },
-                { "id": "verify", "label": "Verify structure, layout, behavior, and accessibility" }
+                {
+                    "id": "purpose",
+                    "label": "Decide what the page must help a customer do"
+                },
+                {
+                    "id": "structure",
+                    "label": "Build the content structure with meaningful sections"
+                },
+                {
+                    "id": "style",
+                    "label": "Style the structure for clarity and layout"
+                },
+                {
+                    "id": "behavior",
+                    "label": "Add interactive behavior for the order button"
+                },
+                {
+                    "id": "verify",
+                    "label": "Verify structure, layout, behavior, and accessibility"
+                }
             ],
             "correctOrder": ["purpose", "structure", "style", "behavior", "verify"],
             "explanation": "Purpose guides structure. Structure precedes styling. Behavior attaches to real controls. Verification checks the result against the purpose."
@@ -87,10 +127,22 @@
             "quiz": {
                 "prompt": "Choose the most meaningful decomposition.",
                 "options": [
-                    { "id": "single", "label": "One file that mixes content, styling, and order logic" },
-                    { "id": "concerns", "label": "Content structure, presentation, order behavior, and tests as separate concerns" },
-                    { "id": "lines", "label": "Split every ten lines into its own file" },
-                    { "id": "random", "label": "Group files by the first letter of their names" }
+                    {
+                        "id": "single",
+                        "label": "One file that mixes content, styling, and order logic"
+                    },
+                    {
+                        "id": "concerns",
+                        "label": "Content structure, presentation, order behavior, and tests as separate concerns"
+                    },
+                    {
+                        "id": "lines",
+                        "label": "Split every ten lines into its own file"
+                    },
+                    {
+                        "id": "random",
+                        "label": "Group files by the first letter of their names"
+                    }
                 ],
                 "correctId": "concerns",
                 "explanation": "Concern-based parts can be built, changed, and tested independently. Arbitrary splits create coordination without reducing complexity."
@@ -109,17 +161,41 @@
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
             "statements": [
-                { "id": "testable", "label": "A useful part can be checked with a clear expectation.", "correct": true },
-                { "id": "responsibility", "label": "A part should have a recognizable responsibility.", "correct": true },
-                { "id": "more", "label": "More parts always make a system easier to understand.", "correct": false },
-                { "id": "hidden", "label": "Decomposition hides all failure so tests are unnecessary.", "correct": false }
+                {
+                    "id": "testable",
+                    "label": "A useful part can be checked with a clear expectation.",
+                    "correct": true
+                },
+                {
+                    "id": "responsibility",
+                    "label": "A part should have a recognizable responsibility.",
+                    "correct": true
+                },
+                {
+                    "id": "more",
+                    "label": "More parts always make a system easier to understand.",
+                    "correct": false
+                },
+                {
+                    "id": "hidden",
+                    "label": "Decomposition hides all failure so tests are unnecessary.",
+                    "correct": false
+                }
             ],
             "explanation": "Good boundaries clarify responsibility and enable verification. Too many tiny parts can add overhead."
         }
     ],
-    "evaluation": { "kind": "steps", "passScore": 1 },
-    "rewards": { "experience": 85, "unlocks": ["before-code.can-we-trust-the-result"] },
-    "persistence": { "kind": "none" },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 85,
+        "unlocks": ["before-code.can-we-trust-the-result"]
+    },
+    "persistence": {
+        "kind": "none"
+    },
     "accessibility": {
         "summary": "Plan items can be reordered with buttons and are exposed as a list. The boundary question uses radio options.",
         "keyboardNotes": "Focus an item and use the move buttons. Radio group arrow keys select a boundary.",
