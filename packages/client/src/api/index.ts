@@ -44,7 +44,13 @@ export class ApiError extends Error {
     public readonly requestId: string | undefined;
     public readonly details: unknown;
 
-    public constructor(code: string, message: string, status: number, requestId?: string, details?: unknown) {
+    public constructor(
+        code: string,
+        message: string,
+        status: number,
+        requestId?: string,
+        details?: unknown,
+    ) {
         super(message);
         this.name = "ApiError";
         this.code = code;
@@ -82,22 +88,34 @@ export class ApiClient {
             headers: { accept: "application/json" },
         });
         if (!response.ok) {
-            throw new ApiError("csrf_unavailable", "Could not establish a request token.", response.status);
+            throw new ApiError(
+                "csrf_unavailable",
+                "Could not establish a request token.",
+                response.status,
+            );
         }
         const body = (await response.json()) as { csrfToken?: string };
         if (typeof body.csrfToken !== "string") {
-            throw new ApiError("csrf_invalid", "The server returned an invalid request token.", response.status);
+            throw new ApiError(
+                "csrf_invalid",
+                "The server returned an invalid request token.",
+                response.status,
+            );
         }
         this.csrfToken = body.csrfToken;
         return body.csrfToken;
     }
 
     public async me(): Promise<MeResponse> {
-        return MeResponseSchema.parse(await this.request("GET", "/me", undefined, false, MeResponseSchema));
+        return MeResponseSchema.parse(
+            await this.request("GET", "/me", undefined, false, MeResponseSchema),
+        );
     }
 
     public async register(input: RegisterRequest): Promise<AuthResponse> {
-        const response = AuthResponseSchema.parse(await this.request("POST", "/auth/register", input, true, AuthResponseSchema));
+        const response = AuthResponseSchema.parse(
+            await this.request("POST", "/auth/register", input, true, AuthResponseSchema),
+        );
         if (response.nativeToken !== undefined) {
             this.nativeToken = response.nativeToken;
         }
@@ -105,7 +123,9 @@ export class ApiClient {
     }
 
     public async login(input: LoginRequest): Promise<AuthResponse> {
-        const response = AuthResponseSchema.parse(await this.request("POST", "/auth/login", input, true, AuthResponseSchema));
+        const response = AuthResponseSchema.parse(
+            await this.request("POST", "/auth/login", input, true, AuthResponseSchema),
+        );
         if (response.nativeToken !== undefined) {
             this.nativeToken = response.nativeToken;
         }
@@ -121,7 +141,9 @@ export class ApiClient {
     }
 
     public async exportData(): Promise<ExportBundle> {
-        return ExportBundleSchema.parse(await this.request("POST", "/me/export", {}, true, ExportBundleSchema));
+        return ExportBundleSchema.parse(
+            await this.request("POST", "/me/export", {}, true, ExportBundleSchema),
+        );
     }
 
     public async deleteAccount(): Promise<void> {
@@ -141,7 +163,9 @@ export class ApiClient {
     }
 
     public async sync(input: SyncRequest): Promise<SyncResponse> {
-        return SyncResponseSchema.parse(await this.request("POST", "/sync", input, true, SyncResponseSchema));
+        return SyncResponseSchema.parse(
+            await this.request("POST", "/sync", input, true, SyncResponseSchema),
+        );
     }
 
     public async savePreferences(preferences: Preferences): Promise<SyncResponse> {
@@ -165,7 +189,9 @@ export class ApiClient {
     }
 
     public async getWorld(): Promise<WorldResponse> {
-        return WorldResponseSchema.parse(await this.request("GET", "/worlds/campus", undefined, false, WorldResponseSchema));
+        return WorldResponseSchema.parse(
+            await this.request("GET", "/worlds/campus", undefined, false, WorldResponseSchema),
+        );
     }
 
     public async actOnWorld(input: WorldActionRequest): Promise<WorldResponse> {
@@ -178,18 +204,31 @@ export class ApiClient {
         const body = await this.request("GET", "/projects", undefined, false);
         const parsed = ProjectDetailSchema.array().safeParse(body);
         if (!parsed.success) {
-            throw new ApiError("invalid_response", "The project list response did not match the contract.", 200);
+            throw new ApiError(
+                "invalid_response",
+                "The project list response did not match the contract.",
+                200,
+            );
         }
         return parsed.data;
     }
 
     public async getProject(projectId: string): Promise<ProjectDetail> {
         return ProjectDetailSchema.parse(
-            await this.request("GET", `/projects/${encodeURIComponent(projectId)}`, undefined, false, ProjectDetailSchema),
+            await this.request(
+                "GET",
+                `/projects/${encodeURIComponent(projectId)}`,
+                undefined,
+                false,
+                ProjectDetailSchema,
+            ),
         );
     }
 
-    public async saveRevision(projectId: string, input: ProjectRevisionRequest): Promise<ProjectDetail> {
+    public async saveRevision(
+        projectId: string,
+        input: ProjectRevisionRequest,
+    ): Promise<ProjectDetail> {
         return ProjectDetailSchema.parse(
             await this.request(
                 "POST",
@@ -205,14 +244,24 @@ export class ApiClient {
         const body = await this.request("GET", "/clubs", undefined, false);
         const parsed = ClubSchema.array().safeParse(body);
         if (!parsed.success) {
-            throw new ApiError("invalid_response", "The club list response did not match the contract.", 200);
+            throw new ApiError(
+                "invalid_response",
+                "The club list response did not match the contract.",
+                200,
+            );
         }
         return parsed.data;
     }
 
     public async getClub(clubId: string): Promise<ClubDetail> {
         return ClubDetailSchema.parse(
-            await this.request("GET", `/clubs/${encodeURIComponent(clubId)}`, undefined, false, ClubDetailSchema),
+            await this.request(
+                "GET",
+                `/clubs/${encodeURIComponent(clubId)}`,
+                undefined,
+                false,
+                ClubDetailSchema,
+            ),
         );
     }
 
@@ -222,7 +271,13 @@ export class ApiClient {
 
     public async joinClub(clubId: string, input: JoinClubRequest): Promise<Club> {
         return ClubSchema.parse(
-            await this.request("POST", `/clubs/${encodeURIComponent(clubId)}/join`, input, true, ClubSchema),
+            await this.request(
+                "POST",
+                `/clubs/${encodeURIComponent(clubId)}/join`,
+                input,
+                true,
+                ClubSchema,
+            ),
         );
     }
 
@@ -230,7 +285,10 @@ export class ApiClient {
         return ClubSchema.parse(await this.request("POST", "/clubs/join", input, true, ClubSchema));
     }
 
-    public async submitEvent(eventId: string, input: EventSubmissionRequest): Promise<EventSubmissionResponse> {
+    public async submitEvent(
+        eventId: string,
+        input: EventSubmissionRequest,
+    ): Promise<EventSubmissionResponse> {
         return EventSubmissionResponseSchema.parse(
             await this.request(
                 "POST",
@@ -277,11 +335,22 @@ export class ApiClient {
         }
 
         const contentType = response.headers.get("content-type") ?? "";
-        const payload: unknown = contentType.includes("application/json") ? await response.json() : await response.text();
+        const payload: unknown = contentType.includes("application/json")
+            ? await response.json()
+            : await response.text();
 
         if (!response.ok) {
             if (typeof payload === "object" && payload !== null && "error" in payload) {
-                const error = (payload as { error: { code?: unknown; message?: unknown; requestId?: unknown; details?: unknown } }).error;
+                const error = (
+                    payload as {
+                        error: {
+                            code?: unknown;
+                            message?: unknown;
+                            requestId?: unknown;
+                            details?: unknown;
+                        };
+                    }
+                ).error;
                 throw new ApiError(
                     typeof error.code === "string" ? error.code : "http_error",
                     typeof error.message === "string" ? error.message : "Request failed.",
