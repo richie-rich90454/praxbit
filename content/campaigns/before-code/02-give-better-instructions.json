@@ -10,7 +10,10 @@
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "order",
-    "runtime": { "kind": "none", "capabilities": ["interactive-simulation", "keyboard", "screen-reader"] },
+    "runtime": {
+        "kind": "none",
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
+    },
     "scenario": {
         "world": "campus",
         "system": "delivery",
@@ -18,8 +21,21 @@
         "briefing": "A campus courier robot understands only the commands you place in its queue. Order the commands so it delivers a parcel without knocking anything over."
     },
     "objectives": [
-        { "id": "ordered-delivery", "description": "Arrange a precise delivery procedure.", "stepIds": ["delivery-order"] },
-        { "id": "precision", "description": "Recognize why ambiguous instructions fail.", "stepIds": ["precision-check"] }
+        {
+            "id": "ordered-delivery",
+            "description": "Arrange a precise delivery procedure.",
+            "stepIds": ["delivery-order"]
+        },
+        {
+            "id": "precision",
+            "description": "Recognize why ambiguous instructions fail.",
+            "stepIds": ["precision-check"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["algorithm-claims"]
+        }
     ],
     "assets": ["pip:explaining", "scene:campus", "system:delivery", "icon:steps"],
     "hints": [
@@ -56,9 +72,18 @@
             }
         ],
         "vocabulary": [
-            { "term": "Algorithm", "definition": "A finite, precise sequence of steps for solving a problem." },
-            { "term": "Ambiguous", "definition": "Open to more than one interpretation." },
-            { "term": "Execution", "definition": "Carrying out the steps of an algorithm." }
+            {
+                "term": "Algorithm",
+                "definition": "A finite, precise sequence of steps for solving a problem."
+            },
+            {
+                "term": "Ambiguous",
+                "definition": "Open to more than one interpretation."
+            },
+            {
+                "term": "Execution",
+                "definition": "Carrying out the steps of an algorithm."
+            }
         ]
     },
     "steps": [
@@ -69,11 +94,26 @@
             "prompt": "Arrange these commands so the courier delivers the parcel safely. Use the up and down buttons or drag with a pointer.",
             "evidence": "construction",
             "items": [
-                { "id": "lift", "label": "Lift the parcel from the loading shelf" },
-                { "id": "turn", "label": "Turn right 90 degrees" },
-                { "id": "walk", "label": "Walk forward four steps" },
-                { "id": "lower", "label": "Lower the parcel at the delivery desk" },
-                { "id": "return", "label": "Return to the charging station" }
+                {
+                    "id": "lift",
+                    "label": "Lift the parcel from the loading shelf"
+                },
+                {
+                    "id": "turn",
+                    "label": "Turn right 90 degrees"
+                },
+                {
+                    "id": "walk",
+                    "label": "Walk forward four steps"
+                },
+                {
+                    "id": "lower",
+                    "label": "Lower the parcel at the delivery desk"
+                },
+                {
+                    "id": "return",
+                    "label": "Return to the charging station"
+                }
             ],
             "correctOrder": ["lift", "turn", "walk", "lower", "return"],
             "explanation": "The courier must hold the parcel before moving, travel to the desk, release the parcel, and then return."
@@ -87,9 +127,18 @@
             "quiz": {
                 "prompt": "Which command is precise enough for a machine?",
                 "options": [
-                    { "id": "goal", "label": "Deliver the parcel quickly" },
-                    { "id": "walk4", "label": "Walk forward 4 steps" },
-                    { "id": "nice", "label": "Be careful near the desk" }
+                    {
+                        "id": "goal",
+                        "label": "Deliver the parcel quickly"
+                    },
+                    {
+                        "id": "walk4",
+                        "label": "Walk forward 4 steps"
+                    },
+                    {
+                        "id": "nice",
+                        "label": "Be careful near the desk"
+                    }
                 ],
                 "correctId": "walk4",
                 "explanation": "Walk forward 4 steps names an action and a measurable amount. The other commands depend on judgment the robot does not have."
@@ -108,17 +157,41 @@
             "prompt": "Select every statement that is true about algorithms.",
             "evidence": "explanation",
             "statements": [
-                { "id": "finite", "label": "An algorithm should finish after a finite number of steps.", "correct": true },
-                { "id": "order-free", "label": "The order of steps never changes the result.", "correct": false },
-                { "id": "precise", "label": "Each step should be unambiguous to its executor.", "correct": true },
-                { "id": "random", "label": "An algorithm is any random sequence of actions.", "correct": false }
+                {
+                    "id": "finite",
+                    "label": "An algorithm should finish after a finite number of steps.",
+                    "correct": true
+                },
+                {
+                    "id": "order-free",
+                    "label": "The order of steps never changes the result.",
+                    "correct": false
+                },
+                {
+                    "id": "precise",
+                    "label": "Each step should be unambiguous to its executor.",
+                    "correct": true
+                },
+                {
+                    "id": "random",
+                    "label": "An algorithm is any random sequence of actions.",
+                    "correct": false
+                }
             ],
             "explanation": "Algorithms are finite, precise, and order-sensitive. Reordering operations can change or break the result."
         }
     ],
-    "evaluation": { "kind": "steps", "passScore": 1 },
-    "rewards": { "experience": 55, "unlocks": ["before-code.remember-this"] },
-    "persistence": { "kind": "none" },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 55,
+        "unlocks": ["before-code.remember-this"]
+    },
+    "persistence": {
+        "kind": "none"
+    },
     "accessibility": {
         "summary": "Reordering works with buttons as well as pointer dragging, and the current order is available as text.",
         "keyboardNotes": "Focus an item and use the move up and move down buttons. Drag and drop is optional.",
