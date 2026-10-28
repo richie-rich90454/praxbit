@@ -5,24 +5,14 @@
     "courseId": "campus",
     "title": "A page with no identity",
     "summary": "Repair the storefront HTML so its structure communicates meaning to browsers and assistive technology.",
-    "skills": [
-        "web.html",
-        "web.accessibility"
-    ],
-    "prerequisites": [
-        "concept.instructions",
-        "concept.decomposition"
-    ],
+    "skills": ["web.html", "web.accessibility"],
+    "prerequisites": ["concept.instructions", "concept.decomposition"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-html",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "dom-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "dom-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,24 +24,20 @@
         {
             "id": "semantic-structure",
             "description": "Give the page a header, navigation, main content, and articles.",
-            "stepIds": [
-                "repair-html"
-            ]
+            "stepIds": ["repair-html"]
         },
         {
             "id": "accessible-controls",
             "description": "Provide meaningful alternative text and labeled actions.",
-            "stepIds": [
-                "repair-html"
-            ]
+            "stepIds": ["repair-html"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["html-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:page"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:page"],
     "hints": [
         "Start with header, nav, main, and article instead of div elements.",
         "Each product can be an article with class product. Add one h1 for the store name.",
@@ -205,9 +191,7 @@
     },
     "rewards": {
         "experience": 110,
-        "unlocks": [
-            "campus.everything-is-misplaced"
-        ]
+        "unlocks": ["campus.everything-is-misplaced"]
     },
     "persistence": {
         "kind": "world-action",
@@ -220,8 +204,5 @@
         "screenReaderNotes": "The code editor announces its language and line numbers. Tests report pass or fail with the checked requirement."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
