@@ -1,11 +1,17 @@
 import { For, Show, createSignal, onMount, type JSX } from "solid-js";
 import { evaluateStep } from "@praxbit/domain";
-import { TerminalSimulator, terminalObjectiveIds, type TerminalSnapshot } from "@praxbit/execution/simulated";
+import {
+    TerminalSimulator,
+    terminalObjectiveIds,
+    type TerminalSnapshot,
+} from "@praxbit/execution/simulated";
 import type { TerminalStep } from "@praxbit/contracts";
 import type { InteractionProps } from "./types.ts";
 
-export function TerminalView(props: { readonly step: TerminalStep } & InteractionProps): JSX.Element {
-    let simulator = new TerminalSimulator(props.step.initial);
+export function TerminalView(
+    props: { readonly step: TerminalStep } & InteractionProps,
+): JSX.Element {
+    const simulator = new TerminalSimulator(props.step.initial);
     let inputElement: HTMLInputElement | undefined;
     const [state, setState] = createSignal<TerminalSnapshot>(simulator.snapshot());
     const [command, setCommand] = createSignal("");
@@ -16,15 +22,13 @@ export function TerminalView(props: { readonly step: TerminalStep } & Interactio
     });
 
     function runCommand(): void {
-        const entry = command().trim();
+        const entry = (inputElement?.value ?? command()).trim();
         if (entry.length === 0) {
             return;
         }
         const result = simulator.execute(entry);
         setState(result.state);
-        setCompleted(
-            terminalObjectiveIds(result.state, props.step.objectives),
-        );
+        setCompleted(terminalObjectiveIds(result.state, props.step.objectives));
         setCommand("");
         inputElement?.focus();
     }
@@ -47,8 +51,9 @@ export function TerminalView(props: { readonly step: TerminalStep } & Interactio
     return (
         <div class="stack">
             <p class="meta">
-                Deterministic Linux simulation. The files, processes, permissions, and services below are state inside
-                this exercise, not a real machine. Command behavior is constrained to what the exercise needs.
+                Deterministic Linux simulation. The files, processes, permissions, and services
+                below are state inside this exercise, not a real machine. Command behavior is
+                constrained to what the exercise needs.
             </p>
             <div class="surface surface--quiet stack stack--tight">
                 <h3>Objectives</h3>
@@ -61,7 +66,10 @@ export function TerminalView(props: { readonly step: TerminalStep } & Interactio
                                         class={`status ${completed().includes(item.id) ? "status--success" : "status--warning"}`}
                                     >
                                         <span class="status__mark" aria-hidden="true" />
-                                        {completed().includes(item.id) ? "Complete" : "Not yet"}: {item.description}
+                                        {completed().includes(item.id)
+                                            ? "Complete"
+                                            : "Not yet"}:{" "}
+                                        {item.description}
                                     </span>
                                 </li>
                             );
@@ -77,7 +85,10 @@ export function TerminalView(props: { readonly step: TerminalStep } & Interactio
                                 <span class="terminal__prompt">campus@praxbit:~$ </span>
                                 {item.command}
                                 <Show when={item.output.length > 0}>
-                                    <pre class="terminal__line" style={{ "white-space": "pre-wrap" }}>
+                                    <pre
+                                        class="terminal__line"
+                                        style={{ "white-space": "pre-wrap" }}
+                                    >
                                         {item.output}
                                     </pre>
                                 </Show>
