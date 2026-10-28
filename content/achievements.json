@@ -1,0 +1,61 @@
+{
+    "version": 1,
+    "achievements": [
+        {
+            "id": "achievement.first-transfer",
+            "title": "Transfer",
+            "description": "Solved an unfamiliar problem independently using an idea you had learned.",
+            "kind": "independent-transfer",
+            "rule": "first-independent-transfer"
+        },
+        {
+            "id": "achievement.boundary-finder",
+            "title": "Boundary finder",
+            "description": "Used boundary and invalid cases as real evidence.",
+            "kind": "hidden-boundary",
+            "rule": "three-boundary-tests"
+        },
+        {
+            "id": "achievement.debugger",
+            "title": "Patient debugger",
+            "description": "Recovered from five debugging problems with evidence.",
+            "kind": "difficult-debugging",
+            "rule": "five-debugging-successes"
+        },
+        {
+            "id": "achievement.teammate",
+            "title": "Reliable teammate",
+            "description": "Contributed to a club incident or helped a teammate.",
+            "kind": "helping-teammate",
+            "rule": "team-event-participation"
+        },
+        {
+            "id": "achievement.project-shipper",
+            "title": "Project shipper",
+            "description": "Completed an authentic project with working checks.",
+            "kind": "authentic-project",
+            "rule": "first-project-complete"
+        },
+        {
+            "id": "achievement.ai-reviewer",
+            "title": "Careful reviewer",
+            "description": "Reviewed AI-generated work rather than trusting it.",
+            "kind": "ai-review",
+            "rule": "three-ai-reviews"
+        },
+        {
+            "id": "achievement.polyglot",
+            "title": "Second language",
+            "description": "Demonstrated competence in more than one language.",
+            "kind": "new-language",
+            "rule": "second-language"
+        },
+        {
+            "id": "achievement.world-recovered",
+            "title": "Campus restored",
+            "description": "Resolved the campus incident with verified recovery steps.",
+            "kind": "recovery",
+            "rule": "world-recovered"
+        }
+    ]
+}
