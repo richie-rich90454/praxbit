@@ -40,7 +40,9 @@ export function StateView(props: { readonly step: StateStep } & InteractionProps
                             return (
                                 <div class="row row--between">
                                     <span>{item.label}</span>
-                                    <code class="inline-code">{values()[item.id] ?? item.initial}</code>
+                                    <code class="inline-code">
+                                        {values()[item.id] ?? item.initial}
+                                    </code>
                                 </div>
                             );
                         }}
@@ -135,9 +137,11 @@ export function RuleView(props: { readonly step: RuleStep } & InteractionProps):
                 <tbody>
                     <For each={props.step.inputs}>
                         {function input(item): JSX.Element {
-                            const expected = props.step.expected.find(function match(candidate): boolean {
-                                return candidate.inputId === item.id;
-                            });
+                            const expected = props.step.expected.find(
+                                function match(candidate): boolean {
+                                    return candidate.inputId === item.id;
+                                },
+                            );
                             return (
                                 <tr>
                                     <td>{item.label}</td>
@@ -153,7 +157,10 @@ export function RuleView(props: { readonly step: RuleStep } & InteractionProps):
                 class="button"
                 disabled={rule().length === 0}
                 onClick={function submit(): void {
-                    props.onResult(evaluateStep(props.step, { kind: "rule", ruleId: rule() }), rule());
+                    props.onResult(
+                        evaluateStep(props.step, { kind: "rule", ruleId: rule() }),
+                        rule(),
+                    );
                 }}
             >
                 Apply rule
@@ -187,7 +194,10 @@ export function TraceView(props: { readonly step: TraceStep } & InteractionProps
                             return (
                                 <div
                                     style={{
-                                        background: activeLine()?.id === item.id ? "#F1D9D5" : "transparent",
+                                        background:
+                                            activeLine()?.id === item.id
+                                                ? "#F1D9D5"
+                                                : "transparent",
                                         padding: "2px 6px",
                                     }}
                                 >
@@ -254,14 +264,18 @@ export function TraceView(props: { readonly step: TraceStep } & InteractionProps
                     {function watch(item): JSX.Element {
                         return (
                             <div class="field">
-                                <label for={`watch-${props.step.id}-${item.id}`}>{item.label}</label>
+                                <label for={`watch-${props.step.id}-${item.id}`}>
+                                    {item.label}
+                                </label>
                                 <input
                                     id={`watch-${props.step.id}-${item.id}`}
                                     class="input"
                                     value={values()[item.id] ?? ""}
                                     onInput={function change(event): void {
                                         const next = event.currentTarget.value;
-                                        setValues(function update(current): Readonly<Record<string, string>> {
+                                        setValues(function update(current): Readonly<
+                                            Record<string, string>
+                                        > {
                                             return { ...current, [item.id]: next };
                                         });
                                     }}
@@ -451,7 +465,9 @@ function nodeParent(path: string): string {
     return index < 0 ? "" : path.slice(0, index);
 }
 
-export function FilesystemView(props: { readonly step: FilesystemStep } & InteractionProps): JSX.Element {
+export function FilesystemView(
+    props: { readonly step: FilesystemStep } & InteractionProps,
+): JSX.Element {
     const [current, setCurrent] = createSignal<readonly string[]>([]);
     const [selected, setSelected] = createSignal<readonly string[]>([]);
 
@@ -459,12 +475,22 @@ export function FilesystemView(props: { readonly step: FilesystemStep } & Intera
         return current().join("/");
     });
 
-    const children = createMemo(function list(): readonly { path: string; name: string; type: "folder" | "file"; note?: string }[] {
+    const children = createMemo(function list(): readonly {
+        path: string;
+        name: string;
+        type: "folder" | "file";
+        note?: string;
+    }[] {
         return props.step.nodes
             .filter(function direct(node): boolean {
                 return nodeParent(node.path) === currentPath();
             })
-            .map(function entry(node): { path: string; name: string; type: "folder" | "file"; note?: string } {
+            .map(function entry(node): {
+                path: string;
+                name: string;
+                type: "folder" | "file";
+                note?: string;
+            } {
                 return {
                     path: node.path,
                     name: node.path.slice(node.path.lastIndexOf("/") + 1),
@@ -615,7 +641,9 @@ export function NetworkView(props: { readonly step: NetworkStep } & InteractionP
                     </For>
                 </div>
                 <div class="row row--between">
-                    <span class="meta">Route: {path().length === 0 ? "not started" : path().join(" → ")}</span>
+                    <span class="meta">
+                        Route: {path().length === 0 ? "not started" : path().join(" → ")}
+                    </span>
                     <button
                         type="button"
                         class="button button--ghost button--small"
