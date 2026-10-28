@@ -5,23 +5,14 @@
     "courseId": "python-foundations",
     "title": "Stock totals in Python",
     "summary": "Loop over a list of dictionaries and accumulate a total.",
-    "skills": [
-        "python.functions",
-        "python.control"
-    ],
-    "prerequisites": [
-        "python.control"
-    ],
+    "skills": ["python.functions", "python.control"],
+    "prerequisites": ["python.control"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-python",
-        "capabilities": [
-            "pyodide-wasm",
-            "source-editing",
-            "deterministic-tests"
-        ]
+        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,17 +24,15 @@
         {
             "id": "total",
             "description": "Sum quantities across a list.",
-            "stepIds": [
-                "stock-total"
-            ]
+            "stepIds": ["stock-total"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["python-loop-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:python"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:python"],
     "hints": [
         "Initialize total to 0 before the loop.",
         "Use for item in items and add item[\"quantity\"].",
@@ -131,9 +120,7 @@
                     "kind": "function",
                     "description": "An empty list totals zero.",
                     "name": "total_stock",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": 0
                 },
                 {
@@ -222,8 +209,5 @@
         "screenReaderNotes": "Tests announce the list contents, expected total, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "ai"
-    ]
+    "tags": ["professional", "ai"]
 }
