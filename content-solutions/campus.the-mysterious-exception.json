@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-label": {
+            "files": {
+                "labels.js": "function customerLabel(order) {\n  const name = order.customer?.name;\n  return name ?? \"Guest\";\n}\n"
+            }
+        }
+    }
+}
