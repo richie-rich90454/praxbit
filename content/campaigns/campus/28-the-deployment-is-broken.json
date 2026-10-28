@@ -1,0 +1,252 @@
+{
+    "id": "campus.the-deployment-is-broken",
+    "version": 1,
+    "sequence": 28,
+    "courseId": "campus",
+    "title": "The deployment is broken",
+    "summary": "Restore a release by repointing the deployment symlink and verifying the service.",
+    "skills": [
+        "ops.deployment"
+    ],
+    "prerequisites": [
+        "git.branches",
+        "ops.processes"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "terminal",
+    "runtime": {
+        "kind": "simulated-linux",
+        "capabilities": [
+            "deterministic-linux-simulation",
+            "shell",
+            "symlinks"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "broken-release",
+        "briefing": "The current release symlink points at a release directory that no longer exists. The previous release is intact. Inspect the link, repoint it to the known-good release, restart, and verify."
+    },
+    "objectives": [
+        {
+            "id": "inspect-link",
+            "description": "Inspect the current release link.",
+            "stepIds": [
+                "restore-release"
+            ]
+        },
+        {
+            "id": "repoint",
+            "description": "Point current at the known-good release.",
+            "stepIds": [
+                "restore-release"
+            ]
+        },
+        {
+            "id": "verify",
+            "description": "Restart and verify the service.",
+            "stepIds": [
+                "restore-release"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:server-room",
+        "icon:deploy"
+    ],
+    "hints": [
+        "Run readlink current and ls releases.",
+        "current points at 2026-10-20-skipped, which is missing.",
+        "The 2026-10-19 release is present and healthy.",
+        "ln -sf releases/2026-10-19 current; systemctl restart orders-api; curl http://localhost:8080/health."
+    ],
+    "misconceptions": [
+        {
+            "id": "deletes-release",
+            "description": "Deleting the broken release path instead of restoring the link.",
+            "stepId": "restore-release",
+            "feedback": "The problem is the link target, not the old directory. Repoint current to a verified release."
+        },
+        {
+            "id": "restart-proof",
+            "description": "Assuming a restart proves the deployment works.",
+            "stepId": "restore-release",
+            "feedback": "The service must start and answer a health request. A command exiting is not deployment success."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Deployments are controlled state",
+                "body": "A common deployment pattern points a stable name such as current at a versioned release directory. Rolling back means changing that pointer to a known-good release. The old release must remain available during the switch."
+            },
+            {
+                "title": "Recovery must be verified",
+                "body": "A symlink change is not a recovered service. After repointing, restart the process and check health. Keep the previous release until the new one proves healthy, so rollback stays possible."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Release",
+                "definition": "A specific deployed version of an application."
+            },
+            {
+                "term": "Symlink",
+                "definition": "A filesystem entry that points to another path."
+            },
+            {
+                "term": "Rollback",
+                "definition": "Returning to a previous known-good version."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "terminal",
+            "id": "restore-release",
+            "title": "Restore the release",
+            "prompt": "Inspect the deployment, repoint current at releases/2026-10-19, restart orders-api, and verify its health endpoint.",
+            "evidence": "debugging",
+            "initial": {
+                "cwd": "/srv/campus",
+                "files": [
+                    {
+                        "path": "/srv/campus/releases/2026-10-18/app/server.js",
+                        "content": "serveOlderRelease();\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/srv/campus/releases/2026-10-19/app/server.js",
+                        "content": "serveStableRelease();\n",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/srv/campus/releases/2026-10-19/app/config.json",
+                        "content": "{\"port\":8080}\n",
+                        "mode": "640"
+                    },
+                    {
+                        "path": "/var/log/orders.log",
+                        "content": "[error] ENOENT: no such file or directory, open '/srv/campus/current/app/server.js'\n",
+                        "mode": "644"
+                    }
+                ],
+                "services": [
+                    {
+                        "id": "orders-api",
+                        "name": "orders-api",
+                        "status": "failed",
+                        "logs": [
+                            "[info] starting orders-api",
+                            "[error] ENOENT: no such file or directory, open '/srv/campus/current/app/server.js'",
+                            "[info] service exited with code 1"
+                        ]
+                    }
+                ],
+                "symlinks": [
+                    {
+                        "path": "/srv/campus/current",
+                        "target": "releases/2026-10-20-skipped"
+                    }
+                ],
+                "processes": []
+            },
+            "objectives": [
+                {
+                    "id": "readlink",
+                    "description": "Inspect the broken current link.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "releases/2026-10-20-skipped"
+                    }
+                },
+                {
+                    "id": "repoint",
+                    "description": "current points at releases/2026-10-19.",
+                    "check": {
+                        "kind": "symlink",
+                        "path": "/srv/campus/current",
+                        "target": "releases/2026-10-19"
+                    }
+                },
+                {
+                    "id": "running",
+                    "description": "orders-api is running.",
+                    "check": {
+                        "kind": "service",
+                        "serviceId": "orders-api",
+                        "status": "running"
+                    }
+                },
+                {
+                    "id": "health",
+                    "description": "The health endpoint responds.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "healthy"
+                    }
+                }
+            ],
+            "explanation": "The link pointed at a missing release. Repointing it to the intact 2026-10-19 release let the service start, and the health request verified recovery."
+        },
+        {
+            "kind": "explain",
+            "id": "deployment-check",
+            "title": "Safe recovery",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "known-good",
+                    "label": "Rollback should target a known-good release.",
+                    "correct": true
+                },
+                {
+                    "id": "verify",
+                    "label": "Health verification is part of recovery.",
+                    "correct": true
+                },
+                {
+                    "id": "delete",
+                    "label": "Deleting previous releases makes rollback easier.",
+                    "correct": false
+                },
+                {
+                    "id": "link",
+                    "label": "A stable symlink can select the active release.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Versioned releases and a stable pointer enable controlled rollback. Verification confirms the selected release actually works."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 200,
+        "unlocks": [
+            "campus.nothing-works-together"
+        ]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "restore-deploy",
+        "system": "server-room"
+    },
+    "accessibility": {
+        "summary": "The terminal is a text interface. Symlink and service checks are listed with plain-text status.",
+        "keyboardNotes": "Type commands and press Enter. The current directory and link state are announced.",
+        "screenReaderNotes": "readlink output is read as a path. Objectives announce pass when the link, service, and health check succeed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
