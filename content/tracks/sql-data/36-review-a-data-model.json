@@ -5,22 +5,14 @@
     "courseId": "sql-data",
     "title": "Review a data model",
     "summary": "Find missing constraints and indexes in a proposed relational schema.",
-    "skills": [
-        "sql.modeling"
-    ],
-    "prerequisites": [
-        "sql.queries",
-        "sql.joins"
-    ],
+    "skills": ["sql.modeling"],
+    "prerequisites": ["sql.queries", "sql.joins"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "schema-review",
-            "no-execution"
-        ]
+        "capabilities": ["schema-review", "no-execution"]
     },
     "scenario": {
         "world": "campus",
@@ -32,17 +24,15 @@
         {
             "id": "find-schema-issues",
             "description": "Identify missing keys, constraints, and indexes.",
-            "stepIds": [
-                "schema-review"
-            ]
+            "stepIds": ["schema-review"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["model-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:database",
-        "icon:schema"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:schema"],
     "hints": [
         "Every table needs a stable primary key.",
         "orders.customer_id must reference customers.id.",
@@ -195,7 +185,5 @@
         "screenReaderNotes": "The schema is announced as a code block. Findings and verdict feedback are read in order."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
