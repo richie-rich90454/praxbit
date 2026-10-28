@@ -38,39 +38,24 @@ The script never prints `DATABASE_URL` or the password. The connection string is
 
 ## Scheduling
 
-Use a systemd timer or cron run by a dedicated backup user. Example timer:
+Use the scheduler provided by the host: cron on Linux, Task Scheduler on Windows, or launchd on macOS. Run the backup as the account that can read the environment and write the backup directory.
 
-```ini
-[Unit]
-Description=Praxbit PostgreSQL backup
+Cron example:
 
-[Timer]
-OnCalendar=*-*-* 02:30:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target
+```cron
+30 2 * * * cd /path/to/praxbit && ./infra/backup/backup-postgres.sh >> /var/log/praxbit-backup.log 2>&1
 ```
 
-The service unit should run an installed copy of the backup script with the environment file, a timeout, and a failure notification to the operator. Install it outside the release so a deploy cannot remove it:
+On Windows, create a scheduled task that runs `pwsh -File` with the equivalent `pg_dump` command, or run the shell script through Git Bash. On macOS, use a launch agent.
+
+Install the scripts outside the release so an update cannot remove them:
 
 ```bash
 sudo install -o root -g root -m 0755 infra/backup/backup-postgres.sh /usr/local/sbin/praxbit-backup
 sudo install -o root -g root -m 0755 infra/backup/restore-postgres.sh /usr/local/sbin/praxbit-restore
 ```
 
-Example service:
-
-```ini
-[Service]
-Type=oneshot
-User=backup
-EnvironmentFile=/etc/praxbit/backup.env
-ExecStart=/usr/local/sbin/praxbit-backup
-TimeoutStartSec=30m
-```
-
-Do not put the database password in the unit file. Use a root-owned environment file readable by the backup user, or a `.pgpass` file with mode 0600.
+Do not put the database password in the scheduler definition. Use a root-owned environment file readable only by the backup account, or a `.pgpass` file with mode 0600.
 
 ## Off-box copy
 
