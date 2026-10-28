@@ -1,0 +1,202 @@
+{
+    "id": "typescript.narrowing",
+    "version": 1,
+    "sequence": 47,
+    "courseId": "typescript",
+    "title": "Narrow the union",
+    "summary": "Use TypeScript narrowing to handle strings and numbers safely.",
+    "skills": [
+        "ts.types"
+    ],
+    "prerequisites": [
+        "js.types",
+        "js.objects"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": [
+            "source-editing",
+            "syntax-diagnostics",
+            "transpiled-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "union-narrowing",
+        "briefing": "Order identifiers can arrive as strings or numbers. A formatter calls string methods without checking, so numeric ids crash. Narrow the union and format both cases."
+    },
+    "objectives": [
+        {
+            "id": "narrow",
+            "description": "Branch on the runtime type of a union value.",
+            "stepIds": [
+                "fix-narrowing"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:type"
+    ],
+    "hints": [
+        "typeof value === \"string\" narrows the union.",
+        "Numbers become text with String(value) or template literals.",
+        "Trim and uppercase strings, and format numbers as-is.",
+        "Use typeof; return `ID-${typeof value === \"string\" ? value.trim().toUpperCase() : value}`."
+    ],
+    "misconceptions": [
+        {
+            "id": "type-assertion",
+            "description": "Asserting a type instead of checking the value.",
+            "stepId": "fix-narrowing",
+            "feedback": "A type assertion does not change the runtime value. Use a typeof check so both branches are safe."
+        },
+        {
+            "id": "number-methods",
+            "description": "Calling string methods on a union without narrowing.",
+            "stepId": "fix-narrowing",
+            "feedback": "trim exists only on strings. Narrow the union before calling string methods."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Unions describe alternatives",
+                "body": "A value typed string | number can be either at runtime. TypeScript allows only operations valid for every member until code narrows the type. typeof checks, property checks, and equality checks create narrowed branches."
+            },
+            {
+                "title": "Narrowing is runtime truth",
+                "body": "A type assertion tells the compiler to believe something; it does not verify the value. Narrowing inspects the actual value and keeps both branches safe. This distinction matters at boundaries where data arrives from JSON."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Union type",
+                "definition": "A type that permits one of several alternatives."
+            },
+            {
+                "term": "Narrowing",
+                "definition": "Refining a union to a specific member through checks."
+            },
+            {
+                "term": "Type assertion",
+                "definition": "A compile-time claim that does not change runtime behavior."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "code",
+            "id": "fix-narrowing",
+            "title": "Format any order id",
+            "prompt": "Edit format.ts. formatIdentifier(value: string | number) returns ID- followed by the trimmed uppercase string, or the number unchanged after ID-. Run the tests.",
+            "evidence": "construction",
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "format.ts",
+                    "content": "function formatIdentifier(value: string | number): string {\n  return `ID-${value.trim().toUpperCase()}`;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "format.ts",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A lowercase string is trimmed and uppercased.",
+                    "name": "formatIdentifier",
+                    "args": [
+                        "  a1  "
+                    ],
+                    "expected": "ID-A1"
+                },
+                {
+                    "kind": "function",
+                    "description": "A number is formatted as digits.",
+                    "name": "formatIdentifier",
+                    "args": [
+                        42
+                    ],
+                    "expected": "ID-42"
+                },
+                {
+                    "kind": "function",
+                    "description": "An already clean string is preserved.",
+                    "name": "formatIdentifier",
+                    "args": [
+                        "B7"
+                    ],
+                    "expected": "ID-B7"
+                },
+                {
+                    "kind": "function",
+                    "description": "Zero is a valid id.",
+                    "name": "formatIdentifier",
+                    "args": [
+                        0
+                    ],
+                    "expected": "ID-0"
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "narrowing-check",
+            "title": "Narrowing versus asserting",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "typeof",
+                    "label": "typeof can narrow a string | number union.",
+                    "correct": true
+                },
+                {
+                    "id": "assert",
+                    "label": "A type assertion changes the runtime value.",
+                    "correct": false
+                },
+                {
+                    "id": "safe",
+                    "label": "Both union branches must use operations valid for their type.",
+                    "correct": true
+                },
+                {
+                    "id": "json",
+                    "label": "Incoming JSON still needs runtime validation.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Narrowing uses runtime evidence. Assertions do not validate values."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The TypeScript editor and tests are keyboard accessible. Syntax diagnostics are text.",
+        "keyboardNotes": "Ctrl+Enter runs tests. Diagnostic messages are focusable.",
+        "screenReaderNotes": "Tests announce arguments, expected output, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
