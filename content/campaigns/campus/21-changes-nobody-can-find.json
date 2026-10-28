@@ -5,22 +5,14 @@
     "courseId": "campus",
     "title": "Changes nobody can find",
     "summary": "Use Git history to restore a file to a known-good commit.",
-    "skills": [
-        "git.basics"
-    ],
-    "prerequisites": [
-        "concept.filesystems"
-    ],
+    "skills": ["git.basics"],
+    "prerequisites": ["concept.filesystems"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "git",
     "runtime": {
         "kind": "browser-git",
-        "capabilities": [
-            "isomorphic-git",
-            "in-memory-repository",
-            "real-commits"
-        ]
+        "capabilities": ["isomorphic-git", "in-memory-repository", "real-commits"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "inspect-history",
             "description": "Inspect the repository history.",
-            "stepIds": [
-                "restore-file"
-            ]
+            "stepIds": ["restore-file"]
         },
         {
             "id": "restore-known-good",
             "description": "Restore the file to its earlier content.",
-            "stepIds": [
-                "restore-file"
-            ]
+            "stepIds": ["restore-file"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["git-check", "git-claims"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:dev-team",
-        "icon:git"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:dev-team", "icon:git"],
     "hints": [
         "Run git log --oneline to see the commits.",
         "The earlier commit contains the working version of src/store.js.",
@@ -122,13 +110,9 @@
             "extraBranches": [],
             "checks": {
                 "fileIncludes": {
-                    "src/store.js": [
-                        "\"ok\""
-                    ]
+                    "src/store.js": ["\"ok\""]
                 },
-                "logIncludes": [
-                    "Add storefront status"
-                ]
+                "logIncludes": ["Add storefront status"]
             },
             "explanation": "The first commit contains the working status. Checking out that file version restores the known-good content without resetting the branch."
         },
@@ -205,9 +189,7 @@
     },
     "rewards": {
         "experience": 155,
-        "unlocks": [
-            "campus.two-developers-disagree"
-        ]
+        "unlocks": ["campus.two-developers-disagree"]
     },
     "persistence": {
         "kind": "none"
@@ -218,8 +200,5 @@
         "screenReaderNotes": "The prompt announces the repository and branch. Command output is read in order, and checks report pass or fail."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems"
-    ]
+    "tags": ["professional", "systems"]
 }
