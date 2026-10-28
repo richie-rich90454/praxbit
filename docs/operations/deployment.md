@@ -69,11 +69,10 @@ Install, migrate, build, and start:
 corepack enable
 pnpm install --frozen-lockfile
 pnpm db:migrate
-pnpm build
 pnpm start
 ```
 
-`pnpm bootstrap` performs install, migration, and build in one cross-platform command. Use `pnpm bootstrap --skip-install` or `--skip-build` when those steps are already complete; migrations always run.
+`pnpm start` builds the web and server bundles when they are missing. `pnpm bootstrap` performs install, migration, and build in one cross-platform command. Use `pnpm bootstrap --skip-install` or `--skip-build` when those steps are already complete; migrations always run.
 
 The server loads `.env` from the project root automatically. `pnpm db:migrate` and `pnpm db:rollback` use the same loader. Shell variables take precedence over the file. Set `PRAXBIT_ENV_FILE` to use a different file.
 
