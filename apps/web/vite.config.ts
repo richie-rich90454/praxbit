@@ -26,7 +26,8 @@ export default defineConfig({
             manifest: {
                 name: "Praxbit",
                 short_name: "Praxbit",
-                description: "The computer science learning game. Start knowing nothing. Learn to understand everything you build.",
+                description:
+                    "The computer science learning game. Start knowing nothing. Learn to understand everything you build.",
                 theme_color: "#FFFFFF",
                 background_color: "#FFFFFF",
                 display: "standalone",
