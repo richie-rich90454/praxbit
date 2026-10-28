@@ -45,9 +45,12 @@ export function SettingsScreen(): JSX.Element {
                 });
                 return next.length === 0 ? ["everything"] : next;
             }
-            return [...current.filter(function removeEverything(item): boolean {
-                return item !== "everything";
-            }), interest];
+            return [
+                ...current.filter(function removeEverything(item): boolean {
+                    return item !== "everything";
+                }),
+                interest,
+            ];
         });
     }
 
@@ -57,10 +60,14 @@ export function SettingsScreen(): JSX.Element {
         try {
             if (mode() === "register") {
                 await learning.register(handle().trim().toLowerCase(), password());
-                setNotice("Account created. Queued local progress was uploaded and reconciled with the account.");
+                setNotice(
+                    "Account created. Queued local progress was uploaded and reconciled with the account.",
+                );
             } else {
                 await learning.login(handle().trim().toLowerCase(), password());
-                setNotice("Signed in. The account state is now authoritative for synchronized progress.");
+                setNotice(
+                    "Signed in. The account state is now authoritative for synchronized progress.",
+                );
             }
             setPassword("");
         } catch (error) {
@@ -92,7 +99,9 @@ export function SettingsScreen(): JSX.Element {
                 setPreferencesSaved(false);
             }, 1400);
         } catch (error) {
-            setPreferenceError(error instanceof Error ? error.message : "Preferences could not be saved.");
+            setPreferenceError(
+                error instanceof Error ? error.message : "Preferences could not be saved.",
+            );
         }
     }
 
@@ -104,7 +113,9 @@ export function SettingsScreen(): JSX.Element {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
             setReminders(false);
-            setPreferenceError("Notification permission was not granted. The reminder preference was left off.");
+            setPreferenceError(
+                "Notification permission was not granted. The reminder preference was left off.",
+            );
         }
     }
 
@@ -121,7 +132,9 @@ export function SettingsScreen(): JSX.Element {
             setNotice("Account deleted. This device now holds a fresh guest state.");
             navigate("/learn");
         } catch (error) {
-            setAccountError(error instanceof Error ? error.message : "The account could not be deleted.");
+            setAccountError(
+                error instanceof Error ? error.message : "The account could not be deleted.",
+            );
         } finally {
             setAccountBusy(false);
         }
@@ -132,7 +145,10 @@ export function SettingsScreen(): JSX.Element {
             <div class="page-header">
                 <div class="page-header__text">
                     <h1>Settings</h1>
-                    <p class="lede">Account, presentation, privacy, and accessibility. Nothing here changes the curriculum.</p>
+                    <p class="lede">
+                        Account, presentation, privacy, and accessibility. Nothing here changes the
+                        curriculum.
+                    </p>
                 </div>
                 <Pip pose="observing" size={76} />
             </div>
@@ -149,9 +165,10 @@ export function SettingsScreen(): JSX.Element {
                         fallback={
                             <div class="stack">
                                 <p class="small muted">
-                                    Guest progress stays in this browser's IndexedDB. Creating an account uploads the
-                                    queued local evidence and world actions. If the account already has progress,
-                                    conflicting world versions are reported rather than overwritten.
+                                    Guest progress stays in this browser's IndexedDB. Creating an
+                                    account uploads the queued local evidence and world actions. If
+                                    the account already has progress, conflicting world versions are
+                                    reported rather than overwritten.
                                 </p>
                                 <div class="tabs" role="tablist" aria-label="Account action">
                                     <button
@@ -196,7 +213,10 @@ export function SettingsScreen(): JSX.Element {
                                                 setHandle(event.currentTarget.value);
                                             }}
                                         />
-                                        <span class="meta">3-24 lowercase letters, numbers, or underscores. No real name required.</span>
+                                        <span class="meta">
+                                            3-24 lowercase letters, numbers, or underscores. No real
+                                            name required.
+                                        </span>
                                     </label>
                                     <label class="field">
                                         <span>Password</span>
@@ -204,12 +224,19 @@ export function SettingsScreen(): JSX.Element {
                                             class="input"
                                             type="password"
                                             value={password()}
-                                            autocomplete={mode() === "register" ? "new-password" : "current-password"}
+                                            autocomplete={
+                                                mode() === "register"
+                                                    ? "new-password"
+                                                    : "current-password"
+                                            }
                                             onInput={function change(event): void {
                                                 setPassword(event.currentTarget.value);
                                             }}
                                         />
-                                        <span class="meta">At least 10 characters. Stored as a salted scrypt hash on the server.</span>
+                                        <span class="meta">
+                                            At least 10 characters. Stored as a salted scrypt hash
+                                            on the server.
+                                        </span>
                                     </label>
                                     <Show when={accountError().length > 0}>
                                         <p class="feedback feedback--error">{accountError()}</p>
@@ -217,7 +244,11 @@ export function SettingsScreen(): JSX.Element {
                                     <button
                                         type="submit"
                                         class="button"
-                                        disabled={accountBusy() || handle().length < 3 || password().length < 10}
+                                        disabled={
+                                            accountBusy() ||
+                                            handle().length < 3 ||
+                                            password().length < 10
+                                        }
                                     >
                                         {accountBusy()
                                             ? "Working"
@@ -235,8 +266,9 @@ export function SettingsScreen(): JSX.Element {
                                 <code class="inline-code">@{learning.user()?.handle}</code>).
                             </p>
                             <p class="small muted">
-                                Authoritative mastery, reviews, completions, and the campus world are stored in
-                                PostgreSQL. This device keeps a local cache for offline use.
+                                Authoritative mastery, reviews, completions, and the campus world
+                                are stored in PostgreSQL. This device keeps a local cache for
+                                offline use.
                             </p>
                             <Show when={accountError().length > 0}>
                                 <p class="feedback feedback--error">{accountError()}</p>
@@ -260,9 +292,14 @@ export function SettingsScreen(): JSX.Element {
                                 >
                                     Sign out
                                 </button>
-                                <button type="button" class="button button--danger" disabled={accountBusy()} onClick={function remove(): void {
-                                    void deleteAccount();
-                                }}>
+                                <button
+                                    type="button"
+                                    class="button button--danger"
+                                    disabled={accountBusy()}
+                                    onClick={function remove(): void {
+                                        void deleteAccount();
+                                    }}
+                                >
                                     Delete account
                                 </button>
                             </div>
@@ -298,7 +335,11 @@ export function SettingsScreen(): JSX.Element {
                             value={challenge()}
                             onChange={function change(event): void {
                                 const value = event.currentTarget.value;
-                                if (value === "gentle" || value === "standard" || value === "stretch") {
+                                if (
+                                    value === "gentle" ||
+                                    value === "standard" ||
+                                    value === "stretch"
+                                ) {
                                     setChallenge(value);
                                 }
                             }}
@@ -321,8 +362,12 @@ export function SettingsScreen(): JSX.Element {
                             }}
                         />
                         <span class="meta">
-                            {textScale() <= 0.95 ? "Small" : textScale() >= 1.2 ? "Large" : "Standard"} text. The
-                            saved preference applies across the app.
+                            {textScale() <= 0.95
+                                ? "Small"
+                                : textScale() >= 1.2
+                                  ? "Large"
+                                  : "Standard"}{" "}
+                            text. The saved preference applies across the app.
                         </span>
                     </label>
                     <label class="field">
@@ -366,9 +411,10 @@ export function SettingsScreen(): JSX.Element {
                         <span class="choice__text">
                             Allow live AI tutor requests
                             <span class="meta">
-                                Off by default. Curated hints always work offline. When enabled, the server gateway
-                                receives only the selected mission, step, your question, and an optional code snippet.
-                                Provider availability is not guaranteed.
+                                Off by default. Curated hints always work offline. When enabled, the
+                                server gateway receives only the selected mission, step, your
+                                question, and an optional code snippet. Provider availability is not
+                                guaranteed.
                             </span>
                         </span>
                     </label>
@@ -383,8 +429,8 @@ export function SettingsScreen(): JSX.Element {
                         <span class="choice__text">
                             Optional practice reminder
                             <span class="meta">
-                                Web notifications only fire while the app is open. The installed mobile app can schedule
-                                local reminders. Quiet hours are respected.
+                                Web notifications only fire while the app is open. The installed
+                                mobile app can schedule local reminders. Quiet hours are respected.
                             </span>
                         </span>
                     </label>
@@ -416,9 +462,13 @@ export function SettingsScreen(): JSX.Element {
                         <p class="feedback feedback--error">{preferenceError()}</p>
                     </Show>
                     <div class="row">
-                        <button type="button" class="button" onClick={function save(): void {
-                            void savePreferences();
-                        }}>
+                        <button
+                            type="button"
+                            class="button"
+                            onClick={function save(): void {
+                                void savePreferences();
+                            }}
+                        >
                             Save preferences
                         </button>
                         <span class="meta">{preferencesSaved() ? "Saved." : ""}</span>
@@ -428,13 +478,13 @@ export function SettingsScreen(): JSX.Element {
                 <section class="surface stack" aria-labelledby="placement-heading">
                     <h2 id="placement-heading">Placement</h2>
                     <p class="small muted">
-                        Placement credits can skip known prerequisites without granting language mastery. Later
-                        evidence remains authoritative.
+                        Placement credits can skip known prerequisites without granting language
+                        mastery. Later evidence remains authoritative.
                     </p>
                     <Show when={learning.progress().placementSkippedSkills.length > 0}>
                         <p class="meta">
-                            {learning.progress().placementSkippedSkills.length} prerequisite skills are credited from
-                            placement.
+                            {learning.progress().placementSkippedSkills.length} prerequisite skills
+                            are credited from placement.
                         </p>
                     </Show>
                     <div class="row">
@@ -447,16 +497,17 @@ export function SettingsScreen(): JSX.Element {
                 <section class="surface surface--quiet stack" aria-labelledby="about-heading">
                     <h2 id="about-heading">About Praxbit</h2>
                     <p class="small">
-                        Praxbit is the computer science learning game. Start knowing nothing. Learn to understand
-                        everything you build.
+                        Praxbit is the computer science learning game. Start knowing nothing. Learn
+                        to understand everything you build.
                     </p>
                     <p class="small muted">
-                        Foundational lessons work offline after caching. Advanced runtimes such as Python, SQL, and Git
-                        load only when an exercise needs them. The visual world uses PixiJS only on the World screen.
+                        Foundational lessons work offline after caching. Advanced runtimes such as
+                        Python, SQL, and Git load only when an exercise needs them. The visual world
+                        uses PixiJS only on the World screen.
                     </p>
                     <p class="meta">
-                        Account export and deletion are available above. Guest progress never leaves this device until
-                        you choose to connect an account.
+                        Account export and deletion are available above. Guest progress never leaves
+                        this device until you choose to connect an account.
                     </p>
                 </section>
             </div>
