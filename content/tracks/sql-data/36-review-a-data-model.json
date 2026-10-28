@@ -1,0 +1,201 @@
+{
+    "id": "sql.review-model",
+    "version": 1,
+    "sequence": 36,
+    "courseId": "sql-data",
+    "title": "Review a data model",
+    "summary": "Find missing constraints and indexes in a proposed relational schema.",
+    "skills": [
+        "sql.modeling"
+    ],
+    "prerequisites": [
+        "sql.queries",
+        "sql.joins"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "schema-review",
+            "no-execution"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "schema-review",
+        "briefing": "A proposed schema will hold customers and orders. Review it for identity, relationships, valid ranges, and query performance before it reaches production."
+    },
+    "objectives": [
+        {
+            "id": "find-schema-issues",
+            "description": "Identify missing keys, constraints, and indexes.",
+            "stepIds": [
+                "schema-review"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:database",
+        "icon:schema"
+    ],
+    "hints": [
+        "Every table needs a stable primary key.",
+        "orders.customer_id must reference customers.id.",
+        "Totals and dates have valid ranges that constraints can enforce.",
+        "Add primary keys, a foreign key, nonnegative total and quantity checks, and an index on orders.customer_id and placed_at."
+    ],
+    "misconceptions": [
+        {
+            "id": "app-validation",
+            "description": "Assuming application code is enough to protect data integrity.",
+            "stepId": "schema-review",
+            "feedback": "Applications can have bugs and multiple writers. Database constraints enforce invariants at the shared boundary."
+        },
+        {
+            "id": "index-everything",
+            "description": "Adding indexes without a query workload.",
+            "stepId": "schema-review",
+            "feedback": "Indexes cost write time and space. Add them for measured or clearly expected query patterns."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Constraints encode invariants",
+                "body": "A primary key gives a row identity. A foreign key prevents orders from pointing at missing customers. CHECK constraints reject impossible totals and quantities. These rules hold even when another application writes to the database."
+            },
+            {
+                "title": "Indexes serve queries",
+                "body": "An index speeds lookups on selected columns at the cost of storage and write work. Index columns used for joins, filters, and ordering by frequent queries. Measure before adding broad indexing."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Constraint",
+                "definition": "A database rule that rejects invalid data."
+            },
+            {
+                "term": "Foreign key",
+                "definition": "A constraint linking a column to another table's key."
+            },
+            {
+                "term": "Index",
+                "definition": "A structure that speeds selected lookups."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "review",
+            "id": "schema-review",
+            "title": "Review the proposed schema",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Proposed schema",
+                "caption": "Intended for the campus storefront.",
+                "kind": "code",
+                "language": "sql",
+                "content": "CREATE TABLE customers (\n  name TEXT,\n  city TEXT\n);\n\nCREATE TABLE orders (\n  id TEXT,\n  customer_id TEXT,\n  total_cents INTEGER,\n  placed_at TEXT\n);\n\n-- Query: orders for one customer, newest first"
+            },
+            "findings": [
+                {
+                    "id": "pk",
+                    "label": "Neither table has a primary key.",
+                    "correct": true
+                },
+                {
+                    "id": "fk",
+                    "label": "orders.customer_id has no foreign key to customers.",
+                    "correct": true
+                },
+                {
+                    "id": "checks",
+                    "label": "total_cents and placed_at have no validity constraints.",
+                    "correct": true
+                },
+                {
+                    "id": "index",
+                    "label": "The customer and date query has no supporting index.",
+                    "correct": true
+                },
+                {
+                    "id": "name-key",
+                    "label": "Customer name is a suitable primary key.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the schema"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until keys, foreign key, checks, and the query index are defined"
+                },
+                {
+                    "id": "later",
+                    "label": "Deploy now and add constraints after launch"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The schema has no identity, relationship, range constraints, or index for its stated query. Names are not stable unique identifiers."
+        },
+        {
+            "kind": "explain",
+            "id": "model-check",
+            "title": "Why constraints live in the database",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "shared",
+                    "label": "Constraints protect data shared by multiple writers.",
+                    "correct": true
+                },
+                {
+                    "id": "pk",
+                    "label": "A primary key gives every row a stable identity.",
+                    "correct": true
+                },
+                {
+                    "id": "fk",
+                    "label": "Foreign keys help prevent orphaned rows.",
+                    "correct": true
+                },
+                {
+                    "id": "index-free",
+                    "label": "Indexes have no cost.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Constraints enforce invariants near the data. Indexes trade storage and writes for read speed."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The schema and findings are text with standard checkboxes and a radio verdict.",
+        "keyboardNotes": "Use Space for findings and arrow keys for the verdict.",
+        "screenReaderNotes": "The schema is announced as a code block. Findings and verdict feedback are read in order."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
