@@ -26,7 +26,10 @@ export interface SyncFlushResult {
     readonly message?: string;
 }
 
-export async function applySyncSnapshot(db: PraxbitDatabase, response: SyncResponse): Promise<void> {
+export async function applySyncSnapshot(
+    db: PraxbitDatabase,
+    response: SyncResponse,
+): Promise<void> {
     await setMastery(db, response.mastery);
     await setReviews(db, response.reviews);
     await setProgress(db, response.progress);
@@ -72,7 +75,11 @@ export class SyncManager {
                 if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
                     return { status: "unauthenticated", accepted: 0, conflicts: [] };
                 }
-                await markOutboxFailure(this.db, rows[0]?.seq ?? 0, error instanceof Error ? error.message : "Sync failed.");
+                await markOutboxFailure(
+                    this.db,
+                    rows[0]?.seq ?? 0,
+                    error instanceof Error ? error.message : "Sync failed.",
+                );
                 return {
                     status: "failed",
                     accepted: 0,
@@ -102,9 +109,9 @@ export class SyncManager {
                     await this.db.outbox.delete(row.seq);
                 } else if (result.status === "conflict") {
                     conflicts.push(result);
-                    await markOutboxFailure(this.db, row.seq, result.message ?? "Conflict");
+                    await this.db.outbox.delete(row.seq);
                 } else {
-                    await markOutboxFailure(this.db, row.seq, result.message ?? "Rejected");
+                    await this.db.outbox.delete(row.seq);
                 }
             }
 
