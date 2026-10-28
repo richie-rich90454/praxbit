@@ -272,12 +272,22 @@ async function executePreview(input: CheckRunInput): Promise<CheckRunResult> {
     const previewReport = await runPreviewChecks(input.files, checks);
     const outcomes: CheckOutcome[] = previewReport.outcomes.map(
         function toOutcome(outcome): CheckOutcome {
-            return {
+            const converted: {
+                description: string;
+                passed: boolean;
+                actual?: string;
+                error?: string;
+            } = {
                 description: outcome.description,
                 passed: outcome.passed,
-                ...(outcome.actual === undefined ? {} : { actual: outcome.actual }),
-                ...(outcome.error === undefined ? {} : { error: outcome.error }),
             };
+            if (outcome.actual !== undefined) {
+                converted.actual = outcome.actual;
+            }
+            if (outcome.error !== undefined) {
+                converted.error = outcome.error;
+            }
+            return converted;
         },
     );
     return {
@@ -350,22 +360,39 @@ async function executeSql(input: CheckRunInput): Promise<CheckRunResult> {
             verify?: string;
             expectedRows: readonly (readonly unknown[])[];
         } {
-            return {
+            const check: {
+                description: string;
+                verify?: string;
+                expectedRows: readonly (readonly unknown[])[];
+            } = {
                 description: test.description,
-                ...(test.verify === undefined ? {} : { verify: test.verify }),
                 expectedRows: test.expectedRows,
             };
+            if (test.verify !== undefined) {
+                check.verify = test.verify;
+            }
+            return check;
         }),
         sqlWasmUrl,
     );
     return {
         outcomes: report.outcomes.map(function toOutcome(outcome): CheckOutcome {
-            return {
+            const converted: {
+                description: string;
+                passed: boolean;
+                actual?: string;
+                error?: string;
+            } = {
                 description: outcome.description,
                 passed: outcome.passed,
-                ...(outcome.actual === undefined ? {} : { actual: JSON.stringify(outcome.actual) }),
-                ...(outcome.error === undefined ? {} : { error: outcome.error }),
             };
+            if (outcome.actual !== undefined) {
+                converted.actual = JSON.stringify(outcome.actual);
+            }
+            if (outcome.error !== undefined) {
+                converted.error = outcome.error;
+            }
+            return converted;
         }),
         stdout: "",
         stderr: "",
