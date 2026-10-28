@@ -491,12 +491,20 @@ export function FilesystemView(
                 type: "folder" | "file";
                 note?: string;
             } {
-                return {
+                const result: {
+                    path: string;
+                    name: string;
+                    type: "folder" | "file";
+                    note?: string;
+                } = {
                     path: node.path,
                     name: node.path.slice(node.path.lastIndexOf("/") + 1),
                     type: node.type,
-                    ...(node.note === undefined ? {} : { note: node.note }),
                 };
+                if (node.note !== undefined) {
+                    result.note = node.note;
+                }
+                return result;
             })
             .sort(function foldersFirst(left, right): number {
                 if (left.type !== right.type) {
