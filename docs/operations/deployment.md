@@ -96,7 +96,7 @@ Use `brew install postgresql@16` or the official installer. Run the process unde
 
 ### Linux
 
-Use the distribution packages or the official PostgreSQL repository. Run the process from the repository root. Root is allowed; the application does not drop privileges or require a dedicated user. For long-running operation, use a process supervisor of your choice, such as PM2, supervisord, or a terminal multiplexer. systemd is not required.
+Use the distribution packages or the official PostgreSQL repository. Run the process from the repository root. Root is allowed; the application does not drop privileges or require a dedicated user. For long-running operation, use a process supervisor of your choice, such as PM2, supervisord, or a terminal multiplexer.
 
 ## Process management
 
