@@ -5,14 +5,8 @@
     "courseId": "campus",
     "title": "The missing property",
     "summary": "Repair a TypeScript data model and a function that reads it.",
-    "skills": [
-        "js.objects",
-        "ts.types"
-    ],
-    "prerequisites": [
-        "js.types",
-        "js.loops"
-    ],
+    "skills": ["js.objects", "ts.types"],
+    "prerequisites": ["js.types", "js.loops"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
@@ -35,24 +29,20 @@
         {
             "id": "extend-model",
             "description": "Describe the items array in the Order interface.",
-            "stepIds": [
-                "repair-types"
-            ]
+            "stepIds": ["repair-types"]
         },
         {
             "id": "count-items",
             "description": "Return the total quantity across items.",
-            "stepIds": [
-                "repair-types"
-            ]
+            "stepIds": ["repair-types"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["types-check", "types-claims"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:type"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:type"],
     "hints": [
         "An order item has a quantity, and the order holds an array of items.",
         "Add items to the interface with a type of { quantity: number }[].",
@@ -70,7 +60,6 @@
             "id": "types-runtime",
             "description": "Expecting a TypeScript interface to validate runtime JSON.",
             "stepId": "types-check",
-            "answer": "runtime",
             "feedback": "Interfaces are erased at runtime. They describe code to the compiler; external JSON still needs runtime validation."
         }
     ],
@@ -176,19 +165,14 @@
                     "kind": "static",
                     "description": "The Order interface declares items.",
                     "file": "order.ts",
-                    "includes": [
-                        "interface Order",
-                        "items"
-                    ],
+                    "includes": ["interface Order", "items"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Item quantity is typed as a number.",
                     "file": "order.ts",
-                    "includes": [
-                        "quantity: number"
-                    ],
+                    "includes": ["quantity: number"],
                     "excludes": []
                 }
             ]
@@ -266,9 +250,7 @@
     },
     "rewards": {
         "experience": 145,
-        "unlocks": [
-            "campus.the-mysterious-exception"
-        ]
+        "unlocks": ["campus.the-mysterious-exception"]
     },
     "persistence": {
         "kind": "world-action",
@@ -281,8 +263,5 @@
         "screenReaderNotes": "Each test announces whether it is behavioral or structural, plus the expected result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
