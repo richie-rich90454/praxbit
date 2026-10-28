@@ -10,7 +10,10 @@
     "difficulty": "beginner",
     "estimatedMinutes": 4,
     "interaction": "network",
-    "runtime": { "kind": "none", "capabilities": ["interactive-simulation", "keyboard", "screen-reader"] },
+    "runtime": {
+        "kind": "none",
+        "capabilities": ["interactive-simulation", "keyboard", "screen-reader"]
+    },
     "scenario": {
         "world": "campus",
         "system": "messaging",
@@ -18,8 +21,21 @@
         "briefing": "A customer placed an order, but the delivery notification never arrived. Trace the message path from the laptop to the messaging service to find where the route belongs."
     },
     "objectives": [
-        { "id": "trace-request", "description": "Trace the notification route.", "stepIds": ["notification-route"] },
-        { "id": "request-response", "description": "Distinguish a request from a response.", "stepIds": ["http-check"] }
+        {
+            "id": "trace-request",
+            "description": "Trace the notification route.",
+            "stepIds": ["notification-route"]
+        },
+        {
+            "id": "request-response",
+            "description": "Distinguish a request from a response.",
+            "stepIds": ["http-check"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["network-claims"]
+        }
     ],
     "assets": ["pip:explaining", "scene:campus", "system:messaging", "icon:network"],
     "hints": [
@@ -56,9 +72,18 @@
             }
         ],
         "vocabulary": [
-            { "term": "Client", "definition": "The system that sends a request." },
-            { "term": "Server", "definition": "The system that receives and answers a request." },
-            { "term": "Packet", "definition": "A small unit of data moved across a network." }
+            {
+                "term": "Client",
+                "definition": "The system that sends a request."
+            },
+            {
+                "term": "Server",
+                "definition": "The system that receives and answers a request."
+            },
+            {
+                "term": "Packet",
+                "definition": "A small unit of data moved across a network."
+            }
         ]
     },
     "steps": [
@@ -69,12 +94,36 @@
             "prompt": "Click the devices in order from the laptop to the messaging service.",
             "evidence": "construction",
             "nodes": [
-                { "id": "laptop", "label": "Customer laptop", "kind": "device" },
-                { "id": "wifi", "label": "Campus wifi access point", "kind": "router" },
-                { "id": "router", "label": "Campus edge router", "kind": "router" },
-                { "id": "api", "label": "Orders API", "kind": "service" },
-                { "id": "messaging", "label": "Messaging service", "kind": "service" },
-                { "id": "database", "label": "Inventory database", "kind": "database" }
+                {
+                    "id": "laptop",
+                    "label": "Customer laptop",
+                    "kind": "device"
+                },
+                {
+                    "id": "wifi",
+                    "label": "Campus wifi access point",
+                    "kind": "router"
+                },
+                {
+                    "id": "router",
+                    "label": "Campus edge router",
+                    "kind": "router"
+                },
+                {
+                    "id": "api",
+                    "label": "Orders API",
+                    "kind": "service"
+                },
+                {
+                    "id": "messaging",
+                    "label": "Messaging service",
+                    "kind": "service"
+                },
+                {
+                    "id": "database",
+                    "label": "Inventory database",
+                    "kind": "database"
+                }
             ],
             "edges": [
                 ["laptop", "wifi"],
@@ -98,10 +147,22 @@
             "quiz": {
                 "prompt": "Choose the request.",
                 "options": [
-                    { "id": "response", "label": "The confirmation number returned by the API" },
-                    { "id": "request", "label": "The order data sent by the laptop to the API" },
-                    { "id": "database", "label": "The database lookup performed by the API" },
-                    { "id": "notification", "label": "The delivery notification sent later" }
+                    {
+                        "id": "response",
+                        "label": "The confirmation number returned by the API"
+                    },
+                    {
+                        "id": "request",
+                        "label": "The order data sent by the laptop to the API"
+                    },
+                    {
+                        "id": "database",
+                        "label": "The database lookup performed by the API"
+                    },
+                    {
+                        "id": "notification",
+                        "label": "The delivery notification sent later"
+                    }
                 ],
                 "correctId": "request",
                 "explanation": "The laptop initiates the interaction by sending the order data. The confirmation is the response."
@@ -120,17 +181,43 @@
             "prompt": "Select the accurate statements about networked systems.",
             "evidence": "explanation",
             "statements": [
-                { "id": "hops", "label": "A message may pass through devices that do not understand the application data.", "correct": true },
-                { "id": "local", "label": "A network request is identical to a local function call.", "correct": false },
-                { "id": "timeout", "label": "A request can fail or time out, so the client must handle that outcome.", "correct": true },
-                { "id": "guaranteed", "label": "A successful send guarantees the server processed the request.", "correct": false }
+                {
+                    "id": "hops",
+                    "label": "A message may pass through devices that do not understand the application data.",
+                    "correct": true
+                },
+                {
+                    "id": "local",
+                    "label": "A network request is identical to a local function call.",
+                    "correct": false
+                },
+                {
+                    "id": "timeout",
+                    "label": "A request can fail or time out, so the client must handle that outcome.",
+                    "correct": true
+                },
+                {
+                    "id": "guaranteed",
+                    "label": "A successful send guarantees the server processed the request.",
+                    "correct": false
+                }
             ],
             "explanation": "Remote calls cross failure boundaries. A message being sent is not proof that the remote action succeeded."
         }
     ],
-    "evaluation": { "kind": "steps", "passScore": 1 },
-    "rewards": { "experience": 85, "unlocks": ["before-code.break-it-into-parts"] },
-    "persistence": { "kind": "world-action", "action": "restart-service", "system": "messaging" },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 85,
+        "unlocks": ["before-code.break-it-into-parts"]
+    },
+    "persistence": {
+        "kind": "world-action",
+        "action": "restart-service",
+        "system": "messaging"
+    },
     "accessibility": {
         "summary": "Network nodes are buttons in a labeled diagram; a text list offers the same order selection.",
         "keyboardNotes": "Use Tab to move between nodes and Enter to add a node to the route. Clear the route with the reset button.",
