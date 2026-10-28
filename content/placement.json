@@ -53,7 +53,10 @@
             "id": "git",
             "prompt": "What does a Git commit record?",
             "options": [
-                { "id": "snapshot", "label": "A project snapshot with a message and parent history" },
+                {
+                    "id": "snapshot",
+                    "label": "A project snapshot with a message and parent history"
+                },
                 { "id": "deploy", "label": "A deployment to production" },
                 { "id": "test", "label": "A passing test suite" }
             ],
@@ -77,7 +80,10 @@
             "id": "idempotency",
             "prompt": "What makes a retried operation idempotent?",
             "options": [
-                { "id": "same", "label": "Repeating it with the same key has no additional effect" },
+                {
+                    "id": "same",
+                    "label": "Repeating it with the same key has no additional effect"
+                },
                 { "id": "faster", "label": "It runs faster on the second attempt" },
                 { "id": "logged", "label": "It writes a log entry" }
             ],
@@ -89,7 +95,10 @@
             "id": "types",
             "prompt": "Does a TypeScript interface validate JSON at runtime?",
             "options": [
-                { "id": "no", "label": "No, interfaces are erased and runtime validation is separate" },
+                {
+                    "id": "no",
+                    "label": "No, interfaces are erased and runtime validation is separate"
+                },
                 { "id": "yes", "label": "Yes, the interface checks incoming data" },
                 { "id": "sometimes", "label": "Only when the JSON is local" }
             ],
