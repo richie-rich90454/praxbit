@@ -4,19 +4,21 @@ Secrets belong in the process environment, never in the repository, the web bund
 
 ## Production environment file
 
-The systemd unit reads `/etc/praxbit/praxbit.env`. It should be:
+The server reads `.env` from the project root. It should be:
 
-- Owned by `root:praxbit`.
-- Mode `0640` (readable by the service group, not world-readable).
-- Outside the release directory, so a deploy does not overwrite it.
+- Owned by the account that runs the process.
+- Mode `0600` where the platform supports it.
+- Outside version control; `.gitignore` excludes it.
 - Backed up only in an encrypted location, or not backed up at all if it can be reissued.
 
 ```bash
-sudo install -o root -g praxbit -m 0640 /dev/null /etc/praxbit/praxbit.env
-sudo editor /etc/praxbit/praxbit.env
+cp .env.example .env
+chmod 600 .env
 ```
 
-Do not use a `.env` file committed to the repository. The server does not load `.env.local` automatically; a process manager must export the values. The example is `infra/env/praxbit.env.example`, and it contains placeholders only.
+On Windows, use the file properties or `icacls` to restrict access. Running as root is allowed; if you do, keep the checkout and `.env` readable only by root. A process manager may use `PRAXBIT_ENV_FILE` to point at another file outside the repository.
+
+Do not commit a real `.env` file. The committed example is `.env.example` and contains placeholders only.
 
 ## What is secret
 
