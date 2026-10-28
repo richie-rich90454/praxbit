@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "wire-button": {
+            "files": {
+                "script.js": "const addButton = document.querySelector(\"#add-to-cart\");\nconst countLabel = document.querySelector(\"#cart-count\");\nconst status = document.querySelector(\"#cart-status\");\n\nlet count = 0;\n\nfunction addItem() {\n  count += 1;\n  countLabel.textContent = String(count);\n  status.textContent = count === 1 ? \"1 item in cart\" : count + \" items in cart\";\n}\n\naddButton.addEventListener(\"click\", addItem);\n"
+            }
+        }
+    }
+}
