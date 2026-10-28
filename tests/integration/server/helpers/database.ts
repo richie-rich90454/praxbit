@@ -36,6 +36,7 @@ export function buildTestConfig(databaseUrl: string): ServerConfig {
         databaseUrl,
         databasePoolSize: 2,
         contentDirectory: undefined,
+        webDirectory: undefined,
         corsOrigins: [],
         adminHandles: [ADMIN_HANDLE],
         cookieSecure: false,
