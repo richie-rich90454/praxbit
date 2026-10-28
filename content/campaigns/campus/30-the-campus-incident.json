@@ -5,14 +5,8 @@
     "courseId": "campus",
     "title": "The campus incident",
     "summary": "Recover connected services, repair a replayable inventory bug, and review the incident response.",
-    "skills": [
-        "engineering.incident"
-    ],
-    "prerequisites": [
-        "testing.integration",
-        "ai.review",
-        "ops.deployment"
-    ],
+    "skills": ["engineering.incident"],
+    "prerequisites": ["testing.integration", "ai.review", "ops.deployment"],
     "difficulty": "advanced",
     "estimatedMinutes": 12,
     "interaction": "terminal",
@@ -20,6 +14,9 @@
         "kind": "simulated-linux",
         "capabilities": [
             "deterministic-linux-simulation",
+            "shell",
+            "service-state",
+            "browser-javascript",
             "worker-isolation",
             "curated-ai"
         ]
@@ -34,38 +31,25 @@
         {
             "id": "recover-services",
             "description": "Restore the database and API, then verify health.",
-            "stepIds": [
-                "recover-services"
-            ]
+            "stepIds": ["recover-services"]
         },
         {
             "id": "repair-replay",
             "description": "Make inventory replay ignore duplicate and unknown events.",
-            "stepIds": [
-                "repair-replay"
-            ]
+            "stepIds": ["repair-replay"]
         },
         {
             "id": "review-postmortem",
             "description": "Evaluate the incident report against the evidence.",
-            "stepIds": [
-                "review-postmortem"
-            ]
+            "stepIds": ["review-postmortem"]
         },
         {
             "id": "incident-practice",
             "description": "Explain responsible incident response.",
-            "stepIds": [
-                "incident-practice"
-            ]
+            "stepIds": ["incident-practice"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:server-room",
-        "icon:incident"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:incident"],
     "hints": [
         "Inspect both services with systemctl status and journalctl. Restore the database before the API.",
         "Read the logs to find the event id that appears twice in the inventory replay.",
@@ -491,9 +475,5 @@
         "screenReaderNotes": "The report is read as structured text. Service states, test results, and review findings are announced in order."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional",
-        "ai"
-    ]
+    "tags": ["systems", "professional", "ai"]
 }
