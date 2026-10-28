@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-response": {
+            "files": {
+                "client.js": "function parseOrderResponse(status, bodyText) {\n  if (status >= 500) {\n    return { ok: false, error: \"server-error\" };\n  }\n  let body;\n  try {\n    body = JSON.parse(bodyText);\n  } catch (error) {\n    return { ok: false, error: \"invalid-json\" };\n  }\n  if (status >= 200 && status < 300) {\n    if (body !== null && typeof body === \"object\" && typeof body.id === \"string\") {\n      return { ok: true, orderId: body.id };\n    }\n    return { ok: false, error: \"invalid-body\" };\n  }\n  if (body !== null && typeof body === \"object\" && typeof body.error === \"string\") {\n    return { ok: false, error: body.error };\n  }\n  return { ok: false, error: \"invalid-body\" };\n}\n"
+            }
+        }
+    }
+}
