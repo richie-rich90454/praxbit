@@ -19,7 +19,7 @@ content-solutions/  Reference solutions; never bundled into the learner app
 database/       node-pg-migrate migrations
 tests/          Unit, content, integration, security, browser tests
 docs/           Architecture, API, operations, product, curriculum
-infra/          systemd, proxy, backup, deploy, environment templates
+infra/          proxy, backup, and deployment templates
 scripts/        Build and load-test entry points
 ```
 
