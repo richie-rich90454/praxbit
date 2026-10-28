@@ -5,23 +5,14 @@
     "courseId": "campus",
     "title": "Incorrect totals",
     "summary": "Diagnose string concatenation and floating-point rounding in a receipt total.",
-    "skills": [
-        "js.types"
-    ],
-    "prerequisites": [
-        "js.loops",
-        "js.functions"
-    ],
+    "skills": ["js.types"],
+    "prerequisites": ["js.loops", "js.functions"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,20 @@
         {
             "id": "convert-types",
             "description": "Convert string prices to numbers before arithmetic.",
-            "stepIds": [
-                "repair-total"
-            ]
+            "stepIds": ["repair-total"]
         },
         {
             "id": "round-cents",
             "description": "Return a stable integer cent total.",
-            "stepIds": [
-                "repair-total"
-            ]
+            "stepIds": ["repair-total"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["type-check", "type-claims"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:storefront",
-        "icon:receipt"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:storefront", "icon:receipt"],
     "hints": [
         "The plus operator concatenates strings when one side is text.",
         "Convert each price with Number before multiplying by 100.",
@@ -120,55 +107,35 @@
                     "kind": "function",
                     "description": "Two decimal prices add correctly.",
                     "name": "orderTotalCents",
-                    "args": [
-                        [
-                            "12.50",
-                            "0.99"
-                        ]
-                    ],
+                    "args": [["12.50", "0.99"]],
                     "expected": 1349
                 },
                 {
                     "kind": "function",
                     "description": "Small decimals do not drift.",
                     "name": "orderTotalCents",
-                    "args": [
-                        [
-                            "0.10",
-                            "0.20"
-                        ]
-                    ],
+                    "args": [["0.10", "0.20"]],
                     "expected": 30
                 },
                 {
                     "kind": "function",
                     "description": "A single price is converted.",
                     "name": "orderTotalCents",
-                    "args": [
-                        [
-                            "19.99"
-                        ]
-                    ],
+                    "args": [["19.99"]],
                     "expected": 1999
                 },
                 {
                     "kind": "function",
                     "description": "An empty receipt is zero.",
                     "name": "orderTotalCents",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": 0
                 },
                 {
                     "kind": "function",
                     "description": "A whole-dollar string is accepted.",
                     "name": "orderTotalCents",
-                    "args": [
-                        [
-                            "5"
-                        ]
-                    ],
+                    "args": [["5"]],
                     "expected": 500
                 }
             ]
@@ -246,9 +213,7 @@
     },
     "rewards": {
         "experience": 140,
-        "unlocks": [
-            "campus.the-missing-property"
-        ]
+        "unlocks": ["campus.the-missing-property"]
     },
     "persistence": {
         "kind": "world-action",
@@ -261,8 +226,5 @@
         "screenReaderNotes": "Test results include the function name, input arguments, expected value, and actual value."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
