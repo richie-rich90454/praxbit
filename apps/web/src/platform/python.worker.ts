@@ -26,7 +26,12 @@ interface PythonOutcome {
 }
 
 function canonicalize(value: unknown, seen: Set<object>): unknown {
-    if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    if (
+        value === null ||
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+    ) {
         return value;
     }
     if (value === undefined) {
@@ -50,7 +55,7 @@ function canonicalize(value: unknown, seen: Set<object>): unknown {
         seen.delete(value);
         return sorted;
     }
-    return String(value);
+    return "__unsupported";
 }
 
 function normalizedJson(value: unknown): string {
@@ -122,7 +127,11 @@ self.onmessage = async function handleMessage(event: MessageEvent<PythonRequest>
                     description: test.description,
                     passed,
                     actual: normalizedJson(result),
-                    ...(passed ? {} : { error: `Expected ${normalizedJson(test.expected)}, received ${normalizedJson(result)}.` }),
+                    ...(passed
+                        ? {}
+                        : {
+                              error: `Expected ${normalizedJson(test.expected)}, received ${normalizedJson(result)}.`,
+                          }),
                 });
             } catch (error) {
                 outcomes.push({
