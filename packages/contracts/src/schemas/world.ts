@@ -34,7 +34,15 @@ export type SystemStatus = z.infer<typeof SystemStatusSchema>;
 export const WorldSystemSchema = z.strictObject({
     id: WorldSystemIdSchema,
     name: z.string().min(1).max(80),
-    kind: z.enum(["frontend", "service", "data", "network", "people", "infrastructure", "automation"]),
+    kind: z.enum([
+        "frontend",
+        "service",
+        "data",
+        "network",
+        "people",
+        "infrastructure",
+        "automation",
+    ]),
     status: SystemStatusSchema,
     summary: z.string().min(1).max(400),
     dependsOn: z.array(WorldSystemIdSchema),
@@ -86,14 +94,17 @@ export const ProjectSchema = z.strictObject({
             seedSql: z.string().max(6000),
         })
         .optional(),
-    stages: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(80),
-            title: z.string().min(1).max(140),
-            description: z.string().min(1).max(1200),
-            tests: z.array(CodeTestSchema).min(1).max(12),
-        }),
-    ).min(1).max(6),
+    stages: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(80),
+                title: z.string().min(1).max(140),
+                description: z.string().min(1).max(1200),
+                tests: z.array(CodeTestSchema).min(1).max(12),
+            }),
+        )
+        .min(1)
+        .max(6),
     explanation: z.array(z.string().min(1)).min(1),
 });
 export type ProjectDefinition = z.infer<typeof ProjectSchema>;
@@ -143,12 +154,14 @@ export const ClubEventSchema = z.strictObject({
     summary: z.string().min(1).max(600),
     weekOf: z.iso.date(),
     skillIds: z.array(z.string()).min(1),
-    options: z.array(
-        z.strictObject({
-            id: z.string().min(1).max(60),
-            label: z.string().min(1).max(300),
-        }),
-    ).min(2),
+    options: z
+        .array(
+            z.strictObject({
+                id: z.string().min(1).max(60),
+                label: z.string().min(1).max(300),
+            }),
+        )
+        .min(2),
     answerHash: z.string().regex(/^[a-f0-9]{64}$/),
     answerSalt: z.string().min(8).max(64),
     points: z.number().int().min(10).max(1000),
