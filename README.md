@@ -71,46 +71,57 @@ If you are changing dependencies intentionally, use `pnpm install` and commit th
 
 ## Environment
 
-Copy the example and edit it. Never commit real credentials.
+The deployment method is a direct clone of this repository with one `.env` file in the project root. Copy the example:
 
 ```bash
-cp infra/env/praxbit.env.example .env.local
+# macOS or Linux
+cp .env.example .env
 ```
 
-The server reads environment variables directly; it does not load `.env.local` itself. Export them in your shell or use your process manager. Required for the API:
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+Edit `.env` and set at least `DATABASE_URL`. The server reads this file automatically at startup, and `pnpm db:migrate` reads it through the same loader. Shell variables take precedence over `.env`.
+
+The server reads environment variables directly; it does not use a separate deployment directory. Required for the API:
 
 | Variable | Required | Meaning |
 | --- | --- | --- |
 | `DATABASE_URL` | yes | `postgres://` or `postgresql://` connection string |
-| `HOST` | no | Bind address, default `127.0.0.1` |
-| `PORT` | no | API port, default `8787` |
+| `HOST` | no | Bind address, default `127.0.0.1`; use `0.0.0.0` for a reachable server |
+| `PORT` | no | HTTP port, default `8787` |
 | `NODE_ENV` | no | `development`, `test`, or `production` |
 | `DB_POOL_SIZE` | no | 2–4, default 3 |
-| `CONTENT_DIR` | no | Directory containing `skills.json`; otherwise resolved from the repo or release |
-| `PUBLIC_ORIGIN` | production | Public site origin |
-| `CORS_ORIGINS` | no | Comma-separated allowed origins |
+| `CONTENT_DIR` | no | Directory containing `skills.json`; otherwise resolved from the repository |
+| `WEB_DIST` | no | Built web directory; otherwise `apps/web/dist` |
+| `PUBLIC_ORIGIN` | production | Public site origin, for example `https://praxbit.example` |
+| `CORS_ORIGINS` | no | Comma-separated allowed origins; leave empty for same-origin deployment |
 | `ADMIN_HANDLES` | no | Comma-separated lowercase handles promoted to admin at startup |
-| `COOKIE_SECURE` | production | `1` behind HTTPS |
+| `COOKIE_SECURE` | production | `1` behind HTTPS; `0` for direct HTTP development |
 | `TRUST_PROXY` | behind proxy | `1` to trust `X-Forwarded-For`; only when a trusted proxy sets it |
-| `BODY_LIMIT_BYTES` | no | 16384–2097152, default 262144 |
+| `BODY_LIMIT_BYTES` | no | 16384–2097152, default 1048576 |
 | `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` | no | All three enable the AI tutor gateway |
 | `AI_TIMEOUT_MS` | no | 1000–60000, default 12000 |
 
-The full operational template is `infra/env/praxbit.env.example`.
+`PRAXBIT_ENV_FILE` can point at a different environment file when a process manager requires it. The default is `.env` in the project root.
+
+The full operational template is `.env.example`.
 
 ## Database
 
-Create a dedicated database and role. Run migrations with the same `DATABASE_URL` the server will use.
+Create a dedicated database and role. Then edit `DATABASE_URL` in the project-root `.env` and run migrations. The migration command reads `.env` automatically.
 
 ```bash
 createdb praxbit
-DATABASE_URL=postgres://praxbit:password@127.0.0.1:5432/praxbit pnpm db:migrate
+pnpm db:migrate
 ```
 
 Roll back the last migration only when you understand its data loss:
 
 ```bash
-DATABASE_URL=... pnpm db:rollback
+pnpm db:rollback
 ```
 
 For tests, use a separate database. Do not point integration tests at production.
@@ -143,18 +154,21 @@ pnpm --filter @praxbit/companion start -- doctor
 
 ```bash
 pnpm build
+pnpm start
 ```
+
+Open `http://localhost:8787`. The Hono process serves both the API and the built web application, including the service worker and the single-page fallback. Only one process is required on Windows, macOS, or Linux.
 
 The build produces the static web client in `apps/web/dist`, the server bundle in `apps/server/dist`, and the companion in `apps/companion/dist/main.js`. The server build is a Node bundle; do not run `tsx watch` or Vite in production.
 
-Local production-style run:
+For a fresh clone, the cross-platform bootstrap runs install, migration, and build:
 
 ```bash
-DATABASE_URL=... NODE_ENV=production PORT=8787 node apps/server/dist/main.js
-pnpm --filter @praxbit/web preview --port 4173
+pnpm bootstrap
+pnpm start
 ```
 
-The web preview serves static files only. For API calls, put a reverse proxy in front or run the Vite dev server during development. See [docs/operations](docs/operations/deployment.md) for systemd, Caddy, Nginx, backups, and rollback.
+`pnpm bootstrap --skip-install` skips dependency installation, and `--skip-build` skips the build. Neither flag skips migrations. See [docs/operations](docs/operations/deployment.md) for Windows, macOS, Linux, process management, Caddy, Nginx, backups, and rollback.
 
 ## Test and quality gates
 
@@ -217,15 +231,31 @@ The companion writes only inside the chosen `--dir`, rejects absolute paths and 
 
 ## Deployment
 
-Deployment is documented, not automated against a live host in this repository. The target is a single Hono process on a shared 2 vCPU / 2 GB VPS, static files through the existing Caddy or Nginx, PostgreSQL 16+, and no server-side learner compilation. Use:
+The supported deployment is a direct clone of this repository, one project-root `.env`, and one Node.js process. It works on Windows, macOS, and Linux. PostgreSQL 16+ must be installed separately and reachable through `DATABASE_URL`.
 
-- `infra/systemd/praxbit.service`
+```bash
+git clone <repository-url> praxbit
+cd praxbit
+cp .env.example .env
+# Edit DATABASE_URL and, for a public host, PUBLIC_ORIGIN and COOKIE_SECURE.
+corepack enable
+pnpm install --frozen-lockfile
+pnpm db:migrate
+pnpm build
+pnpm start
+```
+
+On Windows PowerShell, create the environment file with `Copy-Item .env.example .env`. Use `pnpm bootstrap` to run install, migration, and build in one step.
+
+The server binds `HOST` and `PORT` from `.env` and serves the web build from `apps/web/dist`. Use `HOST=0.0.0.0` when the browser is on another machine. For direct HTTP access, set `COOKIE_SECURE=0`; for HTTPS behind a reverse proxy, set `COOKIE_SECURE=1` and `TRUST_PROXY=1`.
+
+Linux process-management, proxy, and backup examples are provided for operators who want them:
+
 - `infra/caddy/Caddyfile.example` or `infra/nginx/praxbit.conf.example`
-- `infra/scripts/deploy.sh`
 - `infra/backup/backup-postgres.sh` and `restore-postgres.sh`
 - [docs/operations](docs/operations/deployment.md)
 
-No deployment has been performed against a production host from this working copy. Resource targets are budgets to measure, not measured guarantees.
+No deployment has been performed against a public production host from this working copy. Resource targets are budgets to measure, not measured guarantees.
 
 ## Licensing
 
@@ -240,7 +270,7 @@ This repository does not claim to have received legal review. Confirm jurisdicti
 
 These are real constraints, not a backlog disguised as a feature list.
 
-- **Production verification is incomplete.** The API route surface is implemented, and the PostgreSQL integration suite passed locally against a disposable cluster. Formatting, linting, type checking, unit, content, security, and browser suites also passed locally, and the production web and server bundles build. A real deployment behind a proxy, with production credentials and production data volumes, remains unverified.
+- **Production verification is incomplete.** The PostgreSQL integration suite and a direct-clone deployment smoke test passed locally, including `pnpm start`, the static web shell, SPA routes, the API, and a mission in Chromium. A public host behind a proxy with TLS, production credentials, real traffic, and real data volumes remains unverified.
 - **No server-side learner code execution.** JavaScript runs in a Web Worker, HTML/CSS in sandboxed iframes, Python in Pyodide, SQL in sql.js, and Git in isomorphic-git. These are best-effort browser isolation, not a hardened multi-tenant sandbox. The server never executes arbitrary learner programs.
 - **AI is optional and unverified here.** The gateway is implemented, but no live provider key is committed. Provider behavior, cost, latency, and output quality must be tested with your own account. The AI is not the authoritative grader.
 - **Native applications are not shipped.** Capacitor configuration exists; Android/iOS projects, signing, store metadata, push notifications, deep-link verification, and device testing do not.
