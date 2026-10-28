@@ -1,0 +1,141 @@
+{
+    "id": "before-code.find-the-file",
+    "version": 1,
+    "sequence": 9,
+    "courseId": "before-code",
+    "title": "Find the file",
+    "summary": "Navigate a filesystem and locate the file that holds store inventory.",
+    "skills": ["concept.filesystems"],
+    "prerequisites": ["concept.computation"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 4,
+    "interaction": "filesystem",
+    "runtime": { "kind": "none", "capabilities": ["interactive-simulation", "keyboard", "screen-reader"] },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "inventory-hunt",
+        "briefing": "The server room files are organized in folders. Find the live inventory file without opening unrelated data or backups."
+    },
+    "objectives": [
+        { "id": "locate-file", "description": "Locate the live inventory file.", "stepIds": ["find-inventory"] },
+        { "id": "relative-path", "description": "Read a relative path correctly.", "stepIds": ["path-check"] }
+    ],
+    "assets": ["pip:observing", "scene:campus", "system:server-room", "icon:folder"],
+    "hints": [
+        "Open srv, then campus. The application files live under srv/campus.",
+        "Data and logs are separate folders under srv/campus.",
+        "The file is named inventory.json and sits in the data folder.",
+        "Navigate srv, campus, data, then select inventory.json."
+    ],
+    "misconceptions": [
+        {
+            "id": "backup-confusion",
+            "description": "Selecting an old backup instead of the live file.",
+            "stepId": "find-inventory",
+            "answer": "srv/campus/backups/inventory-old.json",
+            "feedback": "The backup is not the file the running service uses. Live data is in srv/campus/data."
+        },
+        {
+            "id": "parent-path",
+            "description": "Misreading ../ as moving deeper.",
+            "stepId": "path-check",
+            "answer": "data",
+            "feedback": ".. moves up one folder. From app, ../data means go up to campus, then into data."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Folders are named containers",
+                "body": "A filesystem organizes files in a tree. An absolute path starts at the root, such as /srv/campus/data/inventory.json. A relative path starts from the current folder. Both can identify the same file."
+            },
+            {
+                "title": "Names are not locations",
+                "body": "Two folders can contain files with the same name. The complete path and the current working directory determine which file a program opens. Selecting an old backup by mistake can make a service read stale data."
+            }
+        ],
+        "vocabulary": [
+            { "term": "Directory", "definition": "A folder that contains files or other folders." },
+            { "term": "Absolute path", "definition": "A path that starts at the filesystem root." },
+            { "term": "Relative path", "definition": "A path interpreted from the current directory." }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "filesystem",
+            "id": "find-inventory",
+            "title": "Locate inventory.json",
+            "prompt": "Navigate the folders and select the live inventory file. Do not select a backup.",
+            "evidence": "construction",
+            "nodes": [
+                { "path": "srv", "type": "folder" },
+                { "path": "srv/campus", "type": "folder" },
+                { "path": "srv/campus/app", "type": "folder" },
+                { "path": "srv/campus/app/server.js", "type": "file", "note": "Orders service entry point" },
+                { "path": "srv/campus/app/config.json", "type": "file", "note": "Service configuration" },
+                { "path": "srv/campus/data", "type": "folder" },
+                { "path": "srv/campus/data/inventory.json", "type": "file", "note": "Live inventory" },
+                { "path": "srv/campus/data/orders.json", "type": "file", "note": "Recent orders" },
+                { "path": "srv/campus/backups", "type": "folder" },
+                { "path": "srv/campus/backups/inventory-old.json", "type": "file", "note": "Last week's copy" },
+                { "path": "var", "type": "folder" },
+                { "path": "var/log", "type": "folder" },
+                { "path": "var/log/campus.log", "type": "file", "note": "Service log" },
+                { "path": "home", "type": "folder" },
+                { "path": "home/student", "type": "folder" },
+                { "path": "home/student/notes.txt", "type": "file" }
+            ],
+            "targetPath": ["srv", "campus", "data", "inventory.json"],
+            "explanation": "The live inventory file is srv/campus/data/inventory.json. The similarly named file in backups is stale."
+        },
+        {
+            "kind": "quiz",
+            "id": "path-check",
+            "title": "Read the relative path",
+            "prompt": "Your current directory is /srv/campus/app. Which path opens the live inventory file?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the correct relative path.",
+                "options": [
+                    { "id": "data", "label": "data/inventory.json" },
+                    { "id": "parent", "label": "../data/inventory.json" },
+                    { "id": "root", "label": "srv/campus/data/inventory.json" },
+                    { "id": "backup", "label": "../backups/inventory.json" }
+                ],
+                "correctId": "parent",
+                "explanation": "From app, .. moves up to campus. Then data/inventory.json reaches the live file."
+            },
+            "hints": [
+                "Where is data relative to app?",
+                "data is a sibling of app, not a child.",
+                "Move up one folder first with ...",
+                "The path is ../data/inventory.json."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "filesystem-claims",
+            "title": "Paths and identity",
+            "prompt": "Select the accurate statements.",
+            "evidence": "explanation",
+            "statements": [
+                { "id": "same-name", "label": "Two different files can share a file name in different folders.", "correct": true },
+                { "id": "relative", "label": "A relative path depends on the current directory.", "correct": true },
+                { "id": "backup-current", "label": "A backup file is always the live data source.", "correct": false },
+                { "id": "extension", "label": "A .json extension guarantees the file is valid JSON.", "correct": false }
+            ],
+            "explanation": "Paths disambiguate names. Extensions and folder names are conventions, not proof of content."
+        }
+    ],
+    "evaluation": { "kind": "steps", "passScore": 1 },
+    "rewards": { "experience": 80, "unlocks": ["before-code.send-a-message"] },
+    "persistence": { "kind": "none" },
+    "accessibility": {
+        "summary": "The filesystem is a keyboard-navigable tree with expandable folders. A breadcrumb shows the current path.",
+        "keyboardNotes": "Use arrow keys to move through the tree and Enter to open a folder or select a file.",
+        "screenReaderNotes": "Each folder announces expanded or collapsed state. The breadcrumb and selected file are read as text."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
