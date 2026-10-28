@@ -5,22 +5,14 @@
     "courseId": "security",
     "title": "The borrowed name",
     "summary": "Recognize SQL injection and choose evidence that tests the boundary.",
-    "skills": [
-        "security.injection"
-    ],
-    "prerequisites": [
-        "sql.queries",
-        "http.basics"
-    ],
+    "skills": ["security.injection"],
+    "prerequisites": ["sql.queries", "http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "code-review",
-            "no-execution"
-        ]
+        "capabilities": ["code-review", "no-execution"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,20 @@
         {
             "id": "identify-injection",
             "description": "Identify string-interpolated query construction.",
-            "stepIds": [
-                "injection-review"
-            ]
+            "stepIds": ["injection-review"]
         },
         {
             "id": "adversarial-tests",
             "description": "Choose tests that include hostile input.",
-            "stepIds": [
-                "injection-tests"
-            ]
+            "stepIds": ["injection-tests"]
+        },
+        {
+            "id": "demonstrate-understanding",
+            "description": "Check understanding through the remaining explanation and transfer evidence.",
+            "stepIds": ["injection-check"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:api",
-        "icon:shield"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:shield"],
     "hints": [
         "Look at how name is inserted into the SQL string.",
         "A quote in the input can end the string literal and add SQL.",
@@ -236,9 +224,7 @@
     },
     "rewards": {
         "experience": 130,
-        "unlocks": [
-            "security.sessions"
-        ]
+        "unlocks": ["security.sessions"]
     },
     "persistence": {
         "kind": "none"
@@ -249,9 +235,5 @@
         "screenReaderNotes": "The code block is read with line breaks. Tests announce whether each selected case is appropriate."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web",
-        "systems"
-    ]
+    "tags": ["professional", "web", "systems"]
 }
