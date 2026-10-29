@@ -1,0 +1,256 @@
+{
+    "id": "go.concurrency",
+    "version": 1,
+    "sequence": 58,
+    "courseId": "go",
+    "title": "Interfaces, channels, and modules",
+    "summary": "Run work in a goroutine, receive the result from a channel, and reason about module boundaries.",
+    "skills": ["go.interfaces", "go.concurrency", "go.modules", "go.web"],
+    "prerequisites": ["go.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "concurrency",
+        "briefing": "A reporting endpoint sums a batch on a worker goroutine. Move the work off the request path and receive the result safely."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:go"],
+    "hints": [
+        "Create a channel of int.",
+        "Start an anonymous goroutine with go func().",
+        "Send the total into the channel.",
+        "Return the value received from the channel."
+    ],
+    "misconceptions": [
+        {
+            "id": "deadlock",
+            "description": "Sending on an unbuffered channel without a receiver.",
+            "stepId": "apply",
+            "feedback": "The send blocks until another goroutine receives. Receive from the channel in the caller."
+        },
+        {
+            "id": "shared",
+            "description": "Writing to a shared variable from several goroutines without synchronization.",
+            "stepId": "apply",
+            "feedback": "Use channels or a mutex. Unsynchronized shared writes are a data race."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Go functions and collections",
+                "body": "Functions declare parameter and return types: func add(left int, right int) int { return left + right }. A slice such as []int{3, -1, 2} is a view over an array. An interface describes behavior, and a type satisfies it by implementing its methods."
+            },
+            {
+                "title": "Go errors and tools",
+                "body": "Functions return errors explicitly: value, err := strconv.Atoi(text); if err != nil { ... }. A goroutine runs concurrently, and channels carry values between goroutines. go build compiles, go test runs tests, and Go modules record versioned dependencies. net/http serves web endpoints."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Interface",
+                "definition": "A set of method signatures that a type can satisfy implicitly."
+            },
+            {
+                "term": "Goroutine",
+                "definition": "A lightweight concurrent function managed by the Go runtime."
+            },
+            {
+                "term": "Channel",
+                "definition": "A typed conduit for sending values between goroutines."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Go functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Go functions and collections",
+                    "body": "Functions declare parameter and return types: func add(left int, right int) int { return left + right }. A slice such as []int{3, -1, 2} is a view over an array. An interface describes behavior, and a type satisfies it by implementing its methods."
+                },
+                {
+                    "title": "Go errors and tools",
+                    "body": "Functions return errors explicitly: value, err := strconv.Atoi(text); if err != nil { ... }. A goroutine runs concurrently, and channels carry values between goroutines. go build compiles, go test runs tests, and Go modules record versioned dependencies. net/http serves web endpoints."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Interface",
+                    "definition": "A set of method signatures that a type can satisfy implicitly."
+                },
+                {
+                    "term": "Goroutine",
+                    "definition": "A lightweight concurrent function managed by the Go runtime."
+                },
+                {
+                    "term": "Channel",
+                    "definition": "A typed conduit for sending values between goroutines."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Sum through a channel",
+            "prompt": "Edit main.go. sum starts the addition in a goroutine and returns the value received from a channel.",
+            "evidence": "construction",
+            "language": "go",
+            "files": [
+                {
+                    "path": "main.go",
+                    "content": "package main\n\nimport \"fmt\"\n\nfunc sum(values []int) int {\n    total := 0\n    for _, value := range values {\n        total += value\n    }\n    return total\n}\n\nfunc main() {\n    fmt.Println(sum([]int{3, -1, 2}))\n}\n",
+                    "editable": true,
+                    "language": "go"
+                }
+            ],
+            "entry": "main.go",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the slice parameter and int result.",
+                    "file": "main.go",
+                    "includes": ["func sum(values []int) int"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The work runs in a goroutine and returns through a channel.",
+                    "file": "main.go",
+                    "includes": [
+                        "make(chan int)",
+                        "go func()",
+                        "results <- total",
+                        "return <-results"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.go",
+                    "includes": ["func sum(values []int) int"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The channel that never delivers",
+            "prompt": "This function sends a total on an unbuffered channel and then returns without receiving it. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "make",
+                    "label": "results := make(chan int)"
+                },
+                {
+                    "id": "send",
+                    "label": "results <- total"
+                },
+                {
+                    "id": "return",
+                    "label": "return total"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "send",
+            "fixes": [
+                {
+                    "id": "receive",
+                    "label": "Return <-results so a receiver is waiting."
+                },
+                {
+                    "id": "buffered",
+                    "label": "Make the channel buffered with make(chan int, 1)."
+                },
+                {
+                    "id": "close",
+                    "label": "Close the channel immediately after sending."
+                }
+            ],
+            "correctFixId": "receive",
+            "explanation": "An unbuffered send blocks until a receiver is ready. Receiving in the same function completes the exchange."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Concurrency and modules",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "interface",
+                    "label": "A Go type satisfies an interface by implementing its methods, without an explicit declaration.",
+                    "correct": true
+                },
+                {
+                    "id": "channel",
+                    "label": "An unbuffered channel send blocks until a receiver is ready.",
+                    "correct": true
+                },
+                {
+                    "id": "goroutine",
+                    "label": "A goroutine blocks the entire process until it finishes.",
+                    "correct": false
+                },
+                {
+                    "id": "modules",
+                    "label": "Go modules record exact dependency versions for reproducible builds.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Goroutines run concurrently, and channels synchronize their communication. Interfaces are satisfied implicitly, while modules pin dependencies."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Go workspace is keyboard accessible. Checks verify source structure; they do not compile or run Go.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
