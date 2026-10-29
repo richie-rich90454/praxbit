@@ -1,0 +1,319 @@
+{
+    "id": "systems-architecture.compilers",
+    "version": 1,
+    "sequence": 107,
+    "courseId": "systems-architecture",
+    "title": "From source to executable",
+    "summary": "Trace a program through lexing, parsing, type checking, IR, optimization, and code generation, and make diagnostics reproducible.",
+    "skills": ["compilers.basics", "concept.testing"],
+    "prerequisites": ["concept.instructions", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "compilers",
+        "briefing": "The compiler notes claim that a program which parses is ready to run and that errors can be printed in any order. Rewrite the pipeline note so each pass has a defined input and output, the optimizer is constrained by observable behavior, and diagnostics are reproducible."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:systems"],
+    "hints": [
+        "The pipeline is text, tokens, AST, typed AST, IR, optimized IR, and target instructions.",
+        "A parse can succeed while a name is undefined or a call has the wrong arity; the type checker is what rejects it.",
+        "An optimizer may only remove or reorder work whose effects cannot be observed; unknown calls and volatile accesses are barriers.",
+        "Sort diagnostics by file, offset, and code, not by when a pass happened to find them."
+    ],
+    "misconceptions": [
+        {
+            "id": "parse-means-valid",
+            "description": "Equating a successful parse with a valid program.",
+            "stepId": "apply",
+            "feedback": "The parser checks only that tokens fit the grammar. Name resolution and type checking reject unknown identifiers, wrong arity, and mismatched types."
+        },
+        {
+            "id": "optimizer-freedom",
+            "description": "Letting an optimizer rewrite code without a behavior argument.",
+            "stepId": "review",
+            "feedback": "An optimization must preserve every observable effect, including calls with unknown bodies and volatile reads. Dead-store elimination cannot cross those barriers."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Lexing turns text into tokens",
+                "body": "The lexer scans characters into tokens such as identifiers, literals, operators, and punctuation. It uses maximal munch, so a name is the longest valid identifier, and it reports illegal characters here. Whitespace and comments usually disappear, which is why the later stages cannot recover the original formatting."
+            },
+            {
+                "title": "Parsing builds a syntax tree",
+                "body": "The parser matches the token stream against a grammar and produces an AST. The tree records nesting, precedence, and statement boundaries that the flat token stream does not, but it still says nothing about whether the names resolve or the types fit. A syntax error is a shape error, not a meaning error."
+            },
+            {
+                "title": "Type checking is a separate judgment",
+                "body": "The type checker resolves names, checks arity, and applies typing rules to the AST. A program can parse and still call an undefined function, pass a string where a number is required, or return the wrong type. Those are exactly the programs that a successful parse does not exclude, so parse success is not program validity."
+            },
+            {
+                "title": "IR and optimization",
+                "body": "Lowering turns the typed tree into an IR with explicit temporaries, basic blocks, and control-flow edges. An optimizer may fold constants, inline calls, and remove dead code, but only when it preserves observable behavior. Calls whose bodies are unknown, volatile accesses, and traps are barriers: moving or deleting them can change what the program does."
+            },
+            {
+                "title": "Code generation and deterministic diagnostics",
+                "body": "Code generation selects instructions, assigns registers, and emits the target object. Diagnostics from every pass must be ordered by file, offset, and code so a rerun produces byte-identical output; ordering by hash-map iteration or by the time a pass happened to run makes failures hard to reproduce."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Token",
+                "definition": "A classified lexeme such as an identifier, literal, or operator."
+            },
+            {
+                "term": "AST",
+                "definition": "A tree that represents the grammatical structure of a program."
+            },
+            {
+                "term": "Type checker",
+                "definition": "A pass that resolves names and proves that the program obeys the typing rules."
+            },
+            {
+                "term": "IR",
+                "definition": "An intermediate representation between the typed AST and target instructions."
+            },
+            {
+                "term": "Optimization",
+                "definition": "A semantics-preserving rewrite that reduces work or resource use."
+            },
+            {
+                "term": "Diagnostic",
+                "definition": "A structured compiler message with a file, offset, and code."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "The compiler pipeline",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Lexing turns text into tokens",
+                    "body": "The lexer scans characters into tokens such as identifiers, literals, operators, and punctuation. It uses maximal munch, so a name is the longest valid identifier, and it reports illegal characters here. Whitespace and comments usually disappear, which is why the later stages cannot recover the original formatting."
+                },
+                {
+                    "title": "Parsing builds a syntax tree",
+                    "body": "The parser matches the token stream against a grammar and produces an AST. The tree records nesting, precedence, and statement boundaries that the flat token stream does not, but it still says nothing about whether the names resolve or the types fit. A syntax error is a shape error, not a meaning error."
+                },
+                {
+                    "title": "Type checking is a separate judgment",
+                    "body": "The type checker resolves names, checks arity, and applies typing rules to the AST. A program can parse and still call an undefined function, pass a string where a number is required, or return the wrong type. Those are exactly the programs that a successful parse does not exclude, so parse success is not program validity."
+                },
+                {
+                    "title": "IR and optimization",
+                    "body": "Lowering turns the typed tree into an IR with explicit temporaries, basic blocks, and control-flow edges. An optimizer may fold constants, inline calls, and remove dead code, but only when it preserves observable behavior. Calls whose bodies are unknown, volatile accesses, and traps are barriers: moving or deleting them can change what the program does."
+                },
+                {
+                    "title": "Code generation and deterministic diagnostics",
+                    "body": "Code generation selects instructions, assigns registers, and emits the target object. Diagnostics from every pass must be ordered by file, offset, and code so a rerun produces byte-identical output; ordering by hash-map iteration or by the time a pass happened to run makes failures hard to reproduce."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Token",
+                    "definition": "A classified lexeme such as an identifier, literal, or operator."
+                },
+                {
+                    "term": "AST",
+                    "definition": "A tree that represents the grammatical structure of a program."
+                },
+                {
+                    "term": "Type checker",
+                    "definition": "A pass that resolves names and proves that the program obeys the typing rules."
+                },
+                {
+                    "term": "IR",
+                    "definition": "An intermediate representation between the typed AST and target instructions."
+                },
+                {
+                    "term": "Optimization",
+                    "definition": "A semantics-preserving rewrite that reduces work or resource use."
+                },
+                {
+                    "term": "Diagnostic",
+                    "definition": "A structured compiler message with a file, offset, and code."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Document the compiler pipeline",
+            "prompt": "Edit compiler.md. Replace the three-stage sketch with the full pipeline, give each stage its input and output, explain why parsing is not enough, state the rule an optimizer must preserve, and fix the diagnostic order.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "compiler.md",
+                    "content": "# Compiler pipeline\n\nsource -> parse -> optimize -> executable\n\n## Diagnostics\n\nPrint each error as soon as it is found.\n\n# TODO: list the missing stages, say what each pass consumes and produces, and fix the diagnostic order\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "compiler.md",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The pipeline names every stage from source to executable.",
+                    "file": "compiler.md",
+                    "includes": [
+                        "source -> lexer -> parser -> AST -> type checker -> IR -> optimizer -> code generator -> executable"
+                    ],
+                    "excludes": ["source -> parse -> optimize -> executable"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The stage table gives every pass an input and an output.",
+                    "file": "compiler.md",
+                    "includes": [
+                        "| Lexer | source text | tokens |",
+                        "| Parser | tokens | AST |",
+                        "| Type checker | AST | typed AST |",
+                        "| Optimizer | IR | equivalent IR |",
+                        "| Code generator | IR | target instructions |"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The note separates a successful parse from a valid program.",
+                    "file": "compiler.md",
+                    "includes": [
+                        "A successful parse proves only that the input matches the grammar.",
+                        "Name resolution and type checking reject programs that parse"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Optimization is constrained by observable behavior.",
+                    "file": "compiler.md",
+                    "includes": [
+                        "An optimization is valid only when it preserves observable behavior",
+                        "volatile"
+                    ],
+                    "excludes": ["An optimization may change any behavior"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Diagnostics have a stable order.",
+                    "file": "compiler.md",
+                    "includes": [
+                        "file path, then byte offset, then diagnostic code",
+                        "byte-identical"
+                    ],
+                    "excludes": ["Print each error as soon as it is found."]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "compiler.md",
+                    "includes": [
+                        "source -> lexer -> parser -> AST -> type checker -> IR -> optimizer -> code generator -> executable"
+                    ],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the dead-store pass",
+            "prompt": "Review the optimizer and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "optimize.ts",
+                "caption": "The pass drops an assignment when a later assignment to the same name exists. report() reads the global between the two stores.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "type Stmt =\n    | { kind: \"assign\"; name: string; value: number }\n    | { kind: \"call\"; name: string }\n    | { kind: \"return\"; name: string };\n\nlet total = 0;\nlet observed = 0;\n\nfunction report(): void {\n    observed = total;\n}\n\nfunction optimize(body: Stmt[]): Stmt[] {\n    return body.filter(function dropOverwritten(stmt, index) {\n        if (stmt.kind !== \"assign\") {\n            return true;\n        }\n        return !body.slice(index + 1).some(function laterStore(next) {\n            return next.kind === \"assign\" && next.name === stmt.name;\n        });\n    });\n}\n\nfunction execute(body: Stmt[]): number {\n    for (const stmt of body) {\n        if (stmt.kind === \"assign\") {\n            total = stmt.value;\n        } else if (stmt.kind === \"call\") {\n            report();\n        } else {\n            return observed;\n        }\n    }\n    return observed;\n}\n\nconst before: Stmt[] = [\n    { kind: \"assign\", name: \"total\", value: 1 },\n    { kind: \"call\", name: \"report\" },\n    { kind: \"assign\", name: \"total\", value: 2 },\n    { kind: \"return\", name: \"observed\" },\n];\n\nexecute(before);\nexecute(optimize(before));\n"
+            },
+            "findings": [
+                {
+                    "id": "dead-store-global",
+                    "label": "The pass removes total = 1 even though report() reads the global before the next store.",
+                    "correct": true
+                },
+                {
+                    "id": "call-barrier",
+                    "label": "A call whose body is not visible must be treated as a possible read of every global.",
+                    "correct": true
+                },
+                {
+                    "id": "behavior-change",
+                    "label": "The optimized body returns 0 where the original returns 1, so observable behavior changed.",
+                    "correct": true
+                },
+                {
+                    "id": "type-error",
+                    "label": "The type checker rejects execute because the loop can finish without returning a number.",
+                    "correct": false
+                },
+                {
+                    "id": "final-store",
+                    "label": "The pass is safe because the last store to total determines the final value.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until calls are treated as barriers for global reads."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; dead-store elimination is always safe for globals."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the naming of the pass needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The pass proves only that a later assignment exists, not that the earlier value is unread. report() reads total between the two stores, so removing total = 1 changes execute from 1 to 0. Treat calls with unknown bodies and volatile accesses as barriers, or restrict the pass to local values with no intervening reads."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Systems and architecture workspace is keyboard accessible. Checks verify source structure; they do not compile or run Systems and architecture.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
