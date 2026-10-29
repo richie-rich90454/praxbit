@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Program.cs": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\nclass Program\n{\n    static List<int> Positives(IEnumerable<int> values)\n    {\n        return values.Where(value => value > 0).ToList();\n    }\n\n    static void Main()\n    {\n        Console.WriteLine(string.Join(\",\", Positives(new[] { 3, -1, 2 })));\n    }\n}\n"
+            }
+        }
+    }
+}
