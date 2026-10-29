@@ -1,0 +1,256 @@
+{
+    "id": "solidjs.signals",
+    "version": 1,
+    "sequence": 76,
+    "courseId": "solidjs",
+    "title": "Signals, memos, and guarded routes",
+    "summary": "Build a shared cart store with signals, a memoized total, and a route guard.",
+    "skills": ["solid.signals", "solid.control-flow", "web.routing"],
+    "prerequisites": ["solid.components", "concept.conditions"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "signals",
+        "briefing": "The cart recalculates its total in a plain function and never blocks checkout when it is empty. Build a shared signal store, memoize the total, and guard the route."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "hints": [
+        "Create the signal with createSignal and read it by calling items().",
+        "Wrap the store factory in createRoot so its memo has an owner.",
+        "Derive the total with createMemo instead of a plain function.",
+        "In the route guard, throw redirect(\"/catalog\") when the cart is empty."
+    ],
+    "misconceptions": [
+        {
+            "id": "plain-function",
+            "description": "Deriving state in a plain function instead of a memo.",
+            "stepId": "apply",
+            "feedback": "A plain function recomputes on every call and has no reactive owner. createMemo caches the value and tracks its dependencies."
+        },
+        {
+            "id": "map-list",
+            "description": "Rendering reactive lists with map.",
+            "stepId": "apply",
+            "feedback": "Use <For each={items()}> so Solid reconciles rows by identity and tracks the source."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Signals are the source of truth",
+                "body": "createSignal returns a getter and a setter. Components read the getter inside JSX, and Solid subscribes only those expressions to changes."
+            },
+            {
+                "title": "Memos derive values",
+                "body": "createMemo caches a computation and recomputes it when a dependency changes. A plain function has no owner and no cache, so it cannot act as derived state."
+            },
+            {
+                "title": "Lists and branches use control flow",
+                "body": "Render reactive lists with <For each={items()}> and conditionals with <Show>. Map rebuilds rows on every change, while For reconciles them by item identity."
+            },
+            {
+                "title": "Guards run before the route",
+                "body": "A router beforeLoad guard can throw redirect to send the user elsewhere before the destination renders."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Signal",
+                "definition": "A reactive value with a getter and a setter."
+            },
+            {
+                "term": "Memo",
+                "definition": "A cached computation that tracks its reactive dependencies."
+            },
+            {
+                "term": "For",
+                "definition": "A Solid control-flow component that renders a list by item identity."
+            },
+            {
+                "term": "Route guard",
+                "definition": "Code that runs before navigation and can allow, redirect, or cancel it."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Solid signals and control flow",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Signals are the source of truth",
+                    "body": "createSignal returns a getter and a setter. Components read the getter inside JSX, and Solid subscribes only those expressions to changes."
+                },
+                {
+                    "title": "Memos derive values",
+                    "body": "createMemo caches a computation and recomputes it when a dependency changes. A plain function has no owner and no cache, so it cannot act as derived state."
+                },
+                {
+                    "title": "Lists and branches use control flow",
+                    "body": "Render reactive lists with <For each={items()}> and conditionals with <Show>. Map rebuilds rows on every change, while For reconciles them by item identity."
+                },
+                {
+                    "title": "Guards run before the route",
+                    "body": "A router beforeLoad guard can throw redirect to send the user elsewhere before the destination renders."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Signal",
+                    "definition": "A reactive value with a getter and a setter."
+                },
+                {
+                    "term": "Memo",
+                    "definition": "A cached computation that tracks its reactive dependencies."
+                },
+                {
+                    "term": "For",
+                    "definition": "A Solid control-flow component that renders a list by item identity."
+                },
+                {
+                    "term": "Route guard",
+                    "definition": "Code that runs before navigation and can allow, redirect, or cancel it."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Build the shared cart store",
+            "prompt": "Edit cart.ts. Create the shared store with createSignal, derive the total with createMemo, update items immutably, and redirect empty carts to the catalog.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "cart.ts",
+                    "content": "import { createSignal } from \"solid-js\";\nimport { redirect } from \"@solidjs/router\";\n\nexport type CartItem = {\n  id: string;\n  name: string;\n  price: number;\n  quantity: number;\n};\n\nconst [items, setItems] = createSignal<CartItem[]>([]);\n\nexport function cartTotal() {\n  // TODO: derive the total with createMemo instead of recalculating it\n  return items().reduce(function sum(value, item) {\n    return value + item.price * item.quantity;\n  }, 0);\n}\n\nexport function addItem(item: CartItem) {\n  // TODO: update the shared signal with the new item\n  return item;\n}\n\nexport function requireCart() {\n  // TODO: redirect to the catalog when the cart is empty\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "cart.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The store uses a shared signal and a memoized total.",
+                    "file": "cart.ts",
+                    "includes": [
+                        "const [items, setItems] = createSignal<CartItem[]>([])",
+                        "createMemo(",
+                        "createRoot("
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Adding an item updates the signal immutably.",
+                    "file": "cart.ts",
+                    "includes": ["setItems(", "return [...current, item]"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The route guard redirects an empty cart to the catalog.",
+                    "file": "cart.ts",
+                    "includes": ["export function requireCart()", "throw redirect(\"/catalog\")"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "cart.ts",
+                    "includes": ["const [items, setItems] = createSignal<CartItem[]>([])"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the product list",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "ProductList.tsx",
+                "caption": "The component destructures props and renders rows with map instead of For.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { createSignal } from \"solid-js\";\n\ntype Product = {\n  id: string;\n  name: string;\n  price: number;\n};\n\nexport function ProductList(props: { products: Product[] }) {\n  const { products } = props;\n  const [query, setQuery] = createSignal(\"\");\n\n  return (\n    <section>\n      <input\n        value={query()}\n        onInput={(event) => setQuery(event.currentTarget.value)}\n      />\n      <ul>\n        {products\n          .filter((product) => product.name.includes(query()))\n          .map((product) => (\n            <li>{product.name}</li>\n          ))}\n      </ul>\n    </section>\n  );\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "destructure-props",
+                    "label": "Destructuring props captures the current products array instead of reading the live prop.",
+                    "correct": true
+                },
+                {
+                    "id": "map-list",
+                    "label": "The list renders with map instead of For, so rows are rebuilt rather than reconciled by item identity.",
+                    "correct": true
+                },
+                {
+                    "id": "for",
+                    "label": "The list already uses For to reconcile rows by identity.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until props are read live and the list uses For."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; map renders the same rows."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the input markup needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Destructuring props snapshots the initial array, so later parent updates never reach this component. Rendering with map instead of <For each={props.products}> rebuilds every row instead of reconciling by item identity."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The SolidJS workspace is keyboard accessible. Checks verify source structure; they do not compile or run SolidJS.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
