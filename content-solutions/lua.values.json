@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.lua": "local function count_positive(values)\n  local count = 0\n  for _, value in ipairs(values) do\n    if value > 0 then\n      count = count + 1\n    end\n  end\n  return count\nend\n\nprint(count_positive({ 3, -1, 2 }))\n"
+            }
+        }
+    }
+}
