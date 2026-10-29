@@ -603,7 +603,7 @@ export function MissionScreen(): JSX.Element {
                     <div class="surface stack">
                         <div class="grid grid--two">
                             <div class="stack stack--tight">
-                                <h3>Result</h3>
+                                <h2>Result</h2>
                                 <p class="small">
                                     {completion()?.outcome.independent === true
                                         ? "Independent success"
