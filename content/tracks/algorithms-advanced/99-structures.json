@@ -1,0 +1,275 @@
+{
+    "id": "algorithms-advanced.structures",
+    "version": 1,
+    "sequence": 99,
+    "courseId": "algorithms-advanced",
+    "title": "Queues and linked structures",
+    "summary": "Implement a bounded ring buffer with constant-time enqueue and dequeue, and reason about linked pointers and iterator invalidation.",
+    "skills": ["algorithms.arrays", "algorithms.complexity"],
+    "prerequisites": ["algorithms.arrays", "concept.data"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "structures",
+        "briefing": "The render farm feeds frames to workers through a fixed-capacity queue. The current queue calls Array.shift on every dequeue, which copies every remaining frame, and enqueue uses push, so the array grows past its capacity. Replace the representation with a ring buffer that wraps its indexes, tracks its own count, and rejects overflow."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:algorithms"],
+    "hints": [
+        "Compute the tail as (head + count) % capacity before writing.",
+        "Reject enqueue when count equals capacity; do not grow the array.",
+        "Read the head slot, clear it, then advance head with modulo.",
+        "Return the stored count from the getter so size stays O(1)."
+    ],
+    "misconceptions": [
+        {
+            "id": "shift-constant",
+            "description": "Treating Array.shift as O(1).",
+            "stepId": "apply",
+            "feedback": "shift copies every remaining element down one index. A ring buffer moves an index instead."
+        },
+        {
+            "id": "wrap-tail",
+            "description": "Writing at head + count without wrapping.",
+            "stepId": "apply",
+            "feedback": "Once the tail passes the last slot it must wrap to the front. Use modulo capacity."
+        },
+        {
+            "id": "iterator-mutation",
+            "description": "Removing nodes while an iterator holds a pointer into the list.",
+            "stepId": "check",
+            "feedback": "The iterator's next pointer can skip or revisit nodes. Snapshot the values or invalidate the iterator on mutation."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A ring buffer reuses fixed slots",
+                "body": "A circular queue keeps an array of capacity slots, a head index, and a count. The tail is (head + count) % capacity, so enqueue writes one slot and dequeue reads one slot. Both operations update two integers and never move the remaining values."
+            },
+            {
+                "title": "A linked list moves pointers, not elements",
+                "body": "A singly linked list stores a value and a next reference per node. With a head and a tail pointer, appending at the tail and removing at the head are O(1). Finding or removing an arbitrary node still requires a walk, so the cost depends on which operation the structure promises."
+            },
+            {
+                "title": "Pointer discipline prevents lost nodes",
+                "body": "Before reassigning a next pointer, keep the node you still need. A missing null check can dereference the end of the list, and a stale tail pointer can turn an O(1) append into a full walk. A sentinel node removes the empty-list special case."
+            },
+            {
+                "title": "Mutation invalidates iterators",
+                "body": "An iterator stores a node reference or an index. If the queue changes during traversal, that position can skip an element, repeat one, or point at a removed node. Snapshot the values or make the iterator fail when the structure changes."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Ring buffer",
+                "definition": "A fixed-size array used as a queue by wrapping its head and tail indexes."
+            },
+            {
+                "term": "Head",
+                "definition": "The index of the oldest element and the next one to dequeue."
+            },
+            {
+                "term": "Tail",
+                "definition": "The index where the next element is written, computed from head and count."
+            },
+            {
+                "term": "Sentinel",
+                "definition": "A dummy node that removes special cases at the start or end of a linked list."
+            },
+            {
+                "term": "Iterator invalidation",
+                "definition": "The failure of an iterator that points into a structure that changed after the iterator was created."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Queues, pointers, and stable costs",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A ring buffer reuses fixed slots",
+                    "body": "A circular queue keeps an array of capacity slots, a head index, and a count. The tail is (head + count) % capacity, so enqueue writes one slot and dequeue reads one slot. Both operations update two integers and never move the remaining values."
+                },
+                {
+                    "title": "A linked list moves pointers, not elements",
+                    "body": "A singly linked list stores a value and a next reference per node. With a head and a tail pointer, appending at the tail and removing at the head are O(1). Finding or removing an arbitrary node still requires a walk, so the cost depends on which operation the structure promises."
+                },
+                {
+                    "title": "Pointer discipline prevents lost nodes",
+                    "body": "Before reassigning a next pointer, keep the node you still need. A missing null check can dereference the end of the list, and a stale tail pointer can turn an O(1) append into a full walk. A sentinel node removes the empty-list special case."
+                },
+                {
+                    "title": "Mutation invalidates iterators",
+                    "body": "An iterator stores a node reference or an index. If the queue changes during traversal, that position can skip an element, repeat one, or point at a removed node. Snapshot the values or make the iterator fail when the structure changes."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Ring buffer",
+                    "definition": "A fixed-size array used as a queue by wrapping its head and tail indexes."
+                },
+                {
+                    "term": "Head",
+                    "definition": "The index of the oldest element and the next one to dequeue."
+                },
+                {
+                    "term": "Tail",
+                    "definition": "The index where the next element is written, computed from head and count."
+                },
+                {
+                    "term": "Sentinel",
+                    "definition": "A dummy node that removes special cases at the start or end of a linked list."
+                },
+                {
+                    "term": "Iterator invalidation",
+                    "definition": "The failure of an iterator that points into a structure that changed after the iterator was created."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Implement a bounded ring-buffer queue",
+            "prompt": "Edit structures.ts. Store values in a fixed array of slots. Enqueue at (head + count) % capacity and reject a full queue. Dequeue from head, clear the slot, and advance head with modulo. Keep size as the stored count.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "structures.ts",
+                    "content": "export class FrameQueue<T> {\n    private slots: Array<T | undefined>;\n    private head = 0;\n    private count = 0;\n\n    constructor(private capacity: number) {\n        this.slots = new Array<T | undefined>(capacity);\n    }\n\n    enqueue(value: T): void {\n        // TODO: write at the tail index and grow the count, wrapping with modulo\n        this.slots.push(value);\n        this.count += 1;\n    }\n\n    dequeue(): T | undefined {\n        const value = this.slots.shift();\n        this.count -= 1;\n        return value;\n    }\n\n    get size(): number {\n        return this.count;\n    }\n}\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "structures.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The queue keeps its generic shape and validates the capacity.",
+                    "file": "structures.ts",
+                    "includes": [
+                        "export class FrameQueue<T> {",
+                        "if (!Number.isInteger(capacity) || capacity <= 0) {",
+                        "this.slots = new Array<T | undefined>(capacity);"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Enqueue writes at the wrapped tail and increments the count.",
+                    "file": "structures.ts",
+                    "includes": [
+                        "if (this.count === this.capacity) {",
+                        "const tail = (this.head + this.count) % this.capacity;",
+                        "this.slots[tail] = value;",
+                        "this.count += 1;"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Dequeue reads the head, clears the slot, and advances with modulo.",
+                    "file": "structures.ts",
+                    "includes": [
+                        "const value = this.slots[this.head];",
+                        "this.slots[this.head] = undefined;",
+                        "this.head = (this.head + 1) % this.capacity;",
+                        "this.count -= 1;"
+                    ],
+                    "excludes": [".shift()"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Size returns the stored count instead of scanning the slots.",
+                    "file": "structures.ts",
+                    "includes": ["get size(): number {", "return this.count;"],
+                    "excludes": ["this.slots.length"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "structures.ts",
+                    "includes": ["export class FrameQueue<T> {"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Queue invariants and pointer costs",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "wrap",
+                    "label": "A ring buffer advances its head with modulo instead of shifting every remaining element.",
+                    "correct": true
+                },
+                {
+                    "id": "shift",
+                    "label": "Array.shift removes the first element in constant time.",
+                    "correct": false
+                },
+                {
+                    "id": "tail",
+                    "label": "A singly linked list with a maintained tail pointer can append in O(1).",
+                    "correct": true
+                },
+                {
+                    "id": "mutate",
+                    "label": "An iterator over a linked list stays valid after the node it points at is removed.",
+                    "correct": false
+                },
+                {
+                    "id": "count",
+                    "label": "A ring buffer needs a stored count because the backing array length stays at capacity.",
+                    "correct": true
+                }
+            ],
+            "explanation": "The ring buffer makes dequeue constant time by moving an index and clearing the vacated slot. A linked list can match that cost when it keeps both ends, but arbitrary access and deletion require a walk. Mutation invalidates iterators because their stored position no longer describes the same element."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Advanced algorithms workspace is keyboard accessible. Checks verify source structure; they do not compile or run Advanced algorithms.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems"]
+}
