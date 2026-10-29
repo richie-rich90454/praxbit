@@ -52,10 +52,6 @@ test.describe("accessibility", function accessibilitySuite(): void {
     }: {
         page: Page;
     }): Promise<void> {
-        test.skip(
-            test.info().project.name !== "desktop",
-            "Keyboard focus is verified in the desktop project.",
-        );
         await page.goto("/learn");
         await page.keyboard.press("Tab");
         await expect(page.getByRole("link", { name: "Skip to main content" })).toBeFocused();
