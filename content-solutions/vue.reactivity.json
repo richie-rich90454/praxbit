@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "useCart.ts": "import { computed, ref } from \"vue\";\nimport type { Router } from \"vue-router\";\n\nexport type CartItem = {\n  id: string;\n  name: string;\n  price: number;\n  quantity: number;\n};\n\nconst items = ref<CartItem[]>([]);\n\nexport function useCart() {\n  const total = computed(function sum() {\n    return items.value.reduce(function addToTotal(value, item) {\n      return value + item.price * item.quantity;\n    }, 0);\n  });\n\n  function add(item: Omit<CartItem, \"quantity\">) {\n    const existing = items.value.find(function byId(entry) {\n      return entry.id === item.id;\n    });\n\n    if (existing !== undefined) {\n      existing.quantity += 1;\n      return;\n    }\n\n    items.value.push({ ...item, quantity: 1 });\n  }\n\n  return { items, total, add };\n}\n\nexport function installCartGuard(router: Router) {\n  router.beforeEach(function guard(to) {\n    if (to.meta.requiresCart === true && items.value.length === 0) {\n      return { name: \"catalog\" };\n    }\n    return true;\n  });\n}\n"
+            }
+        }
+    }
+}
