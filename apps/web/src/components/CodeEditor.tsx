@@ -114,6 +114,10 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
                 ]),
                 runKeymap,
                 EditorView.lineWrapping,
+                EditorView.contentAttributes.of({
+                    "aria-label": props.label,
+                    "aria-multiline": "true",
+                }),
                 EditorState.readOnly.of(props.readOnly === true),
                 languageExtension(props.language),
                 editorTheme,
@@ -125,6 +129,8 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
             ],
         });
         view = new EditorView({ state, parent: container });
+        // Keep the scroll container keyboard-reachable; the content stays the primary tab stop.
+        view.scrollDOM.setAttribute("tabindex", "0");
     });
 
     createEffect(function syncValue(): void {
