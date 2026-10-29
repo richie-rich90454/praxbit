@@ -1,0 +1,226 @@
+{
+    "id": "express.routing",
+    "version": 1,
+    "sequence": 81,
+    "courseId": "express",
+    "title": "Routes and params in Express",
+    "summary": "Register a parameterized route and return JSON for both found and missing products.",
+    "skills": ["express.routing"],
+    "prerequisites": ["node.hono", "http.basics"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "routing",
+        "briefing": "The campus catalog exposes a small product API. The new detail route must return one product by id, and a missing id must produce a clear 404 instead of an empty success."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:express"],
+    "hints": [
+        "Declare the detail route with /products/:id.",
+        "Use products.find and compare item.id with request.params.id.",
+        "When find returns undefined, answer with status 404 and a JSON error.",
+        "Return the product with response.json(product)."
+    ],
+    "misconceptions": [
+        {
+            "id": "return-value",
+            "description": "Returning a product instead of sending it.",
+            "stepId": "apply",
+            "feedback": "Express does not serialize a returned value. Call response.json and let the handler finish."
+        },
+        {
+            "id": "route-order",
+            "description": "Registering a broad route before a specific one.",
+            "stepId": "apply",
+            "feedback": "The first matching route wins. Put the specific path first or make the broad handler account for the detail path."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Routes match in order",
+                "body": "Express checks registered routes in sequence. A broad route such as /products can shadow a narrower one if it is registered first, so the specific path should be declared deliberately."
+            },
+            {
+                "title": "Params are request data",
+                "body": "A colon marks a route parameter. After a match, the value is available on request.params under the same name."
+            },
+            {
+                "title": "JSON is a response contract",
+                "body": "response.json serializes the value and sets the content type. Pair a missing resource with 404 so the client can distinguish absence from an empty result."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Route",
+                "definition": "A method and path pattern that Express matches against a request."
+            },
+            {
+                "term": "Route parameter",
+                "definition": "A named segment in the path, read from request.params."
+            },
+            {
+                "term": "Handler",
+                "definition": "The function that receives the request and writes the response."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Express routes and responses",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Routes match in order",
+                    "body": "Express checks registered routes in sequence. A broad route such as /products can shadow a narrower one if it is registered first, so the specific path should be declared deliberately."
+                },
+                {
+                    "title": "Params are request data",
+                    "body": "A colon marks a route parameter. After a match, the value is available on request.params under the same name."
+                },
+                {
+                    "title": "JSON is a response contract",
+                    "body": "response.json serializes the value and sets the content type. Pair a missing resource with 404 so the client can distinguish absence from an empty result."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Route",
+                    "definition": "A method and path pattern that Express matches against a request."
+                },
+                {
+                    "term": "Route parameter",
+                    "definition": "A named segment in the path, read from request.params."
+                },
+                {
+                    "term": "Handler",
+                    "definition": "The function that receives the request and writes the response."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Return one product by id",
+            "prompt": "Edit app.ts. Create the Express app, register GET /products/:id, return the matching product as JSON, and answer 404 when it is missing.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "app.ts",
+                    "content": "import express from \"express\";\n\ntype Product = { id: string; name: string; price: number };\nconst products: Product[] = [\n    { id: \"notebook\", name: \"Notebook\", price: 4.5 },\n    { id: \"pen\", name: \"Pen\", price: 1.25 },\n];\n\nexport const app = express();\n\n// TODO: register GET /products/:id and return the matching product\napp.get(\"/products\", function list(request, response) {\n    response.json(products);\n});\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "app.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The app is created and the parameterized route is registered.",
+                    "file": "app.ts",
+                    "includes": ["export const app = express();", "app.get(\"/products/:id\""],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The handler reads the id from route params and searches the catalog.",
+                    "file": "app.ts",
+                    "includes": ["request.params.id", "products.find"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A missing product answers 404 with a JSON error.",
+                    "file": "app.ts",
+                    "includes": ["response.status(404).json({ error: \"not_found\" })"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A found product is serialized as JSON.",
+                    "file": "app.ts",
+                    "includes": ["response.json(product)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "app.ts",
+                    "includes": ["export const app = express();"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Routing and responses",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "params",
+                    "label": "Route parameters are read from request.params after the route matches.",
+                    "correct": true
+                },
+                {
+                    "id": "json",
+                    "label": "response.json serializes the value and sets a JSON content type.",
+                    "correct": true
+                },
+                {
+                    "id": "order",
+                    "label": "Express matches routes in registration order, so a broader route can shadow a narrower one.",
+                    "correct": true
+                },
+                {
+                    "id": "return",
+                    "label": "Returning a value from a route handler sends that value to the client.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Express matches routes in the order they were registered and exposes path segments through request.params. The handler must write the response; a returned value is ignored."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Express workspace is keyboard accessible. Checks verify source structure; they do not compile or run Express.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
