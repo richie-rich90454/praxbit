@@ -1,0 +1,204 @@
+{
+    "id": "rust.values",
+    "version": 1,
+    "sequence": 59,
+    "courseId": "rust",
+    "title": "Values and borrowing in Rust",
+    "summary": "Use a borrowed slice, a loop, and a condition to count positive values.",
+    "skills": ["rust.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "values",
+        "briefing": "A robotics controller stores sensor changes in a vector. Count positive changes without taking ownership of the data."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:rust"],
+    "hints": [
+        "The loop yields a reference to each value.",
+        "Dereference the reference before comparing.",
+        "Use if *value > 0.",
+        "Increment count in the branch."
+    ],
+    "misconceptions": [
+        {
+            "id": "copy",
+            "description": "Assuming a slice parameter copies the data.",
+            "stepId": "apply",
+            "feedback": "A slice reference borrows the existing data. No copy occurs."
+        },
+        {
+            "id": "bounds",
+            "description": "Expecting indexing to return Option.",
+            "stepId": "apply",
+            "feedback": "Indexing panics on an invalid index. Use get for an Option."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Rust values and decisions",
+                "body": "Rust binds values with let: let count: i32 = 3;. A binding is immutable unless it is declared with let mut. String owns text, while &str borrows it. Option<T> models absence and Result<T, E> models failure. if and match select branches, and match must cover every case. A for loop borrows a collection by reference: for value in &values { ... }."
+            },
+            {
+                "title": "Rust source files",
+                "body": "Cargo compiles a crate and its dependencies. A binary crate starts at fn main, and cargo run builds and executes it."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Ownership",
+                "definition": "The rule that each value has a single responsible owner."
+            },
+            {
+                "term": "Borrowing",
+                "definition": "Temporarily using a value through a reference without taking ownership."
+            },
+            {
+                "term": "Pattern matching",
+                "definition": "Destructuring a value through match or let patterns."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Rust values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Rust values and decisions",
+                    "body": "Rust binds values with let: let count: i32 = 3;. A binding is immutable unless it is declared with let mut. String owns text, while &str borrows it. Option<T> models absence and Result<T, E> models failure. if and match select branches, and match must cover every case. A for loop borrows a collection by reference: for value in &values { ... }."
+                },
+                {
+                    "title": "Rust source files",
+                    "body": "Cargo compiles a crate and its dependencies. A binary crate starts at fn main, and cargo run builds and executes it."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Ownership",
+                    "definition": "The rule that each value has a single responsible owner."
+                },
+                {
+                    "term": "Borrowing",
+                    "definition": "Temporarily using a value through a reference without taking ownership."
+                },
+                {
+                    "term": "Pattern matching",
+                    "definition": "Destructuring a value through match or let patterns."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive sensor changes",
+            "prompt": "Edit src/main.rs. count_positive borrows a slice and returns the number of values greater than zero.",
+            "evidence": "construction",
+            "language": "rust",
+            "files": [
+                {
+                    "path": "src/main.rs",
+                    "content": "fn count_positive(values: &[i32]) -> usize {\n    let mut count = 0;\n    for value in values {\n        count += 0; // TODO: count positive values\n    }\n    count\n}\n\nfn main() {\n    println!(\"{}\", count_positive(&[3, -1, 2]));\n}\n",
+                    "editable": true,
+                    "language": "rust"
+                }
+            ],
+            "entry": "src/main.rs",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function borrows a slice and returns a count.",
+                    "file": "src/main.rs",
+                    "includes": ["fn count_positive(values: &[i32]) -> usize"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The loop counts only positive values.",
+                    "file": "src/main.rs",
+                    "includes": ["if *value > 0", "count += 1"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "src/main.rs",
+                    "includes": ["fn count_positive(values: &[i32]) -> usize"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "immutable",
+                    "label": "A let binding is immutable unless it is declared with mut.",
+                    "correct": true
+                },
+                {
+                    "id": "borrow",
+                    "label": "A shared reference prevents the owner from being dropped while it is alive.",
+                    "correct": true
+                },
+                {
+                    "id": "copy",
+                    "label": "Passing &[i32] copies the entire slice.",
+                    "correct": false
+                },
+                {
+                    "id": "panic",
+                    "label": "Indexing a slice out of bounds returns None.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Borrowing gives temporary access without transferring ownership. Out-of-bounds indexing panics; get returns an Option."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Rust workspace is keyboard accessible. Checks verify source structure; they do not compile or run Rust.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
