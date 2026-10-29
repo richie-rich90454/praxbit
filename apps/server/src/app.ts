@@ -113,10 +113,12 @@ export function createApplication(dependencies: ApplicationDependencies): Hono<A
             ".js": "text/javascript; charset=utf-8",
             ".json": "application/json; charset=utf-8",
             ".map": "application/json; charset=utf-8",
+            ".mjs": "text/javascript; charset=utf-8",
             ".png": "image/png",
             ".svg": "image/svg+xml",
             ".wasm": "application/wasm",
             ".webmanifest": "application/manifest+json; charset=utf-8",
+            ".woff": "font/woff",
             ".woff2": "font/woff2",
         };
 
@@ -168,8 +170,10 @@ export function createApplication(dependencies: ApplicationDependencies): Hono<A
                     "cache-control": requested.cache,
                 });
             }
+            const extension = extname(context.req.path).toLowerCase();
             const looksLikeAsset =
-                context.req.path.startsWith("/assets/") || /\.[a-z0-9]+$/i.test(context.req.path);
+                context.req.path.startsWith("/assets/") ||
+                (extension.length > 0 && contentTypes[extension] !== undefined);
             if (looksLikeAsset) {
                 return context.text("Not found", 404);
             }
