@@ -56,6 +56,7 @@ test.describe("real programming environments", function codeSuite(): void {
         await page.goto("/missions/campus.changes-nobody-can-find");
         await page.getByRole("button", { name: /start mission/i }).click();
         const input = page.locator("#git-command-restore-file");
+        const output = page.getByLabel("Git output");
         for (const command of [
             "git log --oneline",
             "git checkout HEAD~1 -- src/store.js",
@@ -64,6 +65,7 @@ test.describe("real programming environments", function codeSuite(): void {
             await input.fill(command);
             await expect(input).toHaveValue(command);
             await input.press("Enter");
+            await expect(output).toContainText(`$ ${command}`);
         }
         await page.getByRole("button", { name: /check repository/i }).click();
         await expect(page.getByText("That works")).toBeVisible();
