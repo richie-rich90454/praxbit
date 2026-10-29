@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "CMakeLists.txt": "cmake_minimum_required(VERSION 3.24)\nproject(campus_inventory LANGUAGES CXX)\n\nadd_executable(inventory src/main.cpp)\n\ntarget_compile_features(inventory PRIVATE cxx_std_20)\ntarget_include_directories(inventory PRIVATE include)\n"
+            }
+        }
+    }
+}
