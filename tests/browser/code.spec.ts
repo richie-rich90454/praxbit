@@ -1,9 +1,39 @@
 import { expect, test, type Page } from "@playwright/test";
 
+async function openFirstCodeStep(page: Page, missionId: string): Promise<void> {
+    await page.goto(`/missions/${missionId}`);
+    await page.getByRole("button", { name: /start mission/i }).click();
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+        if ((await page.locator(".cm-content").count()) > 0) {
+            return;
+        }
+        const next = page.getByRole("button", { name: /^continue$/i });
+        if ((await next.count()) === 0) {
+            break;
+        }
+        await next.click();
+    }
+    await expect(page.locator(".cm-content").first()).toBeVisible();
+}
+
 async function replaceEditor(page: Page, source: string): Promise<void> {
     const editor = page.locator(".cm-content").first();
     await editor.click();
     await editor.fill(source);
+}
+
+async function runUntilAllPassed(
+    page: Page,
+    source: string,
+    buttonName: RegExp = /run tests/i,
+): Promise<void> {
+    await replaceEditor(page, source);
+    await page.getByRole("button", { name: buttonName }).click();
+    await expect(page.getByRole("heading", { name: "Test results" })).toBeVisible({
+        timeout: 60_000,
+    });
+    await expect(page.locator("table").getByText("Fail")).toHaveCount(0);
+    await expect(page.getByText("That works")).toBeVisible();
 }
 
 test.describe("real programming environments", function codeSuite(): void {
@@ -22,6 +52,55 @@ test.describe("real programming environments", function codeSuite(): void {
         await expect(page.getByRole("heading", { name: "Test results" })).toBeVisible();
         await expect(page.locator("table").getByText("Fail")).toHaveCount(0);
         await expect(page.getByText("That works")).toBeVisible();
+    });
+
+    test("browser TypeScript transpiles and runs behavioral tests", async function typescriptMission({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await openFirstCodeStep(page, "typescript.generics");
+        await runUntilAllPassed(
+            page,
+            "function firstOrNull<T>(items: readonly T[]): T | null {\n    return items[0] ?? null;\n}\n",
+        );
+    });
+
+    test("Pyodide runs Python tests without a network fetch", async function pythonMission({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await openFirstCodeStep(page, "python.collections");
+        await runUntilAllPassed(
+            page,
+            'def summarize(orders):\n    count = 0\n    total = 0\n    for order in orders:\n        count += 1\n        total += order["total"]\n    return {"count": count, "total": total}\n',
+        );
+    });
+
+    test("SQLite evaluates a real SQL query", async function sqlMission({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await openFirstCodeStep(page, "sql.filter-orders");
+        await runUntilAllPassed(
+            page,
+            "SELECT id, total_cents FROM orders WHERE total_cents >= 5000 ORDER BY total_cents DESC;\n",
+        );
+    });
+
+    test("static analysis checks a language without a browser runtime", async function staticMission({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await openFirstCodeStep(page, "java.values");
+        await runUntilAllPassed(
+            page,
+            "public class Main {\n    static int countPositive(int[] values) {\n        int count = 0;\n        for (int value : values) {\n            if (value > 0) {\n                count += 1;\n            }\n        }\n        return count;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(countPositive(new int[] { 3, -1, 2 }));\n    }\n}\n",
+            /run checks/i,
+        );
     });
 
     test("the deterministic terminal recovers a failed service", async function terminalMission({
