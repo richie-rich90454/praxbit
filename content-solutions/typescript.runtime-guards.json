@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "format.ts": "function parseCount(value: unknown): number | null {\n    if (typeof value !== \"number\") {\n        return null;\n    }\n    if (!Number.isInteger(value) || value < 0) {\n        return null;\n    }\n    return value;\n}\n"
+            }
+        }
+    }
+}
