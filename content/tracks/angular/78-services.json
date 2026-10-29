@@ -1,0 +1,271 @@
+{
+    "id": "angular.services",
+    "version": 1,
+    "sequence": 78,
+    "courseId": "angular",
+    "title": "Services, HTTP, and route guards",
+    "summary": "Move the cart request into a root-provided service and keep failures visible to the caller.",
+    "skills": ["angular.services", "angular.routing", "web.build-tooling"],
+    "prerequisites": ["angular.components", "web.routing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "services",
+        "briefing": "The cart summary renders an empty list on every failure, so the page cannot tell a full cart from a broken request. Move the HTTP boundary into an injected service, let the error propagate, and keep manual subscriptions out of the component."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
+    "hints": [
+        "Change @Injectable() to @Injectable({ providedIn: \"root\" }).",
+        "Add a constructor parameter typed HttpClient and mark it private readonly.",
+        "Return this.http.get<CartLine[]>(\"/api/cart\") from load.",
+        "Delete the of([]) fallback so a failed request stays visible to the caller."
+    ],
+    "misconceptions": [
+        {
+            "id": "swallow-error",
+            "description": "Returning an empty array when the request fails.",
+            "stepId": "apply",
+            "feedback": "An empty array is a valid cart, so the caller can no longer tell success from failure. Let the error reach the caller and render an error state."
+        },
+        {
+            "id": "new-service",
+            "description": "Constructing the service with new instead of injecting it.",
+            "stepId": "apply",
+            "feedback": "The service needs HttpClient and application scope. Inject it through the constructor or inject()."
+        },
+        {
+            "id": "subscribe-service",
+            "description": "Subscribing to the observable inside the service.",
+            "stepId": "review",
+            "feedback": "A service that subscribes takes ownership of the request and the cleanup. Return the observable and let the consumer decide when to subscribe."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Root-provided services share one instance",
+                "body": "An @Injectable({ providedIn: \"root\" }) service is created once for the application injector. Any component or guard that asks for it receives the same instance, so cart state and HTTP access stay in one place."
+            },
+            {
+                "title": "Constructor injection names the dependency",
+                "body": "The constructor declares what the service needs. Angular reads the parameter types and supplies HttpClient, which the application provides through provideHttpClient(). Calling new CartService() would skip that wiring."
+            },
+            {
+                "title": "HTTP observables are cold and failures are values",
+                "body": "HttpClient methods return observables that start the request when subscribed. Return the observable unchanged so the caller can render an error state; catching the error and returning an empty array hides a broken request."
+            },
+            {
+                "title": "Guards run before the route activates",
+                "body": "A functional guard uses inject(CartService) and returns true, false, or a UrlTree that redirects. It runs before the routed component is created, so it can block a cart page for a visitor without a session."
+            },
+            {
+                "title": "The production build is its own target",
+                "body": "ng build compiles ahead of time, checks template types, applies bundle budgets, and writes hashed files. A budget or template error fails the build; fixing it is part of the work, not a reason to ship the development bundle."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Injectable",
+                "definition": "A decorator that marks a class as available to Angular's dependency injector."
+            },
+            {
+                "term": "Constructor injection",
+                "definition": "Declaring dependencies as constructor parameters so the injector supplies them."
+            },
+            {
+                "term": "Functional guard",
+                "definition": "A route guard written as a function that can inject services and return a decision."
+            },
+            {
+                "term": "Ahead-of-time compilation",
+                "definition": "Compiling templates during the build so template errors surface before the browser runs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Services, HTTP, guards, and builds",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Root-provided services share one instance",
+                    "body": "An @Injectable({ providedIn: \"root\" }) service is created once for the application injector. Any component or guard that asks for it receives the same instance, so cart state and HTTP access stay in one place."
+                },
+                {
+                    "title": "Constructor injection names the dependency",
+                    "body": "The constructor declares what the service needs. Angular reads the parameter types and supplies HttpClient, which the application provides through provideHttpClient(). Calling new CartService() would skip that wiring."
+                },
+                {
+                    "title": "HTTP observables are cold and failures are values",
+                    "body": "HttpClient methods return observables that start the request when subscribed. Return the observable unchanged so the caller can render an error state; catching the error and returning an empty array hides a broken request."
+                },
+                {
+                    "title": "Guards run before the route activates",
+                    "body": "A functional guard uses inject(CartService) and returns true, false, or a UrlTree that redirects. It runs before the routed component is created, so it can block a cart page for a visitor without a session."
+                },
+                {
+                    "title": "The production build is its own target",
+                    "body": "ng build compiles ahead of time, checks template types, applies bundle budgets, and writes hashed files. A budget or template error fails the build; fixing it is part of the work, not a reason to ship the development bundle."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Injectable",
+                    "definition": "A decorator that marks a class as available to Angular's dependency injector."
+                },
+                {
+                    "term": "Constructor injection",
+                    "definition": "Declaring dependencies as constructor parameters so the injector supplies them."
+                },
+                {
+                    "term": "Functional guard",
+                    "definition": "A route guard written as a function that can inject services and return a decision."
+                },
+                {
+                    "term": "Ahead-of-time compilation",
+                    "definition": "Compiling templates during the build so template errors surface before the browser runs."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Expose the cart through an injectable service",
+            "prompt": "Edit cart.service.ts. Make the service application-wide, receive HttpClient through its constructor, and return a typed cart request that lets failures reach the caller.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "cart.service.ts",
+                    "content": "import { Injectable } from \"@angular/core\";\nimport { HttpClient } from \"@angular/common/http\";\nimport { Observable, of } from \"rxjs\";\n\nexport interface CartLine {\n    sku: string;\n    quantity: number;\n}\n\n@Injectable()\nexport class CartService {\n    // TODO: inject HttpClient and return the typed cart request\n    load(): Observable<CartLine[]> {\n        return of([]);\n    }\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "cart.service.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The service is provided once at the application root.",
+                    "file": "cart.service.ts",
+                    "includes": ["@Injectable({ providedIn: \"root\" })"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "HttpClient arrives through constructor injection.",
+                    "file": "cart.service.ts",
+                    "includes": ["constructor(private readonly http: HttpClient) {}"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The request is typed and returned without a silent fallback.",
+                    "file": "cart.service.ts",
+                    "includes": ["return this.http.get<CartLine[]>(\"/api/cart\")"],
+                    "excludes": ["of([])", "catchError", "TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "cart.service.ts",
+                    "includes": ["@Injectable({ providedIn: \"root\" })"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the cart subscription",
+            "prompt": "Review cart-summary.component.ts and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "cart-summary.component.ts",
+                "caption": "The summary subscribes by hand, hides request failures, and uses NgFor without importing it.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { Component, OnInit } from \"@angular/core\";\nimport { CartLine, CartService } from \"./cart.service\";\n\n@Component({\n    selector: \"app-cart-summary\",\n    standalone: true,\n    template: `\n        <ul>\n            <li *ngFor=\"let line of lines\">{{ line.sku }} x {{ line.quantity }}</li>\n        </ul>\n    `,\n})\nexport class CartSummaryComponent implements OnInit {\n    lines: CartLine[] = [];\n\n    constructor(private cart: CartService) {}\n\n    ngOnInit(): void {\n        this.cart.load().subscribe({\n            next: (lines) => {\n                this.lines = lines;\n            },\n            error: () => {\n                this.lines = [];\n            },\n        });\n    }\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "leak",
+                    "label": "The subscription in ngOnInit is never unsubscribed.",
+                    "correct": true
+                },
+                {
+                    "id": "silent-error",
+                    "label": "The error handler replaces a failed request with an empty cart.",
+                    "correct": true
+                },
+                {
+                    "id": "ngfor-import",
+                    "label": "The standalone component uses *ngFor without importing CommonModule or NgFor.",
+                    "correct": true
+                },
+                {
+                    "id": "root-provided",
+                    "label": "The component must list CartService in providers because the service is root-provided.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the subscription, error state, and template import are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the cart summary is short-lived."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming and formatting remain."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The manual subscription keeps running after the component is destroyed, and the error callback makes a failed request look like an empty cart. The standalone template also cannot resolve *ngFor without importing CommonModule or NgFor. Return the observable to the template or unsubscribe in ngOnDestroy, and surface the failure."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Angular workspace is keyboard accessible. Checks verify source structure; they do not compile or run Angular.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
