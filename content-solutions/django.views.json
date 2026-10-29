@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "views.py": "from django.http import JsonResponse\nfrom django.shortcuts import get_object_or_404\nfrom django.urls import path\n\nfrom .models import Item\n\n\ndef item_payload(item):\n    return {\n        \"id\": item.id,\n        \"name\": item.name,\n        \"price\": str(item.price),\n        \"category\": item.category.name,\n    }\n\n\ndef item_list(request):\n    items = Item.objects.select_related(\"category\").all()\n    return JsonResponse({\"items\": [item_payload(item) for item in items]})\n\n\ndef item_detail(request, item_id):\n    item = get_object_or_404(Item.objects.select_related(\"category\"), pk=item_id)\n    return JsonResponse(item_payload(item))\n\n\nurlpatterns = [\n    path(\"items/\", item_list, name=\"item-list\"),\n    path(\"items/<int:item_id>/\", item_detail, name=\"item-detail\"),\n]\n"
+            }
+        }
+    }
+}
