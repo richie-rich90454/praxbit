@@ -1,0 +1,251 @@
+{
+    "id": "csharp.linq",
+    "version": 1,
+    "sequence": 56,
+    "courseId": "csharp",
+    "title": "LINQ and async boundaries",
+    "summary": "Compose a LINQ query, then diagnose an async void handler that cannot be awaited.",
+    "skills": ["csharp.linq", "csharp.async", "csharp.dotnet"],
+    "prerequisites": ["csharp.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "linq",
+        "briefing": "A dashboard filters positive stock changes and calls a service asynchronously. Keep the query typed and the async boundary observable."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:csharp"],
+    "hints": [
+        "Start from the values sequence.",
+        "Use Where with a predicate.",
+        "Materialize with ToList so the return type is a List<int>.",
+        "Return values.Where(value => value > 0).ToList()."
+    ],
+    "misconceptions": [
+        {
+            "id": "deferred",
+            "description": "Returning a deferred query as a list.",
+            "stepId": "apply",
+            "feedback": "A deferred query may read data later. Materialize it with ToList when the method promises a list."
+        },
+        {
+            "id": "asyncvoid",
+            "description": "Using async void for ordinary methods.",
+            "stepId": "apply",
+            "feedback": "async void hides completion and exceptions. Use async Task so callers can await it."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "C# functions and collections",
+                "body": "Methods declare parameter and return types: static int Add(int left, int right) => left + right;. List<int> values = new() { 3, -1, 2 }; grows dynamically, and LINQ composes queries over it."
+            },
+            {
+                "title": "C# errors and tools",
+                "body": "Exceptions signal failures. int.TryParse avoids an exception when invalid text is expected. The dotnet CLI builds and tests, NuGet restores packages, and xUnit or NUnit runs the test suite."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "LINQ",
+                "definition": "A set of query operators over sequences."
+            },
+            {
+                "term": "Deferred execution",
+                "definition": "A query that runs when its results are enumerated, not when it is declared."
+            },
+            {
+                "term": "Dependency injection",
+                "definition": "Supplying a class's dependencies from outside instead of constructing them inside."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "C# functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "C# functions and collections",
+                    "body": "Methods declare parameter and return types: static int Add(int left, int right) => left + right;. List<int> values = new() { 3, -1, 2 }; grows dynamically, and LINQ composes queries over it."
+                },
+                {
+                    "title": "C# errors and tools",
+                    "body": "Exceptions signal failures. int.TryParse avoids an exception when invalid text is expected. The dotnet CLI builds and tests, NuGet restores packages, and xUnit or NUnit runs the test suite."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "LINQ",
+                    "definition": "A set of query operators over sequences."
+                },
+                {
+                    "term": "Deferred execution",
+                    "definition": "A query that runs when its results are enumerated, not when it is declared."
+                },
+                {
+                    "term": "Dependency injection",
+                    "definition": "Supplying a class's dependencies from outside instead of constructing them inside."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Filter positives with LINQ",
+            "prompt": "Edit Program.cs. Positives returns a List<int> containing only values greater than zero, using LINQ.",
+            "evidence": "construction",
+            "language": "csharp",
+            "files": [
+                {
+                    "path": "Program.cs",
+                    "content": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\nclass Program\n{\n    static List<int> Positives(IEnumerable<int> values)\n    {\n        // TODO: filter with LINQ\n        return new List<int>();\n    }\n\n    static void Main()\n    {\n        Console.WriteLine(string.Join(\",\", Positives(new[] { 3, -1, 2 })));\n    }\n}\n",
+                    "editable": true,
+                    "language": "csharp"
+                }
+            ],
+            "entry": "Program.cs",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The method keeps the sequence-to-list signature.",
+                    "file": "Program.cs",
+                    "includes": ["static List<int> Positives(IEnumerable<int> values)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The query filters positives and materializes the result.",
+                    "file": "Program.cs",
+                    "includes": [".Where(value => value > 0)", ".ToList()"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Program.cs",
+                    "includes": ["static List<int> Positives(IEnumerable<int> values)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The unobservable handler",
+            "prompt": "This event handler is async void, so failures cannot be awaited. Select the faulty declaration and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "signature",
+                    "label": "private async void LoadTotal()"
+                },
+                {
+                    "id": "body",
+                    "label": "{"
+                },
+                {
+                    "id": "call",
+                    "label": "    int total = await service.GetTotalAsync();"
+                },
+                {
+                    "id": "use",
+                    "label": "    Console.WriteLine(total);"
+                }
+            ],
+            "buggyId": "signature",
+            "fixes": [
+                {
+                    "id": "task",
+                    "label": "Change the return type to async Task."
+                },
+                {
+                    "id": "sync",
+                    "label": "Remove async and block with .Result."
+                },
+                {
+                    "id": "ignore",
+                    "label": "Keep async void and add a try/catch that swallows errors."
+                }
+            ],
+            "correctFixId": "task",
+            "explanation": "async Task is awaitable and propagates exceptions. async void is only appropriate for top-level event handlers."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "LINQ and async boundaries",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "deferred",
+                    "label": "A LINQ query can defer work until it is enumerated.",
+                    "correct": true
+                },
+                {
+                    "id": "tolist",
+                    "label": "ToList materializes the query into a list.",
+                    "correct": true
+                },
+                {
+                    "id": "asyncvoid",
+                    "label": "An async void method can be awaited by its caller.",
+                    "correct": false
+                },
+                {
+                    "id": "linq",
+                    "label": "LINQ queries must always return the same type as their source.",
+                    "correct": false
+                }
+            ],
+            "explanation": "LINQ composes a query; ToList fixes the result. async void cannot be awaited and should be limited to event handlers."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The C# workspace is keyboard accessible. Checks verify source structure; they do not compile or run C#.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "games"]
+}
