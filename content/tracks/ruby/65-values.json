@@ -1,0 +1,204 @@
+{
+    "id": "ruby.values",
+    "version": 1,
+    "sequence": 65,
+    "courseId": "ruby",
+    "title": "Values and loops in Ruby",
+    "summary": "Use dynamic values, a block, and a condition to count positives.",
+    "skills": ["ruby.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "values",
+        "briefing": "A campus report counts positive stock changes in Ruby."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:ruby"],
+    "hints": [
+        "The each loop already visits every value.",
+        "Ask each integer whether it is positive.",
+        "Use the positive? predicate.",
+        "Add count += 1 if value.positive? inside the block."
+    ],
+    "misconceptions": [
+        {
+            "id": "nil",
+            "description": "Assuming nil responds to every method.",
+            "stepId": "apply",
+            "feedback": "nil is an object, but most methods are not defined on it. Check for nil or use a safe navigation pattern."
+        },
+        {
+            "id": "mutation",
+            "description": "Mutating the array while iterating over it.",
+            "stepId": "apply",
+            "feedback": "Changing a collection during each can skip or repeat elements. Build a new collection or iterate over a copy."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Ruby values are dynamic",
+                "body": "A Ruby local name can hold any object. Integers, floats, strings, symbols, arrays, and hashes all carry their own methods, and the same name can be rebound to a different type later. Symbols are immutable names such as :ready and are commonly used as hash keys."
+            },
+            {
+                "title": "Blocks describe iteration",
+                "body": "A block is a chunk of behavior passed to a method, written with do/end or braces. The each method yields each element, and the block decides what to do with it. A predicate such as positive? answers a yes-or-no question about one value."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Block",
+                "definition": "A chunk of code passed to a method, written with do/end or braces."
+            },
+            {
+                "term": "Symbol",
+                "definition": "An immutable name such as :ready, often used as a hash key."
+            },
+            {
+                "term": "Dynamic typing",
+                "definition": "A language where a name can hold values of different types over time."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Ruby values and blocks",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Ruby values are dynamic",
+                    "body": "A Ruby local name can hold any object. Integers, floats, strings, symbols, arrays, and hashes all carry their own methods, and the same name can be rebound to a different type later. Symbols are immutable names such as :ready and are commonly used as hash keys."
+                },
+                {
+                    "title": "Blocks describe iteration",
+                    "body": "A block is a chunk of behavior passed to a method, written with do/end or braces. The each method yields each element, and the block decides what to do with it. A predicate such as positive? answers a yes-or-no question about one value."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Block",
+                    "definition": "A chunk of code passed to a method, written with do/end or braces."
+                },
+                {
+                    "term": "Symbol",
+                    "definition": "An immutable name such as :ready, often used as a hash key."
+                },
+                {
+                    "term": "Dynamic typing",
+                    "definition": "A language where a name can hold values of different types over time."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive stock changes",
+            "prompt": "Edit main.rb. count_positive returns how many values are greater than zero.",
+            "evidence": "construction",
+            "language": "ruby",
+            "files": [
+                {
+                    "path": "main.rb",
+                    "content": "def count_positive(values)\n  count = 0\n  values.each do |value|\n    count += 0 # TODO: count positive values\n  end\n  count\nend\n\nputs count_positive([3, -1, 2])\n",
+                    "editable": true,
+                    "language": "ruby"
+                }
+            ],
+            "entry": "main.rb",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The method keeps the taught name and parameter.",
+                    "file": "main.rb",
+                    "includes": ["def count_positive(values)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The block counts only positive values.",
+                    "file": "main.rb",
+                    "includes": ["count += 1 if value.positive?"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.rb",
+                    "includes": ["def count_positive(values)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Values and blocks",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "dynamic",
+                    "label": "A Ruby variable can be rebound to a value of another type.",
+                    "correct": true
+                },
+                {
+                    "id": "symbol",
+                    "label": "A symbol is the same object as a mutable string with the same text.",
+                    "correct": false
+                },
+                {
+                    "id": "block",
+                    "label": "A block can be yielded to by a method.",
+                    "correct": true
+                },
+                {
+                    "id": "nil",
+                    "label": "Calling a method on nil always returns nil.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Ruby resolves method calls at runtime. Symbols are immutable names, and nil is an object that does not silently accept every method."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "web"]
+}
