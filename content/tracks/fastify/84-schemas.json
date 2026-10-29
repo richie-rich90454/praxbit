@@ -1,0 +1,251 @@
+{
+    "id": "fastify.schemas",
+    "version": 1,
+    "sequence": 84,
+    "courseId": "fastify",
+    "title": "Strict schemas and plugin scope",
+    "summary": "Reject unknown fields with additionalProperties: false and register routes inside an encapsulated plugin.",
+    "skills": ["fastify.schemas", "fastify.plugins"],
+    "prerequisites": ["fastify.routing", "api.validation"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "schemas",
+        "briefing": "A client sent an extra role field in the product body and the store accepted it. The catalog routes also need their own scope so shared hooks do not leak across the server."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
+    "hints": [
+        "Add additionalProperties: false to both object schemas.",
+        "Type the plugin parameter as FastifyInstance instead of any.",
+        "Keep the routes inside the catalog plugin and register the plugin once.",
+        "Read only request.body.name and request.body.price after validation."
+    ],
+    "misconceptions": [
+        {
+            "id": "permissive-schema",
+            "description": "Assuming a properties list rejects other keys.",
+            "stepId": "apply",
+            "feedback": "It only documents known keys. Add additionalProperties: false when unknown input must fail."
+        },
+        {
+            "id": "global-plugin",
+            "description": "Expecting a plugin hook to apply to routes outside the plugin.",
+            "stepId": "apply",
+            "feedback": "Encapsulation keeps the hook inside the child context. Register the hook at the scope that needs it or expose it deliberately."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "additionalProperties is the strict switch",
+                "body": "A JSON schema allows unknown keys by default. Setting additionalProperties: false makes the extra field a validation failure instead of silently storing it."
+            },
+            {
+                "title": "Plugins create a scope",
+                "body": "Fastify registers a plugin in a child context. Hooks and decorators added inside the plugin stay there unless the plugin explicitly exposes them."
+            },
+            {
+                "title": "Register once, near the entry point",
+                "body": "A plugin does not run until it is registered. Keep registration at the composition root so the route tree and its scope are visible in one place."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "additionalProperties",
+                "definition": "The JSON schema keyword that controls whether unknown object keys are allowed."
+            },
+            {
+                "term": "Encapsulation",
+                "definition": "The rule that a plugin's hooks and decorators stay inside its own scope."
+            },
+            {
+                "term": "Composition root",
+                "definition": "The entry point where plugins and routes are registered."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Fastify schemas and plugins",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "additionalProperties is the strict switch",
+                    "body": "A JSON schema allows unknown keys by default. Setting additionalProperties: false makes the extra field a validation failure instead of silently storing it."
+                },
+                {
+                    "title": "Plugins create a scope",
+                    "body": "Fastify registers a plugin in a child context. Hooks and decorators added inside the plugin stay there unless the plugin explicitly exposes them."
+                },
+                {
+                    "title": "Register once, near the entry point",
+                    "body": "A plugin does not run until it is registered. Keep registration at the composition root so the route tree and its scope are visible in one place."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "additionalProperties",
+                    "definition": "The JSON schema keyword that controls whether unknown object keys are allowed."
+                },
+                {
+                    "term": "Encapsulation",
+                    "definition": "The rule that a plugin's hooks and decorators stay inside its own scope."
+                },
+                {
+                    "term": "Composition root",
+                    "definition": "The entry point where plugins and routes are registered."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Validate the body and scope the plugin",
+            "prompt": "Edit server.ts. Add body and params schemas with additionalProperties: false, and register the catalog routes inside an encapsulated plugin.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "server.ts",
+                    "content": "import Fastify from \"fastify\";\n\ntype Product = { id: string; name: string; price: number };\nconst products: Product[] = [];\n\nexport const app = Fastify({ logger: false });\n\nasync function catalog(app: any) {\n    // TODO: validate the body, reject extra fields, and register the plugin\n    app.post(\"/products\", async function createProduct(request, reply) {\n        products.push(request.body);\n        return reply.status(201).send(request.body);\n    });\n}\n\napp.register(catalog);\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "server.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The plugin is a function that receives its own Fastify instance.",
+                    "file": "server.ts",
+                    "includes": [
+                        "async function catalog(app: FastifyInstance)",
+                        "app.register(catalog);"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Body and params schemas reject unknown fields.",
+                    "file": "server.ts",
+                    "includes": ["additionalProperties: false", "body: {", "params: {"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The create route reads only the validated body fields.",
+                    "file": "server.ts",
+                    "includes": ["request.body.name", "request.body.price"],
+                    "excludes": ["request.body.role"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The created product answers with 201.",
+                    "file": "server.ts",
+                    "includes": ["reply.status(201).send(product)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "server.ts",
+                    "includes": ["async function catalog(app: FastifyInstance)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the catalog plugin",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "catalog.ts",
+                "caption": "The body schema is permissive and the authentication hook is trapped inside an unrelated plugin.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import Fastify, { type FastifyInstance } from \"fastify\";\n\nexport const app = Fastify({ logger: false });\n\nconst catalog = async function catalog(app: FastifyInstance) {\n    app.addHook(\"onRequest\", async function authenticate(request) {\n        request.user = { role: \"admin\" };\n    });\n};\n\napp.register(catalog);\n\napp.post(\"/products\", {\n    schema: {\n        body: {\n            type: \"object\",\n            required: [\"name\", \"price\"],\n            properties: {\n                name: { type: \"string\" },\n                price: { type: \"number\" },\n            },\n        },\n    },\n}, async function createProduct(request, reply) {\n    return reply.status(201).send(request.body);\n});\n"
+            },
+            "findings": [
+                {
+                    "id": "extra",
+                    "label": "The body schema has no additionalProperties: false, so extra fields pass validation.",
+                    "correct": true
+                },
+                {
+                    "id": "scope",
+                    "label": "The authentication hook lives in a plugin, so it does not apply to the root route.",
+                    "correct": true
+                },
+                {
+                    "id": "decorator",
+                    "label": "request.user is assigned without a module augmentation for the request type.",
+                    "correct": true
+                },
+                {
+                    "id": "serialize",
+                    "label": "The schema prevents the handler from returning the request body.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the schema and hook scope are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; Fastify applies plugin hooks globally."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the plugin name remains."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Fastify allows unknown keys unless additionalProperties is false, so role reaches the store. Hooks added inside a plugin are encapsulated and never run for the root POST route. Assigning request.user also needs a type augmentation."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 125,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Fastify workspace is keyboard accessible. Checks verify source structure; they do not compile or run Fastify.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
