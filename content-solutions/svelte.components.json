@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "ProductCard.svelte": "<script lang=\"ts\">\n    export let name: string;\n    export let price: number;\n</script>\n\n<article class=\"product-card\">\n    <h3>{name}</h3>\n    <p class=\"price\">{price.toFixed(2)}</p>\n</article>\n\n<style>\n    .product-card {\n        padding: 1rem;\n        border: 1px solid #d6d6d6;\n    }\n\n    .price {\n        font-weight: 600;\n    }\n</style>\n"
+            }
+        }
+    }
+}
