@@ -1,0 +1,320 @@
+{
+    "id": "algorithms-advanced.graphs",
+    "version": 1,
+    "sequence": 101,
+    "courseId": "algorithms-advanced",
+    "title": "Graphs and dynamic programming",
+    "summary": "Traverse graphs with an explicit queue and visited set, then reuse subproblems instead of recomputing them.",
+    "skills": ["algorithms.graphs", "algorithms.dp"],
+    "prerequisites": ["algorithms.hashing", "algorithms.complexity"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 10,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "graphs",
+        "briefing": "The campus map service computed routes between buildings. A path search used pop on its work list and never marked visited nodes, so it returned long routes and looped on cycles. The planner also repeated the same subproblems when counting routes. Implement breadth-first search and review the repeated-work recurrence."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:algorithms"],
+    "hints": [
+        "Start the visited set with the start node and process the queue with a head index.",
+        "Mark a neighbor visited before you enqueue it; otherwise cycles enqueue it repeatedly.",
+        "Store the parent only on the first visit so the path stays shortest.",
+        "For the recurrence in the review, cache results by step count or fill a table from the base cases."
+    ],
+    "misconceptions": [
+        {
+            "id": "stack-queue",
+            "description": "Calling pop on the BFS frontier.",
+            "stepId": "apply",
+            "feedback": "pop removes the newest node, which makes the traversal depth-first. Use a head index or shift the oldest node."
+        },
+        {
+            "id": "visited-late",
+            "description": "Marking a node visited when it is dequeued instead of when it is enqueued.",
+            "stepId": "apply",
+            "feedback": "A node can be enqueued several times before its first dequeue. Mark it on discovery."
+        },
+        {
+            "id": "memo-miss",
+            "description": "Recomputing a recurrence without storing results.",
+            "stepId": "review",
+            "feedback": "Overlapping branches repeat the same states, which turns linear recurrences into exponential call trees. Cache each state."
+        },
+        {
+            "id": "greedy-always",
+            "description": "Assuming the locally cheapest choice is globally optimal.",
+            "stepId": "review",
+            "feedback": "Greedy needs a proof of the greedy-choice property. Coin change with denominations 1, 3, and 4 is a counterexample for amount 6."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Breadth-first search explores by distance",
+                "body": "A queue processes nodes in the order they were discovered. Unweighted edges all cost one, so the first time BFS reaches a node is along a shortest path. Level order is the invariant that makes that true."
+            },
+            {
+                "title": "Visited belongs at discovery",
+                "body": "A visited set stops cycles and duplicate work. Mark a node when it is enqueued, not when it is dequeued, or the same node can enter the queue many times. The parent map stores one predecessor per node and is written only on the first visit."
+            },
+            {
+                "title": "A stack changes the question",
+                "body": "A stack, or recursion, follows one branch to the end. It answers reachability and structure questions, but the first path it finds is not generally shortest. Using pop on a BFS queue silently turns the search into depth-first search."
+            },
+            {
+                "title": "Dynamic programming reuses overlapping subproblems",
+                "body": "A recurrence has overlapping subproblems when the same state appears through different branches. Memoization stores each state's result; bottom-up tables fill states in dependency order. Without reuse, the call tree can grow exponentially even when the number of distinct states is small."
+            },
+            {
+                "title": "Greedy needs a proof",
+                "body": "A greedy algorithm commits to a locally best choice and never reconsiders. It is correct only when the greedy-choice property and optimal substructure hold. Coin change with denominations 1, 3, and 4 is a counterexample: greedy takes 4 + 1 + 1 for 6, while 3 + 3 uses fewer coins."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Breadth-first search",
+                "definition": "A traversal that visits nodes in order of their distance from the start."
+            },
+            {
+                "term": "Visited set",
+                "definition": "A set of nodes already discovered, used to stop cycles and duplicate work."
+            },
+            {
+                "term": "Parent map",
+                "definition": "A map from each discovered node to the node it was reached from."
+            },
+            {
+                "term": "Memoization",
+                "definition": "Caching a function result by its arguments so each subproblem is solved once."
+            },
+            {
+                "term": "Overlapping subproblems",
+                "definition": "A recurrence that reaches the same state through multiple branches."
+            },
+            {
+                "term": "Greedy algorithm",
+                "definition": "A strategy that commits to the locally best choice without revisiting it."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Graph search and reusable subproblems",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Breadth-first search explores by distance",
+                    "body": "A queue processes nodes in the order they were discovered. Unweighted edges all cost one, so the first time BFS reaches a node is along a shortest path. Level order is the invariant that makes that true."
+                },
+                {
+                    "title": "Visited belongs at discovery",
+                    "body": "A visited set stops cycles and duplicate work. Mark a node when it is enqueued, not when it is dequeued, or the same node can enter the queue many times. The parent map stores one predecessor per node and is written only on the first visit."
+                },
+                {
+                    "title": "A stack changes the question",
+                    "body": "A stack, or recursion, follows one branch to the end. It answers reachability and structure questions, but the first path it finds is not generally shortest. Using pop on a BFS queue silently turns the search into depth-first search."
+                },
+                {
+                    "title": "Dynamic programming reuses overlapping subproblems",
+                    "body": "A recurrence has overlapping subproblems when the same state appears through different branches. Memoization stores each state's result; bottom-up tables fill states in dependency order. Without reuse, the call tree can grow exponentially even when the number of distinct states is small."
+                },
+                {
+                    "title": "Greedy needs a proof",
+                    "body": "A greedy algorithm commits to a locally best choice and never reconsiders. It is correct only when the greedy-choice property and optimal substructure hold. Coin change with denominations 1, 3, and 4 is a counterexample: greedy takes 4 + 1 + 1 for 6, while 3 + 3 uses fewer coins."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Breadth-first search",
+                    "definition": "A traversal that visits nodes in order of their distance from the start."
+                },
+                {
+                    "term": "Visited set",
+                    "definition": "A set of nodes already discovered, used to stop cycles and duplicate work."
+                },
+                {
+                    "term": "Parent map",
+                    "definition": "A map from each discovered node to the node it was reached from."
+                },
+                {
+                    "term": "Memoization",
+                    "definition": "Caching a function result by its arguments so each subproblem is solved once."
+                },
+                {
+                    "term": "Overlapping subproblems",
+                    "definition": "A recurrence that reaches the same state through multiple branches."
+                },
+                {
+                    "term": "Greedy algorithm",
+                    "definition": "A strategy that commits to the locally best choice without revisiting it."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Breadth-first shortest path",
+            "prompt": "Edit graphs.ts. Process the queue from its head, mark the start as visited, skip neighbors that are already visited, record each parent once, and rebuild the path from the goal.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "graphs.ts",
+                    "content": "export function shortestPath(\n    graph: Map<string, string[]>,\n    start: string,\n    goal: string,\n): string[] | null {\n    const queue = [start];\n    const parent = new Map<string, string>();\n\n    while (queue.length > 0) {\n        // TODO: dequeue in FIFO order, skip visited nodes, and record parents\n        const node = queue.pop() as string;\n        if (node === goal) {\n            return rebuild(parent, start, goal);\n        }\n        for (const next of graph.get(node) ?? []) {\n            parent.set(next, node);\n            queue.push(next);\n        }\n    }\n\n    return null;\n}\n\nfunction rebuild(\n    parent: Map<string, string>,\n    start: string,\n    goal: string,\n): string[] {\n    const path = [goal];\n    let current = goal;\n    while (current !== start) {\n        const previous = parent.get(current);\n        if (previous === undefined) {\n            return [];\n        }\n        path.push(previous);\n        current = previous;\n    }\n    return path.reverse();\n}\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "graphs.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The search marks the start and processes the queue from its head.",
+                    "file": "graphs.ts",
+                    "includes": [
+                        "const visited = new Set<string>([start]);",
+                        "let head = 0;",
+                        "const node = queue[head];",
+                        "head += 1;"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "A neighbor is marked before it can be enqueued twice.",
+                    "file": "graphs.ts",
+                    "includes": [
+                        "if (visited.has(next)) {",
+                        "continue;",
+                        "visited.add(next);",
+                        "parent.set(next, node);",
+                        "queue.push(next);"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A reachable goal returns a rebuilt path and an unreachable goal returns null.",
+                    "file": "graphs.ts",
+                    "includes": [
+                        "if (node === goal) {",
+                        "return rebuild(parent, start, goal);",
+                        "return null;"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The frontier no longer uses a stack pop or an array shift.",
+                    "file": "graphs.ts",
+                    "includes": ["while (head < queue.length) {"],
+                    "excludes": [".pop()", ".shift()"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "graphs.ts",
+                    "includes": ["const visited = new Set<string>([start]);"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the repeated-work recurrence",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "routes.ts",
+                "caption": "The recurrence is correct, but each call recomputes the same step counts.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "function countRoutes(steps: number): number {\n    if (steps <= 1) {\n        return 1;\n    }\n    return countRoutes(steps - 1) + countRoutes(steps - 2);\n}\n\nexport const routes = countRoutes(30);\n"
+            },
+            "findings": [
+                {
+                    "id": "overlap",
+                    "label": "countRoutes(steps - 2) is computed directly and again inside countRoutes(steps - 1).",
+                    "correct": true
+                },
+                {
+                    "id": "exponential",
+                    "label": "The number of calls grows exponentially because no result is stored.",
+                    "correct": true
+                },
+                {
+                    "id": "memo",
+                    "label": "A memo table keyed by steps, or a bottom-up table, would reduce the work to linear time.",
+                    "correct": true
+                },
+                {
+                    "id": "greedy",
+                    "label": "Choosing the two-step move whenever possible is optimal for every input.",
+                    "correct": false
+                },
+                {
+                    "id": "base",
+                    "label": "The function is incorrect because it has no base case.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the repeated subproblems are cached."
+                },
+                {
+                    "id": "style",
+                    "label": "The code only needs formatting changes."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the recurrence is correct, so the cost is acceptable."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The recurrence describes the correct number of routes, but it solves the same step counts repeatedly. The call tree doubles at each level, so countRoutes(30) performs an exponential amount of work. Cache each step count or fill a table from the base cases."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Advanced algorithms workspace is keyboard accessible. Checks verify source structure; they do not compile or run Advanced algorithms.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems"]
+}
