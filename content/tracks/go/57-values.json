@@ -1,0 +1,204 @@
+{
+    "id": "go.values",
+    "version": 1,
+    "sequence": 57,
+    "courseId": "go",
+    "title": "Values and ranges in Go",
+    "summary": "Use a typed slice, a range loop, and a condition to count positive values.",
+    "skills": ["go.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "values",
+        "briefing": "The campus API receives stock changes as a slice of integers. Count the positive changes in Go."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:go"],
+    "hints": [
+        "The range loop already visits every value.",
+        "Test the value before incrementing.",
+        "Use if value > 0.",
+        "Increment count inside the if body."
+    ],
+    "misconceptions": [
+        {
+            "id": "uninitialized",
+            "description": "Assuming a declared int is uninitialized.",
+            "stepId": "apply",
+            "feedback": "Go gives every value a zero value. count starts at 0 without an explicit assignment."
+        },
+        {
+            "id": "range-copy",
+            "description": "Trying to mutate the slice element through the range value.",
+            "stepId": "apply",
+            "feedback": "Range yields a copy of each element. Use the index when a mutation is required."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Go values and decisions",
+                "body": "Go declares values with var count int = 3 or the short form count := 3. Types are checked at compile time. Integers, floats, strings, and booleans are distinct types. Every type has a zero value, such as 0 or an empty string. An if statement can include a short initialization before the condition. Go has one loop keyword: for. It can act as a counting loop or a range loop over a slice."
+            },
+            {
+                "title": "Go source files",
+                "body": "Go source is organized into packages. A program starts at func main in package main, and go run compiles and starts it."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Short variable declaration",
+                "definition": "The := form that declares and initializes a variable inside a function."
+            },
+            {
+                "term": "Slice",
+                "definition": "A descriptor for a contiguous section of an array."
+            },
+            {
+                "term": "Zero value",
+                "definition": "The value a type has before it is explicitly initialized."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Go values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Go values and decisions",
+                    "body": "Go declares values with var count int = 3 or the short form count := 3. Types are checked at compile time. Integers, floats, strings, and booleans are distinct types. Every type has a zero value, such as 0 or an empty string. An if statement can include a short initialization before the condition. Go has one loop keyword: for. It can act as a counting loop or a range loop over a slice."
+                },
+                {
+                    "title": "Go source files",
+                    "body": "Go source is organized into packages. A program starts at func main in package main, and go run compiles and starts it."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Short variable declaration",
+                    "definition": "The := form that declares and initializes a variable inside a function."
+                },
+                {
+                    "term": "Slice",
+                    "definition": "A descriptor for a contiguous section of an array."
+                },
+                {
+                    "term": "Zero value",
+                    "definition": "The value a type has before it is explicitly initialized."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive stock changes",
+            "prompt": "Edit main.go. countPositive returns how many values in the slice are greater than zero.",
+            "evidence": "construction",
+            "language": "go",
+            "files": [
+                {
+                    "path": "main.go",
+                    "content": "package main\n\nimport \"fmt\"\n\nfunc countPositive(values []int) int {\n    count := 0\n    for _, value := range values {\n        count += 0 // TODO: count positive values\n    }\n    return count\n}\n\nfunc main() {\n    fmt.Println(countPositive([]int{3, -1, 2}))\n}\n",
+                    "editable": true,
+                    "language": "go"
+                }
+            ],
+            "entry": "main.go",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the slice parameter and int result.",
+                    "file": "main.go",
+                    "includes": ["func countPositive(values []int) int"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The range loop counts only positive values.",
+                    "file": "main.go",
+                    "includes": ["if value > 0 {", "count += 1"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.go",
+                    "includes": ["func countPositive(values []int) int"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "slice",
+                    "label": "A slice carries a pointer, a length, and a capacity.",
+                    "correct": true
+                },
+                {
+                    "id": "zero",
+                    "label": "An int variable starts at an undefined value.",
+                    "correct": false
+                },
+                {
+                    "id": "range",
+                    "label": "A range loop over a slice yields the index and a copy of the value.",
+                    "correct": true
+                },
+                {
+                    "id": "nil",
+                    "label": "A nil slice cannot be ranged over safely.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Go initializes values to their zero value. Range yields the index and a copy; the length is part of the slice descriptor."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Go workspace is keyboard accessible. Checks verify source structure; they do not compile or run Go.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
