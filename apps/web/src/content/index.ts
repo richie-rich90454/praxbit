@@ -139,11 +139,21 @@ export function nextMission(missionId: string): Mission | undefined {
     if (mission === undefined) {
         return undefined;
     }
-    return missions.find(function follows(candidate: Mission): boolean {
+    const sameCourse = missions.find(function follows(candidate: Mission): boolean {
         return (
             candidate.courseId === mission.courseId && candidate.sequence === mission.sequence + 1
         );
     });
+    if (sameCourse !== undefined) {
+        return sameCourse;
+    }
+    const track = trackForMission(missionId);
+    if (track === undefined) {
+        return undefined;
+    }
+    const index = track.missionIds.indexOf(missionId);
+    const nextId = index < 0 ? undefined : track.missionIds[index + 1];
+    return nextId === undefined ? undefined : missionsById.get(nextId);
 }
 
 export function projectById(projectId: string): ProjectDefinition | undefined {
