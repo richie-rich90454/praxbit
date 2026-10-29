@@ -1,0 +1,282 @@
+{
+    "id": "django.views",
+    "version": 1,
+    "sequence": 94,
+    "courseId": "django",
+    "title": "JSON views without N+1 queries",
+    "summary": "Return explicit fields with JsonResponse, handle missing rows, and load relations in one query.",
+    "skills": ["django.views", "django.testing"],
+    "prerequisites": ["django.models", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "views",
+        "briefing": "The inventory endpoint is slow because each item loads its category separately, and a missing id crashes the detail route. Return explicit JSON fields, load the relation once, and answer missing rows with a 404."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:django"],
+    "hints": [
+        "The URLconf is already correct; focus on the two views.",
+        "Add select_related(\"category\") before .all() in the list view.",
+        "Replace Item.objects.get with get_object_or_404 for the detail route.",
+        "Move the shared field dictionary into a helper so both views return the same shape."
+    ],
+    "misconceptions": [
+        {
+            "id": "n-plus-one",
+            "description": "Accessing a foreign key inside a loop without select_related.",
+            "stepId": "apply",
+            "feedback": "Each lazy access issues a query. select_related joins the related row into the original query."
+        },
+        {
+            "id": "get-500",
+            "description": "Using .get() for a detail route.",
+            "stepId": "apply",
+            "feedback": "A missing row raises DoesNotExist and becomes a 500. get_object_or_404 returns a 404 response."
+        },
+        {
+            "id": "csrf-exempt",
+            "description": "Disabling CSRF on a session-authenticated POST view.",
+            "stepId": "review",
+            "feedback": "Session cookies travel automatically, so another site can submit the request. Keep CSRF enforcement or use token auth without cookie credentials."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "URLconf maps paths to views",
+                "body": "`path(\"items/<int:item_id>/\", item_detail)` converts the URL segment to an int and calls the view with `item_id`. `get_object_or_404` queries the row and returns a 404 response when it does not exist, instead of raising an unhandled DoesNotExist."
+            },
+            {
+                "title": "Relations are lazy",
+                "body": "Accessing `item.category` inside a loop issues one query per item, the N+1 pattern. `select_related(\"category\")` joins the foreign key into the original query; `prefetch_related` handles many-to-many and reverse relations with a second batched query."
+            },
+            {
+                "title": "Sessions and CSRF boundaries",
+                "body": "Django session cookies are sent automatically by the browser, so unsafe methods such as POST need a CSRF token. Mark a view `csrf_exempt` only for an API that authenticates with a token and does not rely on cookies. Read-only GET views must not change state."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "JsonResponse",
+                "definition": "A Django response that serializes a dictionary or list as JSON."
+            },
+            {
+                "term": "URLconf",
+                "definition": "The mapping from URL patterns to view functions."
+            },
+            {
+                "term": "select_related",
+                "definition": "A queryset option that joins foreign keys into the same query."
+            },
+            {
+                "term": "CSRF token",
+                "definition": "A per-session value that proves a state-changing request came from the site."
+            },
+            {
+                "term": "get_object_or_404",
+                "definition": "A shortcut that returns a 404 response when no row matches."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "JSON views and query shape",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "URLconf maps paths to views",
+                    "body": "`path(\"items/<int:item_id>/\", item_detail)` converts the URL segment to an int and calls the view with `item_id`. `get_object_or_404` queries the row and returns a 404 response when it does not exist, instead of raising an unhandled DoesNotExist."
+                },
+                {
+                    "title": "Relations are lazy",
+                    "body": "Accessing `item.category` inside a loop issues one query per item, the N+1 pattern. `select_related(\"category\")` joins the foreign key into the original query; `prefetch_related` handles many-to-many and reverse relations with a second batched query."
+                },
+                {
+                    "title": "Sessions and CSRF boundaries",
+                    "body": "Django session cookies are sent automatically by the browser, so unsafe methods such as POST need a CSRF token. Mark a view `csrf_exempt` only for an API that authenticates with a token and does not rely on cookies. Read-only GET views must not change state."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "JsonResponse",
+                    "definition": "A Django response that serializes a dictionary or list as JSON."
+                },
+                {
+                    "term": "URLconf",
+                    "definition": "The mapping from URL patterns to view functions."
+                },
+                {
+                    "term": "select_related",
+                    "definition": "A queryset option that joins foreign keys into the same query."
+                },
+                {
+                    "term": "CSRF token",
+                    "definition": "A per-session value that proves a state-changing request came from the site."
+                },
+                {
+                    "term": "get_object_or_404",
+                    "definition": "A shortcut that returns a 404 response when no row matches."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Build a JSON item view",
+            "prompt": "Edit views.py. Return explicit item fields in JSON, load the category with select_related, use get_object_or_404 for the detail route, and keep the URLconf paths. Run the checks when done.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "views.py",
+                    "content": "from django.http import JsonResponse\nfrom django.shortcuts import get_object_or_404\nfrom django.urls import path\n\nfrom .models import Item\n\n\ndef item_list(request):\n    items = Item.objects.all()\n    # TODO: load categories in one query and keep the payload explicit\n    payload = []\n    for item in items:\n        payload.append(\n            {\n                \"id\": item.id,\n                \"name\": item.name,\n                \"price\": str(item.price),\n                \"category\": item.category.name,\n            }\n        )\n    return JsonResponse({\"items\": payload})\n\n\ndef item_detail(request, item_id):\n    item = Item.objects.get(pk=item_id)\n    return JsonResponse({\"id\": item.id, \"name\": item.name, \"price\": str(item.price)})\n\n\nurlpatterns = [\n    path(\"items/\", item_list, name=\"item-list\"),\n    path(\"items/<int:item_id>/\", item_detail, name=\"item-detail\"),\n]\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "views.py",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The list view loads each category with its item.",
+                    "file": "views.py",
+                    "includes": ["Item.objects.select_related(\"category\").all()"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The JSON payload names its fields explicitly.",
+                    "file": "views.py",
+                    "includes": [
+                        "\"id\": item.id",
+                        "\"name\": item.name",
+                        "\"price\": str(item.price)",
+                        "\"category\": item.category.name"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The detail view returns a 404 for a missing row.",
+                    "file": "views.py",
+                    "includes": [
+                        "def item_detail(request, item_id):",
+                        "get_object_or_404(",
+                        "pk=item_id"
+                    ],
+                    "excludes": ["Item.objects.get(pk=item_id)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The URLconf names both routes.",
+                    "file": "views.py",
+                    "includes": [
+                        "path(\"items/\", item_list, name=\"item-list\")",
+                        "path(\"items/<int:item_id>/\", item_detail, name=\"item-detail\")"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "views.py",
+                    "includes": ["Item.objects.select_related(\"category\").all()"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the inventory views",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "views.py",
+                "caption": "The list view loads the category inside a loop, and the detail view uses get without a 404 path.",
+                "kind": "code",
+                "language": "python",
+                "content": "from django.http import JsonResponse\n\nfrom .models import Item\n\n\ndef item_list(request):\n    payload = []\n    for item in Item.objects.all():\n        payload.append(\n            {\n                \"id\": item.id,\n                \"name\": item.name,\n                \"price\": item.price,\n                \"category\": item.category.name,\n            }\n        )\n    return JsonResponse({\"items\": payload})\n\n\ndef item_detail(request, item_id):\n    item = Item.objects.get(pk=item_id)\n    return JsonResponse({\"id\": item.id, \"name\": item.name})\n"
+            },
+            "findings": [
+                {
+                    "id": "n-plus-one",
+                    "label": "The list view queries the category once for every item.",
+                    "correct": true
+                },
+                {
+                    "id": "missing-404",
+                    "label": "The detail view raises an unhandled DoesNotExist for a missing item.",
+                    "correct": true
+                },
+                {
+                    "id": "select-related",
+                    "label": "The list view uses select_related to fetch categories in the same query.",
+                    "correct": false
+                },
+                {
+                    "id": "state-get",
+                    "label": "The read-only views change data during a GET request.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the query pattern and missing-row handling are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the JSON responses are explicit."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The category lookup inside the loop is an N+1 query, and the detail view returns a 500 instead of a 404 when the id is missing. Use select_related and get_object_or_404. Session-authenticated unsafe methods still need CSRF protection."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Django workspace is keyboard accessible. Checks verify source structure; they do not compile or run Django.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
