@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "products.module.ts": "import { Controller, Get, Injectable, Module } from \"@nestjs/common\";\n\nexport type Product = { id: string; name: string; price: number };\n\n@Injectable()\nexport class ProductsService {\n    private readonly products: Product[] = [\n        { id: \"p1\", name: \"Notebook\", price: 4.5 },\n    ];\n\n    findAll(): Product[] {\n        return this.products;\n    }\n}\n\n@Controller(\"products\")\nexport class ProductsController {\n    constructor(private readonly products: ProductsService) {}\n\n    @Get()\n    list(): Product[] {\n        return this.products.findAll();\n    }\n}\n\n@Module({\n    controllers: [ProductsController],\n    providers: [ProductsService],\n})\nexport class ProductsModule {}\n"
+            }
+        }
+    }
+}
