@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "src/main.rs": "trait Summary {\n    fn summarize(&self) -> String;\n}\n\nstruct Article {\n    title: String,\n}\n\nimpl Summary for Article {\n    fn summarize(&self) -> String {\n        format!(\"{}\", self.title)\n    }\n}\n\nfn main() {\n    let article = Article { title: String::from(\"Campus power\") };\n    println!(\"{}\", article.summarize());\n}\n"
+            }
+        }
+    }
+}
