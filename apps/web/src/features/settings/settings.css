@@ -1,0 +1,14 @@
+.settings-field-error {
+    color: var(--error);
+    font-size: var(--text-meta);
+}
+
+.settings-danger {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--error);
+}
+
+.settings-danger h3 {
+    color: var(--error);
+}
