@@ -1,0 +1,204 @@
+{
+    "id": "swift.values",
+    "version": 1,
+    "sequence": 63,
+    "courseId": "swift",
+    "title": "Values and loops in Swift",
+    "summary": "Use an array, a filtered loop, and an explicit return type to count positives.",
+    "skills": ["swift.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "values",
+        "briefing": "A campus app summarizes stock changes. Count positive changes in Swift without hiding the result type."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:swift"],
+    "hints": [
+        "The loop visits each value.",
+        "Add a condition before incrementing.",
+        "Use value > 0.",
+        "Increment count inside the branch."
+    ],
+    "misconceptions": [
+        {
+            "id": "force",
+            "description": "Using ! without evidence that a value exists.",
+            "stepId": "apply",
+            "feedback": "Force unwrapping traps on nil. Use if let or guard let."
+        },
+        {
+            "id": "let",
+            "description": "Declaring a counter with let.",
+            "stepId": "apply",
+            "feedback": "let is immutable. Use var for a value that changes."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Swift values and decisions",
+                "body": "Swift declares constants with let count = 3 and variables with var total = 0. Type inference keeps the declaration concise. An optional Int? either contains an Int or nil. if let, guard let, and optional chaining make absence explicit. if and switch select branches, and switch must be exhaustive. A for loop visits a collection: for value in values { ... }."
+            },
+            {
+                "title": "Swift source files",
+                "body": "Swift source is compiled ahead of time. A script can run top-level code, while an app starts from an entry point."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Optional",
+                "definition": "A type that either contains a value or nil."
+            },
+            {
+                "term": "Value semantics",
+                "definition": "Copying a value produces an independent value."
+            },
+            {
+                "term": "Guard",
+                "definition": "A control-flow statement that exits early when a condition fails."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Swift values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Swift values and decisions",
+                    "body": "Swift declares constants with let count = 3 and variables with var total = 0. Type inference keeps the declaration concise. An optional Int? either contains an Int or nil. if let, guard let, and optional chaining make absence explicit. if and switch select branches, and switch must be exhaustive. A for loop visits a collection: for value in values { ... }."
+                },
+                {
+                    "title": "Swift source files",
+                    "body": "Swift source is compiled ahead of time. A script can run top-level code, while an app starts from an entry point."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Optional",
+                    "definition": "A type that either contains a value or nil."
+                },
+                {
+                    "term": "Value semantics",
+                    "definition": "Copying a value produces an independent value."
+                },
+                {
+                    "term": "Guard",
+                    "definition": "A control-flow statement that exits early when a condition fails."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive stock changes",
+            "prompt": "Edit main.swift. countPositive returns how many values are greater than zero.",
+            "evidence": "construction",
+            "language": "swift",
+            "files": [
+                {
+                    "path": "main.swift",
+                    "content": "func countPositive(_ values: [Int]) -> Int {\n    var count = 0\n    for value in values {\n        count += 0 // TODO: count positive values\n    }\n    return count\n}\n\nprint(countPositive([3, -1, 2]))\n",
+                    "editable": true,
+                    "language": "swift"
+                }
+            ],
+            "entry": "main.swift",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the array parameter and Int result.",
+                    "file": "main.swift",
+                    "includes": ["func countPositive(_ values: [Int]) -> Int"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The loop counts only positive values.",
+                    "file": "main.swift",
+                    "includes": ["if value > 0", "count += 1"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.swift",
+                    "includes": ["func countPositive(_ values: [Int]) -> Int"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "let",
+                    "label": "A let binding cannot be reassigned.",
+                    "correct": true
+                },
+                {
+                    "id": "optional",
+                    "label": "An Int? can hold either an Int or nil.",
+                    "correct": true
+                },
+                {
+                    "id": "force",
+                    "label": "Force unwrapping is safe when the optional was nil a moment ago.",
+                    "correct": false
+                },
+                {
+                    "id": "array",
+                    "label": "An Array preserves insertion order.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Swift distinguishes constants from variables and makes absence explicit with optionals."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Swift workspace is keyboard accessible. Checks verify source structure; they do not compile or run Swift.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
