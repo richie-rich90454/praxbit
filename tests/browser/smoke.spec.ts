@@ -61,6 +61,51 @@ test.describe("opening experience", function openingSuite(): void {
         await expect(page.getByRole("link", { name: "Start practice" })).toBeVisible();
     });
 
+    test("the Learn screen groups tracks and filters them by search", async function trackSearch({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await page.goto("/learn");
+        await expect(page.getByRole("heading", { name: "Languages", exact: true })).toBeVisible();
+        await expect(
+            page.getByRole("heading", { name: "Frameworks and tools", exact: true }),
+        ).toBeVisible();
+        const search = page.getByRole("searchbox", { name: "Search tracks" });
+        await search.fill("TypeScript");
+        await expect(page.getByRole("heading", { name: "TypeScript", exact: true })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Python", exact: true })).toHaveCount(0);
+        await search.fill("no such track");
+        await expect(page.getByText(/No tracks match that search/)).toBeVisible();
+    });
+
+    test("every runtime asset is served by the application origin", async function noCdn({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        const external: string[] = [];
+        page.on("request", function record(request): void {
+            const url = new URL(request.url());
+            if (
+                url.protocol !== "data:" &&
+                url.protocol !== "blob:" &&
+                url.hostname !== "localhost"
+            ) {
+                external.push(request.url());
+            }
+        });
+        for (const path of [
+            "/",
+            "/learn",
+            "/missions/python.collections",
+            "/missions/sql.filter-orders",
+        ]) {
+            await page.goto(path);
+        }
+        expect(external).toEqual([]);
+    });
+
     test("the server-backed club screen gates membership without hiding the reason", async function clubGate({
         page,
     }: {
