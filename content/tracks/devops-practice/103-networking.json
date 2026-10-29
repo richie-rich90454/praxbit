@@ -1,0 +1,284 @@
+{
+    "id": "devops-practice.networking",
+    "version": 1,
+    "sequence": 103,
+    "courseId": "devops-practice",
+    "title": "Trace a request through DNS, TLS, and the proxy",
+    "summary": "Follow a request from name resolution to the upstream, preserve client address and scheme, and bound every timeout.",
+    "skills": ["devops.networking", "api.observability"],
+    "prerequisites": ["concept.networks", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "networking",
+        "briefing": "Users report intermittent 502s from api.campus.test. The proxy holds a stalled response for ten minutes, the upstream logs only the proxy address, redirects come back as http, and the health endpoint answers 200 even when the database is down."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:devops"],
+    "hints": [
+        "Resolve the name first; if the address is wrong, stop there.",
+        "Read the certificate subject and dates from openssl s_client.",
+        "Forward X-Forwarded-For and X-Forwarded-Proto from the proxy.",
+        "Set connect and read timeouts on both locations and make /health check the database."
+    ],
+    "misconceptions": [
+        {
+            "id": "proxy-ip",
+            "description": "Assuming the upstream sees the client address.",
+            "stepId": "apply",
+            "feedback": "A reverse proxy opens its own connection to the upstream. Forward X-Forwarded-For and log it explicitly."
+        },
+        {
+            "id": "long-timeout",
+            "description": "Setting a long read timeout to avoid errors.",
+            "stepId": "apply",
+            "feedback": "A long timeout hides a stalled upstream and ties up a worker. Set a deadline and let the client retry."
+        },
+        {
+            "id": "process-health",
+            "description": "Treating a running process as a healthy service.",
+            "stepId": "apply",
+            "feedback": "A process can run while its database is unreachable. Probe a dependency and fail the check when it is down."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Name resolution comes first",
+                "body": "dig shows which address the client will contact. A stale record sends traffic to the wrong host, and no proxy setting can repair that."
+            },
+            {
+                "title": "TLS fails before HTTP exists",
+                "body": "openssl s_client shows the certificate the client receives. Name and expiry problems appear here, not in the upstream log."
+            },
+            {
+                "title": "A proxy must pass its context",
+                "body": "The upstream only knows what the proxy forwards. Client address and original scheme belong in X-Forwarded-For and X-Forwarded-Proto."
+            },
+            {
+                "title": "Timeouts are a budget",
+                "body": "Every hop needs a deadline. A ten-minute read timeout keeps a worker occupied long after the client has given up."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "A record",
+                "definition": "The DNS record that maps a name to an IPv4 address."
+            },
+            {
+                "term": "SNI",
+                "definition": "The server name sent during the TLS handshake so the host can choose a certificate."
+            },
+            {
+                "term": "Reverse proxy",
+                "definition": "A server that accepts client requests and forwards them to an upstream."
+            },
+            {
+                "term": "Health check",
+                "definition": "A probe that reports whether the service can do its job, including dependencies."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "DNS, TLS, and proxy boundaries",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Name resolution comes first",
+                    "body": "dig shows which address the client will contact. A stale record sends traffic to the wrong host, and no proxy setting can repair that."
+                },
+                {
+                    "title": "TLS fails before HTTP exists",
+                    "body": "openssl s_client shows the certificate the client receives. Name and expiry problems appear here, not in the upstream log."
+                },
+                {
+                    "title": "A proxy must pass its context",
+                    "body": "The upstream only knows what the proxy forwards. Client address and original scheme belong in X-Forwarded-For and X-Forwarded-Proto."
+                },
+                {
+                    "title": "Timeouts are a budget",
+                    "body": "Every hop needs a deadline. A ten-minute read timeout keeps a worker occupied long after the client has given up."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "A record",
+                    "definition": "The DNS record that maps a name to an IPv4 address."
+                },
+                {
+                    "term": "SNI",
+                    "definition": "The server name sent during the TLS handshake so the host can choose a certificate."
+                },
+                {
+                    "term": "Reverse proxy",
+                    "definition": "A server that accepts client requests and forwards them to an upstream."
+                },
+                {
+                    "term": "Health check",
+                    "definition": "A probe that reports whether the service can do its job, including dependencies."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Document the request path and fix the proxy",
+            "prompt": "Edit network.md. Record the resolution and TLS checks, replace the proxy block so the upstream receives the client address and scheme, set connect and read timeouts, and make /health depend on the database.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "network.md",
+                    "content": "# Request path for api.campus.test\n\n## Resolution\n\nTODO: confirm which address the name resolves to.\n\n## Proxy block\n\nserver {\n    listen 443 ssl;\n    server_name api.campus.test;\n\n    location / {\n        proxy_pass http://api_upstream;\n        proxy_set_header Host $host;\n        proxy_read_timeout 600s;\n    }\n}\n\n## Health check\n\nThe probe returns 200 while the process is running.\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "network.md",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Resolution and the TLS handshake are inspected directly.",
+                    "file": "network.md",
+                    "includes": [
+                        "dig +short api.campus.test",
+                        "openssl s_client -connect api.campus.test:443"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The proxy forwards the client address and the original scheme.",
+                    "file": "network.md",
+                    "includes": [
+                        "proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for",
+                        "proxy_set_header X-Forwarded-Proto $scheme"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Upstream timeouts are bounded instead of ten minutes.",
+                    "file": "network.md",
+                    "includes": ["proxy_connect_timeout 3s", "proxy_read_timeout 10s"],
+                    "excludes": ["proxy_read_timeout 600s"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The health check proves a dependency, not just a running process.",
+                    "file": "network.md",
+                    "includes": [
+                        "location = /health",
+                        "which checks the database, not just the process"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "network.md",
+                    "includes": ["dig +short api.campus.test"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the proxy boundary",
+            "prompt": "Review the proxy config and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "api.campus.test.conf",
+                "caption": "All API traffic passes through this block, and the health route is answered by nginx itself.",
+                "kind": "code",
+                "language": "text",
+                "content": "upstream api_upstream {\n    server 10.0.4.21:8080;\n}\n\nserver {\n    listen 443 ssl;\n    server_name api.campus.test;\n    ssl_certificate /etc/letsencrypt/live/api.campus.test/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/api.campus.test/privkey.pem;\n\n    location / {\n        proxy_pass http://api_upstream;\n        proxy_set_header Host $host;\n        proxy_read_timeout 600s;\n    }\n\n    location = /health {\n        return 200 \"ok\";\n    }\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "no-client-ip",
+                    "label": "The proxy does not forward the client address, so the upstream logs the proxy IP for every request.",
+                    "correct": true
+                },
+                {
+                    "id": "no-scheme",
+                    "label": "The proxy does not forward X-Forwarded-Proto, so the upstream cannot tell HTTP from HTTPS.",
+                    "correct": true
+                },
+                {
+                    "id": "long-timeout",
+                    "label": "The read timeout is 600s, so a stalled upstream holds a worker for ten minutes.",
+                    "correct": true
+                },
+                {
+                    "id": "static-health",
+                    "label": "The health route returns 200 without checking the database or any other dependency.",
+                    "correct": true
+                },
+                {
+                    "id": "host-header",
+                    "label": "The original Host header is forwarded to the upstream.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the proxy headers, timeout, and health check are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the proxy behavior is acceptable."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming or formatting should change."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The config hides the client address and scheme from the upstream, keeps a stalled response open for ten minutes, and answers health checks without touching the database. Forwarding Host is correct behavior, so it is not a finding."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The DevOps practice workspace is keyboard accessible. Checks verify source structure; they do not compile or run DevOps practice.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
