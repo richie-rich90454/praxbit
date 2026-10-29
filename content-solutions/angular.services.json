@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "cart.service.ts": "import { Injectable } from \"@angular/core\";\nimport { HttpClient } from \"@angular/common/http\";\nimport type { Observable } from \"rxjs\";\n\nexport interface CartLine {\n    sku: string;\n    quantity: number;\n}\n\n@Injectable({ providedIn: \"root\" })\nexport class CartService {\n    constructor(private readonly http: HttpClient) {}\n\n    load(): Observable<CartLine[]> {\n        return this.http.get<CartLine[]>(\"/api/cart\");\n    }\n}\n"
+            }
+        }
+    }
+}
