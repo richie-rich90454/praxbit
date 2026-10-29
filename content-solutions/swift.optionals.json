@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.swift": "func firstPositive(_ values: [Int]) -> Int? {\n    for value in values where value > 0 {\n        return value\n    }\n    return nil\n}\n\nprint(firstPositive([-2, 3, 4]) ?? -1)\n"
+            }
+        }
+    }
+}
