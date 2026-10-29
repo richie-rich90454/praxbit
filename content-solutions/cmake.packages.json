@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "CMakeLists.txt": "# Out of source: cmake -S . -B build && cmake --build build\ncmake_minimum_required(VERSION 3.24)\nproject(campus_report LANGUAGES CXX)\n\nfind_package(fmt 10 REQUIRED)\nfind_package(Threads REQUIRED)\n\nadd_library(report_core STATIC src/report.cpp)\ntarget_compile_features(report_core PUBLIC cxx_std_20)\ntarget_include_directories(report_core PUBLIC\n    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>\n    $<INSTALL_INTERFACE:include>)\ntarget_link_libraries(report_core PRIVATE fmt::fmt Threads::Threads)\n\nadd_executable(report src/main.cpp)\ntarget_link_libraries(report PRIVATE report_core)\n\ninclude(GNUInstallDirs)\ninstall(TARGETS report_core EXPORT campus_reportTargets\n    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}\n    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})\ninstall(TARGETS report RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})\ninstall(EXPORT campus_reportTargets\n    FILE campus_reportTargets.cmake\n    NAMESPACE campus::\n    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/campus_report)\ninstall(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})\n"
+            }
+        }
+    }
+}
