@@ -1,0 +1,272 @@
+{
+    "id": "native.pwa",
+    "version": 1,
+    "sequence": 109,
+    "courseId": "native",
+    "title": "Installable and honestly offline",
+    "summary": "Ship a web app manifest and a service worker whose cache strategy matches each request.",
+    "skills": ["web.browser-apis", "web.build-tooling"],
+    "prerequisites": ["web.browser-apis", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "pwa",
+        "briefing": "The campus app offers an install button on some browsers and shows a blank page when the network drops. The manifest is incomplete, every response is cached under one name, and API calls are stored beside public assets. Build a versioned worker that pre-caches the shell, falls back to an offline document for navigations, and leaves private requests alone."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:native"],
+    "hints": [
+        "Start with a cache version and derive both cache names from it.",
+        "Pre-cache the manifest, icons, and offline page during install and pass the promise to waitUntil.",
+        "Skip non-GET, cross-origin, and /api/ requests before choosing a strategy.",
+        "Return the cached asset immediately, refresh it in the background, and use offline.html for failed navigations."
+    ],
+    "misconceptions": [
+        {
+            "id": "cache-api",
+            "description": "Caching every response, including authenticated API calls.",
+            "stepId": "apply",
+            "feedback": "Private responses can be replayed to another user on a shared device. Skip /api/ or cache only explicitly public responses."
+        },
+        {
+            "id": "one-cache",
+            "description": "Reusing one cache name across releases.",
+            "stepId": "apply",
+            "feedback": "Old shell assets survive the deploy. Version the cache name and delete stale caches on activate."
+        },
+        {
+            "id": "no-waituntil",
+            "description": "Starting install work without event.waitUntil.",
+            "stepId": "apply",
+            "feedback": "The browser may terminate the worker before the cache is filled. Pass the promise to waitUntil."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A manifest makes installation possible",
+                "body": "Installability needs more than a registered worker. The manifest supplies the app name, start URL, standalone display mode, theme colors, and at least 192px and 512px icons. Browsers still vary, but a complete manifest over HTTPS is the common baseline."
+            },
+            {
+                "title": "The lifecycle is install, activate, fetch",
+                "body": "install fills the shell cache, activate removes caches from earlier releases and claims clients, and fetch chooses a strategy per request. Work started during install must be passed to event.waitUntil or the browser can stop the worker before the cache is ready."
+            },
+            {
+                "title": "Version the caches, not just the files",
+                "body": "Derive every cache name from a version string and delete every cache that does not match during activate. Reusing one name across deploys leaves old shell files in place, and a changed index.html can reference assets that were never cached."
+            },
+            {
+                "title": "Stale-while-revalidate is a trade",
+                "body": "Return the stored response immediately while a network request refreshes it in the background. The screen is fast and can be one deploy behind. This is acceptable for public assets and wrong for authenticated API responses."
+            },
+            {
+                "title": "Offline fallback is a route",
+                "body": "A failed navigation should resolve to a cached offline document instead of a rejected promise. API calls should fail visibly so the interface can offer a retry rather than replay private data from another session."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Web app manifest",
+                "definition": "A JSON document that names the app, its start URL, display mode, colors, and icons so a browser can offer installation."
+            },
+            {
+                "term": "Service worker",
+                "definition": "A background script that intercepts network requests for its origin and can serve cached responses."
+            },
+            {
+                "term": "Stale-while-revalidate",
+                "definition": "A cache strategy that returns the stored response immediately and refreshes it from the network in the background."
+            },
+            {
+                "term": "Cache version",
+                "definition": "A label in the cache name that lets activate delete assets from earlier releases."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Installability and the service worker lifecycle",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A manifest makes installation possible",
+                    "body": "Installability needs more than a registered worker. The manifest supplies the app name, start URL, standalone display mode, theme colors, and at least 192px and 512px icons. Browsers still vary, but a complete manifest over HTTPS is the common baseline."
+                },
+                {
+                    "title": "The lifecycle is install, activate, fetch",
+                    "body": "install fills the shell cache, activate removes caches from earlier releases and claims clients, and fetch chooses a strategy per request. Work started during install must be passed to event.waitUntil or the browser can stop the worker before the cache is ready."
+                },
+                {
+                    "title": "Version the caches, not just the files",
+                    "body": "Derive every cache name from a version string and delete every cache that does not match during activate. Reusing one name across deploys leaves old shell files in place, and a changed index.html can reference assets that were never cached."
+                },
+                {
+                    "title": "Stale-while-revalidate is a trade",
+                    "body": "Return the stored response immediately while a network request refreshes it in the background. The screen is fast and can be one deploy behind. This is acceptable for public assets and wrong for authenticated API responses."
+                },
+                {
+                    "title": "Offline fallback is a route",
+                    "body": "A failed navigation should resolve to a cached offline document instead of a rejected promise. API calls should fail visibly so the interface can offer a retry rather than replay private data from another session."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Web app manifest",
+                    "definition": "A JSON document that names the app, its start URL, display mode, colors, and icons so a browser can offer installation."
+                },
+                {
+                    "term": "Service worker",
+                    "definition": "A background script that intercepts network requests for its origin and can serve cached responses."
+                },
+                {
+                    "term": "Stale-while-revalidate",
+                    "definition": "A cache strategy that returns the stored response immediately and refreshes it from the network in the background."
+                },
+                {
+                    "term": "Cache version",
+                    "definition": "A label in the cache name that lets activate delete assets from earlier releases."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Write a versioned service worker with an offline fallback",
+            "prompt": "Edit service-worker.ts. Add a versioned shell cache and runtime cache, pre-cache the manifest, icons, and offline page during install, delete stale caches during activate, serve navigations from the network with an offline fallback, and use stale-while-revalidate for same-origin GET assets. Skip non-GET, cross-origin, and /api/ requests.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "service-worker.ts",
+                    "content": "/// <reference lib=\"webworker\" />\n\nconst CACHE = \"app-cache\";\n\nself.addEventListener(\"install\", () => {\n    // TODO: pre-cache the manifest, icons, and offline page\n    void caches.open(CACHE).then((cache) => cache.add(\"/\"));\n});\n\nself.addEventListener(\"fetch\", (event) => {\n    event.respondWith(\n        fetch(event.request).then((response) => {\n            const copy = response.clone();\n            void caches.open(CACHE).then((cache) => cache.put(event.request, copy));\n            return response;\n        }),\n    );\n});\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "service-worker.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Both caches carry the same version and stale caches are deleted.",
+                    "file": "service-worker.ts",
+                    "includes": [
+                        "const CACHE_VERSION = \"v3\"",
+                        "shell-${CACHE_VERSION}",
+                        "caches.delete(key)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Navigations fall back to the offline document and API requests are skipped.",
+                    "file": "service-worker.ts",
+                    "includes": [
+                        "request.method !== \"GET\"",
+                        "url.pathname.startsWith(\"/api/\")",
+                        "request.mode === \"navigate\"",
+                        "OFFLINE_URL"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Assets use stale-while-revalidate and the starter marker is gone.",
+                    "file": "service-worker.ts",
+                    "includes": [
+                        "caches.match(request)",
+                        "cache.put(request, copy)",
+                        "return cached ?? network"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "service-worker.ts",
+                    "includes": ["const CACHE_VERSION = \"v3\""],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Manifest, lifecycle, and cache policy",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "manifest",
+                    "label": "A manifest with a name, start URL, standalone display, and 192px and 512px icons is part of the installability contract.",
+                    "correct": true
+                },
+                {
+                    "id": "lifecycle",
+                    "label": "install fills the cache, activate cleans old caches, and fetch serves requests.",
+                    "correct": true
+                },
+                {
+                    "id": "version",
+                    "label": "Including a version in the cache name and deleting stale caches on activate prevents old shell files from surviving a deploy.",
+                    "correct": true
+                },
+                {
+                    "id": "api",
+                    "label": "Authenticated API responses should be cached by default so every screen works offline.",
+                    "correct": false
+                },
+                {
+                    "id": "fallback",
+                    "label": "A failed navigation should resolve to a cached offline document instead of a rejected fetch.",
+                    "correct": true
+                },
+                {
+                    "id": "install-only",
+                    "label": "Registering a service worker alone makes an app installable without a manifest.",
+                    "correct": false
+                }
+            ],
+            "explanation": "The manifest describes the installed app and the worker controls what loads offline. A versioned shell cache plus cleanup on activate keeps releases separate, and per-request strategies keep private responses out of shared caches."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Native and offline workspace is keyboard accessible. Checks verify source structure; they do not compile or run Native and offline.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
