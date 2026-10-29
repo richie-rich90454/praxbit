@@ -1,0 +1,244 @@
+{
+    "id": "lua.tables",
+    "version": 1,
+    "sequence": 70,
+    "courseId": "lua",
+    "title": "Tables, metatables, and modules",
+    "summary": "Use a table as a map, resolve methods through __index, and review error handling that hides failures.",
+    "skills": ["lua.tables", "lua.functions", "lua.modules"],
+    "prerequisites": ["lua.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "tables",
+        "briefing": "A game inventory module must track item counts and report bad data instead of masking it."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:lua"],
+    "hints": [
+        "Inventory.__index = Inventory makes method lookup fall back to the module table.",
+        "setmetatable({ items = {} }, Inventory) attaches that fallback to each instance.",
+        "Read the current count with self.items[name] or 0 before adding.",
+        "Use self.items[name] = (self.items[name] or 0) + count."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-key",
+            "description": "Adding to a key that has never been set.",
+            "stepId": "apply",
+            "feedback": "A missing key reads as nil, and arithmetic on nil raises an error. Default the read with or 0 before adding."
+        },
+        {
+            "id": "pcall",
+            "description": "Using pcall to turn every error into a default value.",
+            "stepId": "review",
+            "feedback": "pcall returns false plus the error. Handle the failures you expect and let unexpected ones reach the caller."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Tables are maps",
+                "body": "The same table type serves as a record, a map, and an array. Inventory keeps counts in items, keyed by the item name. Reading a key that has never been set returns nil, so the first insert must supply a default."
+            },
+            {
+                "title": "Metatables route missing lookups",
+                "body": "setmetatable(stock, Inventory) gives stock a metatable. When a key is missing, Lua checks the metatable's __index. Setting Inventory.__index = Inventory makes the module table the fallback, so stock:add finds Inventory.add."
+            },
+            {
+                "title": "Functions and modules",
+                "body": "A module is a table of functions and state. A colon definition such as function Inventory:add(name, count) receives self automatically, and callers use stock:add. A file module returns its table so require can load it once."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Table",
+                "definition": "Lua's compound value, usable as a sequence, map, or object."
+            },
+            {
+                "term": "Metatable",
+                "definition": "A table that controls how another table handles missing keys and operators."
+            },
+            {
+                "term": "Module",
+                "definition": "A table of functions and state that callers require or receive."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Lua tables and modules",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Tables are maps",
+                    "body": "The same table type serves as a record, a map, and an array. Inventory keeps counts in items, keyed by the item name. Reading a key that has never been set returns nil, so the first insert must supply a default."
+                },
+                {
+                    "title": "Metatables route missing lookups",
+                    "body": "setmetatable(stock, Inventory) gives stock a metatable. When a key is missing, Lua checks the metatable's __index. Setting Inventory.__index = Inventory makes the module table the fallback, so stock:add finds Inventory.add."
+                },
+                {
+                    "title": "Functions and modules",
+                    "body": "A module is a table of functions and state. A colon definition such as function Inventory:add(name, count) receives self automatically, and callers use stock:add. A file module returns its table so require can load it once."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Table",
+                    "definition": "Lua's compound value, usable as a sequence, map, or object."
+                },
+                {
+                    "term": "Metatable",
+                    "definition": "A table that controls how another table handles missing keys and operators."
+                },
+                {
+                    "term": "Module",
+                    "definition": "A table of functions and state that callers require or receive."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Build an inventory module",
+            "prompt": "Edit main.lua. Inventory stores counts by name, resolves methods through __index, and totals the stock.",
+            "evidence": "construction",
+            "language": "lua",
+            "files": [
+                {
+                    "path": "main.lua",
+                    "content": "local Inventory = {}\nInventory.__index = nil -- TODO: make Inventory the metatable's __index\n\nfunction Inventory.new()\n  return setmetatable({ items = {} }, Inventory)\nend\n\nfunction Inventory:add(name, count)\n  self.items[name] = 0 -- TODO: add count to the current amount\nend\n\nfunction Inventory:total()\n  local sum = 0\n  for _, count in pairs(self.items) do\n    sum = sum + count\n  end\n  return sum\nend\n\nlocal stock = Inventory.new()\nstock:add(\"bolts\", 3)\nstock:add(\"nuts\", 2)\nprint(stock:total())\n",
+                    "editable": true,
+                    "language": "lua"
+                }
+            ],
+            "entry": "main.lua",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The module table keeps the taught name.",
+                    "file": "main.lua",
+                    "includes": ["local Inventory = {}"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Instances fall back to the module through __index.",
+                    "file": "main.lua",
+                    "includes": [
+                        "Inventory.__index = Inventory",
+                        "setmetatable({ items = {} }, Inventory)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Adding to an unseen item starts from zero.",
+                    "file": "main.lua",
+                    "includes": ["self.items[name] = (self.items[name] or 0) + count"],
+                    "excludes": ["TODO", "self.items[name] = 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.lua",
+                    "includes": ["local Inventory = {}"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the stock module",
+            "prompt": "Review the module and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "stock.lua",
+                "caption": "Missing keys and a broad pcall both turn failures into silent defaults.",
+                "kind": "code",
+                "language": "lua",
+                "content": "local function add_stock(stock, item, amount)\n  stock[item] = stock[item] + amount\nend\n\nlocal function read_amount(source)\n  local ok, amount = pcall(function()\n    return source.amount + 0\n  end)\n  if not ok then\n    return 0\n  end\n  return amount\nend\n"
+            },
+            "findings": [
+                {
+                    "id": "nil-arithmetic",
+                    "label": "Adding amount to a missing key raises an arithmetic error on nil.",
+                    "correct": true
+                },
+                {
+                    "id": "default",
+                    "label": "Using (stock[item] or 0) before the addition makes the first insert safe.",
+                    "correct": true
+                },
+                {
+                    "id": "pcall",
+                    "label": "read_amount returns zero for every failure, so callers cannot distinguish bad data from a bug.",
+                    "correct": true
+                },
+                {
+                    "id": "safe",
+                    "label": "pcall makes read_amount safe because every error becomes a number.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block until missing keys and hidden errors are handled explicitly."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; defaults are harmless."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "A missing table key is nil, and nil + amount raises an error. Default it explicitly with (stock[item] or 0). read_amount also collapses every pcall failure into zero, so validate the field and report it, or let unexpected errors surface."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["games", "systems"]
+}
