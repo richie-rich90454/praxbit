@@ -1,0 +1,316 @@
+{
+    "id": "systems-architecture.distributed",
+    "version": 1,
+    "sequence": 108,
+    "courseId": "systems-architecture",
+    "title": "Partial failure and consistency",
+    "summary": "Retry a write safely with deadlines, idempotency keys, bounded backoff, quorum reads, and backpressure.",
+    "skills": ["architecture.distributed", "api.architecture"],
+    "prerequisites": ["concept.networks", "testing.integration"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "distributed",
+        "briefing": "The payment client retries a POST three times, sends no idempotency key, and has no timeout. A timeout can mean the charge committed, so the retry can charge twice. Define a retry policy that is safe to repeat and explains the consistency trade-offs."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:systems"],
+    "hints": [
+        "Give each attempt its own AbortController and clear the timer in finally.",
+        "Retry only a timeout, a reset, 429, or 5xx; return 4xx to the caller.",
+        "Generate the idempotency key once, outside the loop, and send it on every attempt.",
+        "Cap attempts, back off exponentially with jitter, and reject when the queue is full."
+    ],
+    "misconceptions": [
+        {
+            "id": "timeout-is-failure",
+            "description": "Treating a timeout as proof that the write did not land.",
+            "stepId": "apply",
+            "feedback": "The write may have committed before the response was lost. Reuse one idempotency key so the retry returns the original result instead of repeating the effect."
+        },
+        {
+            "id": "retry-forever",
+            "description": "Retrying without a cap or delay.",
+            "stepId": "review",
+            "feedback": "A failing dependency receives more load from retries exactly when it can handle less. Cap attempts, add backoff with jitter, and honor backpressure."
+        },
+        {
+            "id": "at-least-once-once",
+            "description": "Assuming at-least-once delivery means one delivery.",
+            "stepId": "apply",
+            "feedback": "At-least-once permits duplicates. The handler must be idempotent or deduplicate by key so a repeated delivery has one effect."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A timeout is not a failure",
+                "body": "When a request times out, the server may have committed the write and lost the response. From the client, a lost response and a failed write look identical, so every retry must be safe to apply twice. Treat the timeout as an unknown outcome, not as proof that nothing happened."
+            },
+            {
+                "title": "Retry only what can succeed later",
+                "body": "Retry a connection reset, a timeout, a 429, or a 5xx. Do not retry a 400 or 409 without changing the request. Cap attempts, use exponential backoff with jitter so clients do not retry in lockstep, and keep an overall deadline so one slow dependency cannot hold a request forever."
+            },
+            {
+                "title": "Idempotency makes repetition harmless",
+                "body": "The client generates one key per logical write and reuses it on every attempt. The server stores the key with the result and returns the stored response for a duplicate. At-least-once delivery plus an idempotent handler yields one effect, which is the practical version of exactly-once processing."
+            },
+            {
+                "title": "Consistency is a trade-off",
+                "body": "Read-your-writes can be enforced by carrying a version token or by routing a client to the replica that holds its write. With N replicas, R + W > N makes read and write quorums overlap, but a partition can still force a choice between availability and freshness. Name the guarantee the product needs instead of asking for strong consistency by default."
+            },
+            {
+                "title": "Backpressure limits amplification",
+                "body": "A bounded queue and a 429 with Retry-After tell the caller to slow down. Retries without a cap multiply load during an outage, and unbounded buffering turns a slow dependency into an out-of-memory failure. Reject early when the queue is full instead of accepting work that cannot finish."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Timeout",
+                "definition": "A deadline after which a caller stops waiting for a response that may still arrive."
+            },
+            {
+                "term": "Idempotency key",
+                "definition": "A client-generated identifier that lets a server recognize a repeated write."
+            },
+            {
+                "term": "At-least-once delivery",
+                "definition": "A delivery guarantee that may duplicate a message but never drops it."
+            },
+            {
+                "term": "Read-your-writes",
+                "definition": "A consistency guarantee that a client sees its own committed write on a later read."
+            },
+            {
+                "term": "Quorum",
+                "definition": "The minimum number of replicas that must acknowledge a read or write."
+            },
+            {
+                "term": "Backpressure",
+                "definition": "A signal that tells a producer to slow down when a consumer cannot keep up."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Failure, retries, and consistency",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A timeout is not a failure",
+                    "body": "When a request times out, the server may have committed the write and lost the response. From the client, a lost response and a failed write look identical, so every retry must be safe to apply twice. Treat the timeout as an unknown outcome, not as proof that nothing happened."
+                },
+                {
+                    "title": "Retry only what can succeed later",
+                    "body": "Retry a connection reset, a timeout, a 429, or a 5xx. Do not retry a 400 or 409 without changing the request. Cap attempts, use exponential backoff with jitter so clients do not retry in lockstep, and keep an overall deadline so one slow dependency cannot hold a request forever."
+                },
+                {
+                    "title": "Idempotency makes repetition harmless",
+                    "body": "The client generates one key per logical write and reuses it on every attempt. The server stores the key with the result and returns the stored response for a duplicate. At-least-once delivery plus an idempotent handler yields one effect, which is the practical version of exactly-once processing."
+                },
+                {
+                    "title": "Consistency is a trade-off",
+                    "body": "Read-your-writes can be enforced by carrying a version token or by routing a client to the replica that holds its write. With N replicas, R + W > N makes read and write quorums overlap, but a partition can still force a choice between availability and freshness. Name the guarantee the product needs instead of asking for strong consistency by default."
+                },
+                {
+                    "title": "Backpressure limits amplification",
+                    "body": "A bounded queue and a 429 with Retry-After tell the caller to slow down. Retries without a cap multiply load during an outage, and unbounded buffering turns a slow dependency into an out-of-memory failure. Reject early when the queue is full instead of accepting work that cannot finish."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Timeout",
+                    "definition": "A deadline after which a caller stops waiting for a response that may still arrive."
+                },
+                {
+                    "term": "Idempotency key",
+                    "definition": "A client-generated identifier that lets a server recognize a repeated write."
+                },
+                {
+                    "term": "At-least-once delivery",
+                    "definition": "A delivery guarantee that may duplicate a message but never drops it."
+                },
+                {
+                    "term": "Read-your-writes",
+                    "definition": "A consistency guarantee that a client sees its own committed write on a later read."
+                },
+                {
+                    "term": "Quorum",
+                    "definition": "The minimum number of replicas that must acknowledge a read or write."
+                },
+                {
+                    "term": "Backpressure",
+                    "definition": "A signal that tells a producer to slow down when a consumer cannot keep up."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Define a safe payment retry policy",
+            "prompt": "Edit distributed.md. Add a per-attempt timeout, a bounded retry loop for retryable failures only, one idempotency key reused across attempts, and notes on read-your-writes, quorum overlap, and backpressure.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "distributed.md",
+                    "content": "# Payment retry policy\n\nThe client sends POST /payments and retries three times when the request fails.\n\n# TODO: bound the retries, add a timeout, and make the write safe to repeat\n\n~~~ts\nasync function pay(orderId: string, amountCents: number) {\n    for (let attempt = 0; attempt < 3; attempt += 1) {\n        const response = await fetch(\"/payments\", {\n            method: \"POST\",\n            body: JSON.stringify({ orderId, amountCents }),\n        });\n        if (response.ok) {\n            return response.json();\n        }\n    }\n}\n~~~\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "distributed.md",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "One idempotency key is reused for every attempt.",
+                    "file": "distributed.md",
+                    "includes": [
+                        "const idempotencyKey = crypto.randomUUID();",
+                        "\"Idempotency-Key\": idempotencyKey"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Each attempt has a deadline and cancels its request.",
+                    "file": "distributed.md",
+                    "includes": [
+                        "const controller = new AbortController();",
+                        "setTimeout(() => controller.abort(), 2_000)",
+                        "signal: controller.signal"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Retries are capped and back off with jitter.",
+                    "file": "distributed.md",
+                    "includes": [
+                        "for (let attempt = 0; attempt < 5; attempt += 1)",
+                        "await sleep(2 ** attempt * 100 + Math.random() * 100)"
+                    ],
+                    "excludes": ["for (let attempt = 0; attempt < 3; attempt += 1)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The policy explains read-your-writes and quorum overlap.",
+                    "file": "distributed.md",
+                    "includes": ["R + W > N", "read-your-writes"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The policy makes delivery and overload explicit.",
+                    "file": "distributed.md",
+                    "includes": ["at-least-once delivery into one charge", "Retry-After"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "distributed.md",
+                    "includes": ["const idempotencyKey = crypto.randomUUID();"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the charge loop",
+            "prompt": "Review the retry loop and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "charge.ts",
+                "caption": "A network error retries the same POST forever, and any HTTP response is treated as success.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "async function charge(orderId: string, amountCents: number): Promise<void> {\n    while (true) {\n        try {\n            await fetch(\"https://payments.internal/charge\", {\n                method: \"POST\",\n                headers: { \"Content-Type\": \"application/json\" },\n                body: JSON.stringify({ orderId, amountCents }),\n            });\n            return;\n        } catch {\n            continue;\n        }\n    }\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "no-key",
+                    "label": "The POST has no idempotency key, so a retry after a committed charge can charge the card twice.",
+                    "correct": true
+                },
+                {
+                    "id": "unbounded",
+                    "label": "The catch block retries forever with no attempt cap, backoff, or jitter.",
+                    "correct": true
+                },
+                {
+                    "id": "http-status",
+                    "label": "fetch resolves for 4xx and 5xx responses, and the loop returns as if the charge succeeded.",
+                    "correct": true
+                },
+                {
+                    "id": "timeout",
+                    "label": "There is no per-attempt deadline, so a stalled connection blocks the loop indefinitely.",
+                    "correct": true
+                },
+                {
+                    "id": "post-idempotent",
+                    "label": "POST is idempotent by definition, so replaying the request cannot duplicate a charge.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until retries are bounded and the write is idempotent."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the retry loop handles transient network errors."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the loop formatting needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "A lost response is indistinguishable from a failed charge, and the retry has no key, so the server cannot deduplicate it. The loop also retries forever, ignores HTTP error statuses because fetch resolves on them, and can wait indefinitely without a deadline."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Systems and architecture workspace is keyboard accessible. Checks verify source structure; they do not compile or run Systems and architecture.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
