@@ -1,0 +1,255 @@
+{
+    "id": "express.middleware",
+    "version": 1,
+    "sequence": 82,
+    "courseId": "express",
+    "title": "Middleware order and centralized errors",
+    "summary": "Parse JSON, validate before the handler, and delegate failures to a four-argument error handler.",
+    "skills": ["express.middleware", "express.errors"],
+    "prerequisites": ["express.routing", "node.middleware"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "middleware",
+        "briefing": "The product API accepts new products. A request without a valid body reached the store, and a thrown validation error produced an empty response because the error handler never ran."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:express"],
+    "hints": [
+        "Register express.json() before the route that reads the body.",
+        "Validate both name and price in a middleware function.",
+        "Call next(error) with a status and code instead of writing the response.",
+        "Keep the error handler last and give it all four parameters."
+    ],
+    "misconceptions": [
+        {
+            "id": "handler-first",
+            "description": "Registering the error handler before the routes.",
+            "stepId": "apply",
+            "feedback": "Error middleware only sees failures from middleware and routes registered before it. Register it after them."
+        },
+        {
+            "id": "local-response",
+            "description": "Answering a validation failure inside the middleware.",
+            "stepId": "apply",
+            "feedback": "That bypasses the shared error contract. Pass the error with next(error) and let the boundary serialize it."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Middleware runs in order",
+                "body": "Each app.use and route registration joins a chain. A parser registered after a route cannot prepare the body for that route, so shared work belongs before the handlers that need it. Authentication belongs before validation so an anonymous request is rejected before its body is inspected."
+            },
+            {
+                "title": "next(error) skips to the error handler",
+                "body": "Calling next() continues the normal chain. Calling next(error) skips the remaining normal middleware and finds the next four-argument handler."
+            },
+            {
+                "title": "Four arguments identify an error handler",
+                "body": "Express detects an error handler by its arity. It must be registered after the routes it protects and must keep all four parameters even if next is unused."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Middleware",
+                "definition": "A function that can read the request, change the response, or pass control onward."
+            },
+            {
+                "term": "next",
+                "definition": "The continuation callback that advances the middleware chain."
+            },
+            {
+                "term": "Error handler",
+                "definition": "A four-argument middleware that receives failures from earlier handlers."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Express middleware and errors",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Middleware runs in order",
+                    "body": "Each app.use and route registration joins a chain. A parser registered after a route cannot prepare the body for that route, so shared work belongs before the handlers that need it. Authentication belongs before validation so an anonymous request is rejected before its body is inspected."
+                },
+                {
+                    "title": "next(error) skips to the error handler",
+                    "body": "Calling next() continues the normal chain. Calling next(error) skips the remaining normal middleware and finds the next four-argument handler."
+                },
+                {
+                    "title": "Four arguments identify an error handler",
+                    "body": "Express detects an error handler by its arity. It must be registered after the routes it protects and must keep all four parameters even if next is unused."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Middleware",
+                    "definition": "A function that can read the request, change the response, or pass control onward."
+                },
+                {
+                    "term": "next",
+                    "definition": "The continuation callback that advances the middleware chain."
+                },
+                {
+                    "term": "Error handler",
+                    "definition": "A four-argument middleware that receives failures from earlier handlers."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Validate JSON before the handler",
+            "prompt": "Edit app.ts. Add express.json() with a size limit, validate name and price in middleware, call next(error) on invalid input, and register a four-argument error handler after the routes.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "app.ts",
+                    "content": "import express, { type NextFunction, type Request, type Response } from \"express\";\n\ntype Product = { id: string; name: string; price: number };\nconst products: Product[] = [];\n\nexport const app = express();\n\napp.post(\"/products\", function createProduct(request, response) {\n    // TODO: validate the body and pass failures to an error handler\n    products.push(request.body);\n    response.status(201).json(request.body);\n});\n\napp.use(express.json());\n\napp.use(function onError(error: Error, request: Request, response: Response) {\n    response.status(500).json({ error: error.message });\n});\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "app.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The JSON parser is registered before the routes with a size limit.",
+                    "file": "app.ts",
+                    "includes": ["app.use(express.json({ limit: \"16kb\" }));"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Validation passes failures to the error boundary with next(error).",
+                    "file": "app.ts",
+                    "includes": [
+                        "function validateProduct(request: Request, response: Response, next: NextFunction)",
+                        "next(Object.assign(new Error("
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The validated route uses the middleware before the handler.",
+                    "file": "app.ts",
+                    "includes": ["app.post(\"/products\", validateProduct"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A four-argument error handler returns a stable code and status.",
+                    "file": "app.ts",
+                    "includes": [
+                        "function onError(error:",
+                        "next: NextFunction",
+                        "response.status(status).json({ error: error.code ?? \"internal\" })"
+                    ],
+                    "excludes": ["error.stack"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "app.ts",
+                    "includes": ["app.use(express.json({ limit: \"16kb\" }));"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the middleware chain",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "app.ts",
+                "caption": "The error handler is registered first, the parser is registered last, and validation answers on its own.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import express from \"express\";\n\nexport const app = express();\n\napp.use(function onError(error: Error, request: express.Request, response: express.Response, next: express.NextFunction) {\n    response.status(500).json({ error: error.message });\n});\n\napp.post(\"/products\", function createProduct(request, response) {\n    const body = request.body as { name?: unknown };\n    if (typeof body.name !== \"string\") {\n        response.status(400).json({ error: \"invalid_name\" });\n        return;\n    }\n    response.status(201).json(body);\n});\n\napp.use(express.json());\n"
+            },
+            "findings": [
+                {
+                    "id": "position",
+                    "label": "The error handler is registered before the route, so Express never calls it for a later failure.",
+                    "correct": true
+                },
+                {
+                    "id": "next",
+                    "label": "The validation branch answers directly instead of calling next(error).",
+                    "correct": true
+                },
+                {
+                    "id": "parser",
+                    "label": "express.json() is registered after the route, so request.body is undefined there.",
+                    "correct": true
+                },
+                {
+                    "id": "safe",
+                    "label": "The error handler keeps internal messages out of the response.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the middleware order and delegation are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; Express resolves this order safely."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the handler formatting remains."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Express only invokes a four-argument handler when it appears after the failing route and receives next(error). Here the handler is registered first, the JSON parser runs after the route, and validation writes its own response instead of delegating."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 125,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Express workspace is keyboard accessible. Checks verify source structure; they do not compile or run Express.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
