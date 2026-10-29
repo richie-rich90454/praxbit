@@ -14,6 +14,29 @@ export const HandleSchema = z
 
 export const IsoDateTimeSchema = z.iso.datetime({ offset: true });
 
+export const ContentLanguageSchema = z.enum([
+    "javascript",
+    "typescript",
+    "html",
+    "css",
+    "json",
+    "python",
+    "sql",
+    "text",
+    "java",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "rust",
+    "kotlin",
+    "swift",
+    "ruby",
+    "zig",
+    "lua",
+]);
+export type ContentLanguage = z.infer<typeof ContentLanguageSchema>;
+
 export const DifficultySchema = z.enum(["beginner", "developing", "advanced"]);
 export type Difficulty = z.infer<typeof DifficultySchema>;
 
