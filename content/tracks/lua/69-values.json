@@ -1,0 +1,212 @@
+{
+    "id": "lua.values",
+    "version": 1,
+    "sequence": 69,
+    "courseId": "lua",
+    "title": "Values and loops in Lua",
+    "summary": "Use local values, a sequence table, and ipairs to count positives.",
+    "skills": ["lua.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "values",
+        "briefing": "A game studio tallies positive score changes in Lua."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:lua"],
+    "hints": [
+        "The loop already visits every score.",
+        "Compare the current value with zero.",
+        "Use an if statement around the increment.",
+        "Add if value > 0 then count = count + 1 end inside the loop."
+    ],
+    "misconceptions": [
+        {
+            "id": "global",
+            "description": "Assigning without local inside a function.",
+            "stepId": "apply",
+            "feedback": "An undeclared assignment creates a global. Declare counters and helpers with local unless sharing is intentional."
+        },
+        {
+            "id": "ipairs",
+            "description": "Assuming ipairs visits every key.",
+            "stepId": "apply",
+            "feedback": "ipairs stops at the first nil and ignores non-integer keys. Use pairs for a map and ipairs for a sequence."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Local values and dynamic types",
+                "body": "A local declaration limits a name to the block where it appears. Lua values carry a type, but a variable is not locked to one: the same name can hold a number, a string, a boolean, or a table at different times."
+            },
+            {
+                "title": "Tables hold sequences",
+                "body": "A table is Lua's compound value and can act as both an array and a map. The sequence { 3, -1, 2 } has keys 1, 2, and 3. ipairs walks consecutive integer keys starting at 1 and stops at the first nil."
+            },
+            {
+                "title": "Loops and conditions",
+                "body": "A numeric or generic for loop repeats a body, and an if statement selects a branch. Indentation is cosmetic; the end keywords close the loop and the conditional."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Local",
+                "definition": "A name declared with local, visible only in the block where it is declared."
+            },
+            {
+                "term": "Table",
+                "definition": "Lua's compound value, usable as both an array and a map."
+            },
+            {
+                "term": "ipairs",
+                "definition": "An iterator over consecutive integer keys starting at 1."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Lua values and loops",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Local values and dynamic types",
+                    "body": "A local declaration limits a name to the block where it appears. Lua values carry a type, but a variable is not locked to one: the same name can hold a number, a string, a boolean, or a table at different times."
+                },
+                {
+                    "title": "Tables hold sequences",
+                    "body": "A table is Lua's compound value and can act as both an array and a map. The sequence { 3, -1, 2 } has keys 1, 2, and 3. ipairs walks consecutive integer keys starting at 1 and stops at the first nil."
+                },
+                {
+                    "title": "Loops and conditions",
+                    "body": "A numeric or generic for loop repeats a body, and an if statement selects a branch. Indentation is cosmetic; the end keywords close the loop and the conditional."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Local",
+                    "definition": "A name declared with local, visible only in the block where it is declared."
+                },
+                {
+                    "term": "Table",
+                    "definition": "Lua's compound value, usable as both an array and a map."
+                },
+                {
+                    "term": "ipairs",
+                    "definition": "An iterator over consecutive integer keys starting at 1."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive score changes",
+            "prompt": "Edit main.lua. count_positive returns how many values are greater than zero.",
+            "evidence": "construction",
+            "language": "lua",
+            "files": [
+                {
+                    "path": "main.lua",
+                    "content": "local function count_positive(values)\n  local count = 0\n  for _, value in ipairs(values) do\n    count = count + 0 -- TODO: count positive values\n  end\n  return count\nend\n\nprint(count_positive({ 3, -1, 2 }))\n",
+                    "editable": true,
+                    "language": "lua"
+                }
+            ],
+            "entry": "main.lua",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the taught name and parameter.",
+                    "file": "main.lua",
+                    "includes": ["local function count_positive(values)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The loop counts only values greater than zero.",
+                    "file": "main.lua",
+                    "includes": ["for _, value in ipairs(values) do", "count = count + 1"],
+                    "excludes": ["count = count + 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.lua",
+                    "includes": ["local function count_positive(values)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Values and loops",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "local",
+                    "label": "A local name is visible only inside the block that declares it.",
+                    "correct": true
+                },
+                {
+                    "id": "types",
+                    "label": "A Lua variable is locked to the type of its first value.",
+                    "correct": false
+                },
+                {
+                    "id": "ipairs",
+                    "label": "ipairs visits integer keys starting at 1 and stops at the first nil.",
+                    "correct": true
+                },
+                {
+                    "id": "index",
+                    "label": "Lua table indexes start at zero.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Lua is dynamically typed: a name can hold any value, and local controls scope rather than type. Tables are the single compound structure, sequences start at index 1, and ipairs follows that sequence until a nil."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["games", "systems"]
+}
