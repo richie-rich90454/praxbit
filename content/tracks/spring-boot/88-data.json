@@ -1,0 +1,287 @@
+{
+    "id": "spring-boot.data",
+    "version": 1,
+    "sequence": 88,
+    "courseId": "spring-boot",
+    "title": "Transactions and a stable API boundary",
+    "summary": "Read products through a repository inside a read-only transaction and return a response record.",
+    "skills": ["spring.data", "spring.security"],
+    "prerequisites": ["spring.controllers", "sql.queries"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 10,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "data",
+        "briefing": "The service injects its repository into a field, returns the JPA entity, and runs no transaction, so lazy fields fail once the entity leaves the session. Move to constructor injection, return a response record, and put the database work in a transaction."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:spring"],
+    "hints": [
+        "The repository interface is already declared at the bottom of the file.",
+        "Declare the repository as a private final field and assign it in the constructor.",
+        "Annotate the read method with @Transactional(readOnly = true).",
+        "Build a ProductResponse from the entity id, name, and stock instead of returning the entity."
+    ],
+    "misconceptions": [
+        {
+            "id": "transaction-remote",
+            "description": "Holding a database transaction during a remote call.",
+            "stepId": "review",
+            "feedback": "The transaction keeps a connection checked out. Call remote services before or after the transactional method."
+        },
+        {
+            "id": "field-injection",
+            "description": "Using @Autowired on a field.",
+            "stepId": "apply",
+            "feedback": "Constructor injection makes the dependency final and visible in the constructor signature."
+        },
+        {
+            "id": "entity-return",
+            "description": "Returning the entity from the service.",
+            "stepId": "apply",
+            "feedback": "The entity is tied to the table. Map it to a response record at the API boundary."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Entities belong to the data layer",
+                "body": "An @Entity class maps to a table. Its fields follow the schema, and lazy relationships may load only while a session is open. Returning it from a service couples the API to the table and can serialize fields that clients should never see. Map it to a response record at the boundary."
+            },
+            {
+                "title": "Repositories remove boilerplate",
+                "body": "A repository interface that extends JpaRepository<Product, Long> gets CRUD operations and derived queries such as findByStockGreaterThan without an implementation class. Spring creates the proxy at startup."
+            },
+            {
+                "title": "Transactions define the unit of work",
+                "body": "Spring wraps a method annotated with @Transactional in a transaction. readOnly = true lets the provider skip dirty checking for reads. The transaction belongs to the service method that owns the database work, not to a controller that also calls remote services."
+            },
+            {
+                "title": "Constructor injection makes dependencies explicit",
+                "body": "A final field assigned in the constructor cannot be replaced after construction and is checked by the compiler. Field injection hides the dependency and makes the class harder to build in a test."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Entity",
+                "definition": "A class whose fields map to columns of a database table."
+            },
+            {
+                "term": "Repository",
+                "definition": "An interface that gives the service CRUD and query methods for an entity."
+            },
+            {
+                "term": "Transaction",
+                "definition": "A unit of work that commits together or rolls back together."
+            },
+            {
+                "term": "Response record",
+                "definition": "A small immutable type that defines what the API returns."
+            },
+            {
+                "term": "Constructor injection",
+                "definition": "Supplying dependencies through a constructor so they can be final."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Repositories, transactions, and boundaries",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Entities belong to the data layer",
+                    "body": "An @Entity class maps to a table. Its fields follow the schema, and lazy relationships may load only while a session is open. Returning it from a service couples the API to the table and can serialize fields that clients should never see. Map it to a response record at the boundary."
+                },
+                {
+                    "title": "Repositories remove boilerplate",
+                    "body": "A repository interface that extends JpaRepository<Product, Long> gets CRUD operations and derived queries such as findByStockGreaterThan without an implementation class. Spring creates the proxy at startup."
+                },
+                {
+                    "title": "Transactions define the unit of work",
+                    "body": "Spring wraps a method annotated with @Transactional in a transaction. readOnly = true lets the provider skip dirty checking for reads. The transaction belongs to the service method that owns the database work, not to a controller that also calls remote services."
+                },
+                {
+                    "title": "Constructor injection makes dependencies explicit",
+                    "body": "A final field assigned in the constructor cannot be replaced after construction and is checked by the compiler. Field injection hides the dependency and makes the class harder to build in a test."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Entity",
+                    "definition": "A class whose fields map to columns of a database table."
+                },
+                {
+                    "term": "Repository",
+                    "definition": "An interface that gives the service CRUD and query methods for an entity."
+                },
+                {
+                    "term": "Transaction",
+                    "definition": "A unit of work that commits together or rolls back together."
+                },
+                {
+                    "term": "Response record",
+                    "definition": "A small immutable type that defines what the API returns."
+                },
+                {
+                    "term": "Constructor injection",
+                    "definition": "Supplying dependencies through a constructor so they can be final."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Close the data boundary",
+            "prompt": "Edit ProductService.java. Use constructor injection, keep the entity and repository mapped, mark reads transactional, and return a ProductResponse instead of the entity. Run the checks when done.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "ProductService.java",
+                    "content": "package com.praxbit.catalog;\n\nimport java.util.List;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.data.jpa.repository.JpaRepository;\nimport org.springframework.stereotype.Service;\n\n@Service\npublic class ProductService {\n    @Autowired\n    private ProductRepository repository;\n\n    // TODO: use constructor injection, return a response record, and mark reads transactional\n    public Product find(long id) {\n        return repository.findById(id).orElseThrow();\n    }\n}\n\ninterface ProductRepository extends JpaRepository<Product, Long> {\n    List<Product> findByStockGreaterThan(int stock);\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "ProductService.java",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The service receives its repository through the constructor.",
+                    "file": "ProductService.java",
+                    "includes": [
+                        "private final ProductRepository repository;",
+                        "public ProductService(ProductRepository repository)"
+                    ],
+                    "excludes": ["@Autowired"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The entity is mapped and exposed through a Spring Data repository.",
+                    "file": "ProductService.java",
+                    "includes": [
+                        "@Entity",
+                        "interface ProductRepository extends JpaRepository<Product, Long>"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Reads run inside a read-only transaction.",
+                    "file": "ProductService.java",
+                    "includes": ["@Transactional(readOnly = true)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The public method returns a response record, not the entity.",
+                    "file": "ProductService.java",
+                    "includes": [
+                        "record ProductResponse(long id, String name, int stock)",
+                        "public ProductResponse find(long id)"
+                    ],
+                    "excludes": ["public Product find(long id)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductService.java",
+                    "includes": ["private final ProductRepository repository;"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the transaction boundary",
+            "prompt": "Review the controller and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "ProductController.java",
+                "caption": "The controller injects by field, returns the entity, and keeps a database transaction open during a remote pricing call.",
+                "kind": "code",
+                "language": "java",
+                "content": "package com.praxbit.catalog;\n\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.transaction.annotation.Transactional;\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.PathVariable;\nimport org.springframework.web.bind.annotation.RestController;\nimport org.springframework.web.client.RestClient;\n\n@RestController\npublic class ProductController {\n    @Autowired\n    private ProductService service;\n\n    private final RestClient restClient = RestClient.create(\"https://pricing.praxbit.dev\");\n\n    @GetMapping(\"/api/products/{id}\")\n    @Transactional\n    public ResponseEntity<Product> get(@PathVariable long id) {\n        Product product = service.find(id);\n        if (product.getStock() == 0) {\n            restClient.get()\n                .uri(\"/availability/{id}\", id)\n                .retrieve()\n                .toBodilessEntity();\n        }\n        return ResponseEntity.ok(product);\n    }\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "entity-body",
+                    "label": "The endpoint returns the JPA entity as the response body.",
+                    "correct": true
+                },
+                {
+                    "id": "field-inject",
+                    "label": "The controller uses field injection for ProductService.",
+                    "correct": true
+                },
+                {
+                    "id": "remote-tx",
+                    "label": "The transaction stays open while the remote pricing call runs.",
+                    "correct": true
+                },
+                {
+                    "id": "read-only",
+                    "label": "Marking the method read-only would make the remote call safe inside the transaction.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the entity boundary, injection, and transaction scope are fixed."
+                },
+                {
+                    "id": "style",
+                    "label": "The code only needs formatting changes."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remote call inside a transaction is acceptable."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Returning the entity couples the API to the table and can serialize lazy fields. Field injection hides the dependency, and @Transactional holds a database connection while an external HTTP call runs. Return a response record, inject through the constructor, and move the remote call outside the transaction."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Spring Boot workspace is keyboard accessible. Checks verify source structure; they do not compile or run Spring Boot.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
