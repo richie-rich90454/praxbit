@@ -1,0 +1,278 @@
+{
+    "id": "database-engineering.indexes",
+    "version": 1,
+    "sequence": 111,
+    "courseId": "database-engineering",
+    "title": "Read the query before the index",
+    "summary": "Design one composite index from a real query and verify it with EXPLAIN.",
+    "skills": ["sql.postgresql", "sql.indexes"],
+    "prerequisites": ["sql.queries", "sql.modeling"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "indexes",
+        "briefing": "The storefront opens a customer's order history with a status filter, newest first. The current index was copied from a template, and the query still reads far more rows than it returns."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
+    "hints": [
+        "The query filters customer_id and status with equality, then sorts by placed_at.",
+        "Order the index columns: equality filters first, the sort column last.",
+        "Use INCLUDE (id, total_cents) so the scan can stay inside the index.",
+        "Run EXPLAIN (ANALYZE, BUFFERS) and look for an Index Only Scan instead of a Seq Scan."
+    ],
+    "misconceptions": [
+        {
+            "id": "status-first",
+            "description": "Leading the index with the low-cardinality status column.",
+            "stepId": "apply",
+            "feedback": "Status filters little on its own. Lead with customer_id, which matches far fewer rows, then order the remaining columns by the query."
+        },
+        {
+            "id": "estimate-only",
+            "description": "Trusting EXPLAIN without ANALYZE.",
+            "stepId": "check",
+            "feedback": "A plain EXPLAIN shows estimates. EXPLAIN (ANALYZE, BUFFERS) runs the query and shows actual time and buffer usage."
+        },
+        {
+            "id": "index-everything",
+            "description": "Adding an index for every column.",
+            "stepId": "apply",
+            "feedback": "Each index costs storage and slows writes. Add indexes for real query shapes and verify them with a plan."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Selectivity picks the lead column",
+                "body": "customer_id matches a small slice of the table; status has only a few values and filters little. Put the more selective equality column first."
+            },
+            {
+                "title": "Composite order follows the query",
+                "body": "A B-tree can use the index for equality on customer_id and status, then read placed_at in descending order. Put the sort column after the equality columns so PostgreSQL does not need a separate sort."
+            },
+            {
+                "title": "A covering index avoids heap fetches",
+                "body": "INCLUDE adds id and total_cents to the index leaf, so an index-only scan can answer the query when the visibility map allows it. PostgreSQL secondary indexes do not store the primary key for you, so add id when the query returns it. Each extra column makes the index larger, so include only what the query selects."
+            },
+            {
+                "title": "The plan is evidence",
+                "body": "EXPLAIN (ANALYZE, BUFFERS) runs the query and reports actual time, rows, loops, and buffer reads. Compare the plan before and after the index instead of assuming the index is used."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Index",
+                "definition": "A separate structure that lets the database find rows without scanning the whole table."
+            },
+            {
+                "term": "Selectivity",
+                "definition": "How much a column narrows the result; a column with many distinct values is usually more selective."
+            },
+            {
+                "term": "Composite index",
+                "definition": "An index over several columns in a fixed order."
+            },
+            {
+                "term": "Covering index",
+                "definition": "An index that contains every column a query needs, so the table heap is not visited for the selected values."
+            },
+            {
+                "term": "Sequential scan",
+                "definition": "Reading every row of a table because no index answers the query."
+            },
+            {
+                "term": "EXPLAIN ANALYZE",
+                "definition": "A command that runs a query and reports its actual plan and timing; the BUFFERS option adds buffer usage."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Indexes follow the query",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Selectivity picks the lead column",
+                    "body": "customer_id matches a small slice of the table; status has only a few values and filters little. Put the more selective equality column first."
+                },
+                {
+                    "title": "Composite order follows the query",
+                    "body": "A B-tree can use the index for equality on customer_id and status, then read placed_at in descending order. Put the sort column after the equality columns so PostgreSQL does not need a separate sort."
+                },
+                {
+                    "title": "A covering index avoids heap fetches",
+                    "body": "INCLUDE adds id and total_cents to the index leaf, so an index-only scan can answer the query when the visibility map allows it. PostgreSQL secondary indexes do not store the primary key for you, so add id when the query returns it. Each extra column makes the index larger, so include only what the query selects."
+                },
+                {
+                    "title": "The plan is evidence",
+                    "body": "EXPLAIN (ANALYZE, BUFFERS) runs the query and reports actual time, rows, loops, and buffer reads. Compare the plan before and after the index instead of assuming the index is used."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Index",
+                    "definition": "A separate structure that lets the database find rows without scanning the whole table."
+                },
+                {
+                    "term": "Selectivity",
+                    "definition": "How much a column narrows the result; a column with many distinct values is usually more selective."
+                },
+                {
+                    "term": "Composite index",
+                    "definition": "An index over several columns in a fixed order."
+                },
+                {
+                    "term": "Covering index",
+                    "definition": "An index that contains every column a query needs, so the table heap is not visited for the selected values."
+                },
+                {
+                    "term": "Sequential scan",
+                    "definition": "Reading every row of a table because no index answers the query."
+                },
+                {
+                    "term": "EXPLAIN ANALYZE",
+                    "definition": "A command that runs a query and reports its actual plan and timing; the BUFFERS option adds buffer usage."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Index the order history query",
+            "prompt": "Edit indexes.sql. Drop the mismatched index and replace it with one that serves the customer and status filter, the newest-first order, and the selected columns. Add an EXPLAIN (ANALYZE, BUFFERS) check.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "indexes.sql",
+                    "content": "-- TODO: replace this index with one built for the query below.\nCREATE INDEX orders_status_idx ON orders (status, placed_at DESC);\n\n-- Query: the twenty most recent paid orders for one customer.\nSELECT id, placed_at, total_cents\nFROM orders\nWHERE customer_id = 'c1'\n  AND status = 'paid'\nORDER BY placed_at DESC\nLIMIT 20;\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "indexes.sql",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The mismatched index is dropped and replaced with one built for the query.",
+                    "file": "indexes.sql",
+                    "includes": [
+                        "DROP INDEX orders_status_idx;",
+                        "CREATE INDEX orders_customer_status_placed_idx",
+                        "ON orders (customer_id, status, placed_at DESC)"
+                    ],
+                    "excludes": ["ON orders (status, placed_at DESC)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The index covers the selected columns.",
+                    "file": "indexes.sql",
+                    "includes": ["INCLUDE (id, total_cents)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The plan is measured with real timing and buffer counts.",
+                    "file": "indexes.sql",
+                    "includes": ["EXPLAIN (ANALYZE, BUFFERS)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The query keeps its filter, order, and limit.",
+                    "file": "indexes.sql",
+                    "includes": [
+                        "WHERE customer_id = 'c1'",
+                        "AND status = 'paid'",
+                        "ORDER BY placed_at DESC",
+                        "LIMIT 20;"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "indexes.sql",
+                    "includes": ["DROP INDEX orders_status_idx;"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Index design and query plans",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "selectivity",
+                    "label": "A column that matches few rows is usually a better leading index column than a column with three distinct values.",
+                    "correct": true
+                },
+                {
+                    "id": "composite-order",
+                    "label": "In a composite B-tree index, equality columns should come before the column used for ordering.",
+                    "correct": true
+                },
+                {
+                    "id": "covering",
+                    "label": "A covering index lets the planner answer a query without reading the selected columns from the table heap.",
+                    "correct": true
+                },
+                {
+                    "id": "status-first",
+                    "label": "A low-cardinality column such as status should always lead a composite index.",
+                    "correct": false
+                },
+                {
+                    "id": "explain-estimate",
+                    "label": "EXPLAIN without ANALYZE reports actual execution time and buffer counts.",
+                    "correct": false
+                }
+            ],
+            "explanation": "The index follows the query: equality columns first, the sort column next, and the selected columns in INCLUDE. EXPLAIN (ANALYZE, BUFFERS) proves the plan with real time and buffer counts."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Database engineering workspace is keyboard accessible. Checks verify source structure; they do not compile or run Database engineering.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems", "web"]
+}
