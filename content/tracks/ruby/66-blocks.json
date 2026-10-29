@@ -1,0 +1,234 @@
+{
+    "id": "ruby.blocks",
+    "version": 1,
+    "sequence": 66,
+    "courseId": "ruby",
+    "title": "Blocks and object boundaries",
+    "summary": "Use reduce with a block, then review an error handler that swallows failures.",
+    "skills": ["ruby.blocks", "ruby.objects", "ruby.tooling"],
+    "prerequisites": ["ruby.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "blocks",
+        "briefing": "A campus totals service needs a block-based reduction and a narrower rescue."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:ruby"],
+    "hints": [
+        "Start with values.reduce(0).",
+        "The block receives the accumulator and the current value.",
+        "Return sum + value from the block.",
+        "Use values.reduce(0) { |sum, value| sum + value }."
+    ],
+    "misconceptions": [
+        {
+            "id": "bare-rescue",
+            "description": "Using rescue without an exception class.",
+            "stepId": "review",
+            "feedback": "A bare rescue catches StandardError, including mistakes you wanted to see. Name the exception you can handle."
+        },
+        {
+            "id": "each-return",
+            "description": "Expecting each to return the accumulated value.",
+            "stepId": "apply",
+            "feedback": "each returns the original collection. Use reduce or inject when you need an accumulated result."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Blocks carry behavior",
+                "body": "Methods such as reduce receive a block and call it with accumulated state. The block's return value becomes the next accumulator, and the seed gives an empty collection a defined result."
+            },
+            {
+                "title": "Objects and modules",
+                "body": "Classes define object state and behavior. Modules group reusable behavior and can be included into classes, which keeps shared logic out of a single inheritance chain."
+            },
+            {
+                "title": "Tooling around the code",
+                "body": "Bundler installs the gems a project declares in its Gemfile. Minitest and RSpec describe behavior as tests, and RuboCop reports style and consistency problems before review."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Reducer",
+                "definition": "A method that combines a collection into a single accumulated value."
+            },
+            {
+                "term": "Module",
+                "definition": "A namespace and mixin unit for shared behavior."
+            },
+            {
+                "term": "Duck typing",
+                "definition": "Using an object by the methods it responds to rather than its declared class."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Blocks and objects",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Blocks carry behavior",
+                    "body": "Methods such as reduce receive a block and call it with accumulated state. The block's return value becomes the next accumulator, and the seed gives an empty collection a defined result."
+                },
+                {
+                    "title": "Objects and modules",
+                    "body": "Classes define object state and behavior. Modules group reusable behavior and can be included into classes, which keeps shared logic out of a single inheritance chain."
+                },
+                {
+                    "title": "Tooling around the code",
+                    "body": "Bundler installs the gems a project declares in its Gemfile. Minitest and RSpec describe behavior as tests, and RuboCop reports style and consistency problems before review."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Reducer",
+                    "definition": "A method that combines a collection into a single accumulated value."
+                },
+                {
+                    "term": "Module",
+                    "definition": "A namespace and mixin unit for shared behavior."
+                },
+                {
+                    "term": "Duck typing",
+                    "definition": "Using an object by the methods it responds to rather than its declared class."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Total a collection with reduce",
+            "prompt": "Edit main.rb. total uses reduce with an initial value of zero.",
+            "evidence": "construction",
+            "language": "ruby",
+            "files": [
+                {
+                    "path": "main.rb",
+                    "content": "def total(values)\n  sum = 0\n  # TODO: reduce the values with a block\n  sum\nend\n\nputs total([3, -1, 2])\n",
+                    "editable": true,
+                    "language": "ruby"
+                }
+            ],
+            "entry": "main.rb",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The method keeps the taught name and parameter.",
+                    "file": "main.rb",
+                    "includes": ["def total(values)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The collection is reduced with an explicit seed and block.",
+                    "file": "main.rb",
+                    "includes": ["values.reduce(0)", "{ |sum, value| sum + value }"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.rb",
+                    "includes": ["def total(values)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the rescue",
+            "prompt": "Review the error handler and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "parse_count.rb",
+                "caption": "The rescue swallows every failure and reports zero.",
+                "kind": "code",
+                "language": "ruby",
+                "content": "def parse_count(text)\n  Integer(text)\nrescue\n  0\nend\n"
+            },
+            "findings": [
+                {
+                    "id": "broad-rescue",
+                    "label": "The bare rescue catches every StandardError.",
+                    "correct": true
+                },
+                {
+                    "id": "hides-bug",
+                    "label": "Returning zero hides malformed input from the caller.",
+                    "correct": true
+                },
+                {
+                    "id": "specific",
+                    "label": "The handler should rescue ArgumentError for invalid text.",
+                    "correct": true
+                },
+                {
+                    "id": "fine",
+                    "label": "The handler is safe because zero is always a valid count.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block until the rescue is narrowed and the failure is visible."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; returning zero is acceptable."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "A bare rescue catches unrelated programming errors. Rescue ArgumentError and decide explicitly whether to return nil, raise, or report the invalid input."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "web"]
+}
