@@ -1,0 +1,251 @@
+{
+    "id": "cargo.workspace",
+    "version": 1,
+    "sequence": 98,
+    "courseId": "cargo",
+    "title": "A workspace with shared dependencies",
+    "summary": "Split the build into member crates that inherit versions and profiles from the workspace.",
+    "skills": ["cargo.workspace"],
+    "prerequisites": ["cargo.packages", "architecture.modularity"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "workspace",
+        "briefing": "The campus CLI and its core library now live in separate crates, but each one pins serde separately and the release profile differs. Create a workspace that shares dependency versions and release settings."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cargo"],
+    "hints": [
+        "List both crate directories in workspace.members.",
+        "Keep one serde and serde_json requirement under workspace.dependencies.",
+        "Members use serde.workspace = true instead of repeating a version.",
+        "Declare [profile.release] once at the root; member profile sections are ignored."
+    ],
+    "misconceptions": [
+        {
+            "id": "duplicate-version",
+            "description": "Pinning serde in each member.",
+            "stepId": "apply",
+            "feedback": "Two pins drift apart and the workspace builds against different major versions in one dependency graph. Declare the version once and inherit it."
+        },
+        {
+            "id": "wildcard",
+            "description": "Using * to avoid version conflicts.",
+            "stepId": "review",
+            "feedback": "A wildcard cannot prevent conflicts; it removes the constraint that would surface them. State a compatible range and let the shared lockfile pin the resolution."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "One manifest owns shared versions",
+                "body": "A workspace root lists member directories, and workspace.dependencies declares versions once. A member then writes serde.workspace = true, which pulls the version and features from the root instead of restating them."
+            },
+            {
+                "title": "Profiles apply to the whole build",
+                "body": "Profiles are defined at the workspace root and apply to every member. Shared metadata under workspace.package lets members inherit fields like edition and license with field.workspace = true."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Workspace",
+                "definition": "A set of crates that share one lockfile, target directory, and dependency resolution."
+            },
+            {
+                "term": "Workspace dependency",
+                "definition": "A version requirement declared once under [workspace.dependencies] and inherited by members."
+            },
+            {
+                "term": "Profile",
+                "definition": "A named set of compiler and linker settings, such as release, declared at the workspace root."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Cargo workspaces",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "One manifest owns shared versions",
+                    "body": "A workspace root lists member directories, and workspace.dependencies declares versions once. A member then writes serde.workspace = true, which pulls the version and features from the root instead of restating them."
+                },
+                {
+                    "title": "Profiles apply to the whole build",
+                    "body": "Profiles are defined at the workspace root and apply to every member. Shared metadata under workspace.package lets members inherit fields like edition and license with field.workspace = true."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Workspace",
+                    "definition": "A set of crates that share one lockfile, target directory, and dependency resolution."
+                },
+                {
+                    "term": "Workspace dependency",
+                    "definition": "A version requirement declared once under [workspace.dependencies] and inherited by members."
+                },
+                {
+                    "term": "Profile",
+                    "definition": "A named set of compiler and linker settings, such as release, declared at the workspace root."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Declare a Cargo workspace",
+            "prompt": "Edit the root Cargo.toml. Add the workspace members, move serde and serde_json into workspace.dependencies, and set a shared release profile. Member crates inherit with workspace = true.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "Cargo.toml",
+                    "content": "[workspace]\nmembers = [\"crates/core\"]\n\n[workspace.dependencies]\nserde = \"1.0.203\"\nserde_json = \"1.0.117\"\n\n[profile.release]\nlto = \"thin\"\n\n# TODO: add the cli member and make the member crates inherit shared versions\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "Cargo.toml",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The workspace lists both member crates and pins the resolver.",
+                    "file": "Cargo.toml",
+                    "includes": [
+                        "[workspace]",
+                        "members = [\"crates/core\", \"crates/cli\"]",
+                        "resolver = \"2\""
+                    ],
+                    "excludes": ["members = [\"crates/core\"]"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Dependency versions live once in the workspace.",
+                    "file": "Cargo.toml",
+                    "includes": [
+                        "serde = { version = \"1.0.203\", features = [\"derive\"] }",
+                        "serde_json = \"1.0.117\""
+                    ],
+                    "excludes": ["serde = \"1.0.199\""]
+                },
+                {
+                    "kind": "static",
+                    "description": "Members inherit shared metadata and dependencies.",
+                    "file": "Cargo.toml",
+                    "includes": [
+                        "edition.workspace = true",
+                        "serde.workspace = true",
+                        "serde_json.workspace = true"
+                    ],
+                    "excludes": ["serde = \"1.0.203\""]
+                },
+                {
+                    "kind": "static",
+                    "description": "The release profile is shared by every member.",
+                    "file": "Cargo.toml",
+                    "includes": ["[profile.release]", "lto = \"thin\"", "codegen-units = 1"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Cargo.toml",
+                    "includes": ["[workspace]"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the workspace manifest",
+            "prompt": "Review the workspace files and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Cargo.toml and members",
+                "caption": "The members pin serde separately and the CLI pulls an HTTP client with a wildcard.",
+                "kind": "code",
+                "language": "text",
+                "content": "[workspace]\nmembers = [\"crates/core\", \"crates/cli\"]\n\n[workspace.dependencies]\nserde = { version = \"1.0.203\", features = [\"derive\"] }\n\n[profile.release]\nlto = \"thin\"\n\n# crates/core/Cargo.toml\n[package]\nname = \"campus-core\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nserde = { version = \"1.0.199\", features = [\"derive\"] }\n\n# crates/cli/Cargo.toml\n[package]\nname = \"campus-cli\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\ncampus-core = { path = \"../core\" }\nserde = { version = \"1.0.203\", features = [\"derive\"] }\nreqwest = \"*\"\n"
+            },
+            "findings": [
+                {
+                    "id": "duplicate-serde",
+                    "label": "campus-core pins serde 1.0.199 while the workspace declares 1.0.203.",
+                    "correct": true
+                },
+                {
+                    "id": "no-inheritance",
+                    "label": "Both members restate serde instead of inheriting with serde.workspace = true.",
+                    "correct": true
+                },
+                {
+                    "id": "wildcard-reqwest",
+                    "label": "reqwest = \"*\" accepts any version and makes resolution unpredictable.",
+                    "correct": true
+                },
+                {
+                    "id": "shared-version",
+                    "label": "The members already inherit the workspace serde version.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until versions are inherited and the wildcard is replaced."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; Cargo resolves the conflicts automatically."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the manifest formatting needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Versions are declared twice and already disagree, so members can compile against different serde releases. A wildcard adds an unbounded dependency, and a regenerated lockfile can silently move it. Move the versions to workspace.dependencies and inherit them."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Cargo workspace is keyboard accessible. Checks verify source structure; they do not compile or run Cargo.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
