@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.kt": "import kotlinx.coroutines.*\n\nsuspend fun loadTotal(): Int = coroutineScope {\n    val first = async { 20 }\n    val second = async { 22 }\n    first.await() + second.await()\n}\n\nfun main() = runBlocking {\n    println(loadTotal())\n}\n"
+            }
+        }
+    }
+}
