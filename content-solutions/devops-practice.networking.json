@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "network.md": "# Request path for api.campus.test\n\n## Resolution\n\n$ dig +short api.campus.test A\n$ dig +trace api.campus.test\n\nThe name must resolve to the load balancer address, not to a host being retired.\n\n## TCP and TLS handshake\n\n$ curl -v --max-time 5 https://api.campus.test/health\n$ openssl s_client -connect api.campus.test:443 -servername api.campus.test\n\nCheck the certificate subject and expiry in the s_client output. A name mismatch or an expired certificate fails the connection before any request reaches the proxy.\n\n## Proxy block\n\nserver {\n    listen 443 ssl;\n    server_name api.campus.test;\n\n    location / {\n        proxy_pass http://api_upstream;\n        proxy_http_version 1.1;\n        proxy_set_header Host $host;\n        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n        proxy_set_header X-Forwarded-Proto $scheme;\n        proxy_connect_timeout 3s;\n        proxy_read_timeout 10s;\n    }\n\n    location = /health {\n        proxy_pass http://api_upstream/health;\n        proxy_connect_timeout 1s;\n        proxy_read_timeout 2s;\n    }\n}\n\nThe upstream reads the client address from X-Forwarded-For and the scheme from X-Forwarded-Proto. Without both headers, every request looks like it came from the proxy over plain HTTP, so logs and redirects are wrong.\n\n## Health check\n\n$ curl -fsS --max-time 2 https://api.campus.test/health\n\nThe probe calls /health, which checks the database, not just the process. A running worker with an unreachable database must fail the probe.\n"
+            }
+        }
+    }
+}
