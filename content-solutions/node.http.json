@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "server.ts": "import { createServer } from \"node:http\";\n\ntype StatusUpdate = { message: string };\nconst latest: StatusUpdate[] = [];\nconst limit = 16 * 1024;\n\nexport const server = createServer(function handle(request, response) {\n    if (request.method !== \"POST\" || request.url !== \"/status\") {\n        response.writeHead(404, { \"content-type\": \"application/json\" });\n        response.end(JSON.stringify({ error: \"not_found\" }));\n        return;\n    }\n\n    let size = 0;\n    let rejected = false;\n    const chunks: Buffer[] = [];\n    request.on(\"data\", function onChunk(chunk: Buffer) {\n        if (rejected) {\n            return;\n        }\n        size += chunk.length;\n        if (size > limit) {\n            rejected = true;\n            chunks.length = 0;\n            response.writeHead(413, { \"content-type\": \"application/json\" });\n            response.end(JSON.stringify({ error: \"payload_too_large\" }));\n            return;\n        }\n        chunks.push(chunk);\n    });\n    request.on(\"end\", function onEnd() {\n        if (rejected) {\n            return;\n        }\n        try {\n            const body = JSON.parse(Buffer.concat(chunks).toString(\"utf8\")) as StatusUpdate;\n            latest.push(body);\n            response.writeHead(201, { \"content-type\": \"application/json\" });\n            response.end(JSON.stringify({ status: body.message }));\n        } catch {\n            response.writeHead(400, { \"content-type\": \"application/json\" });\n            response.end(JSON.stringify({ error: \"invalid_json\" }));\n        }\n    });\n});\n"
+            }
+        }
+    }
+}
