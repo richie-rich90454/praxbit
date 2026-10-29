@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.rb": "def total(values)\n  values.reduce(0) { |sum, value| sum + value }\nend\n\nputs total([3, -1, 2])\n"
+            }
+        }
+    }
+}
