@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Program.cs": "using System;\nusing System.Collections.Generic;\n\nclass Program\n{\n    static int CountPositive(List<int> values)\n    {\n        int count = 0;\n        foreach (int value in values)\n        {\n            if (value > 0)\n            {\n                count += 1;\n            }\n        }\n        return count;\n    }\n\n    static void Main()\n    {\n        Console.WriteLine(CountPositive(new List<int> { 3, -1, 2 }));\n    }\n}\n"
+            }
+        }
+    }
+}
