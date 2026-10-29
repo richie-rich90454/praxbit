@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.go": "package main\n\nimport \"fmt\"\n\nfunc countPositive(values []int) int {\n    count := 0\n    for _, value := range values {\n        if value > 0 {\n            count += 1\n        }\n    }\n    return count\n}\n\nfunc main() {\n    fmt.Println(countPositive([]int{3, -1, 2}))\n}\n"
+            }
+        }
+    }
+}
