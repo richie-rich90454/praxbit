@@ -1,0 +1,246 @@
+{
+    "id": "spring-boot.controllers",
+    "version": 1,
+    "sequence": 87,
+    "courseId": "spring-boot",
+    "title": "Controllers that answer with a status",
+    "summary": "Map a GET route, validate the path id, and choose the response status explicitly.",
+    "skills": ["spring.boot", "spring.controllers"],
+    "prerequisites": ["java.oop", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "controllers",
+        "briefing": "Clients receive 200 with an empty body when a product id does not exist, and negative ids still reach the database. Make the route reject non-positive ids and answer 404 for a missing product."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:spring"],
+    "hints": [
+        "The controller already injects ProductService, so keep that constructor.",
+        "Add @Validated on the class and @Positive on the path variable.",
+        "Change the return type to ResponseEntity<Product>.",
+        "Map the optional with ResponseEntity::ok and use orElseGet for notFound().build()."
+    ],
+    "misconceptions": [
+        {
+            "id": "null-404",
+            "description": "Thinking a null return becomes 404.",
+            "stepId": "apply",
+            "feedback": "A null body still produces 200. Return ResponseEntity.notFound().build() when the optional is empty."
+        },
+        {
+            "id": "validation-scope",
+            "description": "Adding @Positive without enabling method validation.",
+            "stepId": "check",
+            "feedback": "Annotate the controller with @Validated so Spring validates the method arguments before the body runs."
+        },
+        {
+            "id": "entity-shape",
+            "description": "Returning the persistence entity as the API contract.",
+            "stepId": "apply",
+            "feedback": "The entity follows the table. A response model keeps the API stable and hides internal columns."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Annotations map requests",
+                "body": "A controller method is bound to a route by annotations. @RestController marks the class so return values are written to the response body, and @GetMapping maps GET requests to a path. The template segment {id} names a value that @PathVariable binds to a parameter."
+            },
+            {
+                "title": "The response is a decision",
+                "body": "A handler can return the product alone, but then every outcome looks like 200. ResponseEntity wraps the body with a status and headers. Returning ResponseEntity.ok(product) for a match and ResponseEntity.notFound().build() for an empty optional makes the outcome visible to the client."
+            },
+            {
+                "title": "Validate before the lookup",
+                "body": "Spring validates method arguments when the controller is annotated with @Validated. A constraint such as @Positive on the path variable rejects zero and negative ids with 400 before the service runs. Validation at the boundary keeps invalid identifiers out of the data layer."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Controller",
+                "definition": "A class whose methods handle HTTP requests for one route group."
+            },
+            {
+                "term": "Path variable",
+                "definition": "A segment of the route template bound to a handler parameter."
+            },
+            {
+                "term": "ResponseEntity",
+                "definition": "A response wrapper that carries status, headers, and body."
+            },
+            {
+                "term": "Method validation",
+                "definition": "Constraint checks applied to controller method arguments before the method body runs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Controllers, routes, and responses",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Annotations map requests",
+                    "body": "A controller method is bound to a route by annotations. @RestController marks the class so return values are written to the response body, and @GetMapping maps GET requests to a path. The template segment {id} names a value that @PathVariable binds to a parameter."
+                },
+                {
+                    "title": "The response is a decision",
+                    "body": "A handler can return the product alone, but then every outcome looks like 200. ResponseEntity wraps the body with a status and headers. Returning ResponseEntity.ok(product) for a match and ResponseEntity.notFound().build() for an empty optional makes the outcome visible to the client."
+                },
+                {
+                    "title": "Validate before the lookup",
+                    "body": "Spring validates method arguments when the controller is annotated with @Validated. A constraint such as @Positive on the path variable rejects zero and negative ids with 400 before the service runs. Validation at the boundary keeps invalid identifiers out of the data layer."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Controller",
+                    "definition": "A class whose methods handle HTTP requests for one route group."
+                },
+                {
+                    "term": "Path variable",
+                    "definition": "A segment of the route template bound to a handler parameter."
+                },
+                {
+                    "term": "ResponseEntity",
+                    "definition": "A response wrapper that carries status, headers, and body."
+                },
+                {
+                    "term": "Method validation",
+                    "definition": "Constraint checks applied to controller method arguments before the method body runs."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Return an explicit response",
+            "prompt": "Edit ProductController.java. Validate the path id, keep the route, and return 404 when the service finds no product. Run the structural checks when done.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "ProductController.java",
+                    "content": "package com.praxbit.catalog;\n\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.PathVariable;\nimport org.springframework.web.bind.annotation.RestController;\n\n@RestController\npublic class ProductController {\n    private final ProductService service;\n\n    public ProductController(ProductService service) {\n        this.service = service;\n    }\n\n    @GetMapping(\"/api/products/{id}\")\n    public Product get(@PathVariable long id) {\n        // TODO: validate the id and return 404 when the product is missing\n        return service.find(id).orElse(null);\n    }\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "ProductController.java",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The class stays a validated REST controller.",
+                    "file": "ProductController.java",
+                    "includes": ["@RestController", "@Validated", "class ProductController"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The GET route binds a validated positive id.",
+                    "file": "ProductController.java",
+                    "includes": [
+                        "@GetMapping(\"/api/products/{id}\")",
+                        "@Positive",
+                        "@PathVariable long id"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A found product returns 200 and a missing product returns 404.",
+                    "file": "ProductController.java",
+                    "includes": [
+                        "ResponseEntity<Product>",
+                        "ResponseEntity::ok",
+                        "ResponseEntity.notFound().build()"
+                    ],
+                    "excludes": ["orElse(null)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductController.java",
+                    "includes": ["@RestController"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Controller semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "restcontroller",
+                    "label": "@RestController serializes return values into the response body.",
+                    "correct": true
+                },
+                {
+                    "id": "responseentity",
+                    "label": "ResponseEntity carries the status code and headers as well as the body.",
+                    "correct": true
+                },
+                {
+                    "id": "method-validation",
+                    "label": "Method validation for @Positive path variables requires @Validated on the controller.",
+                    "correct": true
+                },
+                {
+                    "id": "null-body",
+                    "label": "Returning null from a handler automatically produces a 404 response.",
+                    "correct": false
+                },
+                {
+                    "id": "entity-shape",
+                    "label": "Returning the entity directly keeps the API stable when the table changes.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Annotations bind the method to a route, ResponseEntity makes the status explicit, and @Validated lets the constraint reject an invalid id before the lookup. A null body still produces 200 unless the handler returns a status."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Spring Boot workspace is keyboard accessible. Checks verify source structure; they do not compile or run Spring Boot.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
