@@ -1,0 +1,241 @@
+{
+    "id": "aspnet-core.controllers",
+    "version": 1,
+    "sequence": 89,
+    "courseId": "aspnet-core",
+    "title": "Attribute-routed actions with typed results",
+    "summary": "Mark an API controller, keep the attribute route, and return a typed result with 404 handling.",
+    "skills": ["aspnet.controllers"],
+    "prerequisites": ["csharp.syntax", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "controllers",
+        "briefing": "Unknown products are returned as null with a 200 status, and the controller is not marked as an API controller, so model validation and problem details are not enabled. Return a typed action result and a 404 for a missing product."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:dotnet"],
+    "hints": [
+        "Keep the existing route template and the integer constraint.",
+        "Add [ApiController] above the class declaration.",
+        "Change the return type to ActionResult<Product>.",
+        "Return NotFound() when the service returns null, otherwise return the product."
+    ],
+    "misconceptions": [
+        {
+            "id": "null-404",
+            "description": "Thinking a null return becomes 404.",
+            "stepId": "apply",
+            "feedback": "A null body is still a 200 response. Return NotFound() explicitly when the service finds nothing."
+        },
+        {
+            "id": "controller-base",
+            "description": "Treating ControllerBase as the view-aware base class.",
+            "stepId": "check",
+            "feedback": "ControllerBase is the API base class. Controller adds view helpers that an HTTP API does not need."
+        },
+        {
+            "id": "api-controller",
+            "description": "Leaving off [ApiController] and expecting validation.",
+            "stepId": "apply",
+            "feedback": "The attribute enables automatic model validation and problem details. Add it to the controller."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Attribute routing",
+                "body": "[Route(\"api/[controller]\")] sets the base path, and [controller] is replaced by the controller name without the Controller suffix. [HttpGet(\"{id:int}\")] adds the method and an integer route constraint, so a non-numeric id does not reach the action."
+            },
+            {
+                "title": "[ApiController] changes the behavior",
+                "body": "The attribute enables automatic model validation, binding source inference, and problem details responses. Without it, an invalid model can reach the action and failures return a generic response."
+            },
+            {
+                "title": "ActionResult<T> carries both shapes",
+                "body": "An action can return the product or a status result. ActionResult<Product> lets the method return the product directly on success and NotFound() when the service finds nothing, while the framework writes the correct status."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "API controller",
+                "definition": "A controller marked with [ApiController] so API conventions and validation apply."
+            },
+            {
+                "term": "Attribute routing",
+                "definition": "Routes declared on the controller and action with attributes."
+            },
+            {
+                "term": "Action result",
+                "definition": "A return type that can carry either a value or an HTTP status."
+            },
+            {
+                "term": "Model validation",
+                "definition": "Checking bound input against data annotations before the action runs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Controllers, routes, and action results",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Attribute routing",
+                    "body": "[Route(\"api/[controller]\")] sets the base path, and [controller] is replaced by the controller name without the Controller suffix. [HttpGet(\"{id:int}\")] adds the method and an integer route constraint, so a non-numeric id does not reach the action."
+                },
+                {
+                    "title": "[ApiController] changes the behavior",
+                    "body": "The attribute enables automatic model validation, binding source inference, and problem details responses. Without it, an invalid model can reach the action and failures return a generic response."
+                },
+                {
+                    "title": "ActionResult<T> carries both shapes",
+                    "body": "An action can return the product or a status result. ActionResult<Product> lets the method return the product directly on success and NotFound() when the service finds nothing, while the framework writes the correct status."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "API controller",
+                    "definition": "A controller marked with [ApiController] so API conventions and validation apply."
+                },
+                {
+                    "term": "Attribute routing",
+                    "definition": "Routes declared on the controller and action with attributes."
+                },
+                {
+                    "term": "Action result",
+                    "definition": "A return type that can carry either a value or an HTTP status."
+                },
+                {
+                    "term": "Model validation",
+                    "definition": "Checking bound input against data annotations before the action runs."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Return a typed action result",
+            "prompt": "Edit ProductsController.cs. Mark the controller as an API controller, keep the route and the integer constraint, and return 404 when the service finds no product.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "ProductsController.cs",
+                    "content": "using Microsoft.AspNetCore.Mvc;\n\nnamespace Praxbit.Catalog.Controllers;\n\n[Route(\"api/[controller]\")]\npublic class ProductsController : ControllerBase\n{\n    private readonly IProductService _service;\n\n    public ProductsController(IProductService service)\n    {\n        _service = service;\n    }\n\n    // TODO: expose a typed action result and a 404 for a missing product\n    [HttpGet(\"{id:int}\")]\n    public Product Get(int id)\n    {\n        return _service.Find(id)!;\n    }\n}\n",
+                    "editable": true,
+                    "language": "csharp"
+                }
+            ],
+            "entry": "ProductsController.cs",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The controller is an API controller with an attribute route.",
+                    "file": "ProductsController.cs",
+                    "includes": ["[ApiController]", "[Route(\"api/[controller]\")]"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The action is a typed GET bound to an integer id.",
+                    "file": "ProductsController.cs",
+                    "includes": [
+                        "[HttpGet(\"{id:int}\")]",
+                        "public ActionResult<Product> Get(int id)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A missing product becomes a 404.",
+                    "file": "ProductsController.cs",
+                    "includes": ["return NotFound();", "return product;"],
+                    "excludes": ["return _service.Find(id)!;"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductsController.cs",
+                    "includes": ["[ApiController]"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Controller semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "api-controller",
+                    "label": "[ApiController] enables automatic model validation and problem details responses.",
+                    "correct": true
+                },
+                {
+                    "id": "action-result",
+                    "label": "ActionResult<T> lets an action return either a T or a status result.",
+                    "correct": true
+                },
+                {
+                    "id": "route-token",
+                    "label": "[Route(\"api/[controller]\")] replaces [controller] with the controller name minus the Controller suffix.",
+                    "correct": true
+                },
+                {
+                    "id": "null-404",
+                    "label": "Returning null from an action produces a 404 automatically.",
+                    "correct": false
+                },
+                {
+                    "id": "controller-base",
+                    "label": "ControllerBase exists to render Razor views.",
+                    "correct": false
+                }
+            ],
+            "explanation": "The API controller attribute turns on API conventions, the attribute route binds the action, and ActionResult<Product> makes success and failure explicit. A null return is still a 200 response with an empty body."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The ASP.NET Core workspace is keyboard accessible. Checks verify source structure; they do not compile or run ASP.NET Core.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "web"]
+}
