@@ -8,7 +8,7 @@ Praxbit is a local-first learning application for computer science and software 
 
 ## Status
 
-Praxbit is a pre-release implementation. The repository contains a working learning engine, 48 authored missions, three projects, a SolidJS web client, a Hono/PostgreSQL account platform, a browser execution layer, a deterministic world simulation, and a TypeScript companion CLI. Production hosting, native store builds, and a live AI provider require external provisioning and are not verified by this repository alone.
+Praxbit is a pre-release implementation. The repository contains a working learning engine, 120 authored missions across 41 tracks, three projects, a SolidJS web client, a Hono/PostgreSQL account platform, a browser execution layer, a deterministic world simulation, and a TypeScript companion CLI. Production hosting, native store builds, and a live AI provider require external provisioning and are not verified by this repository alone.
 
 The honest current limits are listed in [Known limitations](#known-limitations). Do not treat a feature listed as implemented below as production-verified unless the verification column or the operations documentation says so.
 
@@ -17,7 +17,7 @@ The honest current limits are listed in [Known limitations](#known-limitations).
 | Area | Current implementation | Verification |
 | --- | --- | --- |
 | Learning engine | Skill graph with prerequisite validation, mission state machine, deterministic step evaluators, evidence model, mastery estimator, spaced review, placement, recommendations | Portable TypeScript in `packages/domain`; unit tests |
-| Curriculum | 30 launch missions (12 before-code, 18 campus) plus 18 additional track missions; three projects; one weekly club event | Schema, references, and executable reference solutions validated with zero warnings; deferred checks listed in Known limitations |
+| Curriculum | 30 launch missions (12 before-code, 18 campus) plus 90 applied and advanced track missions across 41 tracks; three projects; one weekly club event | Schema, references, and executable reference solutions validated with zero warnings; deferred checks listed in Known limitations |
 | Web client | SolidJS screens for Learn, World, Practice, Projects, Club, Settings, Placement, and mission play | Typecheck and Playwright suites when the database and API are running |
 | Code execution | Browser JavaScript worker, sandboxed HTML/CSS preview, Pyodide Python, SQLite via sql.js, isomorphic-git, deterministic Linux/terminal simulation, static analysis | Implemented as browser adapters; not a server-side security boundary |
 | World | Deterministic campus state with nine systems, versioned actions, recovery flags, PixiJS rendering plus an accessible system list | Domain tests and browser rendering |
@@ -274,7 +274,7 @@ These are real constraints, not a backlog disguised as a feature list.
 - **No server-side learner code execution.** JavaScript runs in a Web Worker, HTML/CSS in sandboxed iframes, Python in Pyodide, SQL in sql.js, and Git in isomorphic-git. These are best-effort browser isolation, not a hardened multi-tenant sandbox. The server never executes arbitrary learner programs.
 - **AI is optional and unverified here.** The gateway is implemented, but no live provider key is committed. Provider behavior, cost, latency, and output quality must be tested with your own account. The AI is not the authoritative grader.
 - **Native applications are not shipped.** Capacitor configuration exists; Android/iOS projects, signing, store metadata, push notifications, deep-link verification, and device testing do not.
-- **Curriculum breadth is limited.** There are 48 missions. Python has three, SQL three, TypeScript one, Hono one. Java, Go, Rust, and C appear as skill-graph concepts without mission tracks. Do not present those languages as fully supported.
+- **Curriculum depth varies, and many advanced tracks use static analysis.** Every language and framework named in the plan now has an assessed track, but each language or framework pack is a focused two- or three-mission foundation, not a complete reference course. Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and the framework/server packs validate source structure with static checks; they are not compiled or executed in the browser. TypeScript, JavaScript, HTML, CSS, Python through Pyodide, SQL through SQLite, and Git use their real runtimes. The interface labels each runtime truthfully, and the validator never counts a deferred check as a pass.
 - **Some content checks are deferred.** `pnpm content:validate` passes with zero errors and zero warnings after executing 119 checks. Ten CSS computed-style checks are deferred because jsdom cannot compute layout faithfully. The browser suite exercises the project CSS path, but not every deferred mission check; verify those in a real browser.
 - **Projects are small.** Three projects exist with executable stage checks. They are not a substitute for a full project-based curriculum.
 - **Club and competition flows depend on the API.** The UI and service code exist, and the PostgreSQL integration suite covers club membership and verified events. No live club-scale verification has been performed. Local results are not trusted for ranked competition.
