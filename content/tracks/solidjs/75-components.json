@@ -1,0 +1,217 @@
+{
+    "id": "solidjs.components",
+    "version": 1,
+    "sequence": 75,
+    "courseId": "solidjs",
+    "title": "Fine-grained components",
+    "summary": "Build a SolidJS component that reads props through the props object so updates stay live.",
+    "skills": ["solid.components"],
+    "prerequisites": ["web.html", "js.functions"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "components",
+        "briefing": "A campus storefront renders a product card. The card must keep the live props binding instead of taking a snapshot of the first value."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "hints": [
+        "Keep the props parameter in the function signature.",
+        "Read props.name inside JSX instead of copying it into a local variable.",
+        "Return an article with a heading and a paragraph.",
+        "Format the price with props.price.toFixed(2)."
+    ],
+    "misconceptions": [
+        {
+            "id": "destructure-props",
+            "description": "Destructuring props before rendering.",
+            "stepId": "apply",
+            "feedback": "Destructuring reads each getter once and loses the live binding. Read properties through props in JSX."
+        },
+        {
+            "id": "snapshot",
+            "description": "Copying a prop into a local value and rendering the copy.",
+            "stepId": "apply",
+            "feedback": "A local copy is a snapshot. Keep the prop read inside the reactive expression."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Components run once",
+                "body": "A Solid component function runs once to create DOM nodes and reactive bindings. It does not re-run when data changes, so values that must update need to stay behind a getter."
+            },
+            {
+                "title": "Read props through the object",
+                "body": "Solid props are reactive getters. Reading props.name inside JSX keeps the binding live; destructuring evaluates the getter once and captures a snapshot."
+            },
+            {
+                "title": "Fine-grained updates",
+                "body": "Only the DOM expressions that read a changed signal update. This removes the need for a virtual DOM diff."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Fine-grained reactivity",
+                "definition": "A model where individual computations and DOM nodes subscribe directly to the values they read."
+            },
+            {
+                "term": "Props object",
+                "definition": "The reactive object a parent passes to a child component."
+            },
+            {
+                "term": "JSX compilation",
+                "definition": "The build step that turns JSX into direct DOM creation and update code."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "SolidJS components and props",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Components run once",
+                    "body": "A Solid component function runs once to create DOM nodes and reactive bindings. It does not re-run when data changes, so values that must update need to stay behind a getter."
+                },
+                {
+                    "title": "Read props through the object",
+                    "body": "Solid props are reactive getters. Reading props.name inside JSX keeps the binding live; destructuring evaluates the getter once and captures a snapshot."
+                },
+                {
+                    "title": "Fine-grained updates",
+                    "body": "Only the DOM expressions that read a changed signal update. This removes the need for a virtual DOM diff."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Fine-grained reactivity",
+                    "definition": "A model where individual computations and DOM nodes subscribe directly to the values they read."
+                },
+                {
+                    "term": "Props object",
+                    "definition": "The reactive object a parent passes to a child component."
+                },
+                {
+                    "term": "JSX compilation",
+                    "definition": "The build step that turns JSX into direct DOM creation and update code."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Render props without destructuring",
+            "prompt": "Edit ProductCard.tsx. Keep the props object in the signature, read name and price through it, and format the price with two decimals.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "ProductCard.tsx",
+                    "content": "type ProductProps = {\n  name: string;\n  price: number;\n};\n\nexport function ProductCard(props: ProductProps) {\n  // TODO: render the name and price from the props object\n  return <article>{props.name}</article>;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "ProductCard.tsx",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The component keeps props as a live object.",
+                    "file": "ProductCard.tsx",
+                    "includes": ["export function ProductCard(props: ProductProps)", "props.name"],
+                    "excludes": ["{ name, price }"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The component renders the name and a two-decimal price.",
+                    "file": "ProductCard.tsx",
+                    "includes": ["<h3>{props.name}</h3>", "props.price.toFixed(2)"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductCard.tsx",
+                    "includes": ["export function ProductCard(props: ProductProps)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Props and fine-grained rendering",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "props",
+                    "label": "SolidJS props are reactive getters, so reading props.name in JSX keeps the binding live.",
+                    "correct": true
+                },
+                {
+                    "id": "destructure",
+                    "label": "Destructuring props once preserves updates for every field.",
+                    "correct": false
+                },
+                {
+                    "id": "run-once",
+                    "label": "A Solid component function runs once and creates reactive bindings.",
+                    "correct": true
+                },
+                {
+                    "id": "virtual",
+                    "label": "SolidJS reconciles a virtual DOM on every update.",
+                    "correct": false
+                },
+                {
+                    "id": "jsx",
+                    "label": "Solid compiles JSX into direct DOM operations.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Solid components execute once. Props stay live because they are read through the props object inside reactive expressions, while destructuring takes a one-time snapshot."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The SolidJS workspace is keyboard accessible. Checks verify source structure; they do not compile or run SolidJS.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
