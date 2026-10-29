@@ -1,0 +1,220 @@
+{
+    "id": "react.components",
+    "version": 1,
+    "sequence": 71,
+    "courseId": "react",
+    "title": "Components with typed props",
+    "summary": "Build a typed product card that renders props without hiding the data contract.",
+    "skills": ["react.components", "web.component-architecture"],
+    "prerequisites": ["js.functions", "web.html"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "components",
+        "briefing": "A campus storefront renders product data. Build the card as a typed function component and keep rendering pure."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
+    "hints": [
+        "Declare a ProductProps type with name and price.",
+        "Destructure name and price in the parameter list.",
+        "Return an article with a heading and a paragraph.",
+        "Format the price with price.toFixed(2)."
+    ],
+    "misconceptions": [
+        {
+            "id": "mutate-prop",
+            "description": "Mutating props inside the child.",
+            "stepId": "apply",
+            "feedback": "Props belong to the parent. Emit an event or call a callback instead of writing to them."
+        },
+        {
+            "id": "format-price",
+            "description": "Rendering a raw float as the price.",
+            "stepId": "apply",
+            "feedback": "Prices need a fixed display format. Format at the render boundary with toFixed(2)."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Props are a contract",
+                "body": "A component receives data through props. The prop type documents what the component needs and lets the compiler catch missing or misspelled fields."
+            },
+            {
+                "title": "Rendering is a pure step",
+                "body": "Given the same props, the component should produce the same markup. Side effects belong in event handlers or controlled effects, not in the render path."
+            },
+            {
+                "title": "Small components compose",
+                "body": "A card that only renders its props can be reused in a list, a detail view, or a checkout summary without changes."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Component",
+                "definition": "A reusable function that returns markup for a piece of the interface."
+            },
+            {
+                "term": "Prop",
+                "definition": "A value passed from a parent component to a child."
+            },
+            {
+                "term": "Pure render",
+                "definition": "A render that produces the same markup for the same props."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Components and props",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Props are a contract",
+                    "body": "A component receives data through props. The prop type documents what the component needs and lets the compiler catch missing or misspelled fields."
+                },
+                {
+                    "title": "Rendering is a pure step",
+                    "body": "Given the same props, the component should produce the same markup. Side effects belong in event handlers or controlled effects, not in the render path."
+                },
+                {
+                    "title": "Small components compose",
+                    "body": "A card that only renders its props can be reused in a list, a detail view, or a checkout summary without changes."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Component",
+                    "definition": "A reusable function that returns markup for a piece of the interface."
+                },
+                {
+                    "term": "Prop",
+                    "definition": "A value passed from a parent component to a child."
+                },
+                {
+                    "term": "Pure render",
+                    "definition": "A render that produces the same markup for the same props."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Render a typed product card",
+            "prompt": "Edit ProductCard.tsx. Type the props, destructure them in the parameter list, and render the name and a price with two decimals.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "ProductCard.tsx",
+                    "content": "type ProductProps = {\n  name: string;\n  price: number;\n};\n\nexport function ProductCard(props: ProductProps) {\n  // TODO: render the product name and price with two decimals\n  return <article>{props.name}</article>;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "ProductCard.tsx",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The component keeps a typed props contract and destructures it.",
+                    "file": "ProductCard.tsx",
+                    "includes": [
+                        "type ProductProps",
+                        "export function ProductCard({ name, price }: ProductProps)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The component renders the name and a two-decimal price.",
+                    "file": "ProductCard.tsx",
+                    "includes": ["<h3>{name}</h3>", "price.toFixed(2)"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductCard.tsx",
+                    "includes": ["type ProductProps"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Props and rendering",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "props",
+                    "label": "Props are read-only inputs supplied by the parent.",
+                    "correct": true
+                },
+                {
+                    "id": "mutate",
+                    "label": "A child component should mutate a prop object to update the parent.",
+                    "correct": false
+                },
+                {
+                    "id": "pure",
+                    "label": "A pure render produces the same output for the same props.",
+                    "correct": true
+                },
+                {
+                    "id": "types",
+                    "label": "A prop type documents the data a component requires.",
+                    "correct": true
+                },
+                {
+                    "id": "state",
+                    "label": "Every value in a component must be stored in global state.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Props carry data into a component and remain owned by the parent. A typed signature makes the contract explicit, and a pure render keeps the output predictable."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The React workspace is keyboard accessible. Checks verify source structure; they do not compile or run React.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
