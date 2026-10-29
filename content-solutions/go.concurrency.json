@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.go": "package main\n\nimport \"fmt\"\n\nfunc sum(values []int) int {\n    results := make(chan int)\n    go func() {\n        total := 0\n        for _, value := range values {\n            total += value\n        }\n        results <- total\n    }()\n    return <-results\n}\n\nfunc main() {\n    fmt.Println(sum([]int{3, -1, 2}))\n}\n"
+            }
+        }
+    }
+}
