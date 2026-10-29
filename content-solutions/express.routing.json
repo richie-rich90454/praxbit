@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "app.ts": "import express from \"express\";\n\ntype Product = { id: string; name: string; price: number };\nconst products: Product[] = [\n    { id: \"notebook\", name: \"Notebook\", price: 4.5 },\n    { id: \"pen\", name: \"Pen\", price: 1.25 },\n];\n\nexport const app = express();\n\napp.get(\"/products/:id\", function getProduct(request, response) {\n    const product = products.find(function match(item) {\n        return item.id === request.params.id;\n    });\n    if (product === undefined) {\n        response.status(404).json({ error: \"not_found\" });\n        return;\n    }\n    response.json(product);\n});\n"
+            }
+        }
+    }
+}
