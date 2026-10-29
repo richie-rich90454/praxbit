@@ -1,0 +1,306 @@
+{
+    "id": "native.capacitor",
+    "version": 1,
+    "sequence": 110,
+    "courseId": "native",
+    "title": "Native shell, shared contracts",
+    "summary": "Keep platform calls behind one adapter, protect credentials and deep links, and resolve cross-device sync conflicts by revision.",
+    "skills": ["api.architecture", "web.state-management"],
+    "prerequisites": ["api.validation", "testing.integration"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 10,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "capacitor",
+        "briefing": "The same web bundle now ships to browsers and to iOS and Android through Capacitor. A synced web directory is not a store build: the native project still needs signing, icons, permission descriptions, and versioning. The shell stores the session token in Preferences, opens any incoming URL, and lets the last device win every sync. Move platform calls behind one adapter and keep the shared contract intact."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:native"],
+    "hints": [
+        "Define one PlatformAdapter interface and one factory.",
+        "Branch on Capacitor.isNativePlatform() inside the factory.",
+        "Check the URL host and load the session before calling the route handler.",
+        "Compare revisions in mergeOrder and throw when both sides changed."
+    ],
+    "misconceptions": [
+        {
+            "id": "preferences",
+            "description": "Treating Preferences as secure storage.",
+            "stepId": "apply",
+            "feedback": "Preferences writes readable files. Credentials belong in Keychain or Keystore through a secure storage plugin."
+        },
+        {
+            "id": "deep-link",
+            "description": "Routing an app URL before the session is restored.",
+            "stepId": "review",
+            "feedback": "Validate the host, wait for the session, then route. Otherwise a link can land inside an authenticated area."
+        },
+        {
+            "id": "last-write-wins",
+            "description": "Sending the whole local record without a revision check.",
+            "stepId": "apply",
+            "feedback": "Compare revisions and surface a conflict; never replace a newer server record with older local state."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A synced web directory is not a store build",
+                "body": "npx cap sync copies the web bundle and updates native dependencies. It does not sign the app, set the bundle version, add required permission descriptions, produce icons, or upload a reviewable binary. The Xcode workspace and Android project still go through their own build and release steps."
+            },
+            {
+                "title": "One adapter, two implementations",
+                "body": "Shared screens call an interface. Native code uses Keychain or Keystore, app URL events, and local notifications; web code uses httpOnly cookies, the History API, and the Notifications API. Platform checks stay in the adapter, not in every component. Preferences and localStorage are plain storage, so credentials belong in a secure storage plugin backed by iOS Keychain or Android Keystore."
+            },
+            {
+                "title": "Deep links cross a trust boundary",
+                "body": "Parse the URL, check the scheme and host against an allowlist, restore the session, then route. A link that lands on an authenticated screen before authorization is a bypass."
+            },
+            {
+                "title": "Sync needs a revision",
+                "body": "Each write carries the revision it was based on. If the server revision is newer, keep the server value or ask for a merge. Last-write-wins silently destroys another device's work."
+            },
+            {
+                "title": "Ask for notification permission in context",
+                "body": "Request permission when the user turns on alerts and handle denial. A launch-time prompt is usually denied and cannot be shown again on iOS."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Capacitor",
+                "definition": "A native runtime that loads a web bundle inside an iOS or Android shell and exposes platform APIs through plugins."
+            },
+            {
+                "term": "Platform adapter",
+                "definition": "One interface that shared code calls, with native and web implementations behind it."
+            },
+            {
+                "term": "Deep link",
+                "definition": "A URL that opens a specific screen in the app, often from another app or a browser."
+            },
+            {
+                "term": "Revision",
+                "definition": "A monotonically increasing version number attached to a record so concurrent writes can be ordered."
+            },
+            {
+                "term": "Secure storage",
+                "definition": "Platform-backed storage such as iOS Keychain or Android Keystore that is not readable as plain files."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Capacitor boundaries and sync",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A synced web directory is not a store build",
+                    "body": "npx cap sync copies the web bundle and updates native dependencies. It does not sign the app, set the bundle version, add required permission descriptions, produce icons, or upload a reviewable binary. The Xcode workspace and Android project still go through their own build and release steps."
+                },
+                {
+                    "title": "One adapter, two implementations",
+                    "body": "Shared screens call an interface. Native code uses Keychain or Keystore, app URL events, and local notifications; web code uses httpOnly cookies, the History API, and the Notifications API. Platform checks stay in the adapter, not in every component. Preferences and localStorage are plain storage, so credentials belong in a secure storage plugin backed by iOS Keychain or Android Keystore."
+                },
+                {
+                    "title": "Deep links cross a trust boundary",
+                    "body": "Parse the URL, check the scheme and host against an allowlist, restore the session, then route. A link that lands on an authenticated screen before authorization is a bypass."
+                },
+                {
+                    "title": "Sync needs a revision",
+                    "body": "Each write carries the revision it was based on. If the server revision is newer, keep the server value or ask for a merge. Last-write-wins silently destroys another device's work."
+                },
+                {
+                    "title": "Ask for notification permission in context",
+                    "body": "Request permission when the user turns on alerts and handle denial. A launch-time prompt is usually denied and cannot be shown again on iOS."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Capacitor",
+                    "definition": "A native runtime that loads a web bundle inside an iOS or Android shell and exposes platform APIs through plugins."
+                },
+                {
+                    "term": "Platform adapter",
+                    "definition": "One interface that shared code calls, with native and web implementations behind it."
+                },
+                {
+                    "term": "Deep link",
+                    "definition": "A URL that opens a specific screen in the app, often from another app or a browser."
+                },
+                {
+                    "term": "Revision",
+                    "definition": "A monotonically increasing version number attached to a record so concurrent writes can be ordered."
+                },
+                {
+                    "term": "Secure storage",
+                    "definition": "Platform-backed storage such as iOS Keychain or Android Keystore that is not readable as plain files."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Adapt the shell without leaking platform details",
+            "prompt": "Edit native.ts. Put secure storage, notification permission, and deep link handling behind one adapter. Reject links from other hosts or without a session, and merge synced orders by revision instead of overwriting newer server state.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "native.ts",
+                    "content": "import { App } from \"@capacitor/app\";\nimport { Preferences } from \"@capacitor/preferences\";\n\nconst SESSION_KEY = \"session\";\n\nexport interface SyncedOrder {\n    id: string;\n    revision: number;\n    updatedAt: string;\n    total: number;\n}\n\n// TODO: move credentials to secure storage, authorize deep links, and resolve sync conflicts\nexport async function saveSession(token: string): Promise<void> {\n    await Preferences.set({ key: SESSION_KEY, value: token });\n}\n\nexport async function readSession(): Promise<string | null> {\n    const stored = await Preferences.get({ key: SESSION_KEY });\n    return stored.value;\n}\n\nexport async function openDeepLink(url: string): Promise<void> {\n    const parsed = new URL(url);\n    window.location.assign(parsed.pathname);\n}\n\nexport function mergeOrder(local: SyncedOrder, server: SyncedOrder): SyncedOrder {\n    return local;\n}\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "native.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Native credentials use secure storage and web sessions use a server-set cookie.",
+                    "file": "native.ts",
+                    "includes": [
+                        "Capacitor.isNativePlatform()",
+                        "await SecureStorage.set(SESSION_KEY, JSON.stringify(session))",
+                        "method: \"POST\""
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Deep links are limited to an allowed host and require a session.",
+                    "file": "native.ts",
+                    "includes": [
+                        "if (!ALLOWED_HOSTS.has(url.hostname))",
+                        "const session = await readSession();",
+                        "if (!session)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Notification permission is checked before it is requested.",
+                    "file": "native.ts",
+                    "includes": [
+                        "LocalNotifications.checkPermissions()",
+                        "LocalNotifications.requestPermissions()"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Sync keeps the newer server revision and reports a conflict.",
+                    "file": "native.ts",
+                    "includes": [
+                        "if (local.revision < server.revision)",
+                        "throw new Error(\"Sync conflict: pull the newer server record first\")",
+                        "return { saveSession, readSession, clearSession, requestNotifications, onDeepLink }"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "native.ts",
+                    "includes": ["Capacitor.isNativePlatform()"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the native boundary",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "native.ts",
+                "caption": "Tokens go to localStorage, deep links route without an authorization check, and order writes always replace the server record.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { App } from \"@capacitor/app\";\n\nconst API = \"https://api.praxbit.test\";\n\nexport interface SyncedOrder {\n    id: string;\n    revision: number;\n    total: number;\n}\n\nexport async function signIn(email: string, password: string) {\n    const response = await fetch(`${API}/session`, {\n        method: \"POST\",\n        headers: { \"content-type\": \"application/json\" },\n        body: JSON.stringify({ email, password }),\n    });\n    const session = await response.json();\n    localStorage.setItem(\"token\", session.token);\n    return session;\n}\n\nApp.addListener(\"appUrlOpen\", (event) => {\n    const url = new URL(event.url);\n    window.location.assign(url.pathname + url.search);\n});\n\nexport async function saveOrder(order: SyncedOrder): Promise<void> {\n    await fetch(`${API}/orders/${order.id}`, {\n        method: \"PUT\",\n        headers: { \"content-type\": \"application/json\" },\n        body: JSON.stringify(order),\n    });\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "token-localstorage",
+                    "label": "The access token is written to localStorage.",
+                    "correct": true
+                },
+                {
+                    "id": "deep-link-bypass",
+                    "label": "The deep link handler navigates without checking a session or an allowed host.",
+                    "correct": true
+                },
+                {
+                    "id": "sync-overwrite",
+                    "label": "The order write always replaces the server record, even when the server revision is newer.",
+                    "correct": true
+                },
+                {
+                    "id": "secure-keychain",
+                    "label": "The artifact stores the token in the platform keychain.",
+                    "correct": false
+                },
+                {
+                    "id": "conflict-check",
+                    "label": "The artifact compares revisions before writing.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until credentials, routing, and sync are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the behavior is acceptable for a first release."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming and formatting need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "localStorage exposes the token to any script on the origin. The deep link handler routes any URL before checking a session or host. The order write carries no revision, so a newer server record is overwritten. The artifact does not use the platform keychain and never compares revisions."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Native and offline workspace is keyboard accessible. Checks verify source structure; they do not compile or run Native and offline.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
