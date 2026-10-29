@@ -1,0 +1,255 @@
+{
+    "id": "swift.optionals",
+    "version": 1,
+    "sequence": 64,
+    "courseId": "swift",
+    "title": "Optionals and async Swift",
+    "summary": "Return an optional safely, then diagnose a forced unwrap in a lookup.",
+    "skills": ["swift.optionals", "swift.concurrency", "swift.tooling"],
+    "prerequisites": ["swift.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "optionals",
+        "briefing": "A campus app looks up the first positive reading and may find nothing. Represent absence without crashing."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:swift"],
+    "hints": [
+        "Keep the Int? return type.",
+        "Iterate over the values.",
+        "Filter with where value > 0.",
+        "Return nil after the loop."
+    ],
+    "misconceptions": [
+        {
+            "id": "force",
+            "description": "Force unwrapping a lookup that may fail.",
+            "stepId": "apply",
+            "feedback": "first returns an optional. Handle nil explicitly instead of forcing it."
+        },
+        {
+            "id": "async",
+            "description": "Blocking a thread to wait for async work.",
+            "stepId": "apply",
+            "feedback": "Use await. Blocking defeats the concurrency model and can deadlock."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Swift functions and collections",
+                "body": "Functions declare parameter and return types: func add(_ left: Int, _ right: Int) -> Int { left + right }. Array<Int> or [Int] stores an ordered collection, and Dictionary stores key-value pairs. Async functions and actors structure concurrent work."
+            },
+            {
+                "title": "Swift errors and tools",
+                "body": "A throwing function uses throws, and callers use do/catch or try?. Optionals are not errors; they represent a legitimate absence. Swift Package Manager resolves dependencies, swift build compiles, swift test runs tests, and Xcode provides the IDE."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Async/await",
+                "definition": "Syntax for suspending work without blocking a thread."
+            },
+            {
+                "term": "Actor",
+                "definition": "A reference type that serializes access to its mutable state."
+            },
+            {
+                "term": "Swift Package Manager",
+                "definition": "The dependency and build system for Swift packages."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Swift functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Swift functions and collections",
+                    "body": "Functions declare parameter and return types: func add(_ left: Int, _ right: Int) -> Int { left + right }. Array<Int> or [Int] stores an ordered collection, and Dictionary stores key-value pairs. Async functions and actors structure concurrent work."
+                },
+                {
+                    "title": "Swift errors and tools",
+                    "body": "A throwing function uses throws, and callers use do/catch or try?. Optionals are not errors; they represent a legitimate absence. Swift Package Manager resolves dependencies, swift build compiles, swift test runs tests, and Xcode provides the IDE."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Async/await",
+                    "definition": "Syntax for suspending work without blocking a thread."
+                },
+                {
+                    "term": "Actor",
+                    "definition": "A reference type that serializes access to its mutable state."
+                },
+                {
+                    "term": "Swift Package Manager",
+                    "definition": "The dependency and build system for Swift packages."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Find the first positive reading",
+            "prompt": "Edit main.swift. firstPositive returns the first value greater than zero, or nil when none exists.",
+            "evidence": "construction",
+            "language": "swift",
+            "files": [
+                {
+                    "path": "main.swift",
+                    "content": "func firstPositive(_ values: [Int]) -> Int? {\n    return values.first! // TODO: return nil when no positive value exists\n}\n\nprint(firstPositive([-2, 3, 4]) ?? -1)\n",
+                    "editable": true,
+                    "language": "swift"
+                }
+            ],
+            "entry": "main.swift",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function returns an optional Int.",
+                    "file": "main.swift",
+                    "includes": ["func firstPositive(_ values: [Int]) -> Int?"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The loop returns the first positive value and nil otherwise.",
+                    "file": "main.swift",
+                    "includes": [
+                        "for value in values where value > 0",
+                        "return value",
+                        "return nil"
+                    ],
+                    "excludes": ["values.first!"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.swift",
+                    "includes": ["func firstPositive(_ values: [Int]) -> Int?"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The missing dictionary key",
+            "prompt": "This code traps when the key is absent. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "lookup",
+                    "label": "let balance = balances[\"store\"]"
+                },
+                {
+                    "id": "force",
+                    "label": "let cents = balance! * 100"
+                },
+                {
+                    "id": "print",
+                    "label": "print(cents)"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "force",
+            "fixes": [
+                {
+                    "id": "guard",
+                    "label": "Use guard let balance else { return } before multiplying."
+                },
+                {
+                    "id": "default",
+                    "label": "Use (balance ?? 0) * 100."
+                },
+                {
+                    "id": "ignore",
+                    "label": "Wrap the force unwrap in a do/catch."
+                }
+            ],
+            "correctFixId": "default",
+            "explanation": "A dictionary lookup returns an optional. The nil-coalescing operator supplies a default instead of trapping."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Optionals and async Swift",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "optional",
+                    "label": "An optional return type documents that absence is possible.",
+                    "correct": true
+                },
+                {
+                    "id": "guard",
+                    "label": "guard let exits the current scope when the value is nil.",
+                    "correct": true
+                },
+                {
+                    "id": "force",
+                    "label": "Force unwrapping turns a failed lookup into a safe default.",
+                    "correct": false
+                },
+                {
+                    "id": "async",
+                    "label": "An async function can suspend without blocking its thread.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Optionals make absence part of the type. Async functions suspend at await points and actors serialize mutable state."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Swift workspace is keyboard accessible. Checks verify source structure; they do not compile or run Swift.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
