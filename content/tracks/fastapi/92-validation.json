@@ -1,0 +1,284 @@
+{
+    "id": "fastapi.validation",
+    "version": 1,
+    "sequence": 92,
+    "courseId": "fastapi",
+    "title": "Response contracts and dependency overrides",
+    "summary": "Use response_model and HTTPException, then replace a dependency in tests.",
+    "skills": ["fastapi.validation", "fastapi.testing"],
+    "prerequisites": ["fastapi.routes", "api.validation"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "validation",
+        "briefing": "The item API now exposes internal notes and the test suite hits the real data store. Tighten the public response and make the test deterministic with a dependency override."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastapi"],
+    "hints": [
+        "Import get_items from main next to app.",
+        "Assign app.dependency_overrides[get_items] = fake_items before creating the client.",
+        "Compare the JSON body to a list with id, name, and quantity only.",
+        "Wrap each test in try/finally and call app.dependency_overrides.clear()."
+    ],
+    "misconceptions": [
+        {
+            "id": "override-leak",
+            "description": "Leaving a dependency override installed after a test.",
+            "stepId": "apply",
+            "feedback": "The override is global to the app object. Clear it in finally so later tests do not silently use fake data."
+        },
+        {
+            "id": "test-real-store",
+            "description": "Letting the test call the real data store.",
+            "stepId": "apply",
+            "feedback": "A unit test should replace the dependency and assert the contract without external state."
+        },
+        {
+            "id": "async-block",
+            "description": "Calling a blocking database client from an async endpoint.",
+            "stepId": "review",
+            "feedback": "The event loop cannot serve other requests while the call blocks. Use def or an async driver."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Response models define the public shape",
+                "body": "`@app.get(\"/items\", response_model=list[ItemOut])` serializes only the fields declared on `ItemOut`, even when the handler returns a richer object. `HTTPException(status_code=404, detail=\"Item not found\")` turns a missing record into a documented error response instead of a server error."
+            },
+            {
+                "title": "Dependencies are resolved per request",
+                "body": "`Depends(get_items)` tells FastAPI to call the dependency and pass its result. A test can replace it with `app.dependency_overrides[get_items] = fake_items`, call the app through `TestClient`, and clear the override in `finally` so other tests see the real dependency."
+            },
+            {
+                "title": "Async handlers must not block",
+                "body": "An `async def` endpoint runs on the event loop. A synchronous database call such as `session.query(...).all()` blocks every other request on that worker. Use a regular `def` handler, which FastAPI runs in a thread pool, or an async driver."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Response model",
+                "definition": "The declared shape FastAPI uses to serialize and filter a response."
+            },
+            {
+                "term": "HTTPException",
+                "definition": "A FastAPI error that carries a status code and detail payload."
+            },
+            {
+                "term": "Dependency",
+                "definition": "A callable FastAPI resolves and passes into a handler."
+            },
+            {
+                "term": "Dependency override",
+                "definition": "A test-time replacement registered on the app for a dependency."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Validation and test overrides",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Response models define the public shape",
+                    "body": "`@app.get(\"/items\", response_model=list[ItemOut])` serializes only the fields declared on `ItemOut`, even when the handler returns a richer object. `HTTPException(status_code=404, detail=\"Item not found\")` turns a missing record into a documented error response instead of a server error."
+                },
+                {
+                    "title": "Dependencies are resolved per request",
+                    "body": "`Depends(get_items)` tells FastAPI to call the dependency and pass its result. A test can replace it with `app.dependency_overrides[get_items] = fake_items`, call the app through `TestClient`, and clear the override in `finally` so other tests see the real dependency."
+                },
+                {
+                    "title": "Async handlers must not block",
+                    "body": "An `async def` endpoint runs on the event loop. A synchronous database call such as `session.query(...).all()` blocks every other request on that worker. Use a regular `def` handler, which FastAPI runs in a thread pool, or an async driver."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Response model",
+                    "definition": "The declared shape FastAPI uses to serialize and filter a response."
+                },
+                {
+                    "term": "HTTPException",
+                    "definition": "A FastAPI error that carries a status code and detail payload."
+                },
+                {
+                    "term": "Dependency",
+                    "definition": "A callable FastAPI resolves and passes into a handler."
+                },
+                {
+                    "term": "Dependency override",
+                    "definition": "A test-time replacement registered on the app for a dependency."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Override a dependency in a test",
+            "prompt": "Edit test_main.py. Override get_items so the test never reads the real store, assert that GET /items hides internal_note, and check that a missing item returns 404. Run the checks when done.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "test_main.py",
+                    "content": "from fastapi.testclient import TestClient\n\nfrom main import app\n\n\ndef test_list_items_hides_internal_fields() -> None:\n    client = TestClient(app)\n    # TODO: override get_items and assert the public response\n    response = client.get(\"/items\")\n    assert response.status_code == 200\n\n\ndef test_missing_item_returns_404() -> None:\n    client = TestClient(app)\n    response = client.get(\"/items/99\")\n    assert response.status_code == 200\n",
+                    "editable": true,
+                    "language": "python"
+                },
+                {
+                    "path": "main.py",
+                    "content": "from fastapi import Depends, FastAPI, HTTPException\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nitems = [\n    {\"id\": 1, \"name\": \"Microscope\", \"quantity\": 4, \"internal_note\": \"repair\"},\n]\n\n\nclass ItemOut(BaseModel):\n    id: int\n    name: str\n    quantity: int\n\n\ndef get_items() -> list[dict[str, object]]:\n    return items\n\n\n@app.get(\"/items\", response_model=list[ItemOut])\ndef list_items(records: list[dict[str, object]] = Depends(get_items)) -> list[dict[str, object]]:\n    return records\n\n\n@app.get(\"/items/{item_id}\", response_model=ItemOut)\ndef read_item(item_id: int, records: list[dict[str, object]] = Depends(get_items)) -> dict[str, object]:\n    for item in records:\n        if item[\"id\"] == item_id:\n            return item\n    raise HTTPException(status_code=404, detail=\"Item not found\")\n",
+                    "editable": false,
+                    "language": "python"
+                }
+            ],
+            "entry": "test_main.py",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The test imports the app and the dependency it replaces.",
+                    "file": "test_main.py",
+                    "includes": ["from main import app, get_items"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The override supplies fake records instead of the real store.",
+                    "file": "test_main.py",
+                    "includes": [
+                        "def fake_items() -> list[dict[str, object]]:",
+                        "app.dependency_overrides[get_items] = fake_items"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The list response is asserted without the internal field.",
+                    "file": "test_main.py",
+                    "includes": [
+                        "TestClient(app)",
+                        "assert response.json() == [{\"id\": 1, \"name\": \"Microscope\", \"quantity\": 4}]"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A missing item is checked as a 404 response.",
+                    "file": "test_main.py",
+                    "includes": [
+                        "response = client.get(\"/items/99\")",
+                        "assert response.status_code == 404"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The override is cleared after each test.",
+                    "file": "test_main.py",
+                    "includes": ["app.dependency_overrides.clear()"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "test_main.py",
+                    "includes": ["from main import app, get_items"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the list endpoint",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "main.py",
+                "caption": "The endpoint returns ORM objects and runs a blocking query inside an async handler.",
+                "kind": "code",
+                "language": "python",
+                "content": "from fastapi import Depends, FastAPI\nfrom sqlalchemy.orm import Session\n\nfrom database import get_session\nfrom models import Item\n\napp = FastAPI()\n\n\n@app.get(\"/items\")\nasync def list_items(session: Session = Depends(get_session)) -> list[Item]:\n    items = session.query(Item).all()\n    return items\n"
+            },
+            "findings": [
+                {
+                    "id": "orm-response",
+                    "label": "The endpoint returns ORM objects without a response model.",
+                    "correct": true
+                },
+                {
+                    "id": "blocking-async",
+                    "label": "The async endpoint runs a blocking database call.",
+                    "correct": true
+                },
+                {
+                    "id": "explicit-fields",
+                    "label": "The endpoint limits the response to explicit public fields.",
+                    "correct": false
+                },
+                {
+                    "id": "missing-404",
+                    "label": "The endpoint handles a missing record with a 404 response.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the response contract and database call are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; FastAPI serializes ORM objects safely."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Without a response model FastAPI has no field list, so ORM columns leak and serialization can fail. The synchronous query also blocks the event loop. Return a DTO with response_model, use a sync handler or async driver, and raise HTTPException for missing rows."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The FastAPI workspace is keyboard accessible. Checks verify source structure; they do not compile or run FastAPI.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
