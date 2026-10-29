@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "transaction.sql": "-- Transfer 2500 cents from acct-a to acct-b as one atomic unit.\nBEGIN;\n\nSET TRANSACTION ISOLATION LEVEL READ COMMITTED;\n\n-- Lock both rows in a stable order before reading their balances.\nSELECT balance_cents\nFROM accounts\nWHERE id = 'acct-a'\nFOR UPDATE;\n\nSELECT balance_cents\nFROM accounts\nWHERE id = 'acct-b'\nFOR UPDATE;\n\nUPDATE accounts\nSET balance_cents = balance_cents - 2500\nWHERE id = 'acct-a' AND balance_cents >= 2500;\n\nUPDATE accounts\nSET balance_cents = balance_cents + 2500\nWHERE id = 'acct-b';\n\n-- The application checks the debit row count before this point.\n-- READ COMMITTED waits on the row lock. REPEATABLE READ would abort a\n-- conflicting write instead, so the application would need a retry loop.\nCOMMIT;\n\n-- A transfer rejected by its balance guard is rolled back as a unit.\nBEGIN;\n\nSET TRANSACTION ISOLATION LEVEL READ COMMITTED;\n\nSELECT balance_cents\nFROM accounts\nWHERE id = 'acct-a'\nFOR UPDATE;\n\nUPDATE accounts\nSET balance_cents = balance_cents - 2500\nWHERE id = 'acct-a' AND balance_cents >= 2500;\n\n-- The guard matched zero rows in this run, so the transfer is abandoned.\nROLLBACK;\n"
+            }
+        }
+    }
+}
