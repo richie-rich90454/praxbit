@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "dialects.sql": "-- PostgreSQL: identity, native boolean, ON CONFLICT, and RETURNING.\nCREATE TABLE players (\n    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n    handle TEXT NOT NULL UNIQUE,\n    email TEXT NOT NULL,\n    active BOOLEAN NOT NULL DEFAULT TRUE\n);\n\nINSERT INTO players (handle, email, active)\nVALUES ('ada', 'ada@example.com', TRUE)\nON CONFLICT (handle) DO UPDATE\nSET email = EXCLUDED.email,\n    active = EXCLUDED.active\nRETURNING id, handle, email, active;\n\n-- MySQL 8.0.19+: AUTO_INCREMENT, TINYINT(1) booleans, and no RETURNING.\n-- CREATE TABLE players (\n--     id INTEGER AUTO_INCREMENT PRIMARY KEY,\n--     handle VARCHAR(64) NOT NULL UNIQUE,\n--     email VARCHAR(255) NOT NULL,\n--     active TINYINT(1) NOT NULL DEFAULT 1\n-- );\n-- INSERT INTO players (handle, email, active)\n-- VALUES ('ada', 'ada@example.com', 1) AS incoming\n-- ON DUPLICATE KEY UPDATE email = incoming.email, active = incoming.active;\n\n-- SQLite 3.35+: INTEGER PRIMARY KEY AUTOINCREMENT, 0/1 booleans, and RETURNING.\n-- CREATE TABLE players (\n--     id INTEGER PRIMARY KEY AUTOINCREMENT,\n--     handle TEXT NOT NULL UNIQUE,\n--     email TEXT NOT NULL,\n--     active INTEGER NOT NULL DEFAULT 1\n-- );\n-- INSERT INTO players (handle, email, active)\n-- VALUES ('ada', 'ada@example.com', 1)\n-- ON CONFLICT (handle) DO UPDATE\n-- SET email = excluded.email, active = excluded.active\n-- RETURNING id, handle, email, active;\n\n-- LIMIT exists in all three dialects. Without ORDER BY, which rows survive\n-- the limit is unspecified, so never rely on insertion order.\n"
+            }
+        }
+    }
+}
