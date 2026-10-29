@@ -1,0 +1,226 @@
+{
+    "id": "nestjs.modules",
+    "version": 1,
+    "sequence": 85,
+    "courseId": "nestjs",
+    "title": "Modules, controllers, and providers",
+    "summary": "Wire a controller and a provider into a feature module with constructor injection.",
+    "skills": ["nestjs.modules", "nestjs.providers"],
+    "prerequisites": ["node.middleware", "architecture.modularity"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "modules",
+        "briefing": "The campus catalog is being split into feature modules. The products endpoint must be owned by a module instead of constructing its service by hand."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "hints": [
+        "Add ProductsService to the module providers array.",
+        "Declare a constructor parameter typed as ProductsService.",
+        "Return this.products.findAll() from the GET handler.",
+        "Remove any direct new ProductsService() construction."
+    ],
+    "misconceptions": [
+        {
+            "id": "manual-new",
+            "description": "Creating the service with new inside the controller.",
+            "stepId": "apply",
+            "feedback": "That bypasses the container. Register the provider and ask for it in the constructor."
+        },
+        {
+            "id": "provider-missing",
+            "description": "Adding a controller without its provider.",
+            "stepId": "apply",
+            "feedback": "Nest cannot resolve a constructor dependency that no module provides. Register the provider or import the module that exports it."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A module is a boundary",
+                "body": "The module declares which controllers and providers belong to one feature. Nest builds the dependency graph from that declaration instead of from imports buried in the controller."
+            },
+            {
+                "title": "Constructor injection is the seam",
+                "body": "A controller lists what it needs in its constructor. Nest resolves each parameter from the module's providers, which keeps the controller testable with a substitute."
+            },
+            {
+                "title": "Controllers route, services decide",
+                "body": "The controller maps HTTP requests to method calls. Business logic belongs in the provider, where it can be reused and tested without an HTTP context."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Module",
+                "definition": "A class decorated with @Module that groups controllers and providers."
+            },
+            {
+                "term": "Provider",
+                "definition": "A class registered with Nest so it can be injected into other classes."
+            },
+            {
+                "term": "Constructor injection",
+                "definition": "Declaring dependencies as constructor parameters and letting the container supply them."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "NestJS modules and providers",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A module is a boundary",
+                    "body": "The module declares which controllers and providers belong to one feature. Nest builds the dependency graph from that declaration instead of from imports buried in the controller."
+                },
+                {
+                    "title": "Constructor injection is the seam",
+                    "body": "A controller lists what it needs in its constructor. Nest resolves each parameter from the module's providers, which keeps the controller testable with a substitute."
+                },
+                {
+                    "title": "Controllers route, services decide",
+                    "body": "The controller maps HTTP requests to method calls. Business logic belongs in the provider, where it can be reused and tested without an HTTP context."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Module",
+                    "definition": "A class decorated with @Module that groups controllers and providers."
+                },
+                {
+                    "term": "Provider",
+                    "definition": "A class registered with Nest so it can be injected into other classes."
+                },
+                {
+                    "term": "Constructor injection",
+                    "definition": "Declaring dependencies as constructor parameters and letting the container supply them."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Register the products feature",
+            "prompt": "Edit products.module.ts. Define ProductsService, expose it through ProductsController with GET /products, and register both in ProductsModule.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "products.module.ts",
+                    "content": "import { Controller, Get, Injectable, Module } from \"@nestjs/common\";\n\n@Injectable()\nexport class ProductsService {\n    findAll() {\n        return [{ id: \"p1\", name: \"Notebook\", price: 4.5 }];\n    }\n}\n\n@Controller(\"products\")\nexport class ProductsController {\n    // TODO: inject ProductsService and return its products\n    @Get()\n    list() {\n        return [];\n    }\n}\n\n@Module({\n    controllers: [ProductsController],\n})\nexport class ProductsModule {}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "products.module.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The controller owns the products route.",
+                    "file": "products.module.ts",
+                    "includes": ["@Controller(\"products\")", "@Get()"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The controller receives its service through constructor injection.",
+                    "file": "products.module.ts",
+                    "includes": ["constructor(private readonly products: ProductsService)"],
+                    "excludes": ["new ProductsService()"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The service is registered as a provider in the module.",
+                    "file": "products.module.ts",
+                    "includes": ["providers: [ProductsService]"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The handler delegates to the injected service.",
+                    "file": "products.module.ts",
+                    "includes": ["return this.products.findAll();"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "products.module.ts",
+                    "includes": ["@Controller(\"products\")"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Modules and injection",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "module",
+                    "label": "A NestJS module declares which controllers and providers belong together.",
+                    "correct": true
+                },
+                {
+                    "id": "di",
+                    "label": "Nest resolves constructor parameters from providers registered in the module.",
+                    "correct": true
+                },
+                {
+                    "id": "new",
+                    "label": "A controller should construct its service with new to stay testable.",
+                    "correct": false
+                },
+                {
+                    "id": "shared",
+                    "label": "A provider registered in a module is available to every module without exports.",
+                    "correct": false
+                }
+            ],
+            "explanation": "The module owns the provider registry, and Nest injects constructor parameters from it. A hand-built service bypasses the container and hides the dependency from tests."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The NestJS workspace is keyboard accessible. Checks verify source structure; they do not compile or run NestJS.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
