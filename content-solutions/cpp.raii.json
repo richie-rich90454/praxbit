@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.cpp": "#include <iostream>\n#include <memory>\n\nstd::unique_ptr<int> make_reading(int value) {\n    return std::make_unique<int>(value);\n}\n\nint main() {\n    const std::unique_ptr<int> reading = make_reading(7);\n    std::cout << *reading << \"\\n\";\n    return 0;\n}\n"
+            }
+        }
+    }
+}
