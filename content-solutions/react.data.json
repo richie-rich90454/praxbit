@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "useProducts.ts": "import { useEffect, useState } from \"react\";\n\ntype Product = {\n  id: string;\n  name: string;\n};\n\nexport function useProducts() {\n  const [products, setProducts] = useState<Product[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState(\"\");\n\n  useEffect(() => {\n    const controller = new AbortController();\n\n    async function load() {\n      try {\n        const response = await fetch(\"/api/products\", { signal: controller.signal });\n        if (!response.ok) {\n          throw new Error(\"Request failed\");\n        }\n        const data: Product[] = await response.json();\n        setProducts(data);\n      } catch (caught) {\n        if (!controller.signal.aborted) {\n          setError(caught instanceof Error ? caught.message : \"Request failed\");\n        }\n      } finally {\n        if (!controller.signal.aborted) {\n          setLoading(false);\n        }\n      }\n    }\n\n    void load();\n    return () => controller.abort();\n  }, []);\n\n  return { products, loading, error };\n}\n"
+            }
+        }
+    }
+}
