@@ -24,6 +24,7 @@ export function AppShell(props: { readonly children?: JSX.Element }): JSX.Elemen
             <a
                 class="skip-link"
                 href="#main"
+                tabindex="0"
                 onClick={function focusMain(): void {
                     document.getElementById("main")?.focus();
                 }}
