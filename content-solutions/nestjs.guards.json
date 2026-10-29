@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "auth.guard.ts": "import {\n    CanActivate,\n    Controller,\n    ExecutionContext,\n    ForbiddenException,\n    Get,\n    Injectable,\n    SetMetadata,\n    UseGuards,\n} from \"@nestjs/common\";\nimport { Reflector } from \"@nestjs/core\";\n\nexport function Public() {\n    return SetMetadata(\"public\", true);\n}\n\nexport type RequestWithUser = { user?: { role?: string } };\n\n@Injectable()\nexport class AuthGuard implements CanActivate {\n    constructor(private readonly reflector: Reflector) {}\n\n    canActivate(context: ExecutionContext): boolean {\n        const isPublic = this.reflector.getAllAndOverride<boolean>(\"public\", [\n            context.getHandler(),\n            context.getClass(),\n        ]);\n        if (isPublic === true) {\n            return true;\n        }\n        const request = context.switchToHttp().getRequest<RequestWithUser>();\n        if (request.user?.role !== \"admin\") {\n            throw new ForbiddenException(\"admin_required\");\n        }\n        return true;\n    }\n}\n\n@Controller(\"admin\")\n@UseGuards(AuthGuard)\nexport class AdminController {\n    @Get(\"products\")\n    list(): string[] {\n        return [\"notebook\"];\n    }\n}\n"
+            }
+        }
+    }
+}
