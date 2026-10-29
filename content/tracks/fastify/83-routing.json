@@ -1,0 +1,229 @@
+{
+    "id": "fastify.routing",
+    "version": 1,
+    "sequence": 83,
+    "courseId": "fastify",
+    "title": "Typed routes in Fastify",
+    "summary": "Register a route with typed params and a response schema that shapes the payload.",
+    "skills": ["fastify.routing"],
+    "prerequisites": ["node.hono", "http.basics"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "routing",
+        "briefing": "The campus catalog is moving to Fastify for schema-based serialization. Expose one product with a typed route and a stable response shape."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
+    "hints": [
+        "Pass Params and Reply to app.get as type arguments.",
+        "Put the route path first and the options object second.",
+        "Declare both a 200 and a 404 response schema.",
+        "Use reply.status(404).send for the missing product."
+    ],
+    "misconceptions": [
+        {
+            "id": "return-status",
+            "description": "Returning an error object without setting the status.",
+            "stepId": "apply",
+            "feedback": "A returned object is serialized as 200. Set the status through reply when the resource is missing."
+        },
+        {
+            "id": "runtime-types",
+            "description": "Assuming TypeScript generics also validate the request.",
+            "stepId": "apply",
+            "feedback": "Generics disappear at runtime. Add request schemas when untrusted input must be checked."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The route generic types the request",
+                "body": "Fastify reads the generic on app.get to type Params, Body, Querystring, and Reply. Typing params keeps the handler aligned with the path it serves."
+            },
+            {
+                "title": "Schemas do two jobs",
+                "body": "A request schema validates incoming data before the handler runs. A response schema serializes the reply, which also prevents accidental extra fields from leaving the service."
+            },
+            {
+                "title": "Handlers can return or reply",
+                "body": "Returning a value lets Fastify serialize it through the response schema. Use reply when you need to set a status such as 404 before sending."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Route generic",
+                "definition": "The TypeScript type arguments that describe a route's request and reply shapes."
+            },
+            {
+                "term": "Response schema",
+                "definition": "A JSON schema that controls serialization of a status code's payload."
+            },
+            {
+                "term": "Reply",
+                "definition": "The Fastify response object used to set status and send a payload."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Fastify routes and schemas",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The route generic types the request",
+                    "body": "Fastify reads the generic on app.get to type Params, Body, Querystring, and Reply. Typing params keeps the handler aligned with the path it serves."
+                },
+                {
+                    "title": "Schemas do two jobs",
+                    "body": "A request schema validates incoming data before the handler runs. A response schema serializes the reply, which also prevents accidental extra fields from leaving the service."
+                },
+                {
+                    "title": "Handlers can return or reply",
+                    "body": "Returning a value lets Fastify serialize it through the response schema. Use reply when you need to set a status such as 404 before sending."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Route generic",
+                    "definition": "The TypeScript type arguments that describe a route's request and reply shapes."
+                },
+                {
+                    "term": "Response schema",
+                    "definition": "A JSON schema that controls serialization of a status code's payload."
+                },
+                {
+                    "term": "Reply",
+                    "definition": "The Fastify response object used to set status and send a payload."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Register a typed product route",
+            "prompt": "Edit server.ts. Create the Fastify instance, register GET /products/:id with typed params, and return the product or a 404 with the response schema.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "server.ts",
+                    "content": "import Fastify from \"fastify\";\n\ntype Product = { id: string; name: string; price: number };\nconst products: Product[] = [{ id: \"notebook\", name: \"Notebook\", price: 4.5 }];\n\nexport const app = Fastify();\n\n// TODO: register GET /products/:id with typed params and a response schema\napp.get(\"/products\", async function list() {\n    return products;\n});\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "server.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The instance is created and the typed route is registered.",
+                    "file": "server.ts",
+                    "includes": [
+                        "Fastify({ logger: false })",
+                        "app.get<{ Params: { id: string }; Reply: Product | { error: string } }>"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The route declares params and response schemas.",
+                    "file": "server.ts",
+                    "includes": ["params: {", "response: {"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The handler looks up the product by the typed param.",
+                    "file": "server.ts",
+                    "includes": ["request.params.id", "products.find"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A missing product answers 404 through the reply object.",
+                    "file": "server.ts",
+                    "includes": ["reply.status(404).send({ error: \"not_found\" })"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "server.ts",
+                    "includes": ["Fastify({ logger: false })"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Typed routing",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "types",
+                    "label": "The route generic describes params, body, query, and reply for the handler.",
+                    "correct": true
+                },
+                {
+                    "id": "response",
+                    "label": "A response schema both documents and filters the serialized payload.",
+                    "correct": true
+                },
+                {
+                    "id": "async",
+                    "label": "An async Fastify handler may return the payload instead of calling reply.send.",
+                    "correct": true
+                },
+                {
+                    "id": "params",
+                    "label": "Fastify leaves params untyped unless the whole server is generated from a schema.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Fastify uses route generics for compile-time types and JSON schemas for runtime validation and serialization. A 404 still needs a declared response shape so its body is consistent."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Fastify workspace is keyboard accessible. Checks verify source structure; they do not compile or run Fastify.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
