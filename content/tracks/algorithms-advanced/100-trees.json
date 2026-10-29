@@ -1,0 +1,300 @@
+{
+    "id": "algorithms-advanced.trees",
+    "version": 1,
+    "sequence": 100,
+    "courseId": "algorithms-advanced",
+    "title": "Trees and heaps",
+    "summary": "Maintain the heap invariant with array indexes, and explain why insertion order can turn a binary search tree into a linked list.",
+    "skills": ["algorithms.sorting", "algorithms.complexity"],
+    "prerequisites": ["algorithms.arrays", "algorithms.complexity"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "trees",
+        "briefing": "The campus scheduler keeps deadlines in a min-heap and an index in a binary search tree. A bulk import inserted deadlines in ascending order and the tree became a chain; a hand-written heap update also placed a child before its parent. Implement the heap repair paths and review the tree shape before the import ships."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:algorithms"],
+    "hints": [
+        "A new heap value starts at the end of the array and swaps with its parent while it is smaller.",
+        "The parent of index i is Math.floor((i - 1) / 2); its children are 2i + 1 and 2i + 2.",
+        "Extract the root, pop the last value, put it at index 0, and bubble down.",
+        "Stop bubbling down when neither child is smaller than the current value."
+    ],
+    "misconceptions": [
+        {
+            "id": "sorted-insert",
+            "description": "Inserting sorted keys into a plain binary search tree and expecting logarithmic height.",
+            "stepId": "review",
+            "feedback": "A plain BST has no balancing step. Ascending keys create a chain; use a balanced tree or a median-first insertion order."
+        },
+        {
+            "id": "sibling-order",
+            "description": "Expecting a heap to order left and right children.",
+            "stepId": "apply",
+            "feedback": "A heap only guarantees parent-child order. Siblings have no required relationship."
+        },
+        {
+            "id": "scan-heap",
+            "description": "Rebuilding the heap by scanning all values after every insert.",
+            "stepId": "apply",
+            "feedback": "Bubbling one path is O(log n); a full scan is O(n) per operation."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A binary search tree orders by key",
+                "body": "For every node, keys in the left subtree are smaller and keys in the right subtree are larger. Search, insert, and delete follow one path from the root, so their cost is the height of the tree, not the number of nodes."
+            },
+            {
+                "title": "Insertion order decides the height",
+                "body": "Ascending keys make every new node the right child, so the tree becomes a chain of height n - 1 and search degrades to O(n). A self-balancing tree or a median-first insertion order keeps the height logarithmic, which is why the same key set can have very different costs."
+            },
+            {
+                "title": "A heap orders parents, not subtrees",
+                "body": "A min-heap requires every parent to be no larger than its children, but it does not order the left child against the right child. The array layout puts the parent at (i - 1) / 2 and the children at 2i + 1 and 2i + 2."
+            },
+            {
+                "title": "Repair one path per operation",
+                "body": "Insert bubbles up; extract replaces the root with the last value and bubbles down. Each swap moves one level, so both operations are O(log n). A full scan is O(n) and is not a heap repair."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Binary search tree",
+                "definition": "A binary tree where every left descendant is smaller and every right descendant is larger than the node."
+            },
+            {
+                "term": "Heap order",
+                "definition": "The parent-child rule that makes the root the minimum or maximum; it does not order siblings."
+            },
+            {
+                "term": "Height",
+                "definition": "The number of edges on the longest path from the root to a leaf."
+            },
+            {
+                "term": "Balanced tree",
+                "definition": "A tree whose height stays logarithmic in the number of nodes."
+            },
+            {
+                "term": "Bubble down",
+                "definition": "The repair that swaps a value toward the leaves until the heap order holds."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Tree invariants and heap repair",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A binary search tree orders by key",
+                    "body": "For every node, keys in the left subtree are smaller and keys in the right subtree are larger. Search, insert, and delete follow one path from the root, so their cost is the height of the tree, not the number of nodes."
+                },
+                {
+                    "title": "Insertion order decides the height",
+                    "body": "Ascending keys make every new node the right child, so the tree becomes a chain of height n - 1 and search degrades to O(n). A self-balancing tree or a median-first insertion order keeps the height logarithmic, which is why the same key set can have very different costs."
+                },
+                {
+                    "title": "A heap orders parents, not subtrees",
+                    "body": "A min-heap requires every parent to be no larger than its children, but it does not order the left child against the right child. The array layout puts the parent at (i - 1) / 2 and the children at 2i + 1 and 2i + 2."
+                },
+                {
+                    "title": "Repair one path per operation",
+                    "body": "Insert bubbles up; extract replaces the root with the last value and bubbles down. Each swap moves one level, so both operations are O(log n). A full scan is O(n) and is not a heap repair."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Binary search tree",
+                    "definition": "A binary tree where every left descendant is smaller and every right descendant is larger than the node."
+                },
+                {
+                    "term": "Heap order",
+                    "definition": "The parent-child rule that makes the root the minimum or maximum; it does not order siblings."
+                },
+                {
+                    "term": "Height",
+                    "definition": "The number of edges on the longest path from the root to a leaf."
+                },
+                {
+                    "term": "Balanced tree",
+                    "definition": "A tree whose height stays logarithmic in the number of nodes."
+                },
+                {
+                    "term": "Bubble down",
+                    "definition": "The repair that swaps a value toward the leaves until the heap order holds."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Implement a binary min-heap",
+            "prompt": "Edit trees.ts. Store the heap in an array, bubble a new value up after insert, move the last value to the root and bubble it down after extractMin, and keep parent and child indexes consistent.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "trees.ts",
+                    "content": "export class MinHeap {\n    private values: number[] = [];\n\n    get size(): number {\n        return this.values.length;\n    }\n\n    insert(value: number): void {\n        // TODO: append the value and restore heap order from the bottom\n        this.values.push(value);\n    }\n\n    extractMin(): number | undefined {\n        // TODO: replace the root with the last value and restore heap order\n        return this.values.shift();\n    }\n}\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "trees.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Insert appends the value and bubbles it up from the last index.",
+                    "file": "trees.ts",
+                    "includes": [
+                        "export class MinHeap {",
+                        "this.values.push(value);",
+                        "this.bubbleUp(this.values.length - 1);"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Extract moves the last value to the root and bubbles it down.",
+                    "file": "trees.ts",
+                    "includes": [
+                        "const min = this.values[0];",
+                        "const last = this.values.pop() as number;",
+                        "this.values[0] = last;",
+                        "this.bubbleDown(0);",
+                        "return min;"
+                    ],
+                    "excludes": [".shift()"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Parent and child indexes follow the array heap layout.",
+                    "file": "trees.ts",
+                    "includes": [
+                        "const parent = Math.floor((index - 1) / 2);",
+                        "const left = index * 2 + 1;",
+                        "const right = left + 1;"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Both repair loops stop when the heap order holds.",
+                    "file": "trees.ts",
+                    "includes": [
+                        "if (this.values[parent] <= this.values[index]) {",
+                        "if (smallest === index) {"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "trees.ts",
+                    "includes": ["export class MinHeap {"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the unbalanced tree",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "DeadlineTree.ts",
+                "caption": "The insert function is correct, but the workload delivers deadlines in ascending order.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "type Node = {\n    key: number;\n    left: Node | null;\n    right: Node | null;\n};\n\nfunction insert(root: Node | null, key: number): Node {\n    if (root === null) {\n        return { key, left: null, right: null };\n    }\n    if (key < root.key) {\n        root.left = insert(root.left, key);\n    } else {\n        root.right = insert(root.right, key);\n    }\n    return root;\n}\n\nconst deadlines = [5, 10, 15, 20, 25, 30];\nlet root: Node | null = null;\nfor (const deadline of deadlines) {\n    root = insert(root, deadline);\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "chain",
+                    "label": "Every key after 5 is inserted as the right child of the previous key, so the tree has height 5 for 6 keys.",
+                    "correct": true
+                },
+                {
+                    "id": "log-search",
+                    "label": "Search stays O(log n) because the tree satisfies the binary search tree invariant.",
+                    "correct": false
+                },
+                {
+                    "id": "order",
+                    "label": "The final height depends on insertion order, not only on the set of keys.",
+                    "correct": true
+                },
+                {
+                    "id": "rotation",
+                    "label": "A balanced insertion order or a self-balancing tree would bound the height.",
+                    "correct": true
+                },
+                {
+                    "id": "two-children",
+                    "label": "The tree is balanced because every node has at most two children.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the tree shape or the insertion strategy is fixed."
+                },
+                {
+                    "id": "style",
+                    "label": "The code only needs formatting changes."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; a binary search tree is always logarithmic."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The insert function preserves the BST invariant, but ascending keys create a right spine. Search and insert then walk O(n) nodes. The shape must be bounded by a balanced tree or a different insertion order before this is used for deadlines."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Advanced algorithms workspace is keyboard accessible. Checks verify source structure; they do not compile or run Advanced algorithms.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems"]
+}
