@@ -1,0 +1,246 @@
+{
+    "id": "cmake.packages",
+    "version": 1,
+    "sequence": 96,
+    "courseId": "cmake",
+    "title": "Dependencies, installs, and exported targets",
+    "summary": "Find a package, link its imported target, and install an exported target set.",
+    "skills": ["cmake.packages"],
+    "prerequisites": ["cmake.targets", "git.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "packages",
+        "briefing": "The campus report links a system copy of fmt by absolute path, so it breaks on other machines. Find the package, link the imported target, and install the library with an export others can consume."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cmake"],
+    "hints": [
+        "find_package(fmt 10 REQUIRED) defines the imported target fmt::fmt.",
+        "Link fmt::fmt and Threads::Threads with target_link_libraries, not archive paths.",
+        "Guard source include paths with BUILD_INTERFACE and install paths with INSTALL_INTERFACE.",
+        "Export report_core with install(TARGETS ... EXPORT ...) and install(EXPORT ...)."
+    ],
+    "misconceptions": [
+        {
+            "id": "absolute-lib",
+            "description": "Linking /usr/local/lib/libfmt.a directly.",
+            "stepId": "apply",
+            "feedback": "An absolute archive path encodes one machine's layout. find_package plus the imported target resolves the library and its requirements per environment."
+        },
+        {
+            "id": "global-include",
+            "description": "Using include_directories to make headers visible.",
+            "stepId": "review",
+            "feedback": "Global include paths leak to every target and hide ownership. target_include_directories keeps the path on the target that needs it."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Packages describe themselves",
+                "body": "find_package locates a dependency through its config file and defines imported targets. fmt::fmt carries the include directories, compile definitions, and link libraries the dependency needs, so the build does not guess paths."
+            },
+            {
+                "title": "Installing is exporting a contract",
+                "body": "install(TARGETS ... EXPORT ...) records targets in an export set, and install(EXPORT ...) writes a package file that other projects can consume with find_package. Out-of-source builds keep generated files separate from the source tree."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Imported target",
+                "definition": "A target created by find_package that carries a dependency's usage requirements."
+            },
+            {
+                "term": "Export set",
+                "definition": "A named collection of installable targets that CMake turns into a package file."
+            },
+            {
+                "term": "Out-of-source build",
+                "definition": "A build whose generated files live in a directory separate from the source tree."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "CMake packages and installs",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Packages describe themselves",
+                    "body": "find_package locates a dependency through its config file and defines imported targets. fmt::fmt carries the include directories, compile definitions, and link libraries the dependency needs, so the build does not guess paths."
+                },
+                {
+                    "title": "Installing is exporting a contract",
+                    "body": "install(TARGETS ... EXPORT ...) records targets in an export set, and install(EXPORT ...) writes a package file that other projects can consume with find_package. Out-of-source builds keep generated files separate from the source tree."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Imported target",
+                    "definition": "A target created by find_package that carries a dependency's usage requirements."
+                },
+                {
+                    "term": "Export set",
+                    "definition": "A named collection of installable targets that CMake turns into a package file."
+                },
+                {
+                    "term": "Out-of-source build",
+                    "definition": "A build whose generated files live in a directory separate from the source tree."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Consume and export a CMake package",
+            "prompt": "Edit CMakeLists.txt. Find fmt and Threads, link them to report_core, install the library and executable, and export the library target set.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "CMakeLists.txt",
+                    "content": "cmake_minimum_required(VERSION 3.24)\nproject(campus_report LANGUAGES CXX)\n\n# TODO: find fmt and Threads and link them through their imported targets\nadd_library(report_core STATIC src/report.cpp)\ntarget_include_directories(report_core PUBLIC /usr/local/include)\ntarget_link_libraries(report_core PRIVATE /usr/local/lib/libfmt.a)\n\nadd_executable(report src/main.cpp)\ntarget_link_libraries(report PRIVATE report_core)\n\ninclude_directories(include)\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "CMakeLists.txt",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "fmt and Threads are found as packages.",
+                    "file": "CMakeLists.txt",
+                    "includes": ["find_package(fmt 10 REQUIRED)", "find_package(Threads REQUIRED)"],
+                    "excludes": ["/usr/local"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The library links imported targets, not archive paths.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "target_link_libraries(report_core PRIVATE fmt::fmt Threads::Threads)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The install exports report_core for other projects.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "install(TARGETS report_core EXPORT campus_reportTargets",
+                        "install(EXPORT campus_reportTargets",
+                        "NAMESPACE campus::"
+                    ],
+                    "excludes": ["include_directories(include)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The build is configured out of source.",
+                    "file": "CMakeLists.txt",
+                    "includes": ["cmake -S . -B build"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "CMakeLists.txt",
+                    "includes": ["find_package(fmt 10 REQUIRED)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the dependency wiring",
+            "prompt": "Review the CMake build file and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "CMakeLists.txt",
+                "caption": "The build hardcodes absolute paths and applies includes globally instead of using the imported package target.",
+                "kind": "code",
+                "language": "text",
+                "content": "cmake_minimum_required(VERSION 3.24)\nproject(campus_report LANGUAGES CXX)\n\ninclude_directories(/home/ada/campus/include)\ninclude_directories(include)\n\nfind_package(fmt REQUIRED)\nset(CMAKE_CXX_FLAGS \"-I/usr/local/include\")\n\nadd_executable(report src/main.cpp)\ntarget_link_libraries(report fmt::fmt)\n\nadd_executable(copy src/copy.cpp)\ntarget_link_libraries(copy fmt::fmt)\n\ninstall(TARGETS report DESTINATION bin)\n"
+            },
+            "findings": [
+                {
+                    "id": "absolute-path",
+                    "label": "The build hardcodes /home/ada/campus/include instead of using a target include directory.",
+                    "correct": true
+                },
+                {
+                    "id": "global-includes",
+                    "label": "include_directories applies paths to every target in the directory.",
+                    "correct": true
+                },
+                {
+                    "id": "imported-target",
+                    "label": "fmt is linked through its imported fmt::fmt target.",
+                    "correct": false
+                },
+                {
+                    "id": "flag-injection",
+                    "label": "set(CMAKE_CXX_FLAGS \"-I/usr/local/include\") smuggles another absolute include path past the target model.",
+                    "correct": true
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the hardcoded paths and global includes are replaced."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; absolute paths are portable enough."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming and formatting need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The build reaches outside the project with /home/ada and /usr/local, applies include paths to every target, and bypasses the fmt imported target's requirements. It cannot configure on another machine. Dependency paths must come from find_package, and install rules must export targets."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The CMake workspace is keyboard accessible. Checks verify source structure; they do not compile or run CMake.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
