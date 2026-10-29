@@ -1,0 +1,227 @@
+{
+    "id": "cmake.targets",
+    "version": 1,
+    "sequence": 95,
+    "courseId": "cmake",
+    "title": "Targets carry their own requirements",
+    "summary": "Declare an executable and attach its language standard and include path to the target.",
+    "skills": ["cmake.targets", "cpp.build"],
+    "prerequisites": ["cpp.build", "cpp.templates"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "targets",
+        "briefing": "The campus inventory tool builds only on one laptop because its include path and C++ standard are set globally. Declare the project and attach both requirements to the executable."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cmake"],
+    "hints": [
+        "Call project() once, right after cmake_minimum_required.",
+        "add_executable already names the target inventory.",
+        "Attach the standard with target_compile_features(inventory PRIVATE cxx_std_20).",
+        "Attach the include path with target_include_directories(inventory PRIVATE include)."
+    ],
+    "misconceptions": [
+        {
+            "id": "global-include-dirs",
+            "description": "Using include_directories for a path only one target needs.",
+            "stepId": "apply",
+            "feedback": "Global include paths apply to every target in the directory and hide which target actually needs the headers. Attach the path with target_include_directories."
+        },
+        {
+            "id": "global-standard",
+            "description": "Setting CMAKE_CXX_STANDARD globally because it is shorter.",
+            "stepId": "apply",
+            "feedback": "A global standard forces every target in the tree, including third-party code, onto one mode. target_compile_features states the requirement per target."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A target is the unit of build",
+                "body": "CMake describes targets, not files. add_executable creates an executable target from source files, and every later requirement names that target so it can be applied to exactly one build product."
+            },
+            {
+                "title": "Requirements flow through usage",
+                "body": "target_compile_features records the language standard as a requirement of the target. target_include_directories adds an include path to the target's compile line, and PRIVATE keeps it out of the interface seen by consumers."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Target",
+                "definition": "A build product such as an executable or library, plus the requirements attached to it."
+            },
+            {
+                "term": "Usage requirement",
+                "definition": "A compile or link property a target publishes to itself or to the targets that link it."
+            },
+            {
+                "term": "Generator",
+                "definition": "The native build files CMake writes for a platform and toolchain."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "CMake targets and usage requirements",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A target is the unit of build",
+                    "body": "CMake describes targets, not files. add_executable creates an executable target from source files, and every later requirement names that target so it can be applied to exactly one build product."
+                },
+                {
+                    "title": "Requirements flow through usage",
+                    "body": "target_compile_features records the language standard as a requirement of the target. target_include_directories adds an include path to the target's compile line, and PRIVATE keeps it out of the interface seen by consumers."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Target",
+                    "definition": "A build product such as an executable or library, plus the requirements attached to it."
+                },
+                {
+                    "term": "Usage requirement",
+                    "definition": "A compile or link property a target publishes to itself or to the targets that link it."
+                },
+                {
+                    "term": "Generator",
+                    "definition": "The native build files CMake writes for a platform and toolchain."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Declare a CMake target",
+            "prompt": "Edit CMakeLists.txt. Set the minimum CMake version and project, create the inventory executable, and attach the C++20 requirement and include directory to that target.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "CMakeLists.txt",
+                    "content": "cmake_minimum_required(VERSION 3.24)\n\nadd_executable(inventory src/main.cpp)\n\n# TODO: declare the project and move the include path onto the target\ninclude_directories(include)\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "CMakeLists.txt",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The project is declared after the minimum version.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "cmake_minimum_required(VERSION 3.24)",
+                        "project(campus_inventory LANGUAGES CXX)"
+                    ],
+                    "excludes": ["include_directories(include)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The executable target is created once with its source.",
+                    "file": "CMakeLists.txt",
+                    "includes": ["add_executable(inventory src/main.cpp)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The standard and include path belong to the target.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "target_compile_features(inventory PRIVATE cxx_std_20)",
+                        "target_include_directories(inventory PRIVATE include)"
+                    ],
+                    "excludes": ["CMAKE_CXX_STANDARD"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "CMakeLists.txt",
+                    "includes": ["cmake_minimum_required(VERSION 3.24)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "CMake target semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "project",
+                    "label": "project() names the build and selects the languages it enables.",
+                    "correct": true
+                },
+                {
+                    "id": "minimum",
+                    "label": "cmake_minimum_required should appear before project() so policies are set early.",
+                    "correct": true
+                },
+                {
+                    "id": "global",
+                    "label": "A global include path affects every target in the directory, including unrelated ones.",
+                    "correct": true
+                },
+                {
+                    "id": "feature",
+                    "label": "target_compile_features attaches a language-standard requirement to one target.",
+                    "correct": true
+                },
+                {
+                    "id": "order",
+                    "label": "add_executable must be called before project().",
+                    "correct": false
+                },
+                {
+                    "id": "private",
+                    "label": "PRIVATE include directories still become part of a consumer's interface.",
+                    "correct": false
+                }
+            ],
+            "explanation": "A CMake build is a graph of targets. The minimum version and project declare the policy baseline and enabled languages; add_executable creates a build product; target_compile_features and target_include_directories attach requirements to that product only. Global commands like include_directories leak flags into unrelated targets, which makes builds fragile."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The CMake workspace is keyboard accessible. Checks verify source structure; they do not compile or run CMake.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
