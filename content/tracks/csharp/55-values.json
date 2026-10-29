@@ -1,0 +1,204 @@
+{
+    "id": "csharp.values",
+    "version": 1,
+    "sequence": 55,
+    "courseId": "csharp",
+    "title": "Typed values in C#",
+    "summary": "Use a typed list and a foreach loop to count positive values.",
+    "skills": ["csharp.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "values",
+        "briefing": "The campus store reconciles stock changes from several suppliers. Count the positive changes in C#."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:csharp"],
+    "hints": [
+        "The loop already visits each value.",
+        "Test whether the value is greater than zero.",
+        "Increment count inside the if body.",
+        "Use value > 0, not value >= 0."
+    ],
+    "misconceptions": [
+        {
+            "id": "zero",
+            "description": "Leaving the placeholder increment.",
+            "stepId": "apply",
+            "feedback": "count += 0 never changes the count. Increment in the positive branch."
+        },
+        {
+            "id": "nullable",
+            "description": "Assuming nullable annotations enforce runtime checks.",
+            "stepId": "apply",
+            "feedback": "Annotations describe intent to the compiler. Runtime JSON and database values still need validation."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "C# values and decisions",
+                "body": "C# declares values with a type: int count = 3; double price = 12.50; bool ready = true; and string name = \"Ada\";. Value types store their data directly; reference types refer to objects. Nullable reference types make absence explicit. if and switch select branches, and pattern matching can test shape and type. A foreach loop visits every element: foreach (int value in values) { ... }."
+            },
+            {
+                "title": "C# source files",
+                "body": "C# compiles to intermediate language, and the .NET runtime executes it. dotnet run builds and starts a project."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Value type",
+                "definition": "A type whose variable contains the data directly."
+            },
+            {
+                "term": "Reference type",
+                "definition": "A type whose variable refers to an object."
+            },
+            {
+                "term": "Nullable reference type",
+                "definition": "A compile-time annotation that marks whether a reference may be null."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "C# values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "C# values and decisions",
+                    "body": "C# declares values with a type: int count = 3; double price = 12.50; bool ready = true; and string name = \"Ada\";. Value types store their data directly; reference types refer to objects. Nullable reference types make absence explicit. if and switch select branches, and pattern matching can test shape and type. A foreach loop visits every element: foreach (int value in values) { ... }."
+                },
+                {
+                    "title": "C# source files",
+                    "body": "C# compiles to intermediate language, and the .NET runtime executes it. dotnet run builds and starts a project."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Value type",
+                    "definition": "A type whose variable contains the data directly."
+                },
+                {
+                    "term": "Reference type",
+                    "definition": "A type whose variable refers to an object."
+                },
+                {
+                    "term": "Nullable reference type",
+                    "definition": "A compile-time annotation that marks whether a reference may be null."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive stock changes",
+            "prompt": "Edit Program.cs. CountPositive receives a List<int> and returns how many values are greater than zero.",
+            "evidence": "construction",
+            "language": "csharp",
+            "files": [
+                {
+                    "path": "Program.cs",
+                    "content": "using System;\nusing System.Collections.Generic;\n\nclass Program\n{\n    static int CountPositive(List<int> values)\n    {\n        int count = 0;\n        foreach (int value in values)\n        {\n            count += 0; // TODO: count positive values\n        }\n        return count;\n    }\n\n    static void Main()\n    {\n        Console.WriteLine(CountPositive(new List<int> { 3, -1, 2 }));\n    }\n}\n",
+                    "editable": true,
+                    "language": "csharp"
+                }
+            ],
+            "entry": "Program.cs",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The count method keeps the typed list parameter.",
+                    "file": "Program.cs",
+                    "includes": ["static int CountPositive(List<int> values)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The foreach loop counts only positive values.",
+                    "file": "Program.cs",
+                    "includes": ["if (value > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Program.cs",
+                    "includes": ["static int CountPositive(List<int> values)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "list",
+                    "label": "List<int> stores elements with a compile-time element type.",
+                    "correct": true
+                },
+                {
+                    "id": "value",
+                    "label": "A value-type variable contains its data directly.",
+                    "correct": true
+                },
+                {
+                    "id": "nullable",
+                    "label": "A non-nullable string can still be null at runtime without a warning.",
+                    "correct": false
+                },
+                {
+                    "id": "foreach",
+                    "label": "A foreach loop can visit a List<int> without an index.",
+                    "correct": true
+                }
+            ],
+            "explanation": "C# generics and nullable annotations move many mistakes to compile time, but runtime data still needs validation."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The C# workspace is keyboard accessible. Checks verify source structure; they do not compile or run C#.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "games"]
+}
