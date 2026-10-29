@@ -624,6 +624,838 @@
             "kind": "engineering",
             "parents": ["concept.instructions", "concept.data"],
             "interests": ["systems"]
+        },
+        {
+            "id": "js.modules",
+            "name": "JavaScript modules",
+            "description": "Splitting code into explicit imports and exports with a stable public surface.",
+            "kind": "language",
+            "parents": ["js.functions", "js.objects"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "js.async",
+            "name": "Asynchronous JavaScript",
+            "description": "Promises, async functions, cancellation, and failure handling across time.",
+            "kind": "language",
+            "parents": ["js.functions", "js.events"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "ts.generics",
+            "name": "TypeScript generics",
+            "description": "Preserving relationships between input and output types without losing safety.",
+            "kind": "language",
+            "parents": ["ts.types", "js.functions"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "ts.runtime-validation",
+            "name": "Runtime validation",
+            "description": "Checking unknown values at boundaries because types are erased at runtime.",
+            "kind": "language",
+            "parents": ["ts.types", "api.validation"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "python.data",
+            "name": "Python collections",
+            "description": "Using lists, dictionaries, and comprehensions to shape real data.",
+            "kind": "language",
+            "parents": ["python.functions", "concept.data"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "python.testing",
+            "name": "Python testing",
+            "description": "Writing deterministic tests for Python functions and edge cases.",
+            "kind": "language",
+            "parents": ["python.functions", "concept.testing"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "java.syntax",
+            "name": "Java syntax and types",
+            "description": "Declaring typed values, branching, and iterating in Java.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "java.collections",
+            "name": "Java collections",
+            "description": "Choosing lists, maps, and sets with explicit element types.",
+            "kind": "language",
+            "parents": ["java.oop", "concept.data"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "java.concurrency",
+            "name": "Java concurrency",
+            "description": "Threads, executors, and safe coordination of shared work.",
+            "kind": "language",
+            "parents": ["java.oop", "concept.iteration"],
+            "interests": ["professional", "systems"]
+        },
+        {
+            "id": "java.build",
+            "name": "Java build tools",
+            "description": "Compiling, testing, and packaging Java with Maven or Gradle.",
+            "kind": "engineering",
+            "parents": ["java.oop", "git.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "c.syntax",
+            "name": "C syntax and types",
+            "description": "Typed values, functions, and control flow in C.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "c.pointers",
+            "name": "C pointers",
+            "description": "Addresses, dereferencing, and passing memory explicitly between functions.",
+            "kind": "language",
+            "parents": ["c.memory", "c.syntax"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "c.toolchain",
+            "name": "C toolchain",
+            "description": "Compiling with warnings, linking, Make, and memory diagnostics.",
+            "kind": "engineering",
+            "parents": ["c.syntax", "git.basics"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "cpp.syntax",
+            "name": "C++ syntax and types",
+            "description": "References, const, standard strings, and control flow in C++.",
+            "kind": "language",
+            "parents": ["c.syntax"],
+            "interests": ["systems", "games"]
+        },
+        {
+            "id": "cpp.raii",
+            "name": "C++ RAII",
+            "description": "Tying resource lifetime to object lifetime with constructors and destructors.",
+            "kind": "language",
+            "parents": ["cpp.syntax", "c.memory"],
+            "interests": ["systems", "games"]
+        },
+        {
+            "id": "cpp.stl",
+            "name": "C++ standard library",
+            "description": "Containers, iterators, and algorithms from the STL.",
+            "kind": "language",
+            "parents": ["cpp.raii", "concept.data"],
+            "interests": ["systems", "games"]
+        },
+        {
+            "id": "cpp.templates",
+            "name": "C++ templates",
+            "description": "Writing type-parameterized code without losing compile-time checks.",
+            "kind": "language",
+            "parents": ["cpp.syntax", "concept.decomposition"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "cpp.build",
+            "name": "C++ build systems",
+            "description": "Translation units, linking, and reproducible CMake builds.",
+            "kind": "engineering",
+            "parents": ["cpp.templates", "git.basics"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "csharp.syntax",
+            "name": "C# syntax and types",
+            "description": "Typed values, pattern matching, and control flow in C#.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["professional", "games"]
+        },
+        {
+            "id": "csharp.linq",
+            "name": "C# LINQ",
+            "description": "Composing typed queries over collections with deferred execution in mind.",
+            "kind": "language",
+            "parents": ["csharp.syntax", "concept.data"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "csharp.async",
+            "name": "C# asynchronous code",
+            "description": "Async and await, task composition, and cancellation.",
+            "kind": "language",
+            "parents": ["csharp.syntax", "concept.iteration"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "csharp.dotnet",
+            "name": ".NET platform",
+            "description": "Projects, NuGet, dependency injection, and the .NET CLI.",
+            "kind": "engineering",
+            "parents": ["csharp.syntax", "git.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "go.syntax",
+            "name": "Go syntax and types",
+            "description": "Packages, values, slices, and control flow in Go.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "go.interfaces",
+            "name": "Go interfaces",
+            "description": "Implicit interfaces and small contracts between packages.",
+            "kind": "language",
+            "parents": ["go.syntax", "concept.decomposition"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "go.modules",
+            "name": "Go modules",
+            "description": "Versioned dependencies and reproducible package builds.",
+            "kind": "engineering",
+            "parents": ["go.syntax", "git.basics"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "go.web",
+            "name": "Go web services",
+            "description": "HTTP handlers, JSON, and graceful failure in Go services.",
+            "kind": "framework",
+            "parents": ["go.interfaces", "http.basics"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "rust.syntax",
+            "name": "Rust syntax and types",
+            "description": "Pattern matching, enums, and ownership-aware values in Rust.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "rust.traits",
+            "name": "Rust traits",
+            "description": "Shared behavior through traits and generic bounds.",
+            "kind": "language",
+            "parents": ["rust.syntax", "rust.ownership"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "rust.async",
+            "name": "Rust asynchronous code",
+            "description": "Futures, async runtimes, and cancellation in systems code.",
+            "kind": "language",
+            "parents": ["rust.ownership", "concept.iteration"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "rust.cargo",
+            "name": "Cargo",
+            "description": "Packages, features, tests, and reproducible Rust builds.",
+            "kind": "engineering",
+            "parents": ["rust.syntax", "git.basics"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "kotlin.syntax",
+            "name": "Kotlin syntax and types",
+            "description": "Null safety, expressions, and data classes in Kotlin.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "kotlin.oop",
+            "name": "Kotlin objects",
+            "description": "Classes, interfaces, and composition on the JVM.",
+            "kind": "language",
+            "parents": ["kotlin.syntax", "concept.data"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "kotlin.coroutines",
+            "name": "Kotlin coroutines",
+            "description": "Structured concurrency with suspend functions and scopes.",
+            "kind": "language",
+            "parents": ["kotlin.oop", "concept.iteration"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "kotlin.tooling",
+            "name": "Kotlin tooling",
+            "description": "Gradle builds, tests, and JVM packaging.",
+            "kind": "engineering",
+            "parents": ["kotlin.syntax", "git.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "swift.syntax",
+            "name": "Swift syntax and types",
+            "description": "Typed values, optionals, and expressive control flow in Swift.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "swift.optionals",
+            "name": "Swift optionals",
+            "description": "Representing absence and unwrapping safely.",
+            "kind": "language",
+            "parents": ["swift.syntax", "concept.state"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "swift.concurrency",
+            "name": "Swift concurrency",
+            "description": "Async and await, tasks, and actor isolation.",
+            "kind": "language",
+            "parents": ["swift.optionals", "concept.iteration"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "swift.tooling",
+            "name": "Swift tooling",
+            "description": "Swift Package Manager, builds, and tests.",
+            "kind": "engineering",
+            "parents": ["swift.syntax", "git.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "ruby.syntax",
+            "name": "Ruby syntax and types",
+            "description": "Dynamic values, symbols, and readable control flow in Ruby.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "ruby.blocks",
+            "name": "Ruby blocks",
+            "description": "Blocks, procs, and iteration over collections.",
+            "kind": "language",
+            "parents": ["ruby.syntax", "concept.iteration"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "ruby.objects",
+            "name": "Ruby objects",
+            "description": "Classes, modules, and duck typing.",
+            "kind": "language",
+            "parents": ["ruby.syntax", "concept.data"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "ruby.tooling",
+            "name": "Ruby tooling",
+            "description": "Bundler, Minitest, RSpec, and RuboCop.",
+            "kind": "engineering",
+            "parents": ["ruby.syntax", "git.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "zig.syntax",
+            "name": "Zig syntax and types",
+            "description": "Explicit types, error unions, and compile-time control in Zig.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "zig.memory",
+            "name": "Zig memory",
+            "description": "Allocators, slices, and explicit ownership in Zig.",
+            "kind": "language",
+            "parents": ["zig.syntax", "c.memory"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "zig.build",
+            "name": "Zig build system",
+            "description": "Declaring targets, tests, and dependencies in build.zig.",
+            "kind": "engineering",
+            "parents": ["zig.syntax", "git.basics"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "zig.testing",
+            "name": "Zig testing",
+            "description": "Built-in tests and compile-time checks.",
+            "kind": "engineering",
+            "parents": ["zig.syntax", "concept.testing"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "lua.syntax",
+            "name": "Lua syntax and types",
+            "description": "Dynamic values, local scope, and control flow in Lua.",
+            "kind": "language",
+            "parents": ["concept.state", "concept.instructions"],
+            "interests": ["games", "systems"]
+        },
+        {
+            "id": "lua.tables",
+            "name": "Lua tables",
+            "description": "Using tables as arrays, maps, and objects.",
+            "kind": "language",
+            "parents": ["lua.syntax", "concept.data"],
+            "interests": ["games"]
+        },
+        {
+            "id": "lua.functions",
+            "name": "Lua functions",
+            "description": "First-class functions, closures, and multiple returns.",
+            "kind": "language",
+            "parents": ["lua.syntax", "concept.instructions"],
+            "interests": ["games"]
+        },
+        {
+            "id": "lua.modules",
+            "name": "Lua modules",
+            "description": "Requiring modules and protecting shared state.",
+            "kind": "engineering",
+            "parents": ["lua.tables", "git.basics"],
+            "interests": ["games"]
+        },
+        {
+            "id": "react.effects",
+            "name": "React effects",
+            "description": "Synchronizing components with external systems and cleaning up.",
+            "kind": "framework",
+            "parents": ["react.components", "concept.state"],
+            "interests": ["web"]
+        },
+        {
+            "id": "react.data",
+            "name": "React data flow",
+            "description": "Loading, validating, and rendering remote data with explicit states.",
+            "kind": "framework",
+            "parents": ["react.effects", "http.basics"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "vue.components",
+            "name": "Vue components",
+            "description": "Single-file components, props, and template rendering.",
+            "kind": "framework",
+            "parents": ["web.html", "js.functions"],
+            "interests": ["web"]
+        },
+        {
+            "id": "vue.reactivity",
+            "name": "Vue reactivity",
+            "description": "Refs, computed values, and predictable state updates.",
+            "kind": "framework",
+            "parents": ["vue.components", "concept.state"],
+            "interests": ["web"]
+        },
+        {
+            "id": "vue.routing",
+            "name": "Vue routing",
+            "description": "Routes, guards, and navigation in a Vue application.",
+            "kind": "framework",
+            "parents": ["vue.reactivity", "web.routing"],
+            "interests": ["web"]
+        },
+        {
+            "id": "solid.components",
+            "name": "SolidJS components",
+            "description": "Fine-grained components without a virtual DOM.",
+            "kind": "framework",
+            "parents": ["web.html", "js.functions"],
+            "interests": ["web"]
+        },
+        {
+            "id": "solid.signals",
+            "name": "SolidJS signals",
+            "description": "Signals, memos, and effects that update precisely.",
+            "kind": "framework",
+            "parents": ["solid.components", "concept.state"],
+            "interests": ["web"]
+        },
+        {
+            "id": "solid.control-flow",
+            "name": "SolidJS control flow",
+            "description": "Rendering lists and conditional branches with reactive primitives.",
+            "kind": "framework",
+            "parents": ["solid.signals", "concept.conditions"],
+            "interests": ["web"]
+        },
+        {
+            "id": "angular.components",
+            "name": "Angular components",
+            "description": "Decorated components with templates and explicit inputs.",
+            "kind": "framework",
+            "parents": ["ts.types", "web.html"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "angular.services",
+            "name": "Angular services",
+            "description": "Injectable services, dependency injection, and HTTP boundaries.",
+            "kind": "framework",
+            "parents": ["angular.components", "concept.state"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "angular.routing",
+            "name": "Angular routing",
+            "description": "Route configuration, guards, and resolved data.",
+            "kind": "framework",
+            "parents": ["angular.services", "web.routing"],
+            "interests": ["web"]
+        },
+        {
+            "id": "svelte.components",
+            "name": "Svelte components",
+            "description": "Components that compile to precise DOM updates.",
+            "kind": "framework",
+            "parents": ["web.html", "js.functions"],
+            "interests": ["web"]
+        },
+        {
+            "id": "svelte.reactivity",
+            "name": "Svelte reactivity",
+            "description": "Reactive declarations and state that stays consistent.",
+            "kind": "framework",
+            "parents": ["svelte.components", "concept.state"],
+            "interests": ["web"]
+        },
+        {
+            "id": "svelte.stores",
+            "name": "Svelte stores",
+            "description": "Shared reactive state with writable and derived stores.",
+            "kind": "framework",
+            "parents": ["svelte.reactivity", "concept.data"],
+            "interests": ["web"]
+        },
+        {
+            "id": "web.routing",
+            "name": "Client-side routing",
+            "description": "Mapping URLs to views with history, parameters, and guards.",
+            "kind": "engineering",
+            "parents": ["web.html", "http.basics"],
+            "interests": ["web"]
+        },
+        {
+            "id": "web.state-management",
+            "name": "Client state management",
+            "description": "Choosing local, shared, and server state without duplicating truth.",
+            "kind": "engineering",
+            "parents": ["concept.state", "web.routing"],
+            "interests": ["web"]
+        },
+        {
+            "id": "web.build-tooling",
+            "name": "Frontend build tooling",
+            "description": "Bundling, code splitting, assets, and reproducible production builds.",
+            "kind": "engineering",
+            "parents": ["js.modules", "git.basics"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "web.browser-apis",
+            "name": "Browser APIs",
+            "description": "Storage, fetch, history, and platform capabilities used deliberately.",
+            "kind": "engineering",
+            "parents": ["js.events", "web.html"],
+            "interests": ["web"]
+        },
+        {
+            "id": "web.component-architecture",
+            "name": "Component architecture",
+            "description": "Small composable components with explicit data and behavior boundaries.",
+            "kind": "engineering",
+            "parents": ["web.html", "concept.decomposition"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "express.routing",
+            "name": "Express routing",
+            "description": "Matching requests and composing JSON responses.",
+            "kind": "framework",
+            "parents": ["node.hono", "http.basics"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "express.middleware",
+            "name": "Express middleware",
+            "description": "Ordering parsers, validation, authentication, and error handlers.",
+            "kind": "framework",
+            "parents": ["express.routing", "node.middleware"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "express.errors",
+            "name": "Express error handling",
+            "description": "Centralized errors with explicit status and safe messages.",
+            "kind": "framework",
+            "parents": ["express.middleware", "concept.debugging"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "fastify.routing",
+            "name": "Fastify routing",
+            "description": "Typed routes with fast serialization and plugin boundaries.",
+            "kind": "framework",
+            "parents": ["node.hono", "http.basics"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "fastify.schemas",
+            "name": "Fastify schemas",
+            "description": "JSON schemas that validate requests and shape responses.",
+            "kind": "framework",
+            "parents": ["fastify.routing", "api.validation"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "fastify.plugins",
+            "name": "Fastify plugins",
+            "description": "Encapsulated plugins, hooks, and scoped configuration.",
+            "kind": "framework",
+            "parents": ["fastify.routing", "architecture.modularity"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "nestjs.modules",
+            "name": "NestJS modules",
+            "description": "Modules, controllers, and providers with explicit dependencies.",
+            "kind": "framework",
+            "parents": ["node.middleware", "architecture.modularity"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "nestjs.providers",
+            "name": "NestJS providers",
+            "description": "Injectable services, scopes, and constructor injection.",
+            "kind": "framework",
+            "parents": ["nestjs.modules", "concept.state"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "nestjs.guards",
+            "name": "NestJS guards",
+            "description": "Authorization guards that run before request handlers.",
+            "kind": "framework",
+            "parents": ["nestjs.providers", "security.auth"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "node.http",
+            "name": "Node HTTP services",
+            "description": "Request parsing, response codes, and bounded I/O in Node.",
+            "kind": "framework",
+            "parents": ["node.hono", "http.basics"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "node.errors",
+            "name": "Node error boundaries",
+            "description": "Asynchronous failures, stable error codes, and safe responses.",
+            "kind": "framework",
+            "parents": ["node.middleware", "concept.debugging"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "api.architecture",
+            "name": "API architecture",
+            "description": "Versioning, boundaries, idempotency, and pagination.",
+            "kind": "engineering",
+            "parents": ["api.validation", "architecture.modularity"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "api.observability",
+            "name": "API observability",
+            "description": "Correlation, structured logs, metrics, and useful health signals.",
+            "kind": "engineering",
+            "parents": ["api.architecture", "ops.processes"],
+            "interests": ["professional", "systems"]
+        },
+        {
+            "id": "spring.boot",
+            "name": "Spring Boot",
+            "description": "Convention-driven Java services with explicit configuration.",
+            "kind": "framework",
+            "parents": ["java.oop", "http.basics"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "spring.controllers",
+            "name": "Spring controllers",
+            "description": "Annotated HTTP endpoints, validation, and response entities.",
+            "kind": "framework",
+            "parents": ["spring.boot", "api.validation"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "spring.data",
+            "name": "Spring Data",
+            "description": "Repositories, entities, transactions, and query boundaries.",
+            "kind": "framework",
+            "parents": ["spring.controllers", "sql.queries"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "spring.security",
+            "name": "Spring Security",
+            "description": "Authentication filters, authorization rules, and safe sessions.",
+            "kind": "framework",
+            "parents": ["spring.controllers", "security.auth"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "aspnet.controllers",
+            "name": "ASP.NET Core controllers",
+            "description": "Attribute-routed controllers with typed action results.",
+            "kind": "framework",
+            "parents": ["csharp.syntax", "http.basics"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "aspnet.di",
+            "name": "ASP.NET Core dependency injection",
+            "description": "Service lifetimes, registration, and constructor injection.",
+            "kind": "framework",
+            "parents": ["aspnet.controllers", "architecture.modularity"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "aspnet.middleware",
+            "name": "ASP.NET Core middleware",
+            "description": "Ordered request pipelines, error handling, and endpoint routing.",
+            "kind": "framework",
+            "parents": ["aspnet.controllers", "node.middleware"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "fastapi.routes",
+            "name": "FastAPI routes",
+            "description": "Typed Python endpoints with automatic request parsing.",
+            "kind": "framework",
+            "parents": ["python.functions", "http.basics"],
+            "interests": ["ai", "professional", "web"]
+        },
+        {
+            "id": "fastapi.validation",
+            "name": "FastAPI validation",
+            "description": "Pydantic models, response models, and explicit HTTP errors.",
+            "kind": "framework",
+            "parents": ["fastapi.routes", "api.validation"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "fastapi.testing",
+            "name": "FastAPI testing",
+            "description": "Testing endpoints with dependency overrides and deterministic fixtures.",
+            "kind": "framework",
+            "parents": ["fastapi.routes", "python.testing"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "django.models",
+            "name": "Django models",
+            "description": "Models, migrations, and database constraints in Django.",
+            "kind": "framework",
+            "parents": ["python.functions", "sql.modeling"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "django.views",
+            "name": "Django views",
+            "description": "Request handling, templates, JSON responses, and URL configuration.",
+            "kind": "framework",
+            "parents": ["django.models", "http.basics"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "django.testing",
+            "name": "Django testing",
+            "description": "Test clients, fixtures, and database isolation.",
+            "kind": "framework",
+            "parents": ["django.views", "python.testing"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "cmake.targets",
+            "name": "CMake targets",
+            "description": "Declaring executables, libraries, and compile requirements.",
+            "kind": "engineering",
+            "parents": ["cpp.build", "concept.instructions"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "cmake.packages",
+            "name": "CMake packages",
+            "description": "Finding dependencies and exporting reusable targets.",
+            "kind": "engineering",
+            "parents": ["cmake.targets", "git.basics"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "cargo.packages",
+            "name": "Cargo packages",
+            "description": "Crate metadata, dependencies, features, and tests.",
+            "kind": "engineering",
+            "parents": ["rust.cargo", "git.basics"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "cargo.workspace",
+            "name": "Cargo workspaces",
+            "description": "Coordinating multiple crates with shared dependencies and profiles.",
+            "kind": "engineering",
+            "parents": ["cargo.packages", "architecture.modularity"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "sql.postgresql",
+            "name": "PostgreSQL",
+            "description": "PostgreSQL types, query planning, and operational behavior.",
+            "kind": "language",
+            "parents": ["sql.queries", "sql.modeling"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "sql.indexes",
+            "name": "Index design",
+            "description": "Choosing indexes from query shape, selectivity, and write cost.",
+            "kind": "engineering",
+            "parents": ["sql.postgresql", "performance.measure"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "sql.transactions",
+            "name": "Transactions and isolation",
+            "description": "Atomic changes, isolation levels, and concurrent writers.",
+            "kind": "engineering",
+            "parents": ["sql.queries", "concept.responsibility"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "sql.dialects",
+            "name": "SQL dialects",
+            "description": "Portable SQL and the real differences between PostgreSQL, MySQL, and SQLite.",
+            "kind": "engineering",
+            "parents": ["sql.queries", "sql.modeling"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "redis.caching",
+            "name": "Redis caching",
+            "description": "Cache-aside reads, expiration, invalidation, and failure behavior.",
+            "kind": "engineering",
+            "parents": ["concept.data", "performance.measure"],
+            "interests": ["professional", "systems"]
         }
     ]
 }
