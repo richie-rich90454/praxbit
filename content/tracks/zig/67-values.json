@@ -1,0 +1,212 @@
+{
+    "id": "zig.values",
+    "version": 1,
+    "sequence": 67,
+    "courseId": "zig",
+    "title": "Explicit values in Zig",
+    "summary": "Declare typed values, iterate a slice with a capture, and count positives.",
+    "skills": ["zig.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "values",
+        "briefing": "A rover telemetry check counts positive wheel-speed deltas in Zig."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:zig"],
+    "hints": [
+        "The for loop already visits every value.",
+        "Compare the captured value with zero.",
+        "Use an if statement around the increment.",
+        "Add if (value > 0) { count += 1; } inside the loop."
+    ],
+    "misconceptions": [
+        {
+            "id": "const-reassign",
+            "description": "Assuming a const binding can be reassigned.",
+            "stepId": "apply",
+            "feedback": "const prevents reassignment. Use var for a value that changes, and keep the type explicit."
+        },
+        {
+            "id": "bounds",
+            "description": "Assuming slice indexing is unchecked in every build.",
+            "stepId": "apply",
+            "feedback": "Safe builds panic on out-of-bounds access; ReleaseFast drops the check. Keep every index inside the length."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Every value has a type",
+                "body": "Zig checks types at compile time. A function signature states each parameter and return type, so countPositive takes a slice of i32 values and returns u32. A const binding cannot be reassigned, while a var binding can change and needs an explicit type."
+            },
+            {
+                "title": "Slices carry a length",
+                "body": "A slice is a pointer plus a length, written []const i32 for read-only integers. Indexing stays inside that length, and safe builds panic on an out-of-bounds access instead of reading unrelated memory."
+            },
+            {
+                "title": "For loops capture elements",
+                "body": "The form for (values) |value| binds each element in order without an index variable. When the index matters, for (values, 0..) |value, index| provides both values."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Slice",
+                "definition": "A pointer and a length that view a contiguous sequence."
+            },
+            {
+                "term": "Const binding",
+                "definition": "A name that cannot be reassigned after initialization."
+            },
+            {
+                "term": "For capture",
+                "definition": "The |value| clause that binds each element during a for loop."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Zig values and slices",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Every value has a type",
+                    "body": "Zig checks types at compile time. A function signature states each parameter and return type, so countPositive takes a slice of i32 values and returns u32. A const binding cannot be reassigned, while a var binding can change and needs an explicit type."
+                },
+                {
+                    "title": "Slices carry a length",
+                    "body": "A slice is a pointer plus a length, written []const i32 for read-only integers. Indexing stays inside that length, and safe builds panic on an out-of-bounds access instead of reading unrelated memory."
+                },
+                {
+                    "title": "For loops capture elements",
+                    "body": "The form for (values) |value| binds each element in order without an index variable. When the index matters, for (values, 0..) |value, index| provides both values."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Slice",
+                    "definition": "A pointer and a length that view a contiguous sequence."
+                },
+                {
+                    "term": "Const binding",
+                    "definition": "A name that cannot be reassigned after initialization."
+                },
+                {
+                    "term": "For capture",
+                    "definition": "The |value| clause that binds each element during a for loop."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive speed changes",
+            "prompt": "Edit main.zig. countPositive returns how many values are greater than zero.",
+            "evidence": "construction",
+            "language": "zig",
+            "files": [
+                {
+                    "path": "main.zig",
+                    "content": "const std = @import(\"std\");\n\nfn countPositive(values: []const i32) u32 {\n    var count: u32 = 0;\n    for (values) |value| {\n        count += 0; // TODO: count positive values\n    }\n    return count;\n}\n\npub fn main() void {\n    const values = [_]i32{ 3, -1, 2 };\n    std.debug.print(\"{d}\\n\", .{countPositive(values[0..])});\n}\n",
+                    "editable": true,
+                    "language": "zig"
+                }
+            ],
+            "entry": "main.zig",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the typed slice parameter and return type.",
+                    "file": "main.zig",
+                    "includes": ["fn countPositive(values: []const i32) u32"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The for loop binds each value and counts only positives.",
+                    "file": "main.zig",
+                    "includes": ["for (values) |value|", "if (value > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.zig",
+                    "includes": ["fn countPositive(values: []const i32) u32"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Types and slices",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "typed",
+                    "label": "A function parameter in Zig declares its type in the signature.",
+                    "correct": true
+                },
+                {
+                    "id": "const",
+                    "label": "A const binding cannot be reassigned after it is initialized.",
+                    "correct": true
+                },
+                {
+                    "id": "slice",
+                    "label": "A slice stores a pointer and a length.",
+                    "correct": true
+                },
+                {
+                    "id": "dynamic",
+                    "label": "A Zig variable can hold a value of a different type after assignment.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Zig is statically typed: the compiler knows every parameter and return type. const prevents reassignment, var allows it, and a slice combines a pointer with a length used for bounds checks."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Zig workspace is keyboard accessible. Checks verify source structure; they do not compile or run Zig.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
