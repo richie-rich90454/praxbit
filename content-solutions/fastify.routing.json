@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "server.ts": "import Fastify from \"fastify\";\n\ntype Product = { id: string; name: string; price: number };\nconst products: Product[] = [{ id: \"notebook\", name: \"Notebook\", price: 4.5 }];\n\nexport const app = Fastify({ logger: false });\n\napp.get<{ Params: { id: string }; Reply: Product | { error: string } }>(\n    \"/products/:id\",\n    {\n        schema: {\n            params: {\n                type: \"object\",\n                required: [\"id\"],\n                properties: { id: { type: \"string\" } },\n            },\n            response: {\n                200: {\n                    type: \"object\",\n                    required: [\"id\", \"name\", \"price\"],\n                    properties: {\n                        id: { type: \"string\" },\n                        name: { type: \"string\" },\n                        price: { type: \"number\" },\n                    },\n                },\n                404: {\n                    type: \"object\",\n                    required: [\"error\"],\n                    properties: { error: { type: \"string\" } },\n                },\n            },\n        },\n    },\n    async function getProduct(request, reply) {\n        const product = products.find(function match(item) {\n            return item.id === request.params.id;\n        });\n        if (product === undefined) {\n            return reply.status(404).send({ error: \"not_found\" });\n        }\n        return product;\n    },\n);\n"
+            }
+        }
+    }
+}
