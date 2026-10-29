@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.lua": "local Inventory = {}\nInventory.__index = Inventory\n\nfunction Inventory.new()\n  return setmetatable({ items = {} }, Inventory)\nend\n\nfunction Inventory:add(name, count)\n  self.items[name] = (self.items[name] or 0) + count\nend\n\nfunction Inventory:total()\n  local sum = 0\n  for _, count in pairs(self.items) do\n    sum = sum + count\n  end\n  return sum\nend\n\nlocal stock = Inventory.new()\nstock:add(\"bolts\", 3)\nstock:add(\"nuts\", 2)\nprint(stock:total())\n"
+            }
+        }
+    }
+}
