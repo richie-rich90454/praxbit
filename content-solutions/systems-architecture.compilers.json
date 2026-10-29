@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "compiler.md": "# Compiler pipeline\n\nsource -> lexer -> parser -> AST -> type checker -> IR -> optimizer -> code generator -> executable\n\n| Stage | Input | Output |\n| --- | --- | --- |\n| Lexer | source text | tokens |\n| Parser | tokens | AST |\n| Type checker | AST | typed AST |\n| Lowering | typed AST | IR |\n| Optimizer | IR | equivalent IR |\n| Code generator | IR | target instructions |\n\n## What each stage proves\n\nA successful parse proves only that the input matches the grammar. Name resolution and type checking reject programs that parse: an unknown identifier, a call with the wrong arity, or a string used where a number is required are all grammar-valid.\n\nLowering turns the typed tree into an IR that names temporaries and basic blocks. The optimizer may fold constants and remove dead code. An optimization is valid only when it preserves observable behavior: calls with unknown effects, volatile reads and writes, and traps are barriers rather than dead code.\n\n## Diagnostics\n\nDiagnostics are emitted in a fixed order: file path, then byte offset, then diagnostic code. Two runs over the same input must produce byte-identical output. Do not order errors by hash-map iteration or by the wall clock.\n"
+            }
+        }
+    }
+}
