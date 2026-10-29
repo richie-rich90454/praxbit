@@ -13,6 +13,7 @@ import type { CampusRenderer } from "@praxbit/game";
 import { worldHealth } from "@praxbit/domain";
 import { useLearning } from "../learning/learning-store.tsx";
 import { Pip } from "../../design/Pip.tsx";
+import "./world.css";
 
 function statusLabel(status: string): string {
     return status === "healthy"
@@ -40,7 +41,10 @@ export function WorldScreen(): JSX.Element {
     let renderer: CampusRenderer | undefined;
     const [selected, setSelected] = createSignal<WorldSystemId>("storefront");
     const [pixiError, setPixiError] = createSignal("");
+    const [visualState, setVisualState] = createSignal<"loading" | "ready" | "failed">("loading");
     const [busy, setBusy] = createSignal(false);
+    const [actionError, setActionError] = createSignal("");
+    const [actionNotice, setActionNotice] = createSignal("");
 
     const health = createMemo(function worldHealthSummary() {
         return worldHealth(learning.world());
@@ -52,9 +56,19 @@ export function WorldScreen(): JSX.Element {
         });
     });
 
+    function selectSystem(systemId: WorldSystemId): void {
+        setSelected(systemId);
+        setActionError("");
+        setActionNotice("");
+    }
+
     onMount(function mount(): void {
         void (async function initialize(): Promise<void> {
             if (canvasContainer === undefined) {
+                setVisualState("failed");
+                setPixiError(
+                    "The visual map container did not become available. Use the accessible system list below.",
+                );
                 return;
             }
             try {
@@ -62,13 +76,15 @@ export function WorldScreen(): JSX.Element {
                 renderer = await game.mountCampusWorld(
                     canvasContainer,
                     learning.world(),
-                    setSelected,
+                    selectSystem,
                 );
+                setVisualState("ready");
             } catch (error) {
+                setVisualState("failed");
                 setPixiError(
                     error instanceof Error
-                        ? `${error.message} The accessible system list below still contains the full state.`
-                        : "The visual world could not load. The accessible list below still contains the full state.",
+                        ? `${error.message} Use the accessible system list below; it contains the full state and all available actions.`
+                        : "The visual map could not load. Use the accessible system list below; it contains the full state and all available actions.",
                 );
             }
         })();
@@ -87,12 +103,21 @@ export function WorldScreen(): JSX.Element {
 
     async function restartSystem(): Promise<void> {
         const system = selectedSystem();
-        if (system === undefined) {
+        if (system === undefined || busy()) {
             return;
         }
+        setActionError("");
+        setActionNotice("");
         setBusy(true);
         try {
             await learning.performWorldAction({ id: "restart-service", systemId: system.id });
+            setActionNotice(`Restart recorded for ${system.name}.`);
+        } catch (error) {
+            setActionError(
+                error instanceof Error
+                    ? error.message
+                    : `${system.name} could not be restarted. The world state was not changed.`,
+            );
         } finally {
             setBusy(false);
         }
@@ -126,25 +151,37 @@ export function WorldScreen(): JSX.Element {
                         <div>
                             <h2>Campus systems</h2>
                             <p class="meta">
-                                Select a system in the map or in the accessible list to inspect its
-                                evidence.
+                                The map is a visual overview. The accessible system list below is
+                                the complete control set and works without graphics.
                             </p>
                         </div>
                     </div>
-                    <Show when={pixiError().length > 0}>
-                        <p class="notice notice--error">{pixiError()}</p>
+                    <Show when={visualState() === "loading"}>
+                        <p class="feedback feedback--info" role="status">
+                            Loading the visual campus map…
+                        </p>
                     </Show>
-                    <div
-                        ref={canvasContainer}
-                        style={{ "min-height": "520px" }}
-                        aria-hidden="true"
-                    />
+                    <Show when={pixiError().length > 0}>
+                        <p class="notice notice--error" role="alert">
+                            {pixiError()}
+                        </p>
+                    </Show>
+                    <Show when={visualState() !== "failed"}>
+                        <div
+                            ref={canvasContainer}
+                            class="world-canvas"
+                            style={{
+                                "min-height": visualState() === "loading" ? "160px" : "520px",
+                            }}
+                            aria-hidden="true"
+                        />
+                    </Show>
                 </div>
 
                 <div class="grid grid--two">
                     <section class="surface stack" aria-labelledby="system-list-heading">
                         <h2 id="system-list-heading">Accessible system list</h2>
-                        <ul class="stack stack--tight">
+                        <ul class="world-system-list stack stack--tight">
                             <For each={learning.world().systems}>
                                 {function system(item): JSX.Element {
                                     return (
@@ -155,7 +192,7 @@ export function WorldScreen(): JSX.Element {
                                                 style={{ width: "100%", "text-align": "left" }}
                                                 aria-pressed={selected() === item.id}
                                                 onClick={function choose(): void {
-                                                    setSelected(item.id);
+                                                    selectSystem(item.id);
                                                 }}
                                             >
                                                 <span class="row row--between">
@@ -220,19 +257,43 @@ export function WorldScreen(): JSX.Element {
                                             .join(", ") || "No internal dependencies"}
                                     </p>
                                 </div>
-                                <Show when={selectedSystem()?.status !== "healthy"}>
-                                    <div class="row">
-                                        <button
-                                            type="button"
-                                            class="button"
-                                            disabled={busy()}
-                                            onClick={function restart(): void {
-                                                void restartSystem();
-                                            }}
-                                        >
-                                            {busy() ? "Restarting" : "Restart service"}
-                                        </button>
+                                <Show
+                                    when={selectedSystem()?.status !== "healthy"}
+                                    fallback={
+                                        <p class="meta">
+                                            This system is healthy, so no restart action is
+                                            available.
+                                        </p>
+                                    }
+                                >
+                                    <div class="stack stack--tight">
+                                        <p class="meta">
+                                            Restarting returns this service to its baseline state
+                                            and records the action in World changes.
+                                        </p>
+                                        <div class="row">
+                                            <button
+                                                type="button"
+                                                class="button"
+                                                disabled={busy()}
+                                                onClick={function restart(): void {
+                                                    void restartSystem();
+                                                }}
+                                            >
+                                                {busy() ? "Restarting service…" : "Restart service"}
+                                            </button>
+                                        </div>
                                     </div>
+                                </Show>
+                                <Show when={actionError().length > 0}>
+                                    <p class="feedback feedback--error" role="alert">
+                                        {actionError()}
+                                    </p>
+                                </Show>
+                                <Show when={actionNotice().length > 0}>
+                                    <p class="feedback feedback--success" role="status">
+                                        {actionNotice()}
+                                    </p>
                                 </Show>
                             </div>
                         </Show>
