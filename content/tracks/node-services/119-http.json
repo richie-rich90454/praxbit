@@ -1,0 +1,222 @@
+{
+    "id": "node.http",
+    "version": 1,
+    "sequence": 119,
+    "courseId": "node-services-practice",
+    "title": "HTTP handlers with bounded requests",
+    "summary": "Read a JSON body with a size limit and answer with the right status code.",
+    "skills": ["node.http", "node.hono"],
+    "prerequisites": ["node.hono", "http.basics"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "http",
+        "briefing": "The campus status endpoint accepts JSON from a dashboard. A malformed or oversized body must not exhaust memory or produce a misleading success response."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:node"],
+    "hints": [
+        "Check the method and URL before you read any data.",
+        "Track the byte count inside the data listener.",
+        "Answer 413 as soon as the count passes the limit, then stop reading.",
+        "Wrap JSON.parse in try/catch and answer 400 from the catch block."
+    ],
+    "misconceptions": [
+        {
+            "id": "unbounded",
+            "description": "Buffering the whole body without a limit.",
+            "stepId": "apply",
+            "feedback": "A large body can exhaust memory. Count bytes and reject with 413 once the limit is passed."
+        },
+        {
+            "id": "trusting-parse",
+            "description": "Calling JSON.parse without a catch block.",
+            "stepId": "apply",
+            "feedback": "Malformed JSON throws. Catch the parse failure and return 400 instead of letting the exception escape."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Requests arrive as streams",
+                "body": "Node emits the body in chunks. Count bytes as they arrive and stop accepting data once the limit is crossed, before the buffer grows without bound."
+            },
+            {
+                "title": "Status codes are the contract",
+                "body": "201 means a resource was created, 400 means the client sent invalid JSON, and 413 means the body is too large. The client should not have to read a message to learn which case occurred."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Chunk",
+                "definition": "A piece of the request body emitted by the readable stream."
+            },
+            {
+                "term": "Payload limit",
+                "definition": "The maximum number of bytes a handler accepts for a body."
+            },
+            {
+                "term": "Status code",
+                "definition": "The three-digit result that tells the client how the request was handled."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "HTTP handlers and request limits",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Requests arrive as streams",
+                    "body": "Node emits the body in chunks. Count bytes as they arrive and stop accepting data once the limit is crossed, before the buffer grows without bound."
+                },
+                {
+                    "title": "Status codes are the contract",
+                    "body": "201 means a resource was created, 400 means the client sent invalid JSON, and 413 means the body is too large. The client should not have to read a message to learn which case occurred."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Chunk",
+                    "definition": "A piece of the request body emitted by the readable stream."
+                },
+                {
+                    "term": "Payload limit",
+                    "definition": "The maximum number of bytes a handler accepts for a body."
+                },
+                {
+                    "term": "Status code",
+                    "definition": "The three-digit result that tells the client how the request was handled."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Handle a JSON status update",
+            "prompt": "Edit server.ts. Accept POST /status, read at most 16 KB of JSON, return 201 with the stored status, 400 for invalid JSON, and 413 when the body is too large.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "server.ts",
+                    "content": "import { createServer } from \"node:http\";\n\ntype StatusUpdate = { message: string };\nconst latest: StatusUpdate[] = [];\n\nexport const server = createServer(function handle(request, response) {\n    // TODO: limit the body size, parse JSON, and answer with a status code\n    const chunks: Buffer[] = [];\n    request.on(\"data\", function onChunk(chunk: Buffer) {\n        chunks.push(chunk);\n    });\n    request.on(\"end\", function onEnd() {\n        const body = JSON.parse(Buffer.concat(chunks).toString(\"utf8\")) as StatusUpdate;\n        latest.push(body);\n        response.writeHead(200, { \"content-type\": \"text/plain\" });\n        response.end(\"ok\");\n    });\n});\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "server.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The handler accepts only POST /status.",
+                    "file": "server.ts",
+                    "includes": ["request.method !== \"POST\"", "request.url !== \"/status\""],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The body is capped at 16 KB and rejected with 413.",
+                    "file": "server.ts",
+                    "includes": [
+                        "const limit = 16 * 1024",
+                        "size > limit",
+                        "response.writeHead(413"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Malformed JSON is caught and answered with 400.",
+                    "file": "server.ts",
+                    "includes": ["JSON.parse", "response.writeHead(400"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A valid update is stored and answered with 201 JSON.",
+                    "file": "server.ts",
+                    "includes": ["latest.push(body)", "response.writeHead(201", "application/json"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "server.ts",
+                    "includes": ["request.method !== \"POST\""],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Request handling",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "limit",
+                    "label": "A request body should be bounded before it is buffered in memory.",
+                    "correct": true
+                },
+                {
+                    "id": "parse",
+                    "label": "JSON.parse throws on malformed input, so the handler must catch that failure.",
+                    "correct": true
+                },
+                {
+                    "id": "created",
+                    "label": "A newly created resource is normally answered with 201.",
+                    "correct": true
+                },
+                {
+                    "id": "isolated",
+                    "label": "An uncaught exception in a request handler only affects that one request.",
+                    "correct": false
+                }
+            ],
+            "explanation": "A readable request body can be larger than memory. Counting bytes and rejecting early keeps the service alive, while a guarded parse turns malformed input into a 400 instead of a crash."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Node services workspace is keyboard accessible. Checks verify source structure; they do not compile or run Node services.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
