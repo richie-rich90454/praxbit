@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Cargo.toml": "[package]\nname = \"campus-cli\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nserde = { version = \"1.0.203\", features = [\"derive\"] }\nserde_json = \"1.0.117\"\nclap = { version = \"4.5.4\", features = [\"derive\"], optional = true }\n\n[dev-dependencies]\nassert_cmd = \"2.0.14\"\n\n[features]\ndefault = []\ncli = [\"dep:clap\"]\n\n# Verify with: cargo test --all-features\n"
+            }
+        }
+    }
+}
