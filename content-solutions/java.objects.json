@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.java": "public class Main {\n    static int parseCount(String text) {\n        try {\n            return Integer.parseInt(text);\n        } catch (NumberFormatException error) {\n            return -1;\n        }\n    }\n\n    public static void main(String[] args) {\n        System.out.println(parseCount(\"12\"));\n        System.out.println(parseCount(\"twelve\"));\n    }\n}\n"
+            }
+        }
+    }
+}
