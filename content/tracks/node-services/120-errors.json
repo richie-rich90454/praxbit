@@ -1,0 +1,255 @@
+{
+    "id": "node.errors",
+    "version": 1,
+    "sequence": 120,
+    "courseId": "node-services-practice",
+    "title": "One async failure boundary",
+    "summary": "Catch rejected promises, map failures to stable codes, and keep stack traces out of responses.",
+    "skills": ["node.errors", "node.middleware"],
+    "prerequisites": ["node.http", "node.middleware"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "errors",
+        "briefing": "The status service now has several async handlers. One rejected promise escaped the request and the client received an internal stack trace. Centralize the failure path."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:node"],
+    "hints": [
+        "Attach .catch to the promise returned by the handler.",
+        "Read status and code from the thrown error, with safe defaults.",
+        "Answer with JSON that contains the code, not the error message or stack.",
+        "Replace the raw JSON.parse in updateStatus with a guarded parse that calls fail."
+    ],
+    "misconceptions": [
+        {
+            "id": "floating-promise",
+            "description": "Calling an async handler without handling its promise.",
+            "stepId": "apply",
+            "feedback": "Attach a catch or await inside a wrapper. Otherwise a rejection bypasses the response entirely."
+        },
+        {
+            "id": "stack-response",
+            "description": "Returning error.stack or a driver message to the client.",
+            "stepId": "apply",
+            "feedback": "Stack traces reveal internal paths and implementation details. Return a stable code and log the detail on the server."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A promise is not a callback",
+                "body": "An async handler returns a promise. If nobody attaches a rejection handler, the failure becomes an unhandled rejection and the client waits for a response that never comes."
+            },
+            {
+                "title": "Responses carry codes, logs carry details",
+                "body": "A stable error code and status tell the client what happened. Stack traces, file paths, and driver messages belong in server logs, not in the response body."
+            },
+            {
+                "title": "One boundary beats many try blocks",
+                "body": "A wrapper gives every handler the same failure behavior. Handlers can throw a typed failure and trust the boundary to serialize it consistently."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Unhandled rejection",
+                "definition": "A promise failure with no attached handler."
+            },
+            {
+                "term": "Error code",
+                "definition": "A stable string that identifies a failure without exposing internals."
+            },
+            {
+                "term": "Failure boundary",
+                "definition": "One place that converts thrown errors into HTTP responses."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Async failures and safe responses",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A promise is not a callback",
+                    "body": "An async handler returns a promise. If nobody attaches a rejection handler, the failure becomes an unhandled rejection and the client waits for a response that never comes."
+                },
+                {
+                    "title": "Responses carry codes, logs carry details",
+                    "body": "A stable error code and status tell the client what happened. Stack traces, file paths, and driver messages belong in server logs, not in the response body."
+                },
+                {
+                    "title": "One boundary beats many try blocks",
+                    "body": "A wrapper gives every handler the same failure behavior. Handlers can throw a typed failure and trust the boundary to serialize it consistently."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Unhandled rejection",
+                    "definition": "A promise failure with no attached handler."
+                },
+                {
+                    "term": "Error code",
+                    "definition": "A stable string that identifies a failure without exposing internals."
+                },
+                {
+                    "term": "Failure boundary",
+                    "definition": "One place that converts thrown errors into HTTP responses."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Centralize async failures",
+            "prompt": "Edit errors.ts. Wrap an async handler so rejections reach one boundary, map failures to stable codes and statuses, and return no stack traces.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "errors.ts",
+                    "content": "import type { IncomingMessage, ServerResponse } from \"node:http\";\n\ntype Handler = (request: IncomingMessage, response: ServerResponse) => Promise<void>;\n\nexport function handle(handler: Handler) {\n    return function wrapped(request: IncomingMessage, response: ServerResponse) {\n        // TODO: catch rejections and answer with a stable error code\n        handler(request, response);\n    };\n}\n\nexport async function updateStatus(request: IncomingMessage): Promise<{ ok: true }> {\n    const body = await new Promise<string>(function read(resolve, reject) {\n        const chunks: Buffer[] = [];\n        request.on(\"data\", function onChunk(chunk: Buffer) {\n            chunks.push(chunk);\n        });\n        request.on(\"end\", function onEnd() {\n            resolve(Buffer.concat(chunks).toString(\"utf8\"));\n        });\n        request.on(\"error\", reject);\n    });\n    JSON.parse(body);\n    return { ok: true };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "errors.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The wrapper catches the handler promise instead of dropping it.",
+                    "file": "errors.ts",
+                    "includes": [
+                        "export function handle(handler: Handler)",
+                        "handler(request, response).catch"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Failures carry stable codes and statuses from one table.",
+                    "file": "errors.ts",
+                    "includes": [
+                        "const failures: Record<string, Failure>",
+                        "throw Object.assign(new Error(failure.message)",
+                        "status: failure.status"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The boundary answers with a code and never a stack trace.",
+                    "file": "errors.ts",
+                    "includes": ["response.writeHead(status", "error: code", "application/json"],
+                    "excludes": ["error.stack", "stack:"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Invalid JSON is converted into the shared failure path.",
+                    "file": "errors.ts",
+                    "includes": ["try {", "fail(\"invalid_json\");"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "errors.ts",
+                    "includes": ["export function handle(handler: Handler)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the failure path",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "status-server.ts",
+                "caption": "The async handler drops its promise and the failure helper returns internal details.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { createServer, type IncomingMessage, type ServerResponse } from \"node:http\";\n\nexport const server = createServer(async function handle(request, response) {\n    const body = await readBody(request);\n    const parsed = JSON.parse(body);\n    response.writeHead(200, { \"content-type\": \"application/json\" });\n    response.end(JSON.stringify(parsed));\n});\n\nasync function readBody(request: IncomingMessage): Promise<string> {\n    const chunks: Buffer[] = [];\n    for await (const chunk of request) {\n        chunks.push(chunk as Buffer);\n    }\n    return Buffer.concat(chunks).toString(\"utf8\");\n}\n\nprocess.on(\"uncaughtException\", function onError(error) {\n    console.error(error.stack);\n});\n\nexport function sendFailure(response: ServerResponse, error: unknown) {\n    response.writeHead(500, { \"content-type\": \"application/json\" });\n    response.end(JSON.stringify({ error: String(error), stack: (error as Error).stack }));\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "rejection",
+                    "label": "The async request handler has no catch, so a rejected promise is unhandled.",
+                    "correct": true
+                },
+                {
+                    "id": "stack",
+                    "label": "sendFailure returns the internal stack trace to the client.",
+                    "correct": true
+                },
+                {
+                    "id": "status",
+                    "label": "Every failure is reported as 500 instead of a specific status.",
+                    "correct": true
+                },
+                {
+                    "id": "guard",
+                    "label": "The uncaughtException listener makes the process safe to keep serving.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the failure boundary is fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the failure handling is acceptable."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming and formatting remain."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "createServer ignores the promise returned by the async handler, so a parse failure becomes an unhandled rejection. sendFailure also writes error.stack to the client, and every failure is flattened to 500. Keeping a process alive after uncaughtException is not a request boundary."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 125,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Node services workspace is keyboard accessible. Checks verify source structure; they do not compile or run Node services.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
