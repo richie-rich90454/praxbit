@@ -196,34 +196,43 @@ Placement is a short diagnostic, currently eight multiple-choice questions cover
 
 Placement skips prerequisite checks for the skills it marks. It is advisory: the learner can still open any track. It is not a proctored exam and should not be described as one.
 
-## Additional tracks
+## Applied and advanced tracks
 
-Beyond the 30 launch missions, the repository contains 18 missions in applied tracks:
+Beyond the 30 launch missions, the repository contains 90 missions in applied and advanced tracks. The full catalogue has 41 tracks and 120 missions.
 
-| Track | Missions | Runtime |
+| Domain | Tracks | Missions |
 | --- | --- | --- |
-| Python foundations | Prices in Python; Free shipping; Stock totals in Python | Pyodide `browser-python` |
-| SQL and data | Find high-value orders; Join orders to customers; Review a data model | sql.js `browser-sql`; static review |
-| Algorithms | Binary search; Frequency map; Complexity claims | Browser JavaScript; static review |
-| Security | The borrowed name; Session mistakes | Static review |
-| AI engineering | A prompt is a contract; Evaluate the answer; Agent permissions | Ordering; static review |
-| DevOps | Container boundaries; Pipeline checks | Static review; ordering |
-| TypeScript | Narrow the union | Browser TypeScript transpilation |
-| Node services | Middleware order | Ordering |
+| Language foundations | TypeScript (3), Python (5), Java (2), C (2), C++ (2), C# (2), Go (2), Rust (2), Kotlin (2), Swift (2), Ruby (2), Zig (2), Lua (2) | 30 |
+| Frontend frameworks | React, Vue, SolidJS, Angular, Svelte (2 each) | 10 |
+| Backend frameworks | Node services (3), Express, Fastify, NestJS, Spring Boot, ASP.NET Core, FastAPI, Django (2 each) | 17 |
+| Build systems and data | CMake (2), Cargo (2), Database engineering (4) | 8 |
+| Existing applied tracks | SQL and data (3), Algorithms (3), Security (2), AI engineering (3), DevOps (2) | 13 |
+| Advanced applied tracks | Advanced algorithms (3), Systems and architecture (3), DevOps practice (2), AI practice (2), Native and offline (2) | 12 |
 
-These tracks are intentionally small. A single mission is not a claim that a language or framework is fully supported. SQL missions use SQLite semantics in the browser; PostgreSQL-specific behavior is taught separately and labeled.
+Runtime labels are part of the content contract:
 
-## What is not yet authored
+- TypeScript uses browser transpilation and behavioral tests.
+- JavaScript uses an isolated browser worker.
+- HTML and CSS render in a sandboxed preview frame.
+- Python runs in Pyodide WebAssembly.
+- SQL runs in SQLite WebAssembly; PostgreSQL-specific behavior is taught separately and labeled.
+- Git uses isomorphic-git.
+- Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and the framework/server packs use `static-analysis` with structural checks. The editor is plain text, and the lesson and accessibility notes say the source is not compiled or executed.
+- The terminal is a deterministic Linux-like simulation.
+
+The framework packs teach components, state, routing, data boundaries, middleware, validation, authorization, dependency injection, source layout, and deployment-facing trade-offs. The advanced tracks apply algorithms, operating-system and compiler ideas, distributed failure, DevOps diagnosis, retrieval and structured AI output, and offline/native boundaries. They are assessed foundations, not replacements for a full reference manual.
+
+SQL missions use SQLite semantics in the browser. PostgreSQL behavior, indexes, transaction isolation, dialect differences, and Redis caching are taught as reviewed artifacts rather than executed against a PostgreSQL server.
+
+## Depth and external limits
 
 Be explicit with learners and contributors:
 
-- **Java, Go, Rust, and C** appear in the skill graph but have no mission tracks. Do not advertise them as available languages.
-- **Frameworks** are represented by one Hono middleware mission and no React, Vue, Angular, Django, Spring, or Rails track.
-- **Operating systems, compilers, networking labs, distributed systems, and architecture** have concept skills and some applied missions, but not a complete progression.
-- **Only three projects** exist: an accessible HTML status board, a JavaScript inventory service, and a SQL query lab. There is no large multi-session project.
-- **Native mobile and desktop** lessons do not exist as curriculum tracks.
+- **Depth is the remaining curriculum constraint.** Each language and framework pack is a focused two- or three-mission foundation. A learner who wants a complete language reference, a semester-length operating-systems course, or a production distributed-systems lab will need additional material. The tracks teach enough to build, test, review, and reason about real code; they do not claim exhaustive coverage.
+- **Only three projects** exist: an accessible HTML status board, a JavaScript inventory service, and a SQL query lab. They have executable stage checks, but there is no large multi-session project.
+- **Native store builds are not shipped.** Capacitor configuration and the offline/native curriculum exist; Android and iOS projects, signing, store metadata, push notifications, and device testing require platform build environments.
 - **Club competition** has one weekly structured event. There is no season, team formation flow, or large verified competition set.
-- **Language breadth** is not a marketing number. A track is supported only when it has a coherent progression, assessed exercises, prerequisite relationships, content validation, and truthful runtime support.
+- **Language breadth is not a marketing number.** Every listed language now has a track, but a track is supported only when it has a coherent progression, assessed exercises, prerequisite relationships, content validation, and truthful runtime support. The static-analysis tracks do not pretend to execute code.
 
 ## Authoring contract
 
@@ -232,6 +241,7 @@ A mission manifest is valid only when it includes:
 - `id` matching `course.mission-name`, a positive `version`, and a positive `sequence`.
 - A `courseId`, title, summary, 1–6 skills, up to 8 prerequisites, difficulty, and estimated minutes (2–30).
 - An interaction kind and a runtime kind with at least one capability. The runtime must truthfully describe what executes.
+- For a language without an in-browser runtime, a code step uses `static-analysis` with `static` or `regex` tests. Do not label it with a browser runtime that does not exist.
 - A campus scenario with a system, initial state, and briefing.
 - 1–6 objectives with step ids, 1–12 steps, exactly four mission hints, and at least two misconceptions.
 - A lesson with 1–5 sections and at least one vocabulary term.
