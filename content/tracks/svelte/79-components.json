@@ -1,0 +1,219 @@
+{
+    "id": "svelte.components",
+    "version": 1,
+    "sequence": 79,
+    "courseId": "svelte",
+    "title": "Svelte components with exported props",
+    "summary": "Build a product card that receives its data through export let and scopes its own styles.",
+    "skills": ["svelte.components"],
+    "prerequisites": ["web.html", "js.functions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "components",
+        "briefing": "The storefront repeats product markup on three pages. Build one card component that receives a name and a price, renders both, and keeps its styles with the component."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:svelte"],
+    "hints": [
+        "Declare price with export let and the number type.",
+        "Put the name and price inside the article element.",
+        "Format the price with price.toFixed(2) inside braces.",
+        "Keep the existing style block and add a rule for the price."
+    ],
+    "misconceptions": [
+        {
+            "id": "prop-write",
+            "description": "Reassigning an exported prop to update the parent.",
+            "stepId": "apply",
+            "feedback": "The parent owns the value. Send an event or accept a callback when the child needs to request a change."
+        },
+        {
+            "id": "global-style",
+            "description": "Relying on a global selector to style the card.",
+            "stepId": "apply",
+            "feedback": "Svelte scopes the style block to the component. Keep the card rules there so other pages cannot override or inherit them."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "export let declares a prop",
+                "body": "In a Svelte component, an exported let declaration becomes a prop. The parent passes name and price as attributes, and the component reads them like local variables."
+            },
+            {
+                "title": "Markup is the render function",
+                "body": "Svelte compiles the template into DOM updates. Curly braces insert values, and the compiler updates only the text that depends on a changed prop."
+            },
+            {
+                "title": "Styles stay with the component",
+                "body": "A style block is scoped to the component by default. The compiler adds a class to the markup and rewrites the selectors, so .product-card cannot leak into another page."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Prop",
+                "definition": "A value a parent passes to a component through an exported declaration."
+            },
+            {
+                "term": "Interpolation",
+                "definition": "A curly-brace expression in markup that renders a value."
+            },
+            {
+                "term": "Scoped style",
+                "definition": "A style rule the compiler limits to the component's own elements."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Components, props, and scoped styles",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "export let declares a prop",
+                    "body": "In a Svelte component, an exported let declaration becomes a prop. The parent passes name and price as attributes, and the component reads them like local variables."
+                },
+                {
+                    "title": "Markup is the render function",
+                    "body": "Svelte compiles the template into DOM updates. Curly braces insert values, and the compiler updates only the text that depends on a changed prop."
+                },
+                {
+                    "title": "Styles stay with the component",
+                    "body": "A style block is scoped to the component by default. The compiler adds a class to the markup and rewrites the selectors, so .product-card cannot leak into another page."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Prop",
+                    "definition": "A value a parent passes to a component through an exported declaration."
+                },
+                {
+                    "term": "Interpolation",
+                    "definition": "A curly-brace expression in markup that renders a value."
+                },
+                {
+                    "term": "Scoped style",
+                    "definition": "A style rule the compiler limits to the component's own elements."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Render props in a Svelte component",
+            "prompt": "Edit ProductCard.svelte. Export the name and price props, render both in the markup, and keep the card styles in the component style block.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "ProductCard.svelte",
+                    "content": "<script lang=\"ts\">\n    export let name: string;\n    // TODO: receive the price prop and render it with two decimals\n</script>\n\n<article class=\"product-card\">\n    <h3>{name}</h3>\n</article>\n\n<style>\n    .product-card {\n        padding: 1rem;\n    }\n</style>\n",
+                    "editable": true,
+                    "language": "html"
+                }
+            ],
+            "entry": "ProductCard.svelte",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The component exports both props.",
+                    "file": "ProductCard.svelte",
+                    "includes": ["export let name: string;", "export let price: number;"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The markup renders the name and a two-decimal price.",
+                    "file": "ProductCard.svelte",
+                    "includes": ["<h3>{name}</h3>", "{price.toFixed(2)}"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The component owns its styles.",
+                    "file": "ProductCard.svelte",
+                    "includes": ["<style>", "padding: 1rem;"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductCard.svelte",
+                    "includes": ["export let name: string;"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Props, markup, and scope",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "export",
+                    "label": "An export let declaration exposes a prop to the parent.",
+                    "correct": true
+                },
+                {
+                    "id": "scoped",
+                    "label": "Svelte scopes a component style block to that component by default.",
+                    "correct": true
+                },
+                {
+                    "id": "assign-parent",
+                    "label": "Reassigning an exported prop changes the parent's own variable.",
+                    "correct": false
+                },
+                {
+                    "id": "compile",
+                    "label": "Svelte compiles components into DOM update code at build time.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Props enter through export let and stay owned by the parent. Markup renders them with braces, and the compiler keeps style rules local to the component."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Svelte workspace is keyboard accessible. Checks verify source structure; they do not compile or run Svelte.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
