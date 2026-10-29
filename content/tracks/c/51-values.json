@@ -1,0 +1,204 @@
+{
+    "id": "c.values",
+    "version": 1,
+    "sequence": 51,
+    "courseId": "c",
+    "title": "Values and loops in C",
+    "summary": "Compile a small C program that branches and iterates over an array.",
+    "skills": ["c.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "values",
+        "briefing": "A robotics log stores sensor changes as integers. Count the positive changes in C without reading past the array."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:c"],
+    "hints": [
+        "The loop already has the correct bound.",
+        "Test the current element before incrementing.",
+        "Use values[index] > 0.",
+        "Place count += 1 inside an if block."
+    ],
+    "misconceptions": [
+        {
+            "id": "array-length",
+            "description": "Assuming sizeof inside the function returns the array length.",
+            "stepId": "apply",
+            "feedback": "Inside the function the parameter is a pointer, so sizeof gives the pointer size. Pass the length explicitly."
+        },
+        {
+            "id": "zero-count",
+            "description": "Leaving the placeholder increment.",
+            "stepId": "apply",
+            "feedback": "count += 0 never changes the count. Increment only in the positive branch."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "C values and decisions",
+                "body": "C declares values with a type and storage duration: int count = 3; double price = 12.50; char grade = 'A';. int, double, char, and pointers are distinct types. A string is a pointer to a null-terminated array of char. An if statement selects a branch, and a switch selects among integer cases. A for loop uses an index and an explicit bound: for (int index = 0; index < length; index += 1) { ... }."
+            },
+            {
+                "title": "C source files",
+                "body": "C source is compiled to machine code. #include brings in declarations, and main returns an int status to the operating system."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Pointer",
+                "definition": "A value that stores the address of another object."
+            },
+            {
+                "term": "Null terminator",
+                "definition": "The zero byte that marks the end of a C string."
+            },
+            {
+                "term": "Translation unit",
+                "definition": "One source file after preprocessing, compiled as a unit."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "C values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "C values and decisions",
+                    "body": "C declares values with a type and storage duration: int count = 3; double price = 12.50; char grade = 'A';. int, double, char, and pointers are distinct types. A string is a pointer to a null-terminated array of char. An if statement selects a branch, and a switch selects among integer cases. A for loop uses an index and an explicit bound: for (int index = 0; index < length; index += 1) { ... }."
+                },
+                {
+                    "title": "C source files",
+                    "body": "C source is compiled to machine code. #include brings in declarations, and main returns an int status to the operating system."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Pointer",
+                    "definition": "A value that stores the address of another object."
+                },
+                {
+                    "term": "Null terminator",
+                    "definition": "The zero byte that marks the end of a C string."
+                },
+                {
+                    "term": "Translation unit",
+                    "definition": "One source file after preprocessing, compiled as a unit."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive sensor changes",
+            "prompt": "Edit main.c. count_positive receives a pointer and a length and returns how many values are greater than zero.",
+            "evidence": "construction",
+            "language": "c",
+            "files": [
+                {
+                    "path": "main.c",
+                    "content": "#include <stdio.h>\n\nint count_positive(const int *values, int length) {\n    int count = 0;\n    for (int index = 0; index < length; index += 1) {\n        count += 0; /* TODO: count positive values */\n    }\n    return count;\n}\n\nint main(void) {\n    int values[] = { 3, -1, 2 };\n    printf(\"%d\\n\", count_positive(values, 3));\n    return 0;\n}\n",
+                    "editable": true,
+                    "language": "c"
+                }
+            ],
+            "entry": "main.c",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the pointer-and-length signature.",
+                    "file": "main.c",
+                    "includes": ["int count_positive(const int *values, int length)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The loop reads each value and counts only positives.",
+                    "file": "main.c",
+                    "includes": ["if (values[index] > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.c",
+                    "includes": ["int count_positive(const int *values, int length)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "pointer",
+                    "label": "An array passed to a function arrives as a pointer to its first element.",
+                    "correct": true
+                },
+                {
+                    "id": "bounds",
+                    "label": "C checks array bounds automatically on every access.",
+                    "correct": false
+                },
+                {
+                    "id": "length",
+                    "label": "Passing the length separately lets the function honor the real bound.",
+                    "correct": true
+                },
+                {
+                    "id": "null",
+                    "label": "A null-terminated string stores its length in a separate field.",
+                    "correct": false
+                }
+            ],
+            "explanation": "C does not carry array length with a pointer. The caller and callee must agree on the bound."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The C workspace is keyboard accessible. Checks verify source structure; they do not compile or run C.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
