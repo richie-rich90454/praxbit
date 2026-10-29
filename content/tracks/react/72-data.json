@@ -1,0 +1,272 @@
+{
+    "id": "react.data",
+    "version": 1,
+    "sequence": 72,
+    "courseId": "react",
+    "title": "Data loading with explicit states",
+    "summary": "Load remote data once and expose loading, error, and success states.",
+    "skills": ["react.state", "react.effects", "react.data"],
+    "prerequisites": ["react.components", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "data",
+        "briefing": "The product list flickers and keeps a request alive after the page closes. Load the data once, expose each state, and cancel the request on cleanup."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
+    "hints": [
+        "Move the request into a useEffect with an empty dependency array.",
+        "Create an AbortController inside the effect and pass its signal to fetch.",
+        "Track loading and error with separate state values.",
+        "Return a cleanup function that calls controller.abort()."
+    ],
+    "misconceptions": [
+        {
+            "id": "fetch-render",
+            "description": "Fetching during render.",
+            "stepId": "apply",
+            "feedback": "Render must stay pure. Start the request in an effect and store the result in state."
+        },
+        {
+            "id": "stale-update",
+            "description": "Updating state after the component is gone.",
+            "stepId": "apply",
+            "feedback": "Cancel the request or guard the update so a stale response cannot write state."
+        },
+        {
+            "id": "missing-states",
+            "description": "Returning only products and hiding loading and error.",
+            "stepId": "apply",
+            "feedback": "A request has several states. The interface cannot explain failure or show progress without them."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Remote data has states",
+                "body": "A request is not a value. The interface must distinguish loading, failure, empty results, and success."
+            },
+            {
+                "title": "Effects synchronize with the outside world",
+                "body": "An effect should declare its dependencies and clean up what it started. Cancellation prevents an old response from updating a screen that no longer exists."
+            },
+            {
+                "title": "Errors are data too",
+                "body": "A failed request should become an error state that the interface can render, not an unhandled rejection."
+            },
+            {
+                "title": "Lists need stable identity",
+                "body": "When the loaded products are rendered, each item needs a stable key such as product.id so React can preserve the right DOM nodes when the list changes."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Effect",
+                "definition": "A controlled synchronization with an external system."
+            },
+            {
+                "term": "AbortController",
+                "definition": "A browser API for cancelling an in-flight request."
+            },
+            {
+                "term": "Race condition",
+                "definition": "A stale response overwriting newer state."
+            },
+            {
+                "term": "Key",
+                "definition": "A stable identity used to match list items across renders."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Data, effects, and cleanup",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Remote data has states",
+                    "body": "A request is not a value. The interface must distinguish loading, failure, empty results, and success."
+                },
+                {
+                    "title": "Effects synchronize with the outside world",
+                    "body": "An effect should declare its dependencies and clean up what it started. Cancellation prevents an old response from updating a screen that no longer exists."
+                },
+                {
+                    "title": "Errors are data too",
+                    "body": "A failed request should become an error state that the interface can render, not an unhandled rejection."
+                },
+                {
+                    "title": "Lists need stable identity",
+                    "body": "When the loaded products are rendered, each item needs a stable key such as product.id so React can preserve the right DOM nodes when the list changes."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Effect",
+                    "definition": "A controlled synchronization with an external system."
+                },
+                {
+                    "term": "AbortController",
+                    "definition": "A browser API for cancelling an in-flight request."
+                },
+                {
+                    "term": "Race condition",
+                    "definition": "A stale response overwriting newer state."
+                },
+                {
+                    "term": "Key",
+                    "definition": "A stable identity used to match list items across renders."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Load products with cancellation",
+            "prompt": "Edit useProducts.ts. Load products once, expose loading and error state, and cancel the request when the effect cleans up.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "useProducts.ts",
+                    "content": "import { useEffect, useState } from \"react\";\n\ntype Product = {\n  id: string;\n  name: string;\n};\n\nexport function useProducts() {\n  const [products, setProducts] = useState<Product[]>([]);\n  // TODO: load products once and expose loading and error state\n  useEffect(() => {\n    fetch(\"/api/products\")\n      .then((response) => response.json())\n      .then((data) => setProducts(data));\n  }, []);\n\n  return { products, loading: false, error: \"\" };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "useProducts.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The hook exposes products, loading, and error state.",
+                    "file": "useProducts.ts",
+                    "includes": [
+                        "const [loading, setLoading] = useState(",
+                        "const [error, setError] = useState(",
+                        "return { products, loading, error }"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The effect loads once and aborts on cleanup.",
+                    "file": "useProducts.ts",
+                    "includes": ["useEffect(", "new AbortController()", "controller.abort()"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A failed response sets an error instead of being swallowed.",
+                    "file": "useProducts.ts",
+                    "includes": ["if (!response.ok)", "setError("],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "useProducts.ts",
+                    "includes": ["const [loading, setLoading] = useState("],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the data boundary",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "ProductList.tsx",
+                "caption": "The component fetches on every render and writes state without an error or loading path.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { useState } from \"react\";\n\ntype Product = {\n  id: string;\n  name: string;\n};\n\nexport function ProductList() {\n  const [products, setProducts] = useState<Product[]>([]);\n\n  fetch(\"/api/products\")\n    .then((response) => response.json())\n    .then((data) => setProducts(data));\n\n  return (\n    <ul>\n      {products.map((product) => (\n        <li>{product.name}</li>\n      ))}\n    </ul>\n  );\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "fetch-render",
+                    "label": "The fetch call runs during every render.",
+                    "correct": true
+                },
+                {
+                    "id": "missing-key",
+                    "label": "Each list item lacks a stable key.",
+                    "correct": true
+                },
+                {
+                    "id": "error-state",
+                    "label": "A failed request leaves no error state for the user.",
+                    "correct": true
+                },
+                {
+                    "id": "no-cancel",
+                    "label": "There is no cancellation or unmount guard.",
+                    "correct": true
+                },
+                {
+                    "id": "loading",
+                    "label": "The component shows a loading state while the request is pending.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until fetching, cancellation, keys, and error handling are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the duplicated requests are harmless."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Fetching during render repeats work and can update after unmount. The list also lacks stable keys, and a failed request has no error state or loading state to show."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The React workspace is keyboard accessible. Checks verify source structure; they do not compile or run React.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
