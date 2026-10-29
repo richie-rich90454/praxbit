@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "server.md": "# Ingest worker recovery\n\nThe worker stopped writing checkpoints after the deploy.\n\n## 1. Inspect the running process\n\n$ systemctl status ingest-worker --no-pager\n$ ps -o pid,user,args -C ingest-worker\n\nThe unit runs as ingest. Any permission fix must work for that user, not for your shell.\n\n## 2. Read the unit and the recent log\n\n$ systemctl cat ingest-worker\n$ journalctl -u ingest-worker -n 50 --no-pager\n\nLook for the failing path and the first error, not the last line of the trace.\n\n## 3. Check the data directory\n\n$ stat -c '%U:%G %a %n' /var/lib/ingest\n\nThe directory is owned by root with mode 755, so the ingest user cannot create a checkpoint file.\n\n## 4. Grant the smallest access that works\n\n$ chown -R ingest:ingest /var/lib/ingest\n$ chmod 2770 /var/lib/ingest\n\nThe group needs write access, and new files should stay in the ingest group. No other user needs access.\n\n## 5. Restart and verify\n\n$ systemctl restart ingest-worker\n$ systemctl is-active ingest-worker\n$ journalctl -u ingest-worker --since '2 minutes ago' --no-pager\n\nA returned restart is not proof of health. The unit must be active and the log must show a new checkpoint.\n"
+            }
+        }
+    }
+}
