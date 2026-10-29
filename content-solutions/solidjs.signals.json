@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "cart.ts": "import { createMemo, createRoot, createSignal } from \"solid-js\";\nimport { redirect } from \"@solidjs/router\";\n\nexport type CartItem = {\n  id: string;\n  name: string;\n  price: number;\n  quantity: number;\n};\n\nfunction createCartStore() {\n  const [items, setItems] = createSignal<CartItem[]>([]);\n\n  const total = createMemo(function sum() {\n    return items().reduce(function addToTotal(value, item) {\n      return value + item.price * item.quantity;\n    }, 0);\n  });\n\n  function add(item: CartItem) {\n    setItems(function append(current) {\n      return [...current, item];\n    });\n  }\n\n  return { items, total, add };\n}\n\nexport const cart = createRoot(createCartStore);\n\nexport function requireCart() {\n  if (cart.items().length === 0) {\n    throw redirect(\"/catalog\");\n  }\n}\n"
+            }
+        }
+    }
+}
