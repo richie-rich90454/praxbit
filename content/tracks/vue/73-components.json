@@ -1,0 +1,217 @@
+{
+    "id": "vue.components",
+    "version": 1,
+    "sequence": 73,
+    "courseId": "vue",
+    "title": "Single-file components with declared props",
+    "summary": "Build a Vue single-file component that declares its props and renders them in the template.",
+    "skills": ["vue.components"],
+    "prerequisites": ["web.html", "js.functions"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "components",
+        "briefing": "A campus storefront needs a product card. The card currently hardcodes demo values instead of accepting data from its parent."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:vue"],
+    "hints": [
+        "Use a script setup block with the TypeScript language attribute.",
+        "Call defineProps with an inline type that has name and price.",
+        "Assign the macro result to props and read props.name in the template.",
+        "Format the price with props.price.toFixed(2)."
+    ],
+    "misconceptions": [
+        {
+            "id": "mutate-prop",
+            "description": "Assigning directly to a prop.",
+            "stepId": "apply",
+            "feedback": "Props are read-only. Emit an event so the parent updates its own state."
+        },
+        {
+            "id": "hardcode",
+            "description": "Copying demo values into the component instead of declaring props.",
+            "stepId": "apply",
+            "feedback": "Hardcoded values ignore the parent. Declare the data contract with defineProps."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "One file, three blocks",
+                "body": "A single-file component keeps its script, template, and optional styles together. The script setup block runs once per component instance and exposes bindings to the template."
+            },
+            {
+                "title": "Props are declared, not copied",
+                "body": "defineProps is a compile-time macro that declares the values a parent may pass. Props are read-only inside the child."
+            },
+            {
+                "title": "Templates render reactive values",
+                "body": "A template expression re-evaluates when the values it reads change. Reading through the props object keeps the binding visible."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Single-file component",
+                "definition": "A .vue file that groups script, template, and style blocks."
+            },
+            {
+                "term": "defineProps",
+                "definition": "A compile-time macro that declares a component's props."
+            },
+            {
+                "term": "Template expression",
+                "definition": "A binding inside the template that is evaluated against the component scope."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Vue components and props",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "One file, three blocks",
+                    "body": "A single-file component keeps its script, template, and optional styles together. The script setup block runs once per component instance and exposes bindings to the template."
+                },
+                {
+                    "title": "Props are declared, not copied",
+                    "body": "defineProps is a compile-time macro that declares the values a parent may pass. Props are read-only inside the child."
+                },
+                {
+                    "title": "Templates render reactive values",
+                    "body": "A template expression re-evaluates when the values it reads change. Reading through the props object keeps the binding visible."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Single-file component",
+                    "definition": "A .vue file that groups script, template, and style blocks."
+                },
+                {
+                    "term": "defineProps",
+                    "definition": "A compile-time macro that declares a component's props."
+                },
+                {
+                    "term": "Template expression",
+                    "definition": "A binding inside the template that is evaluated against the component scope."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Declare props in a single-file component",
+            "prompt": "Edit ProductCard.vue. Declare name and price with defineProps, then render both in the template. Format the price with two decimals.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "ProductCard.vue",
+                    "content": "<script setup lang=\"ts\">\n// TODO: declare the product props with defineProps\nconst name = \"Campus mug\";\nconst price = 12.5;\n</script>\n\n<template>\n  <article>\n    <h3>{{ name }}</h3>\n    <p>{{ price.toFixed(2) }}</p>\n  </article>\n</template>\n",
+                    "editable": true,
+                    "language": "vue"
+                }
+            ],
+            "entry": "ProductCard.vue",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The component declares typed props with defineProps.",
+                    "file": "ProductCard.vue",
+                    "includes": ["const props = defineProps<{", "name: string", "price: number"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The template renders the name and a two-decimal price.",
+                    "file": "ProductCard.vue",
+                    "includes": ["<h3>{{ props.name }}</h3>", "props.price.toFixed(2)"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductCard.vue",
+                    "includes": ["const props = defineProps<{"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Props in templates",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "define",
+                    "label": "defineProps declares the values a component accepts from its parent.",
+                    "correct": true
+                },
+                {
+                    "id": "mutate",
+                    "label": "A child component may assign directly to a prop to update the parent.",
+                    "correct": false
+                },
+                {
+                    "id": "sfc",
+                    "label": "A single-file component groups script, template, and style in one file.",
+                    "correct": true
+                },
+                {
+                    "id": "template",
+                    "label": "Template expressions read from the component's reactive scope.",
+                    "correct": true
+                },
+                {
+                    "id": "global",
+                    "label": "Every prop must be copied into a global store before it can render.",
+                    "correct": false
+                }
+            ],
+            "explanation": "defineProps makes the component's data contract explicit. The child reads props and renders them, while the parent remains the owner of the values."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Vue workspace is keyboard accessible. Checks verify source structure; they do not compile or run Vue.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
