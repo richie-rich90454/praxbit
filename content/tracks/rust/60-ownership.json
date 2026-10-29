@@ -1,0 +1,251 @@
+{
+    "id": "rust.ownership",
+    "version": 1,
+    "sequence": 60,
+    "courseId": "rust",
+    "title": "Traits and ownership in Rust",
+    "summary": "Implement a trait for a struct, then diagnose a use-after-move error.",
+    "skills": ["rust.ownership", "rust.traits", "rust.async", "rust.cargo"],
+    "prerequisites": ["rust.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "ownership",
+        "briefing": "A telemetry service summarizes different record types through one trait. Implement the trait and keep ownership clear."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:rust"],
+    "hints": [
+        "Use impl Summary for Article.",
+        "The method signature must match the trait.",
+        "Borrow self so the article remains owned by main.",
+        "Return format!(\"{}\", self.title)."
+    ],
+    "misconceptions": [
+        {
+            "id": "move",
+            "description": "Using a value after passing it by value.",
+            "stepId": "apply",
+            "feedback": "A move transfers ownership. Borrow with & or clone deliberately."
+        },
+        {
+            "id": "async",
+            "description": "Treating an async call as already completed.",
+            "stepId": "apply",
+            "feedback": "Calling an async function returns a future. Await it inside an async context."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Rust functions and collections",
+                "body": "Functions declare parameter and return types: fn add(left: i32, right: i32) -> i32 { left + right }. Vec<i32> owns a growable array. Traits define shared behavior, and generic functions use trait bounds."
+            },
+            {
+                "title": "Rust errors and tools",
+                "body": "Result<T, E> and the ? operator propagate failure. Async functions return futures that an executor drives. cargo build compiles, cargo test runs tests, cargo clippy checks lints, and cargo fmt formats source."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Trait",
+                "definition": "A set of behavior that a type can implement."
+            },
+            {
+                "term": "Lifetime",
+                "definition": "A compile-time label that bounds how long a reference is valid."
+            },
+            {
+                "term": "Future",
+                "definition": "A value representing work that will complete later."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Rust functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Rust functions and collections",
+                    "body": "Functions declare parameter and return types: fn add(left: i32, right: i32) -> i32 { left + right }. Vec<i32> owns a growable array. Traits define shared behavior, and generic functions use trait bounds."
+                },
+                {
+                    "title": "Rust errors and tools",
+                    "body": "Result<T, E> and the ? operator propagate failure. Async functions return futures that an executor drives. cargo build compiles, cargo test runs tests, cargo clippy checks lints, and cargo fmt formats source."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Trait",
+                    "definition": "A set of behavior that a type can implement."
+                },
+                {
+                    "term": "Lifetime",
+                    "definition": "A compile-time label that bounds how long a reference is valid."
+                },
+                {
+                    "term": "Future",
+                    "definition": "A value representing work that will complete later."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Implement a summary trait",
+            "prompt": "Edit src/main.rs. Article implements Summary, and summarize returns the article title.",
+            "evidence": "construction",
+            "language": "rust",
+            "files": [
+                {
+                    "path": "src/main.rs",
+                    "content": "trait Summary {\n    fn summarize(&self) -> String;\n}\n\nstruct Article {\n    title: String,\n}\n\n// TODO: implement Summary for Article\n\nfn main() {\n    let article = Article { title: String::from(\"Campus power\") };\n    println!(\"{}\", article.summarize());\n}\n",
+                    "editable": true,
+                    "language": "rust"
+                }
+            ],
+            "entry": "src/main.rs",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The Summary trait remains the shared contract.",
+                    "file": "src/main.rs",
+                    "includes": ["trait Summary", "fn summarize(&self) -> String;"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Article implements the trait without taking ownership of self.",
+                    "file": "src/main.rs",
+                    "includes": ["impl Summary for Article", "fn summarize(&self) -> String"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "src/main.rs",
+                    "includes": ["trait Summary"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "Use after move",
+            "prompt": "This program passes a String to a function and then uses it again. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "bind",
+                    "label": "let name = String::from(\"campus\");"
+                },
+                {
+                    "id": "pass",
+                    "label": "consume(name);"
+                },
+                {
+                    "id": "use",
+                    "label": "println!(\"{}\", name);"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "pass",
+            "fixes": [
+                {
+                    "id": "borrow",
+                    "label": "Pass &name to consume and borrow the string."
+                },
+                {
+                    "id": "clone",
+                    "label": "Pass name.clone() and keep the original."
+                },
+                {
+                    "id": "ignore",
+                    "label": "Remove the print statement."
+                }
+            ],
+            "correctFixId": "borrow",
+            "explanation": "Passing name by value moves it. Borrowing with &name leaves the original owned by main."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Ownership and traits",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "trait",
+                    "label": "A trait defines behavior that types can implement.",
+                    "correct": true
+                },
+                {
+                    "id": "move",
+                    "label": "Passing a String to a function moves ownership unless it is borrowed or cloned.",
+                    "correct": true
+                },
+                {
+                    "id": "async",
+                    "label": "An async function runs immediately to completion when called.",
+                    "correct": false
+                },
+                {
+                    "id": "cargo",
+                    "label": "Cargo can run tests and manage dependency versions.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Traits define shared contracts, and ownership rules make moves explicit. Async functions return futures that must be driven."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Rust workspace is keyboard accessible. Checks verify source structure; they do not compile or run Rust.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
