@@ -1,0 +1,227 @@
+{
+    "id": "angular.components",
+    "version": 1,
+    "sequence": 77,
+    "courseId": "angular",
+    "title": "Standalone components with explicit inputs",
+    "summary": "Build a standalone product card that receives one typed product through an input.",
+    "skills": ["angular.components"],
+    "prerequisites": ["ts.types", "web.html"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "components",
+        "briefing": "The catalog page repeats the same card markup for every product. Extract a standalone card component, declare its product input, and format the price in the template."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
+    "hints": [
+        "Keep the @Component decorator and add standalone: true next to the selector.",
+        "Declare the input with @Input({ required: true }) and the Product type.",
+        "Interpolate product.name and product.price inside the template.",
+        "Call toFixed(2) on the price so every card shows two decimals."
+    ],
+    "misconceptions": [
+        {
+            "id": "mutate-input",
+            "description": "Assigning to an @Input inside the child.",
+            "stepId": "apply",
+            "feedback": "The parent owns the input value. Emit an output event or call a callback instead of writing to the property."
+        },
+        {
+            "id": "missing-required",
+            "description": "Declaring an optional input and rendering an empty card when the parent forgets it.",
+            "stepId": "apply",
+            "feedback": "Make the input required so the compiler reports the missing binding before the page ships."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A component owns one view",
+                "body": "An Angular component pairs a class with a template. The @Component decorator records the selector, the template, and whether the component is standalone."
+            },
+            {
+                "title": "A selector places the component",
+                "body": "The selector names the element that instantiates the component. A parent template uses <app-product-card> and Angular creates the class behind it."
+            },
+            {
+                "title": "Inputs are the public data contract",
+                "body": "An @Input property is written by the parent binding. Marking it required turns a missing binding into a compile-time error instead of an empty card."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Component",
+                "definition": "A class decorated with @Component that owns a template and its data."
+            },
+            {
+                "term": "Standalone component",
+                "definition": "A component that declares its own dependencies and can be imported without an NgModule."
+            },
+            {
+                "term": "Input",
+                "definition": "A property a parent binds to, passing data into the child component."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Components and inputs",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A component owns one view",
+                    "body": "An Angular component pairs a class with a template. The @Component decorator records the selector, the template, and whether the component is standalone."
+                },
+                {
+                    "title": "A selector places the component",
+                    "body": "The selector names the element that instantiates the component. A parent template uses <app-product-card> and Angular creates the class behind it."
+                },
+                {
+                    "title": "Inputs are the public data contract",
+                    "body": "An @Input property is written by the parent binding. Marking it required turns a missing binding into a compile-time error instead of an empty card."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Component",
+                    "definition": "A class decorated with @Component that owns a template and its data."
+                },
+                {
+                    "term": "Standalone component",
+                    "definition": "A component that declares its own dependencies and can be imported without an NgModule."
+                },
+                {
+                    "term": "Input",
+                    "definition": "A property a parent binds to, passing data into the child component."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Render a product through an @Input",
+            "prompt": "Edit product-card.component.ts. Mark the component standalone, declare a required product input, and render the name and a two-decimal price.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "product-card.component.ts",
+                    "content": "import { Component, Input } from \"@angular/core\";\n\nexport interface Product {\n    name: string;\n    price: number;\n}\n\n@Component({\n    selector: \"app-product-card\",\n    standalone: true,\n    template: `\n        <article class=\"product-card\">\n            <!-- TODO: render the product name and a two-decimal price -->\n        </article>\n    `,\n})\nexport class ProductCardComponent {\n    @Input() product?: Product;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "product-card.component.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The component is standalone and keeps its selector.",
+                    "file": "product-card.component.ts",
+                    "includes": [
+                        "@Component({",
+                        "selector: \"app-product-card\"",
+                        "standalone: true"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The product input is required and typed.",
+                    "file": "product-card.component.ts",
+                    "includes": ["@Input({ required: true }) product!: Product"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The template renders the name and a two-decimal price.",
+                    "file": "product-card.component.ts",
+                    "includes": [
+                        "{{ product.name }}",
+                        "{{ product.price.toFixed(2) }}",
+                        "class=\"product-card\""
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "product-card.component.ts",
+                    "includes": ["@Component({"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Component and input semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "selector",
+                    "label": "The selector determines which element instantiates the component.",
+                    "correct": true
+                },
+                {
+                    "id": "standalone",
+                    "label": "A standalone component can be imported directly by another component.",
+                    "correct": true
+                },
+                {
+                    "id": "input-write",
+                    "label": "A child should assign to an @Input to send a value back to its parent.",
+                    "correct": false
+                },
+                {
+                    "id": "required",
+                    "label": "A required input reports a missing parent binding at compile time.",
+                    "correct": true
+                }
+            ],
+            "explanation": "The decorator ties a class to a template and a selector. Inputs are read-only from the child's perspective: the parent owns the value, and the child renders it. A required input turns an incomplete call site into a compiler error."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Angular workspace is keyboard accessible. Checks verify source structure; they do not compile or run Angular.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
