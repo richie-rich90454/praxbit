@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.rb": "def count_positive(values)\n  count = 0\n  values.each do |value|\n    count += 1 if value.positive?\n  end\n  count\nend\n\nputs count_positive([3, -1, 2])\n"
+            }
+        }
+    }
+}
