@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "report.py": "def safe_divide(left, right):\n    if right == 0:\n        return None\n    return left / right\n"
+            }
+        }
+    }
+}
