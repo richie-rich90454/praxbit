@@ -1,0 +1,255 @@
+{
+    "id": "c.memory",
+    "version": 1,
+    "sequence": 52,
+    "courseId": "c",
+    "title": "Pointers and memory in C",
+    "summary": "Swap values through pointers, then diagnose a missing address in scanf.",
+    "skills": ["c.memory", "c.pointers", "c.toolchain"],
+    "prerequisites": ["c.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "memory",
+        "briefing": "A delivery queue needs an in-place swap, and a data-entry form silently writes to the wrong address. Repair both."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:c"],
+    "hints": [
+        "You need one temporary value to avoid overwriting the first value.",
+        "Read *left into the temporary first.",
+        "Then assign *right to *left.",
+        "Finish by assigning the temporary to *right."
+    ],
+    "misconceptions": [
+        {
+            "id": "pointer-copy",
+            "description": "Swapping the pointer variables themselves.",
+            "stepId": "apply",
+            "feedback": "Swapping the local pointer variables does not change the caller's integers. Dereference both pointers."
+        },
+        {
+            "id": "missing-amp",
+            "description": "Passing integers instead of addresses.",
+            "stepId": "apply",
+            "feedback": "swap needs addresses. Call swap(&first, &second), not swap(first, second)."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "C functions and collections",
+                "body": "Functions declare return and parameter types: int add(int left, int right) { return left + right; }. C has no built-in dynamic array. You pass a pointer and a length, and you manage allocation explicitly."
+            },
+            {
+                "title": "C errors and tools",
+                "body": "C functions report failure through return values such as NULL, -1, or an error code. errno carries details for some library calls. cc or gcc compiles, -Wall -Wextra enables warnings, make drives builds, and valgrind or sanitizers expose memory errors."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Dereference",
+                "definition": "Reading or writing the object a pointer points to."
+            },
+            {
+                "term": "Buffer",
+                "definition": "A contiguous region of memory used to hold data."
+            },
+            {
+                "term": "Undefined behavior",
+                "definition": "An operation the C standard does not define, so any result is possible."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "C functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "C functions and collections",
+                    "body": "Functions declare return and parameter types: int add(int left, int right) { return left + right; }. C has no built-in dynamic array. You pass a pointer and a length, and you manage allocation explicitly."
+                },
+                {
+                    "title": "C errors and tools",
+                    "body": "C functions report failure through return values such as NULL, -1, or an error code. errno carries details for some library calls. cc or gcc compiles, -Wall -Wextra enables warnings, make drives builds, and valgrind or sanitizers expose memory errors."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Dereference",
+                    "definition": "Reading or writing the object a pointer points to."
+                },
+                {
+                    "term": "Buffer",
+                    "definition": "A contiguous region of memory used to hold data."
+                },
+                {
+                    "term": "Undefined behavior",
+                    "definition": "An operation the C standard does not define, so any result is possible."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Swap two values through pointers",
+            "prompt": "Edit main.c. swap receives two pointers and exchanges the values they point to.",
+            "evidence": "construction",
+            "language": "c",
+            "files": [
+                {
+                    "path": "main.c",
+                    "content": "#include <stdio.h>\n\nvoid swap(int *left, int *right) {\n    /* TODO: swap the values through the pointers */\n}\n\nint main(void) {\n    int first = 3;\n    int second = 8;\n    swap(&first, &second);\n    printf(\"%d %d\\n\", first, second);\n    return 0;\n}\n",
+                    "editable": true,
+                    "language": "c"
+                }
+            ],
+            "entry": "main.c",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The swap function takes two integer pointers.",
+                    "file": "main.c",
+                    "includes": ["void swap(int *left, int *right)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The values are exchanged through dereferenced pointers.",
+                    "file": "main.c",
+                    "includes": [
+                        "int temporary = *left;",
+                        "*left = *right;",
+                        "*right = temporary;"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.c",
+                    "includes": ["void swap(int *left, int *right)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The form writes nowhere",
+            "prompt": "This program reads a number but leaves the variable unchanged. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "decl",
+                    "label": "int count = 0;"
+                },
+                {
+                    "id": "read",
+                    "label": "scanf(\"%d\", count);"
+                },
+                {
+                    "id": "print",
+                    "label": "printf(\"%d\\n\", count);"
+                },
+                {
+                    "id": "return",
+                    "label": "return 0;"
+                }
+            ],
+            "buggyId": "read",
+            "fixes": [
+                {
+                    "id": "address",
+                    "label": "Pass &count to scanf."
+                },
+                {
+                    "id": "format",
+                    "label": "Change the format to %f."
+                },
+                {
+                    "id": "ignore",
+                    "label": "Remove the scanf call."
+                }
+            ],
+            "correctFixId": "address",
+            "explanation": "scanf needs the address of the object it should fill. Passing count by value gives it no writable location."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Pointers and memory",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "deref",
+                    "label": "Writing *left = *right changes the value at the address left holds.",
+                    "correct": true
+                },
+                {
+                    "id": "copy",
+                    "label": "Assigning one pointer to another copies the pointed-to value.",
+                    "correct": false
+                },
+                {
+                    "id": "address",
+                    "label": "The & operator produces the address of an object.",
+                    "correct": true
+                },
+                {
+                    "id": "free",
+                    "label": "The swap function needs to free its parameters.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Pointers hold addresses. Dereferencing writes through the address; assigning pointers only changes which address is stored."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The C workspace is keyboard accessible. Checks verify source structure; they do not compile or run C.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
