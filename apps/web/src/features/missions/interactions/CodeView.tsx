@@ -22,7 +22,7 @@ function runtimeLabel(language: string): string {
         case "css":
             return "Real rendering in a sandboxed preview frame. DOM and computed-style checks run inside the frame.";
         case "python":
-            return "Real Python execution in Pyodide WebAssembly. The runtime downloads once, then runs locally.";
+            return "Real Python execution in Pyodide WebAssembly. The runtime is bundled and runs locally.";
         case "sql":
             return "SQL executed against SQLite WebAssembly. PostgreSQL-specific behavior is not implied.";
         default:
@@ -62,6 +62,12 @@ export function CodeView(props: CodeViewProps): JSX.Element {
             return "";
         }
         return buildPreviewDocument(files());
+    });
+
+    const structuralOnly = createMemo(function structural(): boolean {
+        return props.step.tests.every(function check(test): boolean {
+            return test.kind === "static" || test.kind === "regex" || test.kind === "json";
+        });
     });
 
     onMount(function loadDraft(): void {
@@ -217,10 +223,17 @@ export function CodeView(props: CodeViewProps): JSX.Element {
                         void run();
                     }}
                 >
-                    {running() ? "Running tests" : "Run tests"}
+                    {running()
+                        ? structuralOnly()
+                            ? "Running checks"
+                            : "Running tests"
+                        : structuralOnly()
+                          ? "Run checks"
+                          : "Run tests"}
                 </button>
                 <span class="meta">
-                    Ctrl+Enter runs the tests. {saved() ? "Draft saved on this device." : ""}
+                    Ctrl+Enter runs the {structuralOnly() ? "checks" : "tests"}.{" "}
+                    {saved() ? "Draft saved on this device." : ""}
                 </span>
             </div>
 
