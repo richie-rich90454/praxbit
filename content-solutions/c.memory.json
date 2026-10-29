@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.c": "#include <stdio.h>\n\nvoid swap(int *left, int *right) {\n    int temporary = *left;\n    *left = *right;\n    *right = temporary;\n}\n\nint main(void) {\n    int first = 3;\n    int second = 8;\n    swap(&first, &second);\n    printf(\"%d %d\\n\", first, second);\n    return 0;\n}\n"
+            }
+        }
+    }
+}
