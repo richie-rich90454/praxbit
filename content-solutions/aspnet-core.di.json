@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Program.cs": "using Microsoft.EntityFrameworkCore;\nusing Praxbit.Catalog.Data;\nusing Praxbit.Catalog.Services;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddControllers();\nbuilder.Services.AddDbContext<CatalogDbContext>(options =>\n    options.UseSqlServer(builder.Configuration.GetConnectionString(\"Catalog\")));\nbuilder.Services.AddScoped<IProductService, ProductService>();\n\nvar app = builder.Build();\n\napp.UseExceptionHandler(\"/error\");\napp.UseHttpsRedirection();\napp.UseAuthorization();\n\napp.MapControllers();\n\napp.Run();\n"
+            }
+        }
+    }
+}
