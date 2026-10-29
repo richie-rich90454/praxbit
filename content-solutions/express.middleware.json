@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "app.ts": "import express, { type NextFunction, type Request, type Response } from \"express\";\n\ntype Product = { id: string; name: string; price: number };\nconst products: Product[] = [];\n\nexport const app = express();\napp.use(express.json({ limit: \"16kb\" }));\n\nfunction validateProduct(request: Request, response: Response, next: NextFunction) {\n    const body = (request.body ?? {}) as { name?: unknown; price?: unknown };\n    if (typeof body.name !== \"string\" || body.name.trim() === \"\") {\n        next(Object.assign(new Error(\"A product name is required.\"), { status: 400, code: \"invalid_name\" }));\n        return;\n    }\n    if (typeof body.price !== \"number\" || !Number.isFinite(body.price) || body.price < 0) {\n        next(Object.assign(new Error(\"A non-negative price is required.\"), { status: 400, code: \"invalid_price\" }));\n        return;\n    }\n    next();\n}\n\napp.post(\"/products\", validateProduct, function createProduct(request, response) {\n    const body = request.body as { name: string; price: number };\n    const product = { id: String(products.length + 1), name: body.name, price: body.price };\n    products.push(product);\n    response.status(201).json(product);\n});\n\napp.use(function onError(error: Error & { status?: number; code?: string }, request: Request, response: Response, next: NextFunction) {\n    const status = error.status ?? 500;\n    response.status(status).json({ error: error.code ?? \"internal\" });\n});\n"
+            }
+        }
+    }
+}
