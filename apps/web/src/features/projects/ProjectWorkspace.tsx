@@ -8,6 +8,7 @@ import { api } from "../../platform/services.ts";
 import { executeChecks, type CheckOutcome } from "../missions/run-checks.ts";
 import { useLearning } from "../learning/learning-store.tsx";
 import { Pip } from "../../design/Pip.tsx";
+import "./projects.css";
 
 function editorLanguage(path: string): string {
     if (path.endsWith(".ts")) {
@@ -59,7 +60,13 @@ export function ProjectWorkspace(): JSX.Element {
     const [runtimeError, setRuntimeError] = createSignal("");
     const [savedRevision, setSavedRevision] = createSignal<number | undefined>(undefined);
     const [revisionError, setRevisionError] = createSignal("");
+    const [revisionBusy, setRevisionBusy] = createSignal(false);
     const [completionMessage, setCompletionMessage] = createSignal("");
+    const [completionError, setCompletionError] = createSignal("");
+    const [completionBusy, setCompletionBusy] = createSignal(false);
+    const [draftLoading, setDraftLoading] = createSignal(true);
+    const [draftReady, setDraftReady] = createSignal(false);
+    const [draftError, setDraftError] = createSignal("");
 
     const stage = createMemo(function currentStage() {
         return project?.stages[stageIndex()];
@@ -85,31 +92,106 @@ export function ProjectWorkspace(): JSX.Element {
         });
     });
 
+    const failedCount = createMemo(function failedChecks(): number {
+        return outcomes().filter(function failed(item): boolean {
+            return !item.passed;
+        }).length;
+    });
+
+    const nextStage = createMemo(function nextUnpassedStage() {
+        if (project === undefined) {
+            return undefined;
+        }
+        const index = project.stages.findIndex(function unpassed(item): boolean {
+            return !passedStages().includes(item.id);
+        });
+        if (index === -1 || index === stageIndex()) {
+            return undefined;
+        }
+        const next = project.stages[index];
+        return next === undefined ? undefined : { index, stage: next };
+    });
+
+    const stageNextStep = createMemo(function nextStep(): string {
+        if (completionMessage().length > 0) {
+            return "This project is already complete. Keep refining the artifact or review the result below.";
+        }
+        const current = stage();
+        if (current === undefined) {
+            return "";
+        }
+        if (passedStages().includes(current.id)) {
+            if (allStagesPassed()) {
+                return "Every stage has passed. Record completion to finish the project.";
+            }
+            const following = nextStage();
+            return following === undefined
+                ? "This stage passed. Another stage still needs a passing check run."
+                : `This stage passed. Next: ${following.stage.title}.`;
+        }
+        if (outcomes().length > 0) {
+            return failedCount() === 0
+                ? "All checks for this stage passed."
+                : `${failedCount()} of ${outcomes().length} checks failed. Fix the failing rows, then run this stage again.`;
+        }
+        return "Run the stage checks to test this stage. Every check must pass before the stage counts.";
+    });
+
+    const completionRequirement = createMemo(function requirement(): string {
+        if (completionMessage().length > 0) {
+            return "Completion is already recorded for this project.";
+        }
+        if (allStagesPassed()) {
+            return "All stages passed. Record completion to finish the project.";
+        }
+        if (project === undefined) {
+            return "Completion is unavailable.";
+        }
+        const remaining = project.stages.length - passedStages().length;
+        return `${remaining} ${remaining === 1 ? "stage still needs" : "stages still need"} a passing check run before completion can be recorded.`;
+    });
+
+    function stagePassed(stageId: string | undefined): boolean {
+        return stageId !== undefined && passedStages().includes(stageId);
+    }
+
     onMount(function loadDraft(): void {
         void (async function load(): Promise<void> {
             if (project === undefined) {
+                setDraftLoading(false);
                 return;
             }
-            const draft = await learning.loadProjectDraft(project.id);
-            if (draft !== undefined) {
-                setFiles({ ...project.files, ...draft });
-            }
-            if (learning.completedProjectIds().includes(project.id)) {
-                setCompletionMessage(
-                    "This project is already complete. You can keep refining the artifact.",
+            try {
+                const draft = await learning.loadProjectDraft(project.id);
+                if (draft !== undefined) {
+                    setFiles({ ...project.files, ...draft });
+                }
+                if (learning.completedProjectIds().includes(project.id)) {
+                    setCompletionMessage(
+                        "This project is already complete. You can keep refining the artifact.",
+                    );
+                }
+                setDraftReady(true);
+            } catch (error) {
+                setDraftError(
+                    error instanceof Error
+                        ? `${error.message} The starter files are shown instead.`
+                        : "Your saved draft could not be loaded. The starter files are shown instead.",
                 );
+            } finally {
+                setDraftLoading(false);
             }
         })();
     });
 
     onCleanup(function saveDraft(): void {
-        if (project !== undefined) {
+        if (project !== undefined && draftReady()) {
             void learning.saveProjectDraft(project.id, files());
         }
     });
 
     async function runStage(): Promise<void> {
-        if (project === undefined || stage() === undefined || running()) {
+        if (project === undefined || stage() === undefined || running() || draftLoading()) {
             return;
         }
         setRunning(true);
@@ -147,22 +229,40 @@ export function ProjectWorkspace(): JSX.Element {
     }
 
     async function completeIfReady(): Promise<void> {
-        if (project === undefined || !allStagesPassed() || completionMessage().length > 0) {
+        if (
+            project === undefined ||
+            !allStagesPassed() ||
+            completionMessage().length > 0 ||
+            completionBusy()
+        ) {
             return;
         }
-        const outcome = await learning.recordProjectCompletion(project, passedStages().length);
-        setCompletionMessage(
-            outcome.alreadyCompleted
-                ? "Project completion was already recorded."
-                : `Project complete. ${outcome.experience} experience points recorded.`,
-        );
+        setCompletionError("");
+        setCompletionBusy(true);
+        try {
+            const outcome = await learning.recordProjectCompletion(project, passedStages().length);
+            setCompletionMessage(
+                outcome.alreadyCompleted
+                    ? "Project completion was already recorded."
+                    : `Project complete. ${outcome.experience} experience points recorded.`,
+            );
+        } catch (error) {
+            setCompletionError(
+                error instanceof Error
+                    ? error.message
+                    : "Completion could not be recorded. Your stage results are still available; try again.",
+            );
+        } finally {
+            setCompletionBusy(false);
+        }
     }
 
     async function saveRevision(): Promise<void> {
-        if (project === undefined || learning.user() === undefined) {
+        if (project === undefined || learning.user() === undefined || revisionBusy()) {
             return;
         }
         setRevisionError("");
+        setRevisionBusy(true);
         try {
             const current = await api.getProject(project.id);
             const revision = await api.saveRevision(project.id, {
@@ -175,6 +275,8 @@ export function ProjectWorkspace(): JSX.Element {
             setRevisionError(
                 error instanceof Error ? error.message : "The revision could not be saved.",
             );
+        } finally {
+            setRevisionBusy(false);
         }
     }
 
@@ -211,6 +313,40 @@ export function ProjectWorkspace(): JSX.Element {
                     </div>
                 </div>
 
+                <div
+                    class="surface surface--quiet stack stack--tight"
+                    aria-labelledby="project-progress-heading"
+                >
+                    <div class="row row--between">
+                        <h2 id="project-progress-heading">Project progress</h2>
+                        <span class="meta">
+                            {passedStages().length} of {project.stages.length} stages passed
+                        </span>
+                    </div>
+                    <p class="small">
+                        <strong>Current stage:</strong> {stage()?.title ?? "Not started"}
+                    </p>
+                    <p class="small muted">{stageNextStep()}</p>
+                    <Show when={nextStage()}>
+                        {function following(current): JSX.Element {
+                            return (
+                                <div class="row">
+                                    <button
+                                        type="button"
+                                        class="button button--secondary button--small"
+                                        onClick={function advance(): void {
+                                            setStageIndex(current().index);
+                                            setOutcomes([]);
+                                        }}
+                                    >
+                                        Open next unpassed stage: {current().stage.title}
+                                    </button>
+                                </div>
+                            );
+                        }}
+                    </Show>
+                </div>
+
                 <div class="surface surface--quiet stack stack--tight">
                     <h2>Brief</h2>
                     <For each={project.brief}>
@@ -222,38 +358,63 @@ export function ProjectWorkspace(): JSX.Element {
                     <p class="meta">Skills: {project.skills.map(skillName).join(", ")}</p>
                 </div>
 
-                <div class="method-tabs" role="tablist" aria-label="Project stages">
-                    <For each={project.stages}>
-                        {function stageTab(item, index): JSX.Element {
-                            return (
-                                <button
-                                    type="button"
-                                    role="tab"
-                                    class="method-tab"
-                                    aria-selected={stageIndex() === index()}
-                                    onClick={function choose(): void {
-                                        setStageIndex(index());
-                                        setOutcomes([]);
-                                    }}
-                                >
-                                    <span class="method-tab__name">
-                                        {index() + 1}. {item.title}
-                                    </span>
-                                    <span class="method-tab__detail">
-                                        {passedStages().includes(item.id)
-                                            ? "Passed"
-                                            : "Not yet passed"}
-                                    </span>
-                                </button>
-                            );
-                        }}
-                    </For>
+                <div class="stack stack--tight">
+                    <p class="meta">
+                        Stages can be reviewed in any order. Completion requires a passing check run
+                        for every stage.
+                    </p>
+                    <div
+                        class="method-tabs project-stages"
+                        role="tablist"
+                        aria-label="Project stages"
+                    >
+                        <For each={project.stages}>
+                            {function stageTab(item, index): JSX.Element {
+                                return (
+                                    <button
+                                        type="button"
+                                        role="tab"
+                                        class="method-tab"
+                                        aria-selected={stageIndex() === index()}
+                                        onClick={function choose(): void {
+                                            setStageIndex(index());
+                                            setOutcomes([]);
+                                        }}
+                                    >
+                                        <span class="method-tab__name">
+                                            {index() + 1}. {item.title}
+                                        </span>
+                                        <span class="method-tab__detail">
+                                            {stageIndex() === index() ? "Current stage · " : ""}
+                                            {passedStages().includes(item.id)
+                                                ? "Passed"
+                                                : "Not yet passed"}
+                                        </span>
+                                    </button>
+                                );
+                            }}
+                        </For>
+                    </div>
                 </div>
 
                 <Show when={stage() !== undefined}>
                     <div class="surface stack stack--tight">
-                        <h2>{stage()?.title}</h2>
+                        <div class="row row--between">
+                            <h2>{stage()?.title}</h2>
+                            <span
+                                class={`status ${stagePassed(stage()?.id) ? "status--success" : ""}`}
+                            >
+                                <span class="status__mark" aria-hidden="true" />
+                                {stagePassed(stage()?.id) ? "Passed" : "Not yet passed"}
+                            </span>
+                        </div>
                         <p class="small">{stage()?.description}</p>
+                        <p class="meta">
+                            Stage {stageIndex() + 1} of {project.stages.length}.{" "}
+                            {stagePassed(stage()?.id)
+                                ? "This stage has a passing check run."
+                                : "Run the checks below until every row passes."}
+                        </p>
                     </div>
                 </Show>
 
@@ -279,6 +440,16 @@ export function ProjectWorkspace(): JSX.Element {
 
                 <div class="grid grid--two">
                     <div class="stack stack--tight">
+                        <Show when={draftLoading()}>
+                            <p class="feedback feedback--info" role="status">
+                                Loading your saved draft on this device…
+                            </p>
+                        </Show>
+                        <Show when={draftError().length > 0}>
+                            <p class="feedback feedback--error" role="alert">
+                                {draftError()}
+                            </p>
+                        </Show>
                         <CodeEditor
                             value={files()[activeFile()] ?? ""}
                             language={editorLanguage(activeFile())}
@@ -298,40 +469,65 @@ export function ProjectWorkspace(): JSX.Element {
                             <button
                                 type="button"
                                 class="button"
-                                disabled={running()}
+                                disabled={running() || draftLoading()}
                                 onClick={function run(): void {
                                     void runStage();
                                 }}
                             >
-                                {running() ? "Running stage checks" : "Run stage checks"}
+                                {running() ? "Running stage checks…" : "Run stage checks"}
                             </button>
                             <button
                                 type="button"
                                 class="button button--secondary"
+                                disabled={
+                                    !allStagesPassed() ||
+                                    completionMessage().length > 0 ||
+                                    completionBusy()
+                                }
+                                aria-describedby="completion-requirement"
                                 onClick={function complete(): void {
                                     void completeIfReady();
                                 }}
                             >
-                                Record completion
+                                {completionBusy()
+                                    ? "Recording completion…"
+                                    : completionMessage().length > 0
+                                      ? "Completion recorded"
+                                      : "Record completion"}
                             </button>
                         </div>
+                        <p class="meta" id="completion-requirement">
+                            {completionRequirement()}
+                        </p>
+                        <Show when={completionError().length > 0}>
+                            <p class="feedback feedback--error" role="alert">
+                                {completionError()}
+                            </p>
+                        </Show>
                         <Show when={learning.user() !== undefined}>
                             <div class="row">
                                 <button
                                     type="button"
                                     class="button button--secondary button--small"
+                                    disabled={revisionBusy()}
                                     onClick={function save(): void {
                                         void saveRevision();
                                     }}
                                 >
-                                    Save revision to account
+                                    {revisionBusy()
+                                        ? "Saving revision…"
+                                        : "Save revision to account"}
                                 </button>
                                 <Show when={savedRevision() !== undefined}>
-                                    <span class="meta">Revision {savedRevision()} saved.</span>
+                                    <span class="meta" role="status" aria-live="polite">
+                                        Revision {savedRevision()} saved.
+                                    </span>
                                 </Show>
                             </div>
                             <Show when={revisionError().length > 0}>
-                                <p class="feedback feedback--error">{revisionError()}</p>
+                                <p class="feedback feedback--error" role="alert">
+                                    {revisionError()}
+                                </p>
                             </Show>
                         </Show>
                     </div>
@@ -351,7 +547,23 @@ export function ProjectWorkspace(): JSX.Element {
                                 SQL runs in SQLite WebAssembly. Stage checks show the returned rows.
                             </p>
                         </Show>
+                        <Show when={outcomes().length === 0 && !running() && !draftLoading()}>
+                            <p class="feedback feedback--info" role="status">
+                                No checks have run for this stage yet. Use Run stage checks to see
+                                each result.
+                            </p>
+                        </Show>
                         <Show when={outcomes().length > 0}>
+                            <p
+                                class={`feedback ${
+                                    failedCount() === 0 ? "feedback--success" : "feedback--error"
+                                }`}
+                                role="status"
+                            >
+                                {failedCount() === 0
+                                    ? "All checks for this stage passed."
+                                    : `${failedCount()} of ${outcomes().length} checks failed. Fix the failing rows, then run the stage again.`}
+                            </p>
                             <table class="data-table">
                                 <caption class="meta">Stage checks</caption>
                                 <thead>
@@ -390,7 +602,9 @@ export function ProjectWorkspace(): JSX.Element {
                             </table>
                         </Show>
                         <Show when={runtimeError().length > 0}>
-                            <p class="feedback feedback--error">{runtimeError()}</p>
+                            <p class="feedback feedback--error" role="alert">
+                                {runtimeError()} No check results were recorded for this run.
+                            </p>
                         </Show>
                     </div>
                 </div>
