@@ -1,0 +1,275 @@
+{
+    "id": "aspnet-core.di",
+    "version": 1,
+    "sequence": 90,
+    "courseId": "aspnet-core",
+    "title": "Service lifetimes and middleware order",
+    "summary": "Register the DbContext and service in the request scope and order the middleware safely.",
+    "skills": ["aspnet.di", "aspnet.middleware"],
+    "prerequisites": ["aspnet.controllers", "architecture.modularity"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 10,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "di",
+        "briefing": "The product service is registered as a singleton while the DbContext is scoped, so the first request captures a context that later requests keep using. Register the service in the request scope and order the middleware so the exception handler wraps the pipeline."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:dotnet"],
+    "hints": [
+        "Read the lifetimes: AddDbContext registers the context as scoped by default.",
+        "A singleton is created once and keeps its dependencies for the life of the application.",
+        "Register the product service with AddScoped so it matches the DbContext lifetime.",
+        "Place UseExceptionHandler before the other middleware so it wraps the pipeline."
+    ],
+    "misconceptions": [
+        {
+            "id": "singleton-scoped",
+            "description": "Registering a scoped service as a singleton.",
+            "stepId": "review",
+            "feedback": "The singleton outlives the request and captures the first scoped DbContext. Match the lifetimes."
+        },
+        {
+            "id": "middleware-order",
+            "description": "Assuming middleware registration order does not matter.",
+            "stepId": "apply",
+            "feedback": "Middleware runs in registration order. A component only sees requests that reach it."
+        },
+        {
+            "id": "service-locator",
+            "description": "Resolving services from app.Services inside a handler.",
+            "stepId": "review",
+            "feedback": "That hides dependencies and bypasses scope validation. Inject through the constructor instead."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Service lifetimes",
+                "body": "AddSingleton creates one instance for the application, AddScoped creates one per request, and AddTransient creates one per resolution. A singleton that depends on a scoped service captures that instance, which is a captive dependency and keeps the first request's state alive."
+            },
+            {
+                "title": "Register the data layer",
+                "body": "AddDbContext registers the context as scoped. The options callback reads the connection string from configuration, so the value is not hardcoded in the pipeline."
+            },
+            {
+                "title": "Constructor injection supplies the graph",
+                "body": "The controller already receives IProductService through its constructor. The container resolves that constructor from the registered lifetime, so the registration and the constructor must agree about scope."
+            },
+            {
+                "title": "Middleware runs in order",
+                "body": "Each middleware component wraps the rest of the pipeline. UseExceptionHandler must be registered before the components whose exceptions it should catch. Authorization runs before endpoint execution, and MapControllers adds the controller endpoints."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Service lifetime",
+                "definition": "The rule that controls how long a registered service instance lives."
+            },
+            {
+                "term": "Captive dependency",
+                "definition": "A long-lived service holding a shorter-lived dependency beyond its intended scope."
+            },
+            {
+                "term": "DbContext",
+                "definition": "The EF Core unit of work that tracks entities and opens database connections."
+            },
+            {
+                "term": "Middleware",
+                "definition": "A component in the request pipeline that can act before or after the next component."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Lifetimes and the request pipeline",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Service lifetimes",
+                    "body": "AddSingleton creates one instance for the application, AddScoped creates one per request, and AddTransient creates one per resolution. A singleton that depends on a scoped service captures that instance, which is a captive dependency and keeps the first request's state alive."
+                },
+                {
+                    "title": "Register the data layer",
+                    "body": "AddDbContext registers the context as scoped. The options callback reads the connection string from configuration, so the value is not hardcoded in the pipeline."
+                },
+                {
+                    "title": "Constructor injection supplies the graph",
+                    "body": "The controller already receives IProductService through its constructor. The container resolves that constructor from the registered lifetime, so the registration and the constructor must agree about scope."
+                },
+                {
+                    "title": "Middleware runs in order",
+                    "body": "Each middleware component wraps the rest of the pipeline. UseExceptionHandler must be registered before the components whose exceptions it should catch. Authorization runs before endpoint execution, and MapControllers adds the controller endpoints."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Service lifetime",
+                    "definition": "The rule that controls how long a registered service instance lives."
+                },
+                {
+                    "term": "Captive dependency",
+                    "definition": "A long-lived service holding a shorter-lived dependency beyond its intended scope."
+                },
+                {
+                    "term": "DbContext",
+                    "definition": "The EF Core unit of work that tracks entities and opens database connections."
+                },
+                {
+                    "term": "Middleware",
+                    "definition": "A component in the request pipeline that can act before or after the next component."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Register the request scope",
+            "prompt": "Edit Program.cs. Register CatalogDbContext with AddDbContext, register IProductService as scoped, and place the exception handler before the other middleware. Run the checks when done.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "Program.cs",
+                    "content": "using Microsoft.EntityFrameworkCore;\nusing Praxbit.Catalog.Data;\nusing Praxbit.Catalog.Services;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddControllers();\n// TODO: register the DbContext and the product service with lifetimes that match their dependencies\nbuilder.Services.AddSingleton<IProductService, ProductService>();\n\nvar app = builder.Build();\n\napp.UseAuthorization();\napp.UseExceptionHandler(\"/error\");\n\napp.MapControllers();\n\napp.Run();\n",
+                    "editable": true,
+                    "language": "csharp"
+                }
+            ],
+            "entry": "Program.cs",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The DbContext is registered with its provider and connection string.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "builder.Services.AddDbContext<CatalogDbContext>(options =>",
+                        "options.UseSqlServer(builder.Configuration.GetConnectionString(\"Catalog\")))"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The product service uses the request scope.",
+                    "file": "Program.cs",
+                    "includes": ["builder.Services.AddScoped<IProductService, ProductService>()"],
+                    "excludes": ["AddSingleton<IProductService, ProductService>"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Exception handling runs before HTTPS redirection and authorization.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "app.UseExceptionHandler(\"/error\");\napp.UseHttpsRedirection();\napp.UseAuthorization();"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Controllers are mapped as endpoints.",
+                    "file": "Program.cs",
+                    "includes": ["app.MapControllers();"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Program.cs",
+                    "includes": ["builder.Services.AddDbContext<CatalogDbContext>(options =>"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the service registration",
+            "prompt": "Review the startup file and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "Program.cs",
+                "caption": "The product service is a singleton over a scoped DbContext, and the exception handler is registered after authorization.",
+                "kind": "code",
+                "language": "csharp",
+                "content": "using Microsoft.EntityFrameworkCore;\nusing Praxbit.Catalog.Data;\nusing Praxbit.Catalog.Services;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddControllers();\nbuilder.Services.AddDbContext<CatalogDbContext>(options =>\n    options.UseSqlServer(builder.Configuration.GetConnectionString(\"Catalog\")));\nbuilder.Services.AddSingleton<IProductService, ProductService>();\n\nvar app = builder.Build();\n\napp.UseAuthorization();\napp.UseExceptionHandler(\"/error\");\n\napp.MapControllers();\n\napp.Run();\n"
+            },
+            "findings": [
+                {
+                    "id": "captive",
+                    "label": "The singleton ProductService captures the scoped CatalogDbContext.",
+                    "correct": true
+                },
+                {
+                    "id": "order",
+                    "label": "UseExceptionHandler is registered after UseAuthorization, so it cannot wrap authorization failures.",
+                    "correct": true
+                },
+                {
+                    "id": "singleton-safe",
+                    "label": "A singleton can depend on a scoped service because it resolves a fresh instance per request.",
+                    "correct": false
+                },
+                {
+                    "id": "order-neutral",
+                    "label": "Middleware registration order has no effect on which requests reach the exception handler.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the lifetime and pipeline order are fixed."
+                },
+                {
+                    "id": "style",
+                    "label": "The code only needs formatting changes."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the registrations are safe."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The singleton is created once, so it keeps the first request's scoped DbContext and every later request reuses it. The exception handler also sits after authorization, so authorization failures cannot be handled by it. Register the service as scoped and move the exception handler to the top of the pipeline."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The ASP.NET Core workspace is keyboard accessible. Checks verify source structure; they do not compile or run ASP.NET Core.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "web"]
+}
