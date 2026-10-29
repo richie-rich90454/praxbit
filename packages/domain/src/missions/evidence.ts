@@ -46,17 +46,11 @@ export function findMisconception(
     stepId: string,
     answerKey: string | undefined,
 ): Misconception | undefined {
+    if (answerKey === undefined) {
+        return undefined;
+    }
     return mission.misconceptions.find(function matches(item: Misconception): boolean {
-        if (item.stepId !== stepId) {
-            return false;
-        }
-        if (item.answer === undefined) {
-            return true;
-        }
-        if (answerKey === undefined) {
-            return false;
-        }
-        return item.answer === answerKey;
+        return item.stepId === stepId && item.answer === answerKey;
     });
 }
 
