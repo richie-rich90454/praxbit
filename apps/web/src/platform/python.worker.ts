@@ -1,8 +1,13 @@
 interface PyodideRuntime {
     runPython(code: string): unknown;
-    globals: { get(name: string): unknown };
+    globals: {
+        get(name: string): unknown;
+        set(name: string, value: unknown): void;
+        delete(name: string): void;
+    };
     setStdout(options: { batched: (text: string) => void }): void;
     setStderr(options: { batched: (text: string) => void }): void;
+    toPy(value: unknown): unknown;
 }
 
 interface PythonTest {
@@ -116,7 +121,17 @@ self.onmessage = async function handleMessage(event: MessageEvent<PythonRequest>
                     });
                     continue;
                 }
-                let result: unknown = (candidate as (...args: unknown[]) => unknown)(...test.args);
+                const argsProxy = pyodide.toPy(test.args) as { destroy?(): void };
+                let result: unknown;
+                try {
+                    pyodide.globals.set("__praxbit_candidate", candidate);
+                    pyodide.globals.set("__praxbit_args", argsProxy);
+                    result = pyodide.runPython("__praxbit_candidate(*__praxbit_args)");
+                } finally {
+                    pyodide.globals.delete("__praxbit_candidate");
+                    pyodide.globals.delete("__praxbit_args");
+                    argsProxy.destroy?.();
+                }
                 if (typeof result === "object" && result !== null && "toJs" in result) {
                     const proxy = result as { toJs(): unknown; destroy?(): void };
                     result = proxy.toJs();
