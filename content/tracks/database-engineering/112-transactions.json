@@ -1,0 +1,281 @@
+{
+    "id": "database-engineering.transactions",
+    "version": 1,
+    "sequence": 112,
+    "courseId": "database-engineering",
+    "title": "Transactions under concurrency",
+    "summary": "Make a read-modify-write transfer atomic and lock the rows it depends on.",
+    "skills": ["sql.transactions"],
+    "prerequisites": ["sql.queries", "concept.responsibility"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "transactions",
+        "briefing": "Two cashiers can transfer from the same account at the same time. The current code reads a balance, checks it, and writes a new value, so one transfer can overwrite the other."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
+    "hints": [
+        "BEGIN starts the unit; COMMIT makes it durable; ROLLBACK discards it.",
+        "A plain SELECT does not lock the row. Add FOR UPDATE to hold it until commit.",
+        "Lock the two accounts in the same order every time to avoid deadlocks.",
+        "Guard the debit with balance_cents >= 2500 and roll back when it matches no row."
+    ],
+    "misconceptions": [
+        {
+            "id": "statement-atomic",
+            "description": "Confusing statement atomicity with transaction atomicity.",
+            "stepId": "apply",
+            "feedback": "Each statement is atomic by itself. Two statements need an explicit transaction to succeed or fail together."
+        },
+        {
+            "id": "read-committed",
+            "description": "Believing READ COMMITTED prevents lost updates.",
+            "stepId": "review",
+            "feedback": "Two transactions can still read the same balance and write over each other. Lock the row or use an atomic conditional update."
+        },
+        {
+            "id": "lock-after-read",
+            "description": "Reading the balance first and locking afterward.",
+            "stepId": "apply",
+            "feedback": "The value read before FOR UPDATE can already be stale. Lock first, then use the locked row."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A transaction is one unit of work",
+                "body": "BEGIN starts the unit, COMMIT makes all of it durable, and ROLLBACK discards all of it. Without a transaction, a failure between the debit and the credit leaves the accounts unbalanced."
+            },
+            {
+                "title": "Isolation levels do not replace locks",
+                "body": "READ COMMITTED gives each statement a fresh snapshot, so two transactions can read the same balance and write over each other. REPEATABLE READ holds one snapshot and can abort a conflicting write in PostgreSQL, but a read-modify-write that computes an absolute value from an old snapshot still needs a lock or an atomic update. FOR UPDATE makes the row lock explicit and works at either level."
+            },
+            {
+                "title": "Lock in a stable order",
+                "body": "Concurrent transactions that lock the same rows in different orders can deadlock. Lock accounts in a consistent order, keep the transaction short, and check the affected row count so a failed guard aborts the work."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Transaction",
+                "definition": "A group of statements that commit or roll back together."
+            },
+            {
+                "term": "Isolation level",
+                "definition": "The visibility rules for concurrent transactions."
+            },
+            {
+                "term": "Lost update",
+                "definition": "One transaction overwrites another transaction's committed change."
+            },
+            {
+                "term": "Row lock",
+                "definition": "A lock that blocks other writers from changing a row until the transaction ends."
+            },
+            {
+                "term": "Deadlock",
+                "definition": "Two transactions waiting for locks the other holds."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Atomic changes under concurrent writers",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A transaction is one unit of work",
+                    "body": "BEGIN starts the unit, COMMIT makes all of it durable, and ROLLBACK discards all of it. Without a transaction, a failure between the debit and the credit leaves the accounts unbalanced."
+                },
+                {
+                    "title": "Isolation levels do not replace locks",
+                    "body": "READ COMMITTED gives each statement a fresh snapshot, so two transactions can read the same balance and write over each other. REPEATABLE READ holds one snapshot and can abort a conflicting write in PostgreSQL, but a read-modify-write that computes an absolute value from an old snapshot still needs a lock or an atomic update. FOR UPDATE makes the row lock explicit and works at either level."
+                },
+                {
+                    "title": "Lock in a stable order",
+                    "body": "Concurrent transactions that lock the same rows in different orders can deadlock. Lock accounts in a consistent order, keep the transaction short, and check the affected row count so a failed guard aborts the work."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Transaction",
+                    "definition": "A group of statements that commit or roll back together."
+                },
+                {
+                    "term": "Isolation level",
+                    "definition": "The visibility rules for concurrent transactions."
+                },
+                {
+                    "term": "Lost update",
+                    "definition": "One transaction overwrites another transaction's committed change."
+                },
+                {
+                    "term": "Row lock",
+                    "definition": "A lock that blocks other writers from changing a row until the transaction ends."
+                },
+                {
+                    "term": "Deadlock",
+                    "definition": "Two transactions waiting for locks the other holds."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Transfer funds in one transaction",
+            "prompt": "Edit transaction.sql. Move 2500 cents from acct-a to acct-b as one atomic unit: open a transaction, lock both rows in a stable order, guard the debit, and commit. Show the rollback path for an abandoned transfer.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "transaction.sql",
+                    "content": "-- TODO: make the transfer atomic, lock both rows, and guard the debit.\nSELECT balance_cents FROM accounts WHERE id = 'acct-a';\nSELECT balance_cents FROM accounts WHERE id = 'acct-b';\n\nUPDATE accounts SET balance_cents = balance_cents - 2500 WHERE id = 'acct-a';\nUPDATE accounts SET balance_cents = balance_cents + 2500 WHERE id = 'acct-b';\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "transaction.sql",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The transfer opens a transaction with an explicit isolation level.",
+                    "file": "transaction.sql",
+                    "includes": ["BEGIN;", "SET TRANSACTION ISOLATION LEVEL READ COMMITTED;"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Both account rows are locked before they are changed.",
+                    "file": "transaction.sql",
+                    "includes": [
+                        "SELECT balance_cents\nFROM accounts\nWHERE id = 'acct-a'\nFOR UPDATE;",
+                        "SELECT balance_cents\nFROM accounts\nWHERE id = 'acct-b'\nFOR UPDATE;"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The debit is guarded and the credit follows it.",
+                    "file": "transaction.sql",
+                    "includes": [
+                        "WHERE id = 'acct-a' AND balance_cents >= 2500;",
+                        "SET balance_cents = balance_cents + 2500"
+                    ],
+                    "excludes": ["SET balance_cents = 2500"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The successful path commits and the abandoned path rolls back.",
+                    "file": "transaction.sql",
+                    "includes": ["COMMIT;", "ROLLBACK;"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "transaction.sql",
+                    "includes": ["BEGIN;"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the withdrawal path",
+            "prompt": "Review the artifact and select every real concurrency problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "withdraw.ts",
+                "caption": "Two requests can call withdraw for the same account at the same time.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "async function withdraw(accountId: string, amountCents: number): Promise<void> {\n    const result = await pool.query(\n        \"SELECT balance_cents FROM accounts WHERE id = $1\",\n        [accountId],\n    );\n    const balanceCents = result.rows[0].balance_cents;\n\n    if (balanceCents < amountCents) {\n        throw new Error(\"Insufficient funds\");\n    }\n\n    await pool.query(\n        \"UPDATE accounts SET balance_cents = $1 WHERE id = $2\",\n        [balanceCents - amountCents, accountId],\n    );\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "read-modify-write",
+                    "label": "Two concurrent withdrawals can read the same balance before either writes.",
+                    "correct": true
+                },
+                {
+                    "id": "lost-update",
+                    "label": "The UPDATE writes an absolute balance computed from a stale read, so one withdrawal can be lost.",
+                    "correct": true
+                },
+                {
+                    "id": "no-lock",
+                    "label": "The read and write are not protected by a transaction or a row lock.",
+                    "correct": true
+                },
+                {
+                    "id": "atomic-update",
+                    "label": "A single UPDATE that subtracts the amount and checks balance_cents >= $1 plus the row count would close the race.",
+                    "correct": true
+                },
+                {
+                    "id": "read-committed",
+                    "label": "Wrapping the same statements in a READ COMMITTED transaction is enough to prevent the lost update.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the balance update is atomic or row-locked."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the database serializes the two updates."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming and formatting need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Both requests read the same balance, both pass the check, and both write a balance derived from that stale read. Use a conditional atomic UPDATE or lock the row with FOR UPDATE inside a transaction."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Database engineering workspace is keyboard accessible. Checks verify source structure; they do not compile or run Database engineering.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems", "web"]
+}
