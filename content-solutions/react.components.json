@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "ProductCard.tsx": "type ProductProps = {\n  name: string;\n  price: number;\n};\n\nexport function ProductCard({ name, price }: ProductProps) {\n  return (\n    <article>\n      <h3>{name}</h3>\n      <p>{price.toFixed(2)}</p>\n    </article>\n  );\n}\n"
+            }
+        }
+    }
+}
