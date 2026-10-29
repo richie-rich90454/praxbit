@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "ProductController.java": "package com.praxbit.catalog;\n\nimport jakarta.validation.constraints.Positive;\nimport org.springframework.http.ResponseEntity;\nimport org.springframework.validation.annotation.Validated;\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.PathVariable;\nimport org.springframework.web.bind.annotation.RestController;\n\n@Validated\n@RestController\npublic class ProductController {\n    private final ProductService service;\n\n    public ProductController(ProductService service) {\n        this.service = service;\n    }\n\n    @GetMapping(\"/api/products/{id}\")\n    public ResponseEntity<Product> get(@Positive @PathVariable long id) {\n        return service.find(id)\n            .map(ResponseEntity::ok)\n            .orElseGet(() -> ResponseEntity.notFound().build());\n    }\n}\n"
+            }
+        }
+    }
+}
