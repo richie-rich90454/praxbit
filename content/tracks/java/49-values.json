@@ -1,0 +1,204 @@
+{
+    "id": "java.values",
+    "version": 1,
+    "sequence": 49,
+    "courseId": "java",
+    "title": "Typed values in Java",
+    "summary": "Declare typed values, branch on a condition, and count with a for-each loop.",
+    "skills": ["java.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "values",
+        "briefing": "The campus inventory report needs a reliable count of positive stock changes. Implement the count in Java and keep the types explicit."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
+    "hints": [
+        "The loop already visits every value. Only the body is wrong.",
+        "Add an if statement before incrementing the count.",
+        "Compare value with zero using the greater-than operator.",
+        "Use if (value > 0) { count += 1; } inside the loop."
+    ],
+    "misconceptions": [
+        {
+            "id": "reference-equality",
+            "description": "Assuming == compares String text.",
+            "stepId": "apply",
+            "feedback": "Use .equals for text. == asks whether two references point to the same object."
+        },
+        {
+            "id": "count-placeholder",
+            "description": "Leaving the placeholder increment in place.",
+            "stepId": "apply",
+            "feedback": "The placeholder adds zero, so the method always returns zero. Increment only inside the positive branch."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Java values and decisions",
+                "body": "Java declares every variable with a type: int count = 3; double price = 12.50; boolean ready = true; and String name = \"Ada\". Primitive types hold numbers and booleans directly. String is a reference type, and == compares references while .equals compares text. An if statement selects a branch, and switch can select among several constant cases. A for-each loop visits every array element: for (int value : values) { ... }."
+            },
+            {
+                "title": "Java source files",
+                "body": "Java source compiles to bytecode before the JVM runs it. A file named Main.java contains a public class Main and a public static void main(String[] args) entry point."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Variable",
+                "definition": "A named storage location whose type is fixed at declaration."
+            },
+            {
+                "term": "Primitive type",
+                "definition": "A built-in numeric, character, or boolean type that stores its value directly."
+            },
+            {
+                "term": "For-each loop",
+                "definition": "A loop that visits each element of an array or collection."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Java values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Java values and decisions",
+                    "body": "Java declares every variable with a type: int count = 3; double price = 12.50; boolean ready = true; and String name = \"Ada\". Primitive types hold numbers and booleans directly. String is a reference type, and == compares references while .equals compares text. An if statement selects a branch, and switch can select among several constant cases. A for-each loop visits every array element: for (int value : values) { ... }."
+                },
+                {
+                    "title": "Java source files",
+                    "body": "Java source compiles to bytecode before the JVM runs it. A file named Main.java contains a public class Main and a public static void main(String[] args) entry point."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Variable",
+                    "definition": "A named storage location whose type is fixed at declaration."
+                },
+                {
+                    "term": "Primitive type",
+                    "definition": "A built-in numeric, character, or boolean type that stores its value directly."
+                },
+                {
+                    "term": "For-each loop",
+                    "definition": "A loop that visits each element of an array or collection."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive stock changes",
+            "prompt": "Edit Main.java. countPositive returns how many values are greater than zero. Run the structural checks when done.",
+            "evidence": "construction",
+            "language": "java",
+            "files": [
+                {
+                    "path": "Main.java",
+                    "content": "public class Main {\n    static int countPositive(int[] values) {\n        int count = 0;\n        for (int value : values) {\n            count += 0; // TODO: count positive values\n        }\n        return count;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(countPositive(new int[] { 3, -1, 2 }));\n    }\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "Main.java",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The count method keeps the taught signature.",
+                    "file": "Main.java",
+                    "includes": ["static int countPositive(int[] values)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The loop counts only values greater than zero.",
+                    "file": "Main.java",
+                    "includes": ["if (value > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Main.java",
+                    "includes": ["static int countPositive(int[] values)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "typed",
+                    "label": "A Java variable declaration states the type once and the compiler enforces it.",
+                    "correct": true
+                },
+                {
+                    "id": "reference",
+                    "label": "The == operator compares the text of two String values.",
+                    "correct": false
+                },
+                {
+                    "id": "foreach",
+                    "label": "A for-each loop visits each element without an index variable.",
+                    "correct": true
+                },
+                {
+                    "id": "compiler",
+                    "label": "Java source runs directly without compilation.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Java checks types at compile time. == compares references, while .equals compares string content."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Java workspace is keyboard accessible. Checks verify source structure; they do not compile or run Java.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
