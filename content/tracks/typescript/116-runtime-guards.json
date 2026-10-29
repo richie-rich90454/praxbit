@@ -1,0 +1,218 @@
+{
+    "id": "typescript.runtime-guards",
+    "version": 1,
+    "sequence": 116,
+    "courseId": "typescript-practice",
+    "title": "Validate what the compiler cannot see",
+    "summary": "Turn an unknown JSON value into a nonnegative integer or null.",
+    "skills": ["ts.runtime-validation"],
+    "prerequisites": ["ts.generics", "api.validation"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "runtime-guards",
+        "briefing": "A request body claims to contain a count. Validate the unknown value before the import uses it."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:typescript"],
+    "hints": [
+        "Start by checking typeof value.",
+        "Reject non-numbers before doing arithmetic.",
+        "Use Number.isInteger and a nonnegative check.",
+        "Return the original value only after every guard passes."
+    ],
+    "misconceptions": [
+        {
+            "id": "coerce",
+            "description": "Using Number(value) as validation.",
+            "stepId": "apply",
+            "feedback": "Number coerces strings and other values. It does not prove the input was a number."
+        },
+        {
+            "id": "erase",
+            "description": "Assuming an interface validates JSON.",
+            "stepId": "apply",
+            "feedback": "Interfaces are erased. Parse unknown input with explicit checks or a schema library."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "TypeScript functions and collections",
+                "body": "Functions declare parameter and return types, and generics preserve the relationship between them. Array<T> and ReadonlyArray<T> describe element types. Generic helpers should not fall back to any or unsafe casts."
+            },
+            {
+                "title": "TypeScript errors and tools",
+                "body": "A type assertion does not validate runtime data. Unknown values from JSON, storage, or the network need explicit checks. tsc checks types, Vite transpiles for the browser, and ESLint or the local companion can enforce stricter rules."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Type erasure",
+                "definition": "Removal of type annotations during compilation."
+            },
+            {
+                "term": "Runtime guard",
+                "definition": "A check that inspects an actual value before trusting it."
+            },
+            {
+                "term": "unknown",
+                "definition": "The safe type for a value that has not been validated."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "TypeScript functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "TypeScript functions and collections",
+                    "body": "Functions declare parameter and return types, and generics preserve the relationship between them. Array<T> and ReadonlyArray<T> describe element types. Generic helpers should not fall back to any or unsafe casts."
+                },
+                {
+                    "title": "TypeScript errors and tools",
+                    "body": "A type assertion does not validate runtime data. Unknown values from JSON, storage, or the network need explicit checks. tsc checks types, Vite transpiles for the browser, and ESLint or the local companion can enforce stricter rules."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Type erasure",
+                    "definition": "Removal of type annotations during compilation."
+                },
+                {
+                    "term": "Runtime guard",
+                    "definition": "A check that inspects an actual value before trusting it."
+                },
+                {
+                    "term": "unknown",
+                    "definition": "The safe type for a value that has not been validated."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Parse a count from unknown data",
+            "prompt": "Edit format.ts. parseCount returns the value only when it is a nonnegative integer; otherwise it returns null.",
+            "evidence": "construction",
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "format.ts",
+                    "content": "function parseCount(value: unknown): number | null {\n    return Number(value);\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "format.ts",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A nonnegative integer is returned unchanged.",
+                    "name": "parseCount",
+                    "args": [3],
+                    "expected": 3
+                },
+                {
+                    "kind": "function",
+                    "description": "Zero is a valid count.",
+                    "name": "parseCount",
+                    "args": [0],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "A negative value is rejected.",
+                    "name": "parseCount",
+                    "args": [-1],
+                    "expected": null
+                },
+                {
+                    "kind": "function",
+                    "description": "A numeric string is rejected instead of coerced.",
+                    "name": "parseCount",
+                    "args": ["3"],
+                    "expected": null
+                },
+                {
+                    "kind": "function",
+                    "description": "A fractional value is rejected.",
+                    "name": "parseCount",
+                    "args": [2.5],
+                    "expected": null
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Runtime validation",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "unknown",
+                    "label": "unknown forces a check before the value can be used as a number.",
+                    "correct": true
+                },
+                {
+                    "id": "erase",
+                    "label": "Type annotations remain available at runtime for validation.",
+                    "correct": false
+                },
+                {
+                    "id": "integer",
+                    "label": "Number.isInteger rejects fractional values.",
+                    "correct": true
+                },
+                {
+                    "id": "coerce",
+                    "label": "Number(value) is a validation function.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Types are erased at runtime. unknown plus explicit guards is the honest boundary between external data and typed code."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The TypeScript workspace is keyboard accessible. Checks verify source structure; they do not compile or run TypeScript.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
