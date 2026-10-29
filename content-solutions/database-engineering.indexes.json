@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "indexes.sql": "-- Remove the index that does not match the query.\nDROP INDEX orders_status_idx;\n\n-- Equality columns first, then the column that supplies the order.\nCREATE INDEX orders_customer_status_placed_idx\n    ON orders (customer_id, status, placed_at DESC)\n    INCLUDE (id, total_cents);\n\n-- Verify the plan with EXPLAIN (ANALYZE, BUFFERS); look for an index scan.\nEXPLAIN (ANALYZE, BUFFERS)\nSELECT id, placed_at, total_cents\nFROM orders\nWHERE customer_id = 'c1'\n  AND status = 'paid'\nORDER BY placed_at DESC\nLIMIT 20;\n"
+            }
+        }
+    }
+}
