@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "cart.ts": "import { derived, writable } from \"svelte/store\";\n\nexport interface CartLine {\n    sku: string;\n    quantity: number;\n}\n\nfunction loadSaved(): CartLine[] {\n    if (typeof localStorage === \"undefined\") {\n        return [];\n    }\n    const raw = localStorage.getItem(\"cart\");\n    if (raw === null) {\n        return [];\n    }\n    try {\n        const parsed = JSON.parse(raw) as CartLine[];\n        return Array.isArray(parsed) ? parsed : [];\n    } catch {\n        return [];\n    }\n}\n\nexport const cart = writable<CartLine[]>(loadSaved());\n\nexport const itemCount = derived(cart, function count(lines) {\n    return lines.reduce(function total(sum, line) {\n        return sum + line.quantity;\n    }, 0);\n});\n\nexport function addLine(line: CartLine): void {\n    cart.update(function append(lines) {\n        return [...lines, line];\n    });\n}\n"
+            }
+        }
+    }
+}
