@@ -86,13 +86,15 @@ Each step has an id, title, prompt, optional evidence category, and optional fou
 | `filesystem`  | Paths and hierarchy               | `guided-simulation`                       |
 | `network`     | Routes and dependencies           | `guided-simulation`                       |
 | `review`      | Evidence-based review             | `static-analysis`                         |
-| `code`        | Real editing and tests            | `browser-*`                               |
+| `code`        | Real editing and tests            | `browser-*` or `static-analysis`          |
 | `git`         | Real local Git operations         | `browser-git`                             |
 | `terminal`    | Constrained Linux-like operations | `simulated-linux`                         |
 | `test-design` | Choosing useful cases             | `static-analysis`                         |
 | `explain`     | Explaining a rule                 | `static-analysis`                         |
 
 Do not claim a runtime that does not exist. `browser-python` is Pyodide, not CPython on the server. `browser-sql` is SQLite, not PostgreSQL. `simulated-linux` is a simulation, not a Linux host. `static-analysis` does not execute code.
+
+A code step for a language without an in-browser runtime uses `static-analysis` and structural tests (`static` or `regex`). The editor is plain text, the mission runtime must be `static-analysis`, and the lesson and accessibility notes must say that the source is not compiled or executed. Do not label such a step `browser-java`, `browser-rust`, or any other runtime that does not exist. Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and framework source packs follow this rule. TypeScript, JavaScript, HTML, CSS, Python, SQL, and Git use their real browser runtimes.
 
 ## Step evaluation
 
