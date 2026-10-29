@@ -54,7 +54,13 @@
             "title": "Python foundations",
             "summary": "Values, decisions, and loops in a language used for data work and automation.",
             "kind": "language",
-            "missionIds": ["python.values", "python.decisions", "python.loops"],
+            "missionIds": [
+                "python.values",
+                "python.decisions",
+                "python.loops",
+                "python.collections",
+                "python.testing"
+            ],
             "interests": ["ai", "professional"]
         },
         {
@@ -106,7 +112,11 @@
             "title": "TypeScript",
             "summary": "Narrowing, contracts, and types that survive contact with external data.",
             "kind": "language",
-            "missionIds": ["typescript.narrowing"],
+            "missionIds": [
+                "typescript.narrowing",
+                "typescript.generics",
+                "typescript.runtime-guards"
+            ],
             "interests": ["web", "professional"]
         },
         {
@@ -114,7 +124,268 @@
             "title": "Node services",
             "summary": "Middleware order, validation, and error boundaries in Hono services.",
             "kind": "framework",
-            "missionIds": ["node.middleware-order"],
+            "missionIds": ["node.middleware-order", "node.http", "node.errors"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "java",
+            "title": "Java",
+            "summary": "Typed values, objects, collections, concurrency, and the build tools a Java service needs.",
+            "kind": "language",
+            "missionIds": ["java.values", "java.objects"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "c",
+            "title": "C",
+            "summary": "Typed values, pointers, memory, and the compiler warnings that keep C honest.",
+            "kind": "language",
+            "missionIds": ["c.values", "c.memory"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "cpp",
+            "title": "C++",
+            "summary": "References, RAII, STL containers, templates, and the build boundary.",
+            "kind": "language",
+            "missionIds": ["cpp.values", "cpp.raii"],
+            "interests": ["systems", "games"]
+        },
+        {
+            "id": "csharp",
+            "title": "C#",
+            "summary": "Typed values, LINQ, async work, dependency injection, and the .NET CLI.",
+            "kind": "language",
+            "missionIds": ["csharp.values", "csharp.linq"],
+            "interests": ["professional", "games"]
+        },
+        {
+            "id": "go",
+            "title": "Go",
+            "summary": "Small interfaces, explicit errors, goroutines, channels, modules, and HTTP services.",
+            "kind": "language",
+            "missionIds": ["go.values", "go.concurrency"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "rust",
+            "title": "Rust",
+            "summary": "Ownership, borrowing, traits, async work, Cargo, and systems-level correctness.",
+            "kind": "language",
+            "missionIds": ["rust.values", "rust.ownership"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "kotlin",
+            "title": "Kotlin",
+            "summary": "Null-safe types, data classes, coroutines, and Gradle-based JVM work.",
+            "kind": "language",
+            "missionIds": ["kotlin.values", "kotlin.coroutines"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "swift",
+            "title": "Swift",
+            "summary": "Optionals, value semantics, async work, and Swift Package Manager.",
+            "kind": "language",
+            "missionIds": ["swift.values", "swift.optionals"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "ruby",
+            "title": "Ruby",
+            "summary": "Dynamic values, blocks, objects, and the Ruby toolchain.",
+            "kind": "language",
+            "missionIds": ["ruby.values", "ruby.blocks"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "zig",
+            "title": "Zig",
+            "summary": "Explicit types, slices, allocators, and the build steps a Zig program needs.",
+            "kind": "language",
+            "missionIds": ["zig.values", "zig.memory"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "lua",
+            "title": "Lua",
+            "summary": "Local values, tables, metatables, and modules for game scripts.",
+            "kind": "language",
+            "missionIds": ["lua.values", "lua.tables"],
+            "interests": ["games", "systems"]
+        },
+        {
+            "id": "react",
+            "title": "React interfaces",
+            "summary": "Build typed React components and load remote data without leaking requests.",
+            "kind": "framework",
+            "missionIds": ["react.components", "react.data"],
+            "interests": ["web"]
+        },
+        {
+            "id": "vue",
+            "title": "Vue interfaces",
+            "summary": "Build Vue single-file components and keep shared cart state derived and guarded.",
+            "kind": "framework",
+            "missionIds": ["vue.components", "vue.reactivity"],
+            "interests": ["web"]
+        },
+        {
+            "id": "solidjs",
+            "title": "SolidJS interfaces",
+            "summary": "Build fine-grained SolidJS components and a cart store that updates without a virtual DOM.",
+            "kind": "framework",
+            "missionIds": ["solidjs.components", "solidjs.signals"],
+            "interests": ["web"]
+        },
+        {
+            "id": "angular",
+            "title": "Angular",
+            "summary": "Standalone components, injected services, and the HTTP and routing boundaries a production Angular app needs.",
+            "kind": "framework",
+            "missionIds": ["angular.components", "angular.services"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "svelte",
+            "title": "Svelte",
+            "summary": "Components, props, and stores that compile to precise DOM updates.",
+            "kind": "framework",
+            "missionIds": ["svelte.components", "svelte.stores"],
+            "interests": ["web"]
+        },
+        {
+            "id": "express",
+            "title": "Express",
+            "summary": "Express routes, middleware order, and a four-argument error boundary that keeps failures predictable.",
+            "kind": "framework",
+            "missionIds": ["express.routing", "express.middleware"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "fastify",
+            "title": "Fastify",
+            "summary": "Fastify routes with typed parameters, JSON schemas that reject extra fields, and encapsulated plugins.",
+            "kind": "framework",
+            "missionIds": ["fastify.routing", "fastify.schemas"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "nestjs",
+            "title": "NestJS",
+            "summary": "NestJS feature modules, constructor-injected providers, and guards that decide before a handler runs.",
+            "kind": "framework",
+            "missionIds": ["nestjs.modules", "nestjs.guards"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "spring-boot",
+            "title": "Spring Boot",
+            "summary": "Annotated Java controllers, validation, Spring Data repositories, and transactional service boundaries.",
+            "kind": "framework",
+            "missionIds": ["spring-boot.controllers", "spring-boot.data"],
+            "interests": ["professional"]
+        },
+        {
+            "id": "aspnet-core",
+            "title": "ASP.NET Core",
+            "summary": "Attribute-routed C# APIs, typed action results, dependency injection lifetimes, and an ordered middleware pipeline.",
+            "kind": "framework",
+            "missionIds": ["aspnet-core.controllers", "aspnet-core.di"],
+            "interests": ["professional", "web"]
+        },
+        {
+            "id": "fastapi",
+            "title": "FastAPI",
+            "summary": "Typed Python HTTP APIs with Pydantic contracts, explicit errors, and deterministic tests.",
+            "kind": "framework",
+            "missionIds": ["fastapi.routes", "fastapi.validation"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "django",
+            "title": "Django",
+            "summary": "Django models, migrations, and JSON views that keep queries and response fields explicit.",
+            "kind": "framework",
+            "missionIds": ["django.models", "django.views"],
+            "interests": ["web", "professional"]
+        },
+        {
+            "id": "cmake",
+            "title": "CMake",
+            "summary": "Targets, packages, installs, and the build graph a C++ project needs.",
+            "kind": "framework",
+            "missionIds": ["cmake.targets", "cmake.packages"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "cargo",
+            "title": "Cargo",
+            "summary": "Crates, features, and workspaces that keep a Rust build reproducible.",
+            "kind": "framework",
+            "missionIds": ["cargo.packages", "cargo.workspace"],
+            "interests": ["systems"]
+        },
+        {
+            "id": "database-engineering",
+            "title": "Database engineering",
+            "summary": "Indexes, transactions, dialects, and caching that keep PostgreSQL-backed services correct.",
+            "kind": "discipline",
+            "missionIds": [
+                "database-engineering.indexes",
+                "database-engineering.transactions",
+                "database-engineering.dialects",
+                "database-engineering.redis"
+            ],
+            "interests": ["professional", "systems", "web"]
+        },
+        {
+            "id": "algorithms-advanced",
+            "title": "Advanced algorithms",
+            "summary": "Linked structures, trees, heaps, graphs, and dynamic programming with real invariants and complexity trade-offs.",
+            "kind": "discipline",
+            "missionIds": [
+                "algorithms-advanced.structures",
+                "algorithms-advanced.trees",
+                "algorithms-advanced.graphs"
+            ],
+            "interests": ["professional", "systems"]
+        },
+        {
+            "id": "devops-practice",
+            "title": "DevOps practice",
+            "summary": "Linux permissions, service diagnosis, DNS, TLS, and reverse-proxy boundaries.",
+            "kind": "discipline",
+            "missionIds": ["devops-practice.linux", "devops-practice.networking"],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "ai-practice",
+            "title": "AI practice",
+            "summary": "Retrieval, structured output, evaluation, cost, and bounded delegation.",
+            "kind": "discipline",
+            "missionIds": ["ai-practice.retrieval", "ai-practice.structured"],
+            "interests": ["ai", "professional"]
+        },
+        {
+            "id": "systems-architecture",
+            "title": "Systems and architecture",
+            "summary": "Operating-system processes, compiler pipelines, and distributed systems under partial failure.",
+            "kind": "discipline",
+            "missionIds": [
+                "systems-architecture.processes",
+                "systems-architecture.compilers",
+                "systems-architecture.distributed"
+            ],
+            "interests": ["systems", "professional"]
+        },
+        {
+            "id": "native",
+            "title": "Native and offline",
+            "summary": "Installable PWAs, service-worker caches, Capacitor boundaries, secure storage, deep links, and cross-device synchronization.",
+            "kind": "discipline",
+            "missionIds": ["native.pwa", "native.capacitor"],
             "interests": ["web", "professional"]
         }
     ]
