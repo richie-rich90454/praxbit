@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ContentLanguageSchema } from "./common.ts";
 import { CodeTestSchema } from "./code.ts";
 
 export const WorldSystemIdSchema = z.enum([
@@ -86,7 +87,7 @@ export const ProjectSchema = z.strictObject({
     brief: z.array(z.string().min(1)).min(1),
     files: ProjectFileMapSchema,
     entry: z.string().min(1),
-    language: z.enum(["javascript", "typescript", "html", "css", "json", "python", "sql", "text"]),
+    language: ContentLanguageSchema,
     preview: z.enum(["html", "css", "console", "sql", "none"]),
     database: z
         .strictObject({
