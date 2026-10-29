@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.java": "public class Main {\n    static int countPositive(int[] values) {\n        int count = 0;\n        for (int value : values) {\n            if (value > 0) {\n                count += 1;\n            }\n        }\n        return count;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(countPositive(new int[] { 3, -1, 2 }));\n    }\n}\n"
+            }
+        }
+    }
+}
