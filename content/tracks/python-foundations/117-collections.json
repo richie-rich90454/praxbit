@@ -1,0 +1,212 @@
+{
+    "id": "python.collections",
+    "version": 1,
+    "sequence": 117,
+    "courseId": "python-practice",
+    "title": "Shape data with collections",
+    "summary": "Summarize a list of order dictionaries into a count and total.",
+    "skills": ["python.data"],
+    "prerequisites": ["python.control", "python.functions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-python",
+        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "collections",
+        "briefing": "A campus report receives orders as dictionaries. Build a summary without losing empty-input behavior."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:python"],
+    "hints": [
+        "Initialize count and total before the loop.",
+        "Iterate over orders.",
+        "Add one to count and order[\"total\"] to total.",
+        "Return both values in a dictionary."
+    ],
+    "misconceptions": [
+        {
+            "id": "empty",
+            "description": "Special-casing empty input as an error.",
+            "stepId": "apply",
+            "feedback": "Empty input is ordinary. A summary of zero orders should return zero count and zero total."
+        },
+        {
+            "id": "mutation",
+            "description": "Assuming comprehension mutates the source.",
+            "stepId": "apply",
+            "feedback": "A comprehension builds a new collection. The original remains unchanged."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Python values and decisions",
+                "body": "Python names values without declarations: count = 3; total = 0.0; ready = True. int, float, str, bool, list, dict, and None are runtime values. A name can be rebound to a different type. if and for value in values select and repeat work. A for loop iterates over any iterable, including lists, dictionaries, and ranges."
+            },
+            {
+                "title": "Python source files",
+                "body": "Python source is interpreted by CPython or, in Praxbit, by Pyodide compiled to WebAssembly."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "List",
+                "definition": "An ordered, mutable sequence of values."
+            },
+            {
+                "term": "Dictionary",
+                "definition": "A mapping from keys to values."
+            },
+            {
+                "term": "Comprehension",
+                "definition": "A compact expression that builds a collection from an iterable."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Python values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Python values and decisions",
+                    "body": "Python names values without declarations: count = 3; total = 0.0; ready = True. int, float, str, bool, list, dict, and None are runtime values. A name can be rebound to a different type. if and for value in values select and repeat work. A for loop iterates over any iterable, including lists, dictionaries, and ranges."
+                },
+                {
+                    "title": "Python source files",
+                    "body": "Python source is interpreted by CPython or, in Praxbit, by Pyodide compiled to WebAssembly."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "List",
+                    "definition": "An ordered, mutable sequence of values."
+                },
+                {
+                    "term": "Dictionary",
+                    "definition": "A mapping from keys to values."
+                },
+                {
+                    "term": "Comprehension",
+                    "definition": "A compact expression that builds a collection from an iterable."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Summarize order totals",
+            "prompt": "Edit report.py. summarize returns a dictionary with count and total for the supplied orders.",
+            "evidence": "construction",
+            "language": "python",
+            "files": [
+                {
+                    "path": "report.py",
+                    "content": "def summarize(orders):\n    return {\"count\": 0, \"total\": 0}\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "report.py",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Two orders produce the count and total.",
+                    "name": "summarize",
+                    "args": [
+                        [
+                            {
+                                "total": 10
+                            },
+                            {
+                                "total": 5
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "count": 2,
+                        "total": 15
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty list produces zeros.",
+                    "name": "summarize",
+                    "args": [[]],
+                    "expected": {
+                        "count": 0,
+                        "total": 0
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Collections and empty input",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "list",
+                    "label": "A list preserves insertion order.",
+                    "correct": true
+                },
+                {
+                    "id": "dict",
+                    "label": "A dictionary lookup by a missing key raises KeyError.",
+                    "correct": true
+                },
+                {
+                    "id": "empty",
+                    "label": "An empty collection cannot be iterated safely.",
+                    "correct": false
+                },
+                {
+                    "id": "mutate",
+                    "label": "A comprehension mutates the original list.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Lists and dictionaries are runtime objects with clear behavior. Iterating an empty collection is safe and should produce a meaningful empty result."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Python workspace is keyboard accessible. Checks verify source structure; they do not compile or run Python.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["ai", "professional"]
+}
