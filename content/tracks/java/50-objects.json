@@ -1,0 +1,251 @@
+{
+    "id": "java.objects",
+    "version": 1,
+    "sequence": 50,
+    "courseId": "java",
+    "title": "Objects and failure in Java",
+    "summary": "Handle a parse failure explicitly and reason about collections and checked exceptions.",
+    "skills": ["java.oop", "java.collections", "java.concurrency", "java.build"],
+    "prerequisites": ["java.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "objects",
+        "briefing": "An order import reads counts from a text file. Invalid text should produce a safe result instead of crashing the import."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
+    "hints": [
+        "The parsing call can throw NumberFormatException.",
+        "Wrap the parse in a try block.",
+        "Catch NumberFormatException, not every exception.",
+        "Return -1 from the catch block."
+    ],
+    "misconceptions": [
+        {
+            "id": "catch-all",
+            "description": "Catching Exception hides unrelated failures.",
+            "stepId": "apply",
+            "feedback": "Catch NumberFormatException so programming errors are not silently converted into -1."
+        },
+        {
+            "id": "int-return",
+            "description": "Assuming parseInt returns -1 on bad input.",
+            "stepId": "apply",
+            "feedback": "parseInt throws. The -1 value exists only because the catch block chooses it."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Java functions and collections",
+                "body": "Methods declare return types and parameter types: static int add(int a, int b) { return a + b; }. List<Integer> values = new ArrayList<>(); grows dynamically. Generics keep element types explicit, and executors run independent work on reusable threads."
+            },
+            {
+                "title": "Java errors and tools",
+                "body": "Checked exceptions must be declared or caught. A try/catch block around Integer.parseInt can turn invalid text into a clear result. javac compiles, java runs, Maven and Gradle manage builds, and JUnit runs tests."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Method",
+                "definition": "A named block of behavior with declared parameter and return types."
+            },
+            {
+                "term": "Generic collection",
+                "definition": "A collection whose element type is checked by the compiler."
+            },
+            {
+                "term": "Checked exception",
+                "definition": "An exception the compiler requires the caller to handle or declare."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Java functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Java functions and collections",
+                    "body": "Methods declare return types and parameter types: static int add(int a, int b) { return a + b; }. List<Integer> values = new ArrayList<>(); grows dynamically. Generics keep element types explicit, and executors run independent work on reusable threads."
+                },
+                {
+                    "title": "Java errors and tools",
+                    "body": "Checked exceptions must be declared or caught. A try/catch block around Integer.parseInt can turn invalid text into a clear result. javac compiles, java runs, Maven and Gradle manage builds, and JUnit runs tests."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Method",
+                    "definition": "A named block of behavior with declared parameter and return types."
+                },
+                {
+                    "term": "Generic collection",
+                    "definition": "A collection whose element type is checked by the compiler."
+                },
+                {
+                    "term": "Checked exception",
+                    "definition": "An exception the compiler requires the caller to handle or declare."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Parse a count safely",
+            "prompt": "Edit Main.java. parseCount returns the parsed integer or -1 when the text is invalid. Run the checks when done.",
+            "evidence": "construction",
+            "language": "java",
+            "files": [
+                {
+                    "path": "Main.java",
+                    "content": "public class Main {\n    static int parseCount(String text) {\n        return Integer.parseInt(text); // TODO: return -1 for invalid text\n    }\n\n    public static void main(String[] args) {\n        System.out.println(parseCount(\"12\"));\n        System.out.println(parseCount(\"twelve\"));\n    }\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "Main.java",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The parser keeps the taught signature.",
+                    "file": "Main.java",
+                    "includes": ["static int parseCount(String text)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Invalid text is handled by the specific parse exception.",
+                    "file": "Main.java",
+                    "includes": ["try {", "catch (NumberFormatException error)", "return -1;"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Main.java",
+                    "includes": ["static int parseCount(String text)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "Find the off-by-one",
+            "prompt": "The total loop reads past the end of the array. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "init",
+                    "label": "int total = 0;"
+                },
+                {
+                    "id": "loop",
+                    "label": "for (int index = 0; index <= values.length; index += 1) {"
+                },
+                {
+                    "id": "body",
+                    "label": "    total += values[index];"
+                },
+                {
+                    "id": "return",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "loop",
+            "fixes": [
+                {
+                    "id": "strict",
+                    "label": "Change the condition to index < values.length."
+                },
+                {
+                    "id": "start-one",
+                    "label": "Start the index at 1."
+                },
+                {
+                    "id": "subtract",
+                    "label": "Keep the condition and subtract one from the index inside the body."
+                }
+            ],
+            "correctFixId": "strict",
+            "explanation": "Valid array indexes run from 0 through length - 1. The <= condition reads index length, which is outside the array."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Collections and failure",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "generic",
+                    "label": "A List<Integer> rejects a String element at compile time.",
+                    "correct": true
+                },
+                {
+                    "id": "checked",
+                    "label": "A checked exception must be caught or declared by the method.",
+                    "correct": true
+                },
+                {
+                    "id": "catch-all",
+                    "label": "Catching every exception is always better than catching the specific one.",
+                    "correct": false
+                },
+                {
+                    "id": "parse",
+                    "label": "Integer.parseInt returns a sentinel value instead of throwing on invalid text.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Generics preserve element types, and checked exceptions force an explicit recovery decision. Catch the narrowest exception that you can handle."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Java workspace is keyboard accessible. Checks verify source structure; they do not compile or run Java.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
