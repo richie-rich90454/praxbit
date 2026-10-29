@@ -1,0 +1,204 @@
+{
+    "id": "kotlin.values",
+    "version": 1,
+    "sequence": 61,
+    "courseId": "kotlin",
+    "title": "Null-safe values in Kotlin",
+    "summary": "Use immutable and mutable values, a nullable type, and a loop to count positives.",
+    "skills": ["kotlin.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "values",
+        "briefing": "A campus dashboard summarizes stock changes and must handle missing values without crashing."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:kotlin"],
+    "hints": [
+        "The loop already visits each value.",
+        "Add a condition before incrementing.",
+        "Use value > 0.",
+        "Increment the mutable count in the branch."
+    ],
+    "misconceptions": [
+        {
+            "id": "bang",
+            "description": "Using !! to silence a nullable warning.",
+            "stepId": "apply",
+            "feedback": "!! throws at runtime when the value is null. Use ?. or ?: to handle absence."
+        },
+        {
+            "id": "val",
+            "description": "Trying to reassign a val.",
+            "stepId": "apply",
+            "feedback": "val is immutable. Declare a mutable counter with var."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Kotlin values and decisions",
+                "body": "Kotlin declares immutable values with val count = 3 and mutable values with var total = 0. Type inference keeps declarations short. A nullable type is written String?. Safe calls (?.), Elvis (?:), and smart casts replace most explicit null checks. if is an expression, and when selects among several branches without fall-through. A for loop visits a range or collection: for (value in values) { ... }."
+            },
+            {
+                "title": "Kotlin source files",
+                "body": "Kotlin compiles to JVM bytecode. A file can define a top-level fun main() entry point."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "val",
+                "definition": "An immutable local binding."
+            },
+            {
+                "term": "Nullable type",
+                "definition": "A type written with ? that permits null."
+            },
+            {
+                "term": "Smart cast",
+                "definition": "A compiler refinement after a null or type check."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Kotlin values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Kotlin values and decisions",
+                    "body": "Kotlin declares immutable values with val count = 3 and mutable values with var total = 0. Type inference keeps declarations short. A nullable type is written String?. Safe calls (?.), Elvis (?:), and smart casts replace most explicit null checks. if is an expression, and when selects among several branches without fall-through. A for loop visits a range or collection: for (value in values) { ... }."
+                },
+                {
+                    "title": "Kotlin source files",
+                    "body": "Kotlin compiles to JVM bytecode. A file can define a top-level fun main() entry point."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "val",
+                    "definition": "An immutable local binding."
+                },
+                {
+                    "term": "Nullable type",
+                    "definition": "A type written with ? that permits null."
+                },
+                {
+                    "term": "Smart cast",
+                    "definition": "A compiler refinement after a null or type check."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive stock changes",
+            "prompt": "Edit Main.kt. countPositive returns how many values are greater than zero.",
+            "evidence": "construction",
+            "language": "kotlin",
+            "files": [
+                {
+                    "path": "Main.kt",
+                    "content": "fun countPositive(values: List<Int>): Int {\n    var count = 0\n    for (value in values) {\n        count += 0 // TODO: count positive values\n    }\n    return count\n}\n\nfun main() {\n    println(countPositive(listOf(3, -1, 2)))\n}\n",
+                    "editable": true,
+                    "language": "kotlin"
+                }
+            ],
+            "entry": "Main.kt",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the typed list parameter.",
+                    "file": "Main.kt",
+                    "includes": ["fun countPositive(values: List<Int>): Int"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The loop counts only positive values.",
+                    "file": "Main.kt",
+                    "includes": ["if (value > 0)", "count += 1"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Main.kt",
+                    "includes": ["fun countPositive(values: List<Int>): Int"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "val",
+                    "label": "A val binding cannot be reassigned.",
+                    "correct": true
+                },
+                {
+                    "id": "nullable",
+                    "label": "A String? must be checked or safely dereferenced before use.",
+                    "correct": true
+                },
+                {
+                    "id": "elvis",
+                    "label": "The ?: operator throws when the left side is null.",
+                    "correct": false
+                },
+                {
+                    "id": "when",
+                    "label": "A when expression can replace a chain of if/else branches.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Kotlin's type system distinguishes nullable from non-null values, and expressions such as when return values."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
