@@ -76,6 +76,18 @@ function normalizedJson(value: unknown): string {
     }
 }
 
+function displayValue(value: unknown): string {
+    if (value === undefined) {
+        return "undefined";
+    }
+    try {
+        const serialized = JSON.stringify(value);
+        return serialized === undefined ? "[unserializable value]" : serialized;
+    } catch {
+        return "[unserializable value]";
+    }
+}
+
 function installNetworkBlocks(): void {
     const blocked = function blockedNetwork(): never {
         throw new Error("Network access is disabled inside the exercise worker.");
@@ -168,11 +180,11 @@ self.onmessage = async function handleMessage(event: MessageEvent<WorkerRequest>
             outcomes.push({
                 description: test.description,
                 passed,
-                actual: normalizedJson(actual),
+                actual: displayValue(actual),
                 ...(passed
                     ? {}
                     : {
-                          error: `Expected ${normalizedJson(test.expected)}, received ${normalizedJson(actual)}.`,
+                          error: `Expected ${displayValue(test.expected)}, received ${displayValue(actual)}.`,
                       }),
             });
         } catch (error) {
