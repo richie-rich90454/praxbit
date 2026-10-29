@@ -1,0 +1,224 @@
+{
+    "id": "cargo.packages",
+    "version": 1,
+    "sequence": 97,
+    "courseId": "cargo",
+    "title": "Package metadata, dependencies, and features",
+    "summary": "Declare a Rust package with a pinned edition, versioned dependencies, and an optional feature.",
+    "skills": ["cargo.packages", "rust.cargo"],
+    "prerequisites": ["rust.cargo", "rust.syntax"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "packages",
+        "briefing": "The campus command-line tool resolves a different dependency set on every machine because every version is a wildcard. Pin the edition and dependency ranges and put the optional clap dependency behind a feature."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cargo"],
+    "hints": [
+        "The [package] table needs name, version, and edition.",
+        "Write serde as a table with version and features.",
+        "Add optional = true to clap and enable it with dep:clap in a feature.",
+        "Run cargo test --all-features to compile the optional path."
+    ],
+    "misconceptions": [
+        {
+            "id": "wildcard-version",
+            "description": "Using \"*\" for every dependency.",
+            "stepId": "apply",
+            "feedback": "A wildcard accepts any published version, so a fresh resolve can pick an incompatible major release. State a real version requirement and let Cargo.lock pin it."
+        },
+        {
+            "id": "feature-default",
+            "description": "Enabling an optional dependency in the default feature when most users do not need it.",
+            "stepId": "apply",
+            "feedback": "Default features are built by everyone. Keep optional capabilities opt-in so the common build stays small and fast."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Metadata fixes identity",
+                "body": "The [package] table gives the crate its name and version, and edition selects the Rust language edition used to compile it. Cargo records resolved versions in Cargo.lock for binaries, so wildcard requirements still resolve differently when the lockfile is regenerated."
+            },
+            {
+                "title": "Features describe optional capability",
+                "body": "A dependency can be optional, and a feature enables it only when requested. Features are additive, so enabling one must not remove behavior another part of the build relies on."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Manifest",
+                "definition": "Cargo.toml, the file that declares package metadata, dependencies, features, and targets."
+            },
+            {
+                "term": "Semantic version requirement",
+                "definition": "A version range such as 1.0.203 that Cargo resolves against published releases."
+            },
+            {
+                "term": "Feature",
+                "definition": "A named, additive switch that enables optional dependencies or conditional code."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Cargo packages and features",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Metadata fixes identity",
+                    "body": "The [package] table gives the crate its name and version, and edition selects the Rust language edition used to compile it. Cargo records resolved versions in Cargo.lock for binaries, so wildcard requirements still resolve differently when the lockfile is regenerated."
+                },
+                {
+                    "title": "Features describe optional capability",
+                    "body": "A dependency can be optional, and a feature enables it only when requested. Features are additive, so enabling one must not remove behavior another part of the build relies on."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Manifest",
+                    "definition": "Cargo.toml, the file that declares package metadata, dependencies, features, and targets."
+                },
+                {
+                    "term": "Semantic version requirement",
+                    "definition": "A version range such as 1.0.203 that Cargo resolves against published releases."
+                },
+                {
+                    "term": "Feature",
+                    "definition": "A named, additive switch that enables optional dependencies or conditional code."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Declare a Cargo package",
+            "prompt": "Edit Cargo.toml. Set the 2021 edition, pin serde with the derive feature, pin serde_json and assert_cmd, and make clap optional behind a cli feature. Run the tests with cargo test --all-features.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "Cargo.toml",
+                    "content": "[package]\nname = \"campus-cli\"\nversion = \"0.1.0\"\n\n[dependencies]\nserde = \"*\"\nserde_json = \"*\"\nclap = \"*\"\n\n[dev-dependencies]\nassert_cmd = \"*\"\n\n# TODO: set the edition, pin the versions, and gate clap behind a feature\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "Cargo.toml",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The package declares its name and the 2021 edition.",
+                    "file": "Cargo.toml",
+                    "includes": ["[package]", "name = \"campus-cli\"", "edition = \"2021\""],
+                    "excludes": ["serde = \"*\""]
+                },
+                {
+                    "kind": "static",
+                    "description": "Dependencies use concrete version requirements and declared features.",
+                    "file": "Cargo.toml",
+                    "includes": [
+                        "serde = { version = \"1.0.203\", features = [\"derive\"] }",
+                        "clap = { version = \"4.5.4\", features = [\"derive\"], optional = true }"
+                    ],
+                    "excludes": ["version = \"*\""]
+                },
+                {
+                    "kind": "static",
+                    "description": "clap sits behind an explicit feature and the tests run with all features.",
+                    "file": "Cargo.toml",
+                    "includes": ["[features]", "cli = [\"dep:clap\"]", "cargo test --all-features"],
+                    "excludes": ["clap = \"*\""]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Cargo.toml",
+                    "includes": ["[package]"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Cargo package semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "edition",
+                    "label": "The edition field selects the Rust edition used to compile the crate.",
+                    "correct": true
+                },
+                {
+                    "id": "wildcard",
+                    "label": "A wildcard dependency version makes builds reproducible across machines.",
+                    "correct": false
+                },
+                {
+                    "id": "lockfile",
+                    "label": "Cargo.lock records the exact resolved versions for a binary crate.",
+                    "correct": true
+                },
+                {
+                    "id": "features-additive",
+                    "label": "Cargo features are additive and should not disable behavior another feature expects.",
+                    "correct": true
+                },
+                {
+                    "id": "optional",
+                    "label": "An optional dependency is only compiled when a feature enables it.",
+                    "correct": true
+                },
+                {
+                    "id": "dev",
+                    "label": "Dev-dependencies are compiled into the released binary.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Cargo.toml declares identity, edition, dependencies, and features. Version requirements bound which releases Cargo may resolve, and Cargo.lock pins the result for binaries. Optional dependencies sit behind features so default builds stay small."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Cargo workspace is keyboard accessible. Checks verify source structure; they do not compile or run Cargo.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
