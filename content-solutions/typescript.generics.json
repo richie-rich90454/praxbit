@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "format.ts": "function firstOrNull<T>(items: readonly T[]): T | null {\n    return items[0] ?? null;\n}\n"
+            }
+        }
+    }
+}
