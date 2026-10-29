@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.zig": "const std = @import(\"std\");\n\nconst Point = struct {\n    x: i32,\n    y: i32,\n};\n\nfn makePoint(allocator: std.mem.Allocator, x: i32, y: i32) !*Point {\n    const point = try allocator.create(Point);\n    point.* = .{ .x = x, .y = y };\n    return point;\n}\n\npub fn main() !void {\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    defer _ = gpa.deinit();\n    const allocator = gpa.allocator();\n\n    const point = try makePoint(allocator, 3, 4);\n    defer allocator.destroy(point);\n    std.debug.print(\"{d},{d}\\n\", .{ point.x, point.y });\n}\n"
+            }
+        }
+    }
+}
