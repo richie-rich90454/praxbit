@@ -1,0 +1,297 @@
+{
+    "id": "database-engineering.dialects",
+    "version": 1,
+    "sequence": 113,
+    "courseId": "database-engineering",
+    "title": "The same SQL, three databases",
+    "summary": "Port an upsert across PostgreSQL, MySQL, and SQLite while keeping the behavior explicit.",
+    "skills": ["sql.dialects"],
+    "prerequisites": ["sql.queries", "sql.modeling"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "dialects",
+        "briefing": "A players table is moving from a MySQL prototype to PostgreSQL, and the same file also runs against SQLite in local tests. The team keeps assuming that SQL that parses everywhere means the same thing everywhere."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
+    "hints": [
+        "PostgreSQL uses GENERATED ALWAYS AS IDENTITY for an identity column.",
+        "PostgreSQL and SQLite use ON CONFLICT (column) DO UPDATE; MySQL uses ON DUPLICATE KEY UPDATE.",
+        "Only PostgreSQL and SQLite 3.35+ have RETURNING; MySQL needs a follow-up SELECT or LAST_INSERT_ID.",
+        "Booleans are BOOLEAN, TINYINT(1), and INTEGER in the three databases; all three accept LIMIT."
+    ],
+    "misconceptions": [
+        {
+            "id": "same-meaning",
+            "description": "Assuming identical syntax means identical results.",
+            "stepId": "review",
+            "feedback": "Collation, uniqueness, and type rules differ even when the statement parses. Test the behavior on each target."
+        },
+        {
+            "id": "mysql-values",
+            "description": "Using VALUES(column) in a modern MySQL upsert.",
+            "stepId": "apply",
+            "feedback": "MySQL deprecated VALUES() in 8.0.20. Use a row alias after the VALUES list."
+        },
+        {
+            "id": "sqlite-returning",
+            "description": "Assuming RETURNING works on every SQLite version.",
+            "stepId": "apply",
+            "feedback": "RETURNING arrived in SQLite 3.35. Older versions need a follow-up SELECT."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A shared grammar hides different rules",
+                "body": "A statement can parse on PostgreSQL, MySQL, and SQLite and still compare, sort, or constrain values differently. Collation decides whether email comparisons are case-sensitive and whether case variants collide in a unique index."
+            },
+            {
+                "title": "Upserts and RETURNING",
+                "body": "PostgreSQL and SQLite use ON CONFLICT (column) DO UPDATE. MySQL uses ON DUPLICATE KEY UPDATE and has no RETURNING. SQLite gained RETURNING in 3.35; MySQL needs a follow-up SELECT or LAST_INSERT_ID."
+            },
+            {
+                "title": "Identity, booleans, and LIMIT",
+                "body": "PostgreSQL uses GENERATED ALWAYS AS IDENTITY, MySQL uses AUTO_INCREMENT, and SQLite uses INTEGER PRIMARY KEY AUTOINCREMENT. Booleans are native BOOLEAN, TINYINT(1), and INTEGER 0/1. All three accept LIMIT, but without ORDER BY the surviving rows are unspecified."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Dialect",
+                "definition": "A database product's version of SQL and its type and comparison rules."
+            },
+            {
+                "term": "Upsert",
+                "definition": "An insert that updates the existing row when a key already exists."
+            },
+            {
+                "term": "Collation",
+                "definition": "The rules that decide string comparison and sort order."
+            },
+            {
+                "term": "Type affinity",
+                "definition": "SQLite's rule for converting values based on the declared column type."
+            },
+            {
+                "term": "Identity column",
+                "definition": "A column whose value the database generates for each new row."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Portable syntax is not portable behavior",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A shared grammar hides different rules",
+                    "body": "A statement can parse on PostgreSQL, MySQL, and SQLite and still compare, sort, or constrain values differently. Collation decides whether email comparisons are case-sensitive and whether case variants collide in a unique index."
+                },
+                {
+                    "title": "Upserts and RETURNING",
+                    "body": "PostgreSQL and SQLite use ON CONFLICT (column) DO UPDATE. MySQL uses ON DUPLICATE KEY UPDATE and has no RETURNING. SQLite gained RETURNING in 3.35; MySQL needs a follow-up SELECT or LAST_INSERT_ID."
+                },
+                {
+                    "title": "Identity, booleans, and LIMIT",
+                    "body": "PostgreSQL uses GENERATED ALWAYS AS IDENTITY, MySQL uses AUTO_INCREMENT, and SQLite uses INTEGER PRIMARY KEY AUTOINCREMENT. Booleans are native BOOLEAN, TINYINT(1), and INTEGER 0/1. All three accept LIMIT, but without ORDER BY the surviving rows are unspecified."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Dialect",
+                    "definition": "A database product's version of SQL and its type and comparison rules."
+                },
+                {
+                    "term": "Upsert",
+                    "definition": "An insert that updates the existing row when a key already exists."
+                },
+                {
+                    "term": "Collation",
+                    "definition": "The rules that decide string comparison and sort order."
+                },
+                {
+                    "term": "Type affinity",
+                    "definition": "SQLite's rule for converting values based on the declared column type."
+                },
+                {
+                    "term": "Identity column",
+                    "definition": "A column whose value the database generates for each new row."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Port the player upsert",
+            "prompt": "Edit dialects.sql. Write the PostgreSQL table and upsert for players.handle, return the stored row, and record the MySQL 8 and SQLite 3.35 equivalents as comments. Note the identity, boolean, and LIMIT differences.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "dialects.sql",
+                    "content": "-- TODO: port this table and upsert to PostgreSQL, then note the MySQL and SQLite versions.\nCREATE TABLE players (\n    id INTEGER AUTO_INCREMENT PRIMARY KEY,\n    handle VARCHAR(64) NOT NULL UNIQUE,\n    email VARCHAR(255) NOT NULL,\n    active TINYINT(1) NOT NULL DEFAULT 1\n);\n\nINSERT INTO players (handle, email, active)\nVALUES ('ada', 'ada@example.com', 1)\nON DUPLICATE KEY UPDATE email = 'ada@example.com';\n\nSELECT * FROM players WHERE handle = 'ada' LIMIT 1;\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "dialects.sql",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "PostgreSQL uses an identity column and a native boolean.",
+                    "file": "dialects.sql",
+                    "includes": [
+                        "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY",
+                        "active BOOLEAN NOT NULL DEFAULT TRUE"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The PostgreSQL upsert targets handle and returns the stored row.",
+                    "file": "dialects.sql",
+                    "includes": [
+                        "ON CONFLICT (handle) DO UPDATE",
+                        "SET email = EXCLUDED.email",
+                        "RETURNING id, handle, email, active;"
+                    ],
+                    "excludes": ["ON DUPLICATE KEY UPDATE email = 'ada@example.com'"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The MySQL variant uses AUTO_INCREMENT and ON DUPLICATE KEY UPDATE.",
+                    "file": "dialects.sql",
+                    "includes": [
+                        "id INTEGER AUTO_INCREMENT PRIMARY KEY",
+                        "ON DUPLICATE KEY UPDATE email = incoming.email",
+                        "TINYINT(1)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The SQLite variant uses AUTOINCREMENT, integer booleans, and RETURNING.",
+                    "file": "dialects.sql",
+                    "includes": [
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT",
+                        "active INTEGER NOT NULL DEFAULT 1",
+                        "excluded.email"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The file states the LIMIT rule and avoids SELECT *.",
+                    "file": "dialects.sql",
+                    "includes": ["LIMIT exists in all three dialects", "Without ORDER BY"],
+                    "excludes": ["SELECT *"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "dialects.sql",
+                    "includes": ["id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the cross-database query",
+            "prompt": "Review the artifact and select every real portability problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "email-lookup.sql",
+                "caption": "The application sends this query to PostgreSQL and MySQL. users.email is VARCHAR(255) NOT NULL UNIQUE on both databases. PostgreSQL uses the C collation; MySQL 8 uses utf8mb4_0900_ai_ci.",
+                "kind": "code",
+                "language": "sql",
+                "content": "-- The application sends this query to PostgreSQL and MySQL.\nSELECT id, email\nFROM users\nWHERE email = 'Ada@Example.com'\nORDER BY email\nLIMIT 10;\n"
+            },
+            "findings": [
+                {
+                    "id": "collation",
+                    "label": "MySQL's default collation compares email case-insensitively, so the filter can match rows PostgreSQL would not.",
+                    "correct": true
+                },
+                {
+                    "id": "unique",
+                    "label": "The UNIQUE constraint enforces different rules: MySQL's default collation rejects case variants that PostgreSQL accepts.",
+                    "correct": true
+                },
+                {
+                    "id": "order",
+                    "label": "ORDER BY email can return a different order because the databases sort with different collations.",
+                    "correct": true
+                },
+                {
+                    "id": "limit",
+                    "label": "LIMIT 10 is the portability problem because MySQL and SQLite do not support LIMIT.",
+                    "correct": false
+                },
+                {
+                    "id": "varchar",
+                    "label": "SQLite rejects VARCHAR(255), so the schema cannot be ported.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until collation and uniqueness behavior are tested per dialect."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; identical syntax guarantees identical results."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the formatting needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The statements parse on both engines but compare and sort differently. Pin the collation, test the unique constraint behavior, and set explicit ORDER BY expectations for each dialect."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Database engineering workspace is keyboard accessible. Checks verify source structure; they do not compile or run Database engineering.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems", "web"]
+}
