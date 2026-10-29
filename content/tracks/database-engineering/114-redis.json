@@ -1,0 +1,297 @@
+{
+    "id": "database-engineering.redis",
+    "version": 1,
+    "sequence": 114,
+    "courseId": "database-engineering",
+    "title": "Cache without lying",
+    "summary": "Add a cache-aside read and a write path that invalidates instead of serving stale rows.",
+    "skills": ["redis.caching"],
+    "prerequisites": ["concept.data", "performance.measure"],
+    "difficulty": "developing",
+    "estimatedMinutes": 10,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "redis",
+        "briefing": "Product pages read from PostgreSQL on every request. The team added Redis, but the first version served a price that was five minutes old and fell over when Redis restarted."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
+    "hints": [
+        "Cache-aside: read Redis, fall back to PostgreSQL, then fill Redis with a TTL.",
+        "Update the database first, then delete the cached key.",
+        "Coalesce concurrent misses so one refresh does not stampede the database.",
+        "Treat Redis errors as a cache miss, not a request failure."
+    ],
+    "misconceptions": [
+        {
+            "id": "cache-truth",
+            "description": "Treating Redis as the source of truth.",
+            "stepId": "apply",
+            "feedback": "Redis is a copy. The database owns the data; the cache must be invalidated or expired."
+        },
+        {
+            "id": "write-through",
+            "description": "Writing a value read before the update into the cache.",
+            "stepId": "review",
+            "feedback": "A stale read becomes a stale cache entry. Delete after the write or cache the write result."
+        },
+        {
+            "id": "ttl-correct",
+            "description": "Assuming a TTL makes the cache correct.",
+            "stepId": "apply",
+            "feedback": "A TTL bounds staleness; it does not prevent serving an outdated value until expiry."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The database is the source of truth",
+                "body": "A cache holds a copy. Read Redis first, fall back to PostgreSQL on a miss, and fill Redis with a TTL. The TTL bounds how long a bad copy can survive; it does not make the copy correct."
+            },
+            {
+                "title": "Invalidate after the write commits",
+                "body": "Update the database, then delete the key. Never write a value that was read before the update, because that turns a stale read into a stale cache entry. A reader that loaded before the commit can still refill the key with the old value; the TTL bounds that window, and a versioned key closes it when freshness must be strict."
+            },
+            {
+                "title": "Stampedes and outages",
+                "body": "A hot key that expires can send many requests to the database at once. Coalesce misses in the process, and use a shared lock when several processes share the cache. If Redis is down, serve from the database instead of failing the request."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Cache-aside",
+                "definition": "The application reads the cache, loads from the database on a miss, and fills the cache."
+            },
+            {
+                "term": "TTL",
+                "definition": "The time a cached entry is allowed to live before it expires."
+            },
+            {
+                "term": "Invalidation",
+                "definition": "Removing or replacing a cached entry when the source data changes."
+            },
+            {
+                "term": "Stampede",
+                "definition": "Many requests hitting the database at once when a popular key expires."
+            },
+            {
+                "term": "Source of truth",
+                "definition": "The system that owns the data and decides what is correct."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Caching without stale answers",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The database is the source of truth",
+                    "body": "A cache holds a copy. Read Redis first, fall back to PostgreSQL on a miss, and fill Redis with a TTL. The TTL bounds how long a bad copy can survive; it does not make the copy correct."
+                },
+                {
+                    "title": "Invalidate after the write commits",
+                    "body": "Update the database, then delete the key. Never write a value that was read before the update, because that turns a stale read into a stale cache entry. A reader that loaded before the commit can still refill the key with the old value; the TTL bounds that window, and a versioned key closes it when freshness must be strict."
+                },
+                {
+                    "title": "Stampedes and outages",
+                    "body": "A hot key that expires can send many requests to the database at once. Coalesce misses in the process, and use a shared lock when several processes share the cache. If Redis is down, serve from the database instead of failing the request."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Cache-aside",
+                    "definition": "The application reads the cache, loads from the database on a miss, and fills the cache."
+                },
+                {
+                    "term": "TTL",
+                    "definition": "The time a cached entry is allowed to live before it expires."
+                },
+                {
+                    "term": "Invalidation",
+                    "definition": "Removing or replacing a cached entry when the source data changes."
+                },
+                {
+                    "term": "Stampede",
+                    "definition": "Many requests hitting the database at once when a popular key expires."
+                },
+                {
+                    "term": "Source of truth",
+                    "definition": "The system that owns the data and decides what is correct."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Cache product reads safely",
+            "prompt": "Edit cache.ts. Read through the cache with a 300-second TTL, coalesce concurrent misses, fall back to the database when Redis fails, and delete the cached key after a successful update.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "cache.ts",
+                    "content": "type Product = { id: string; name: string; priceCents: number };\n\ninterface Cache {\n    get(key: string): Promise<string | null>;\n    set(key: string, value: string, options: { EX: number }): Promise<unknown>;\n    del(key: string): Promise<unknown>;\n}\n\ninterface Database {\n    product(id: string): Promise<Product | null>;\n    updateProduct(id: string, priceCents: number): Promise<Product>;\n}\n\nfunction keyFor(id: string): string {\n    return `product:${id}`;\n}\n\nexport async function getProduct(cache: Cache, db: Database, id: string): Promise<Product | null> {\n    // TODO: read through the cache with a TTL and coalesce misses\n    return db.product(id);\n}\n\nexport async function updatePrice(cache: Cache, db: Database, id: string, priceCents: number): Promise<Product> {\n    // TODO: update the database and invalidate the cached copy\n    return db.updateProduct(id, priceCents);\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "cache.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Reads use the cache with an explicit TTL.",
+                    "file": "cache.ts",
+                    "includes": [
+                        "const TTL_SECONDS = 300;",
+                        "await cache.get(key)",
+                        "{ EX: TTL_SECONDS }"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A miss loads from the database and fills the cache.",
+                    "file": "cache.ts",
+                    "includes": [
+                        "const product = await db.product(id);",
+                        "await writeCached(cache, key, product);"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Concurrent misses are coalesced in this process.",
+                    "file": "cache.ts",
+                    "includes": [
+                        "const inFlight = new Map<string, Promise<Product | null>>();",
+                        "const pending = inFlight.get(key);",
+                        "inFlight.set(key, load);"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The write path updates the database before deleting the cached key.",
+                    "file": "cache.ts",
+                    "includes": [
+                        "const product = await db.updateProduct(id, priceCents);\n    try {\n        await cache.del(keyFor(id));"
+                    ],
+                    "excludes": ["cache.set(keyFor(id), JSON.stringify(product)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Cache failures fall back to the database instead of failing the request.",
+                    "file": "cache.ts",
+                    "includes": [
+                        "    try {\n        const raw = await cache.get(key);\n        return raw === null ? null : (JSON.parse(raw) as Product);\n    } catch {\n        return null;\n    }"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "cache.ts",
+                    "includes": ["const TTL_SECONDS = 300;"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the price update",
+            "prompt": "Review the artifact and select every real caching problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "updatePrice.ts",
+                "caption": "The function runs after an admin changes a price.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "async function updatePrice(id: string, priceCents: number): Promise<Product> {\n    const product = await db.product(id);\n    await db.updateProduct(id, priceCents);\n    await cache.set(`product:${id}`, JSON.stringify(product), { EX: 300 });\n    return product;\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "stale-read",
+                    "label": "The product is read before the update, so the cache is filled with the old price.",
+                    "correct": true
+                },
+                {
+                    "id": "overwrite",
+                    "label": "The write path overwrites the key instead of deleting it, so the stale value survives for the TTL.",
+                    "correct": true
+                },
+                {
+                    "id": "ttl",
+                    "label": "The TTL limits the staleness window but does not make the cached value correct.",
+                    "correct": true
+                },
+                {
+                    "id": "lock",
+                    "label": "A row lock on the update would prevent the stale cache value.",
+                    "correct": false
+                },
+                {
+                    "id": "source",
+                    "label": "Writing the cache makes it the source of truth, so the stale price is acceptable.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the cache is invalidated from the updated row."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the TTL makes the old price acceptable."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the naming needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The cache write happens after the update but stores the row read before it. Delete the key after the update commits, or cache the row returned by the update. A TTL only bounds the damage."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Database engineering workspace is keyboard accessible. Checks verify source structure; they do not compile or run Database engineering.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems", "web"]
+}
