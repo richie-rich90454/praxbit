@@ -1,0 +1,245 @@
+{
+    "id": "zig.memory",
+    "version": 1,
+    "sequence": 68,
+    "courseId": "zig",
+    "title": "Allocations and cleanup",
+    "summary": "Allocate a struct with an allocator, propagate errors with try, and release it with defer.",
+    "skills": ["zig.memory", "zig.build", "zig.testing"],
+    "prerequisites": ["zig.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "memory",
+        "briefing": "A robot path service needs heap-allocated points that are always freed."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:zig"],
+    "hints": [
+        "makePoint returns a pointer, so the allocation result has type *Point.",
+        "allocator.create(Point) returns an error union; bind it with try.",
+        "Assign point.* = .{ .x = x, .y = y }; after the allocation.",
+        "In main, defer allocator.destroy(point) immediately after the successful call."
+    ],
+    "misconceptions": [
+        {
+            "id": "leak",
+            "description": "Dropping a pointer without freeing it.",
+            "stepId": "review",
+            "feedback": "Every create, alloc, and dupe needs a matching destroy or free. Put defer next to the allocation so error paths clean up too."
+        },
+        {
+            "id": "ignore-error",
+            "description": "Discarding an allocation error with catch unreachable.",
+            "stepId": "apply",
+            "feedback": "Out-of-memory is a recoverable error. Use try to return it to the caller or handle it explicitly."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Allocators own the request",
+                "body": "Zig has no hidden global allocator. A function that needs heap memory receives a std.mem.Allocator and calls create, alloc, or dupe. allocator.create(Point) reserves space for one Point and returns a pointer to it."
+            },
+            {
+                "title": "Errors travel through try",
+                "body": "allocator.create returns an error union because allocation can fail. try returns that error to the caller, while catch handles it on the spot. Ignoring the result leaves an error value where a pointer is expected."
+            },
+            {
+                "title": "Defer ties cleanup to scope",
+                "body": "defer allocator.destroy(point) runs when the surrounding block exits, including error paths. Pair every create with destroy and every alloc with free. The build system compiles with zig build, and zig build test runs the test blocks."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Allocator",
+                "definition": "A value that provides alloc, free, create, and destroy operations."
+            },
+            {
+                "term": "Error union",
+                "definition": "A return type that carries either a value or an error."
+            },
+            {
+                "term": "Defer",
+                "definition": "A statement that schedules cleanup for the end of the current scope."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Zig memory and cleanup",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Allocators own the request",
+                    "body": "Zig has no hidden global allocator. A function that needs heap memory receives a std.mem.Allocator and calls create, alloc, or dupe. allocator.create(Point) reserves space for one Point and returns a pointer to it."
+                },
+                {
+                    "title": "Errors travel through try",
+                    "body": "allocator.create returns an error union because allocation can fail. try returns that error to the caller, while catch handles it on the spot. Ignoring the result leaves an error value where a pointer is expected."
+                },
+                {
+                    "title": "Defer ties cleanup to scope",
+                    "body": "defer allocator.destroy(point) runs when the surrounding block exits, including error paths. Pair every create with destroy and every alloc with free. The build system compiles with zig build, and zig build test runs the test blocks."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Allocator",
+                    "definition": "A value that provides alloc, free, create, and destroy operations."
+                },
+                {
+                    "term": "Error union",
+                    "definition": "A return type that carries either a value or an error."
+                },
+                {
+                    "term": "Defer",
+                    "definition": "A statement that schedules cleanup for the end of the current scope."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Allocate a point and release it",
+            "prompt": "Edit main.zig. makePoint allocates a Point with allocator.create; main releases it with defer.",
+            "evidence": "construction",
+            "language": "zig",
+            "files": [
+                {
+                    "path": "main.zig",
+                    "content": "const std = @import(\"std\");\n\nconst Point = struct {\n    x: i32,\n    y: i32,\n};\n\nfn makePoint(allocator: std.mem.Allocator, x: i32, y: i32) !*Point {\n    // TODO: allocate a Point with allocator.create and fill its fields\n    _ = allocator;\n    _ = x;\n    _ = y;\n    return error.NotImplemented;\n}\n\npub fn main() !void {\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    defer _ = gpa.deinit();\n    const allocator = gpa.allocator();\n\n    const point = try makePoint(allocator, 3, 4);\n    defer allocator.destroy(point);\n    std.debug.print(\"{d},{d}\\n\", .{ point.x, point.y });\n}\n",
+                    "editable": true,
+                    "language": "zig"
+                }
+            ],
+            "entry": "main.zig",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "makePoint keeps the allocator and typed parameters.",
+                    "file": "main.zig",
+                    "includes": [
+                        "fn makePoint(allocator: std.mem.Allocator, x: i32, y: i32) !*Point"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The allocation is propagated with try and assigned to a pointer.",
+                    "file": "main.zig",
+                    "includes": ["const point = try allocator.create(Point);"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "main releases the allocation with defer.",
+                    "file": "main.zig",
+                    "includes": ["defer allocator.destroy(point);"],
+                    "excludes": ["TODO", "error.NotImplemented"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.zig",
+                    "includes": [
+                        "fn makePoint(allocator: std.mem.Allocator, x: i32, y: i32) !*Point"
+                    ],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the allocation",
+            "prompt": "Review the allocation code and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "buffer.zig",
+                "caption": "makeBuffer returns owned memory, but main never releases it.",
+                "kind": "code",
+                "language": "zig",
+                "content": "const std = @import(\"std\");\n\nfn makeBuffer(allocator: std.mem.Allocator, size: usize) ![]u8 {\n    const buffer = try allocator.alloc(u8, size);\n    @memset(buffer, 0);\n    return buffer;\n}\n\npub fn main() !void {\n    var gpa = std.heap.GeneralPurposeAllocator(.{}){};\n    defer _ = gpa.deinit();\n    const buffer = try makeBuffer(gpa.allocator(), 16);\n    std.debug.print(\"{d}\\n\", .{buffer.len});\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "leak",
+                    "label": "The buffer returned by makeBuffer is never freed.",
+                    "correct": true
+                },
+                {
+                    "id": "defer",
+                    "label": "Adding defer allocator.free(buffer) after the call releases it at scope exit.",
+                    "correct": true
+                },
+                {
+                    "id": "gpa",
+                    "label": "GeneralPurposeAllocator.deinit reports leaked allocations in debug builds.",
+                    "correct": true
+                },
+                {
+                    "id": "process",
+                    "label": "Process exit makes the leak harmless in every code path.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block until the allocation has an owner and a matching free."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; main exits after printing."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the buffer size needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The allocation outlives its only reference. Add defer allocator.free(buffer) in main, or free it inside the function that owns it. Relying on process exit hides the leak from tests and long-running services."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Zig workspace is keyboard accessible. Checks verify source structure; they do not compile or run Zig.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems"]
+}
