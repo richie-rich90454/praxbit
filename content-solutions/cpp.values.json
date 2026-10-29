@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.cpp": "#include <iostream>\n#include <vector>\n\nint count_positive(const std::vector<int>& values) {\n    int count = 0;\n    for (const int value : values) {\n        if (value > 0) {\n            count += 1;\n        }\n    }\n    return count;\n}\n\nint main() {\n    const std::vector<int> values = { 3, -1, 2 };\n    std::cout << count_positive(values) << \"\\n\";\n    return 0;\n}\n"
+            }
+        }
+    }
+}
