@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "trees.ts": "export class MinHeap {\n    private values: number[] = [];\n\n    get size(): number {\n        return this.values.length;\n    }\n\n    insert(value: number): void {\n        this.values.push(value);\n        this.bubbleUp(this.values.length - 1);\n    }\n\n    extractMin(): number | undefined {\n        if (this.values.length === 0) {\n            return undefined;\n        }\n        const min = this.values[0];\n        const last = this.values.pop() as number;\n        if (this.values.length > 0) {\n            this.values[0] = last;\n            this.bubbleDown(0);\n        }\n        return min;\n    }\n\n    private bubbleUp(index: number): void {\n        while (index > 0) {\n            const parent = Math.floor((index - 1) / 2);\n            if (this.values[parent] <= this.values[index]) {\n                return;\n            }\n            this.swap(parent, index);\n            index = parent;\n        }\n    }\n\n    private bubbleDown(index: number): void {\n        while (true) {\n            const left = index * 2 + 1;\n            const right = left + 1;\n            let smallest = index;\n            if (left < this.values.length && this.values[left] < this.values[smallest]) {\n                smallest = left;\n            }\n            if (right < this.values.length && this.values[right] < this.values[smallest]) {\n                smallest = right;\n            }\n            if (smallest === index) {\n                return;\n            }\n            this.swap(index, smallest);\n            index = smallest;\n        }\n    }\n\n    private swap(a: number, b: number): void {\n        const temp = this.values[a];\n        this.values[a] = this.values[b];\n        this.values[b] = temp;\n    }\n}\n"
+            }
+        }
+    }
+}
