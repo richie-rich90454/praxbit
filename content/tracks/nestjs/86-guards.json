@@ -1,0 +1,258 @@
+{
+    "id": "nestjs.guards",
+    "version": 1,
+    "sequence": 86,
+    "courseId": "nestjs",
+    "title": "Guards that reject before the handler",
+    "summary": "Implement CanActivate with Reflector metadata and apply it with UseGuards.",
+    "skills": ["nestjs.guards"],
+    "prerequisites": ["nestjs.modules", "security.auth"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "guards",
+        "briefing": "The catalog now has an admin-only write route. A guard returned true for every request, including anonymous ones, so the handler ran without an authorization decision."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "hints": [
+        "Use this.reflector.getAllAndOverride with the handler and class.",
+        "Return true only when the route is explicitly public.",
+        "Read the request with context.switchToHttp().getRequest().",
+        "Throw ForbiddenException when the role is not admin, then apply @UseGuards(AuthGuard)."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-allow",
+            "description": "Returning true from a guard because the happy path works.",
+            "stepId": "apply",
+            "feedback": "A guard that always allows is not an authorization check. Deny by default and allow only explicit cases."
+        },
+        {
+            "id": "manual-provider",
+            "description": "Constructing a service with new inside a controller.",
+            "stepId": "apply",
+            "feedback": "That hides the dependency from Nest and from tests. Register the provider and inject it through the constructor."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Guards run before the handler",
+                "body": "Nest evaluates a guard before the route handler. Returning true continues the request; returning false or throwing stops it with a denial."
+            },
+            {
+                "title": "Reflector reads metadata",
+                "body": "SetMetadata attaches values to a handler or class. Reflector reads them from the execution context, which lets one guard respect a public override."
+            },
+            {
+                "title": "ExecutionContext names the transport",
+                "body": "The context exposes the handler, the class, and the underlying request. switchToHttp gives typed access to the request for the current HTTP adapter."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Guard",
+                "definition": "A class that decides whether a request may reach a route handler."
+            },
+            {
+                "term": "ExecutionContext",
+                "definition": "The object that describes the handler, class, and transport for the current request."
+            },
+            {
+                "term": "Reflector",
+                "definition": "A Nest helper for reading metadata attached with decorators."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "NestJS guards and metadata",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Guards run before the handler",
+                    "body": "Nest evaluates a guard before the route handler. Returning true continues the request; returning false or throwing stops it with a denial."
+                },
+                {
+                    "title": "Reflector reads metadata",
+                    "body": "SetMetadata attaches values to a handler or class. Reflector reads them from the execution context, which lets one guard respect a public override."
+                },
+                {
+                    "title": "ExecutionContext names the transport",
+                    "body": "The context exposes the handler, the class, and the underlying request. switchToHttp gives typed access to the request for the current HTTP adapter."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Guard",
+                    "definition": "A class that decides whether a request may reach a route handler."
+                },
+                {
+                    "term": "ExecutionContext",
+                    "definition": "The object that describes the handler, class, and transport for the current request."
+                },
+                {
+                    "term": "Reflector",
+                    "definition": "A Nest helper for reading metadata attached with decorators."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Guard an admin route",
+            "prompt": "Edit auth.guard.ts. Implement AuthGuard so it reads public metadata with Reflector, rejects requests without the admin role using ForbiddenException, and apply it with @UseGuards.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "auth.guard.ts",
+                    "content": "import { CanActivate, ExecutionContext, Injectable } from \"@nestjs/common\";\nimport { Reflector } from \"@nestjs/core\";\n\n@Injectable()\nexport class AuthGuard implements CanActivate {\n    constructor(private readonly reflector: Reflector) {}\n\n    canActivate(context: ExecutionContext): boolean {\n        // TODO: read metadata and reject requests without the admin role\n        return true;\n    }\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "auth.guard.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The guard implements CanActivate with an execution context.",
+                    "file": "auth.guard.ts",
+                    "includes": [
+                        "implements CanActivate",
+                        "canActivate(context: ExecutionContext): boolean"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Public routes are read from handler and class metadata.",
+                    "file": "auth.guard.ts",
+                    "includes": [
+                        "this.reflector.getAllAndOverride<boolean>(\"public\"",
+                        "context.getHandler()",
+                        "context.getClass()"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Requests without the admin role are rejected.",
+                    "file": "auth.guard.ts",
+                    "includes": [
+                        "request.user?.role !== \"admin\"",
+                        "throw new ForbiddenException(\"admin_required\")"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The guard is applied to the controller with UseGuards.",
+                    "file": "auth.guard.ts",
+                    "includes": ["@UseGuards(AuthGuard)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "auth.guard.ts",
+                    "includes": ["implements CanActivate"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the admin guard",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "auth.guard.ts",
+                "caption": "The guard always allows the request and the controller builds its own service.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { CanActivate, Controller, ExecutionContext, Get, Injectable, Module } from \"@nestjs/common\";\nimport { Reflector } from \"@nestjs/core\";\n\n@Injectable()\nexport class AuthGuard implements CanActivate {\n    constructor(private readonly reflector: Reflector) {}\n\n    canActivate(context: ExecutionContext): boolean {\n        return true;\n    }\n}\n\n@Injectable()\nexport class ProductsService {\n    findAll() {\n        return [{ id: \"p1\", name: \"Notebook\", price: 4.5 }];\n    }\n}\n\n@Controller(\"products\")\nexport class ProductsController {\n    private readonly products = new ProductsService();\n\n    @Get()\n    list() {\n        return this.products.findAll();\n    }\n}\n\n@Module({ controllers: [ProductsController] })\nexport class ProductsModule {}\n"
+            },
+            "findings": [
+                {
+                    "id": "guard",
+                    "label": "AuthGuard returns true for every request, so the handler is never protected.",
+                    "correct": true
+                },
+                {
+                    "id": "new",
+                    "label": "ProductsController constructs ProductsService with new instead of injecting it.",
+                    "correct": true
+                },
+                {
+                    "id": "provider",
+                    "label": "ProductsService is missing from the module providers array.",
+                    "correct": true
+                },
+                {
+                    "id": "reflector",
+                    "label": "AuthGuard correctly uses Reflector to read route metadata.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until authorization and injection are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the guard is a valid default allow policy."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the decorator order remains."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The guard ignores metadata and returns true for every request, so the route has no authorization. The controller constructs its service with new, and the module never registers ProductsService as a provider, so injection cannot supply it."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 125,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The NestJS workspace is keyboard accessible. Checks verify source structure; they do not compile or run NestJS.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
