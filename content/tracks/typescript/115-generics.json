@@ -1,0 +1,204 @@
+{
+    "id": "typescript.generics",
+    "version": 1,
+    "sequence": 115,
+    "courseId": "typescript-practice",
+    "title": "Generics preserve relationships",
+    "summary": "Write a generic helper that returns the first item or null without unsafe casts.",
+    "skills": ["ts.generics"],
+    "prerequisites": ["ts.types", "js.functions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "generics",
+        "briefing": "A campus API returns lists of different types. Write one typed helper that preserves the element type."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:typescript"],
+    "hints": [
+        "The return type already permits null.",
+        "The first item is items[0], which may be undefined.",
+        "Use the nullish coalescing operator to supply null.",
+        "Return items[0] ?? null."
+    ],
+    "misconceptions": [
+        {
+            "id": "cast",
+            "description": "Using as T to silence the empty-array case.",
+            "stepId": "apply",
+            "feedback": "A cast does not add a value. Use ?? null to represent absence honestly."
+        },
+        {
+            "id": "any",
+            "description": "Falling back to any when a generic gets difficult.",
+            "stepId": "apply",
+            "feedback": "any disables the relationship you are trying to preserve. Use a type parameter or a constrained generic."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "TypeScript values and decisions",
+                "body": "TypeScript adds static types to JavaScript: const count: number = 3;. A union such as string | number keeps both alternatives visible until a runtime check narrows it. typeof, equality, and property checks narrow a union inside a branch. Arrays and loops keep their element types, so a transform returns a typed result."
+            },
+            {
+                "title": "TypeScript source files",
+                "body": "The compiler erases types and emits JavaScript. The emitted code is what runs in the browser or Node."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Generic",
+                "definition": "A type parameter that preserves a relationship between inputs and outputs."
+            },
+            {
+                "term": "Type inference",
+                "definition": "The compiler's deduction of a type from context."
+            },
+            {
+                "term": "Union",
+                "definition": "A type that permits one of several alternatives."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "TypeScript values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "TypeScript values and decisions",
+                    "body": "TypeScript adds static types to JavaScript: const count: number = 3;. A union such as string | number keeps both alternatives visible until a runtime check narrows it. typeof, equality, and property checks narrow a union inside a branch. Arrays and loops keep their element types, so a transform returns a typed result."
+                },
+                {
+                    "title": "TypeScript source files",
+                    "body": "The compiler erases types and emits JavaScript. The emitted code is what runs in the browser or Node."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Generic",
+                    "definition": "A type parameter that preserves a relationship between inputs and outputs."
+                },
+                {
+                    "term": "Type inference",
+                    "definition": "The compiler's deduction of a type from context."
+                },
+                {
+                    "term": "Union",
+                    "definition": "A type that permits one of several alternatives."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Return the first item or null",
+            "prompt": "Edit format.ts. firstOrNull<T> returns the first item or null when the array is empty.",
+            "evidence": "construction",
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "format.ts",
+                    "content": "function firstOrNull<T>(items: readonly T[]): T | null {\n    return items[0] as T;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "format.ts",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "An empty array returns null.",
+                    "name": "firstOrNull",
+                    "args": [[]],
+                    "expected": null
+                },
+                {
+                    "kind": "function",
+                    "description": "The first number is preserved.",
+                    "name": "firstOrNull",
+                    "args": [[4, 5]],
+                    "expected": 4
+                },
+                {
+                    "kind": "function",
+                    "description": "The first string is preserved.",
+                    "name": "firstOrNull",
+                    "args": [["a", "b"]],
+                    "expected": "a"
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Generics and type safety",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "generic",
+                    "label": "A generic function can preserve the element type of its input.",
+                    "correct": true
+                },
+                {
+                    "id": "cast",
+                    "label": "A type assertion validates the runtime value.",
+                    "correct": false
+                },
+                {
+                    "id": "null",
+                    "label": "T | null documents that absence is possible.",
+                    "correct": true
+                },
+                {
+                    "id": "any",
+                    "label": "Using any is the safest way to generalize a helper.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Generics carry the element type from input to output. A cast only tells the compiler to trust the author; it does not check the value."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The TypeScript workspace is keyboard accessible. Checks verify source structure; they do not compile or run TypeScript.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
