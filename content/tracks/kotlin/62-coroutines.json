@@ -1,0 +1,251 @@
+{
+    "id": "kotlin.coroutines",
+    "version": 1,
+    "sequence": 62,
+    "courseId": "kotlin",
+    "title": "Coroutines and null safety",
+    "summary": "Run two suspend tasks in a coroutine scope, then diagnose a forced unwrap.",
+    "skills": ["kotlin.oop", "kotlin.coroutines", "kotlin.tooling"],
+    "prerequisites": ["kotlin.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "coroutines",
+        "briefing": "A campus dashboard loads two counters concurrently. Use structured concurrency and keep nullable values explicit."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:kotlin"],
+    "hints": [
+        "Return a coroutineScope block.",
+        "Create two async blocks.",
+        "Await both Deferred values.",
+        "Sum the awaited results."
+    ],
+    "misconceptions": [
+        {
+            "id": "bang",
+            "description": "Forcing a nullable value with !!.",
+            "stepId": "apply",
+            "feedback": "!! throws a NullPointerException when the value is absent. Use ?: or a safe call."
+        },
+        {
+            "id": "cancel",
+            "description": "Assuming cancelled parents leave children alive.",
+            "stepId": "apply",
+            "feedback": "Structured concurrency cancels children with the parent. Cleanup belongs in finally or NonCancellable."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Kotlin functions and collections",
+                "body": "Functions declare parameter and return types: fun add(left: Int, right: Int): Int = left + right. listOf and mutableListOf create lists, while map transforms them. Classes and data classes compose state with behavior."
+            },
+            {
+                "title": "Kotlin errors and tools",
+                "body": "Exceptions signal failure, and runCatching wraps a result. Coroutines use suspend functions, coroutineScope, and async for structured concurrency. Gradle builds and tests the project, the Kotlin compiler produces bytecode, and JUnit runs tests."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Data class",
+                "definition": "A class that generates equality, copy, and display methods from its properties."
+            },
+            {
+                "term": "Coroutine",
+                "definition": "A suspendable unit of work managed by a structured scope."
+            },
+            {
+                "term": "Gradle",
+                "definition": "A build tool that compiles, tests, and packages JVM projects."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Kotlin functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Kotlin functions and collections",
+                    "body": "Functions declare parameter and return types: fun add(left: Int, right: Int): Int = left + right. listOf and mutableListOf create lists, while map transforms them. Classes and data classes compose state with behavior."
+                },
+                {
+                    "title": "Kotlin errors and tools",
+                    "body": "Exceptions signal failure, and runCatching wraps a result. Coroutines use suspend functions, coroutineScope, and async for structured concurrency. Gradle builds and tests the project, the Kotlin compiler produces bytecode, and JUnit runs tests."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Data class",
+                    "definition": "A class that generates equality, copy, and display methods from its properties."
+                },
+                {
+                    "term": "Coroutine",
+                    "definition": "A suspendable unit of work managed by a structured scope."
+                },
+                {
+                    "term": "Gradle",
+                    "definition": "A build tool that compiles, tests, and packages JVM projects."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Load two totals concurrently",
+            "prompt": "Edit Main.kt. loadTotal starts two async tasks and returns their sum inside coroutineScope.",
+            "evidence": "construction",
+            "language": "kotlin",
+            "files": [
+                {
+                    "path": "Main.kt",
+                    "content": "import kotlinx.coroutines.*\n\nsuspend fun loadTotal(): Int {\n    // TODO: run two async tasks and sum their results\n    return 42\n}\n\nfun main() = runBlocking {\n    println(loadTotal())\n}\n",
+                    "editable": true,
+                    "language": "kotlin"
+                }
+            ],
+            "entry": "Main.kt",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The loader remains a suspend function.",
+                    "file": "Main.kt",
+                    "includes": ["suspend fun loadTotal(): Int"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The work runs in a coroutine scope with two async tasks.",
+                    "file": "Main.kt",
+                    "includes": ["coroutineScope {", "async {", "await()"],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Main.kt",
+                    "includes": ["suspend fun loadTotal(): Int"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The forced unwrap",
+            "prompt": "This code crashes when the map has no entry. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "lookup",
+                    "label": "val balance = balances[\"store\"]"
+                },
+                {
+                    "id": "force",
+                    "label": "val cents = balance!! * 100"
+                },
+                {
+                    "id": "print",
+                    "label": "println(cents)"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "force",
+            "fixes": [
+                {
+                    "id": "elvis",
+                    "label": "Use (balance ?: 0) * 100."
+                },
+                {
+                    "id": "try",
+                    "label": "Wrap the expression in a try/catch and return 0."
+                },
+                {
+                    "id": "ignore",
+                    "label": "Keep !! and catch the exception later."
+                }
+            ],
+            "correctFixId": "elvis",
+            "explanation": "The map lookup returns Int?. The Elvis operator supplies a safe default instead of forcing a null value."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Coroutines and null safety",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "structured",
+                    "label": "coroutineScope waits for its children before it returns.",
+                    "correct": true
+                },
+                {
+                    "id": "async",
+                    "label": "async starts work and returns a Deferred value.",
+                    "correct": true
+                },
+                {
+                    "id": "cancel",
+                    "label": "Cancelling a parent scope leaves its children running.",
+                    "correct": false
+                },
+                {
+                    "id": "bang",
+                    "label": "The !! operator is the safest way to unwrap a nullable value.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Structured concurrency ties child lifetimes to their scope. Deferred values are awaited explicitly, and cancellation propagates."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional"]
+}
