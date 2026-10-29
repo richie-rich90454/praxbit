@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "structures.ts": "export class FrameQueue<T> {\n    private slots: Array<T | undefined>;\n    private head = 0;\n    private count = 0;\n\n    constructor(private capacity: number) {\n        if (!Number.isInteger(capacity) || capacity <= 0) {\n            throw new Error(\"Capacity must be a positive integer\");\n        }\n        this.slots = new Array<T | undefined>(capacity);\n    }\n\n    enqueue(value: T): void {\n        if (this.count === this.capacity) {\n            throw new Error(\"Queue is full\");\n        }\n        const tail = (this.head + this.count) % this.capacity;\n        this.slots[tail] = value;\n        this.count += 1;\n    }\n\n    dequeue(): T | undefined {\n        if (this.count === 0) {\n            return undefined;\n        }\n        const value = this.slots[this.head];\n        this.slots[this.head] = undefined;\n        this.head = (this.head + 1) % this.capacity;\n        this.count -= 1;\n        return value;\n    }\n\n    get size(): number {\n        return this.count;\n    }\n}\n"
+            }
+        }
+    }
+}
