@@ -105,9 +105,53 @@
             "correctId": "no",
             "skillId": "ts.types",
             "level": "advanced"
+        },
+        {
+            "id": "java",
+            "prompt": "Which Java declaration creates a mutable integer value?",
+            "options": [
+                { "id": "var", "label": "var count = 3;" },
+                { "id": "const", "label": "const count = 3;" },
+                { "id": "let", "label": "let count = 3;" }
+            ],
+            "correctId": "var",
+            "skillId": "java.syntax",
+            "level": "developing"
+        },
+        {
+            "id": "rust",
+            "prompt": "What does Rust ownership prevent by default?",
+            "options": [
+                {
+                    "id": "use-after-free",
+                    "label": "Using memory after its owner has released it"
+                },
+                { "id": "all-loops", "label": "Writing any loop" },
+                { "id": "errors", "label": "Returning a Result from a function" }
+            ],
+            "correctId": "use-after-free",
+            "skillId": "rust.ownership",
+            "level": "advanced"
+        },
+        {
+            "id": "react",
+            "prompt": "What should a React effect return when it starts a subscription?",
+            "options": [
+                {
+                    "id": "cleanup",
+                    "label": "A cleanup function that removes the subscription"
+                },
+                { "id": "promise", "label": "A promise that never resolves" },
+                { "id": "nothing", "label": "Nothing; effects cannot clean up" }
+            ],
+            "correctId": "cleanup",
+            "skillId": "react.effects",
+            "level": "advanced"
         }
     ],
     "recommendations": [
+        { "minCorrect": 11, "missionId": "typescript.generics" },
+        { "minCorrect": 9, "missionId": "java.values" },
         { "minCorrect": 7, "missionId": "campus.the-mysterious-exception" },
         { "minCorrect": 5, "missionId": "campus.page-with-no-identity" },
         { "minCorrect": 3, "missionId": "before-code.everything-is-information" },
