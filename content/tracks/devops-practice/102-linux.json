@@ -1,0 +1,259 @@
+{
+    "id": "devops-practice.linux",
+    "version": 1,
+    "sequence": 102,
+    "courseId": "devops-practice",
+    "title": "Diagnose a failing service before restarting it",
+    "summary": "Inspect the process, unit, logs, and file modes, then fix access with least privilege and verify the restart.",
+    "skills": ["devops.linux", "ops.permissions"],
+    "prerequisites": ["ops.processes", "ops.permissions"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "linux",
+        "briefing": "The ingest worker stopped writing checkpoints after a deploy. The last responder ran chmod 777 on the data directory and restarted the unit, and the worker failed again an hour later. Write the runbook that finds the real cause."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:devops"],
+    "hints": [
+        "Start with systemctl status and the ExecStart line from systemctl cat.",
+        "Read the last 50 journal lines before you touch permissions.",
+        "Use stat to compare the owner and mode of /var/lib/ingest with the unit's user.",
+        "Replace chmod 777 with chown ingest:ingest and chmod 2770."
+    ],
+    "misconceptions": [
+        {
+            "id": "chmod-777",
+            "description": "Opening the directory to every user.",
+            "stepId": "apply",
+            "feedback": "World-writable paths let any local account replace the worker's files. Grant the service group write access instead."
+        },
+        {
+            "id": "restart-first",
+            "description": "Restarting before reading the journal.",
+            "stepId": "apply",
+            "feedback": "A restart clears the failing state and can hide the error. Read the unit and recent logs first."
+        },
+        {
+            "id": "chown-chmod",
+            "description": "Treating chown and chmod as interchangeable.",
+            "stepId": "apply",
+            "feedback": "chown changes who owns a path; chmod changes what the owner, group, and others may do. The worker needed both."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Diagnose the identity, not the symptom",
+                "body": "The unit runs as ingest, so the permission error belongs to that user. Read the unit's ExecStart and the exact path it writes before changing any access."
+            },
+            {
+                "title": "Least privilege is a smaller change",
+                "body": "chmod 777 makes the failure disappear and lets any local user replace the worker's checkpoint files. Group write access with mode 2770 fixes the path without opening it to everyone."
+            },
+            {
+                "title": "A restart is verified, not assumed",
+                "body": "systemctl restart returns once the process is started. Confirm the unit is active and read the newest journal lines for a fresh checkpoint before closing the incident."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Unit",
+                "definition": "The systemd definition of a service: its command, user, and restart policy."
+            },
+            {
+                "term": "Mode",
+                "definition": "The permission bits of a path, read as owner, group, and other access."
+            },
+            {
+                "term": "Least privilege",
+                "definition": "Giving a process only the access it needs for its job."
+            },
+            {
+                "term": "Journal",
+                "definition": "The systemd log of unit output and service events."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Process, permissions, and restart",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Diagnose the identity, not the symptom",
+                    "body": "The unit runs as ingest, so the permission error belongs to that user. Read the unit's ExecStart and the exact path it writes before changing any access."
+                },
+                {
+                    "title": "Least privilege is a smaller change",
+                    "body": "chmod 777 makes the failure disappear and lets any local user replace the worker's checkpoint files. Group write access with mode 2770 fixes the path without opening it to everyone."
+                },
+                {
+                    "title": "A restart is verified, not assumed",
+                    "body": "systemctl restart returns once the process is started. Confirm the unit is active and read the newest journal lines for a fresh checkpoint before closing the incident."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Unit",
+                    "definition": "The systemd definition of a service: its command, user, and restart policy."
+                },
+                {
+                    "term": "Mode",
+                    "definition": "The permission bits of a path, read as owner, group, and other access."
+                },
+                {
+                    "term": "Least privilege",
+                    "definition": "Giving a process only the access it needs for its job."
+                },
+                {
+                    "term": "Journal",
+                    "definition": "The systemd log of unit output and service events."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Write the worker recovery runbook",
+            "prompt": "Edit server.md. Record the process and unit inspection, read the recent journal, check the data directory owner and mode, grant the ingest user the smallest access that works, then restart and verify the unit.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "server.md",
+                    "content": "# Ingest worker recovery\n\nThe worker stopped writing checkpoints after the deploy.\n\n## Steps\n\n1. TODO: find out why the worker stopped.\n2. Open the data directory to every user so the worker can write:\n\n   $ chmod -R 777 /var/lib/ingest\n\n3. Restart the unit:\n\n   $ systemctl restart ingest-worker\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "server.md",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The runbook inspects the running process and its identity.",
+                    "file": "server.md",
+                    "includes": [
+                        "systemctl status ingest-worker --no-pager",
+                        "ps -o pid,user,args -C ingest-worker"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The unit definition and recent journal are read.",
+                    "file": "server.md",
+                    "includes": [
+                        "systemctl cat ingest-worker",
+                        "journalctl -u ingest-worker -n 50"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Access is fixed with the smallest change, not world access.",
+                    "file": "server.md",
+                    "includes": [
+                        "stat -c '%U:%G %a %n' /var/lib/ingest",
+                        "chown -R ingest:ingest /var/lib/ingest",
+                        "chmod 2770 /var/lib/ingest"
+                    ],
+                    "excludes": ["chmod 777", "chmod -R 777"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The restart is confirmed with unit state and fresh logs.",
+                    "file": "server.md",
+                    "includes": [
+                        "systemctl restart ingest-worker",
+                        "systemctl is-active ingest-worker",
+                        "journalctl -u ingest-worker --since"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "server.md",
+                    "includes": ["systemctl status ingest-worker --no-pager"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Service diagnosis and least privilege",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "identity",
+                    "label": "A permission error must be evaluated for the user the unit runs as.",
+                    "correct": true
+                },
+                {
+                    "id": "inspect",
+                    "label": "The unit file and the recent journal are read before access is changed.",
+                    "correct": true
+                },
+                {
+                    "id": "world",
+                    "label": "Mode 777 is the correct default for a service data directory.",
+                    "correct": false
+                },
+                {
+                    "id": "restart",
+                    "label": "A restart command returning success proves the service is healthy.",
+                    "correct": false
+                },
+                {
+                    "id": "verify",
+                    "label": "The unit state and newest log lines confirm that the restart worked.",
+                    "correct": true
+                }
+            ],
+            "explanation": "The worker's failure belongs to its user and the path it writes. Reading the unit and journal first identifies that user and path; ownership plus group write access fixes the failure without exposing the directory. The restart only counts once status and logs show new work."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The DevOps practice workspace is keyboard accessible. Checks verify source structure; they do not compile or run DevOps practice.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
