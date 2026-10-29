@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "product-card.component.ts": "import { Component, Input } from \"@angular/core\";\n\nexport interface Product {\n    name: string;\n    price: number;\n}\n\n@Component({\n    selector: \"app-product-card\",\n    standalone: true,\n    template: `\n        <article class=\"product-card\">\n            <h3>{{ product.name }}</h3>\n            <p class=\"price\">{{ product.price.toFixed(2) }}</p>\n        </article>\n    `,\n})\nexport class ProductCardComponent {\n    @Input({ required: true }) product!: Product;\n}\n"
+            }
+        }
+    }
+}
