@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.zig": "const std = @import(\"std\");\n\nfn countPositive(values: []const i32) u32 {\n    var count: u32 = 0;\n    for (values) |value| {\n        if (value > 0) {\n            count += 1;\n        }\n    }\n    return count;\n}\n\npub fn main() void {\n    const values = [_]i32{ 3, -1, 2 };\n    std.debug.print(\"{d}\\n\", .{countPositive(values[0..])});\n}\n"
+            }
+        }
+    }
+}
