@@ -1,5 +1,6 @@
 ﻿import { z } from "zod";
 import {
+    ContentLanguageSchema,
     DifficultySchema,
     EvidenceCategorySchema,
     InterestSchema,
@@ -289,7 +290,7 @@ const ReviewStepSchema = z.strictObject({
 const CodeStepSchema = z.strictObject({
     ...stepBase,
     kind: z.literal("code"),
-    language: z.enum(["javascript", "typescript", "html", "css", "json", "python", "sql", "text"]),
+    language: ContentLanguageSchema,
     files: z
         .array(
             z.strictObject({
