@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "ProductCard.vue": "<script setup lang=\"ts\">\nconst props = defineProps<{\n  name: string;\n  price: number;\n}>();\n</script>\n\n<template>\n  <article>\n    <h3>{{ props.name }}</h3>\n    <p>{{ props.price.toFixed(2) }}</p>\n  </article>\n</template>\n"
+            }
+        }
+    }
+}
