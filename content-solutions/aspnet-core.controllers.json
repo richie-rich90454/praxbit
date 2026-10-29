@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "ProductsController.cs": "using Microsoft.AspNetCore.Mvc;\n\nnamespace Praxbit.Catalog.Controllers;\n\n[ApiController]\n[Route(\"api/[controller]\")]\npublic class ProductsController : ControllerBase\n{\n    private readonly IProductService _service;\n\n    public ProductsController(IProductService service)\n    {\n        _service = service;\n    }\n\n    [HttpGet(\"{id:int}\")]\n    public ActionResult<Product> Get(int id)\n    {\n        Product? product = _service.Find(id);\n        if (product is null)\n        {\n            return NotFound();\n        }\n\n        return product;\n    }\n}\n"
+            }
+        }
+    }
+}
