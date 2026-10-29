@@ -1,0 +1,251 @@
+{
+    "id": "cpp.raii",
+    "version": 1,
+    "sequence": 54,
+    "courseId": "cpp",
+    "title": "RAII and ownership in C++",
+    "summary": "Replace manual new and delete with a smart pointer, then review a lifetime bug.",
+    "skills": ["cpp.raii", "cpp.stl", "cpp.templates", "cpp.build"],
+    "prerequisites": ["cpp.syntax", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "raii",
+        "briefing": "A device driver allocates a reading and sometimes forgets to release it. Replace the manual allocation with an owning smart pointer."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose a realistic mistake and choose the correct repair.",
+            "stepIds": ["diagnose"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:cpp"],
+    "hints": [
+        "The return type already promises exclusive ownership.",
+        "std::make_unique allocates and constructs in one step.",
+        "Return make_unique<int>(value).",
+        "Remove the raw new and the empty unique_ptr."
+    ],
+    "misconceptions": [
+        {
+            "id": "raw-new",
+            "description": "Using new and returning an empty unique_ptr.",
+            "stepId": "apply",
+            "feedback": "The raw allocation leaks because no owner receives it. Return make_unique<int>(value)."
+        },
+        {
+            "id": "copy",
+            "description": "Trying to copy a unique_ptr.",
+            "stepId": "apply",
+            "feedback": "Unique ownership cannot be copied. Move it or return it by value."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "C++ functions and collections",
+                "body": "Functions declare return and parameter types: int add(int left, int right) { return left + right; }. std::vector<int> values = { 3, -1, 2 }; owns a growable array and reports its size. Templates such as std::vector<T> are checked when instantiated."
+            },
+            {
+                "title": "C++ errors and tools",
+                "body": "Exceptions signal failures that callers can catch. std::optional models a value that may be absent. g++ or clang++ compiles, CMake configures builds, and sanitizers expose lifetime and bounds errors."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "RAII",
+                "definition": "Tying resource release to the lifetime of an object."
+            },
+            {
+                "term": "Smart pointer",
+                "definition": "An owning pointer that releases its resource automatically."
+            },
+            {
+                "term": "Template",
+                "definition": "A compile-time pattern parameterized by types or values."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "C++ functions and tools",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "C++ functions and collections",
+                    "body": "Functions declare return and parameter types: int add(int left, int right) { return left + right; }. std::vector<int> values = { 3, -1, 2 }; owns a growable array and reports its size. Templates such as std::vector<T> are checked when instantiated."
+                },
+                {
+                    "title": "C++ errors and tools",
+                    "body": "Exceptions signal failures that callers can catch. std::optional models a value that may be absent. g++ or clang++ compiles, CMake configures builds, and sanitizers expose lifetime and bounds errors."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "RAII",
+                    "definition": "Tying resource release to the lifetime of an object."
+                },
+                {
+                    "term": "Smart pointer",
+                    "definition": "An owning pointer that releases its resource automatically."
+                },
+                {
+                    "term": "Template",
+                    "definition": "A compile-time pattern parameterized by types or values."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Own a reading with unique_ptr",
+            "prompt": "Edit main.cpp. make_reading returns a std::unique_ptr<int> that owns the value.",
+            "evidence": "construction",
+            "language": "cpp",
+            "files": [
+                {
+                    "path": "main.cpp",
+                    "content": "#include <iostream>\n#include <memory>\n\nstd::unique_ptr<int> make_reading(int value) {\n    int* reading = new int(value); // TODO: return an owning smart pointer\n    return std::unique_ptr<int>();\n}\n\nint main() {\n    const std::unique_ptr<int> reading = make_reading(7);\n    std::cout << *reading << \"\\n\";\n    return 0;\n}\n",
+                    "editable": true,
+                    "language": "cpp"
+                }
+            ],
+            "entry": "main.cpp",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The factory returns an owning unique_ptr.",
+                    "file": "main.cpp",
+                    "includes": ["std::unique_ptr<int> make_reading(int value)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Allocation is owned by make_unique, not a raw new.",
+                    "file": "main.cpp",
+                    "includes": ["std::make_unique<int>(value)"],
+                    "excludes": ["new int", "std::unique_ptr<int>()"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.cpp",
+                    "includes": ["std::unique_ptr<int> make_reading(int value)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The dangling reference",
+            "prompt": "This function returns a reference to a local string. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "signature",
+                    "label": "const std::string& label() {"
+                },
+                {
+                    "id": "local",
+                    "label": "    const std::string text = \"ready\";"
+                },
+                {
+                    "id": "return",
+                    "label": "    return text;"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "return",
+            "fixes": [
+                {
+                    "id": "value",
+                    "label": "Return std::string by value instead of by reference."
+                },
+                {
+                    "id": "static",
+                    "label": "Make the local string static and keep the reference."
+                },
+                {
+                    "id": "pointer",
+                    "label": "Return a pointer to the local string."
+                }
+            ],
+            "correctFixId": "value",
+            "explanation": "A reference to a local object dangles after the function returns. Returning by value gives the caller an owned string."
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "RAII and ownership",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "raii",
+                    "label": "A unique_ptr releases its object when the pointer goes out of scope.",
+                    "correct": true
+                },
+                {
+                    "id": "copy",
+                    "label": "A unique_ptr can be copied like a raw pointer.",
+                    "correct": false
+                },
+                {
+                    "id": "ownership",
+                    "label": "std::make_unique transfers ownership to the returned unique_ptr.",
+                    "correct": true
+                },
+                {
+                    "id": "delete",
+                    "label": "Every make_unique must be paired with an explicit delete.",
+                    "correct": false
+                }
+            ],
+            "explanation": "RAII makes release automatic. unique_ptr expresses exclusive ownership and cannot be copied."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 115,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The C++ workspace is keyboard accessible. Checks verify source structure; they do not compile or run C++.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "games"]
+}
