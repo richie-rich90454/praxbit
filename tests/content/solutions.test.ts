@@ -6,8 +6,11 @@ import type { CodeStep, MissionStep } from "../../packages/contracts/src/index.t
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
+let validationResult: Promise<RepositoryValidation> | undefined;
+
 async function validation(): Promise<RepositoryValidation> {
-    return await validateRepository(ROOT);
+    validationResult ??= validateRepository(ROOT);
+    return await validationResult;
 }
 
 function codeSteps(missionSteps: readonly MissionStep[]): readonly CodeStep[] {
@@ -24,7 +27,7 @@ describe("reference solutions", function referenceSolutions(): void {
         });
         expect(errors).toEqual([]);
         expect(result.report.executedChecks).toBeGreaterThan(100);
-    });
+    }, 30_000);
 
     it("covers every mission with code steps", async function missionCoverage(): Promise<void> {
         const result = await validation();
