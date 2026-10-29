@@ -17,6 +17,8 @@ export default defineConfig({
                 {
                     src: `${pyodideDirectory.replace(/\\/g, "/")}/*`,
                     dest: "pyodide",
+                    // The Pyodide package is flat; keep pyodide.mjs at /pyodide/.
+                    rename: { stripBase: true },
                 },
             ],
         }),
