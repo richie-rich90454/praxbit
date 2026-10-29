@@ -46,6 +46,17 @@ const RUNTIME_FOR_LANGUAGE: Readonly<Record<string, string>> = {
     sql: "browser-sql",
     json: "static-analysis",
     text: "static-analysis",
+    java: "static-analysis",
+    c: "static-analysis",
+    cpp: "static-analysis",
+    csharp: "static-analysis",
+    go: "static-analysis",
+    rust: "static-analysis",
+    kotlin: "static-analysis",
+    swift: "static-analysis",
+    ruby: "static-analysis",
+    zig: "static-analysis",
+    lua: "static-analysis",
 };
 
 async function content(): Promise<LoadedContent> {
@@ -211,11 +222,99 @@ describe("launch content", function launchContent(): void {
                     expect(mission.runtime.kind, `${mission.id}/${step.id}`).toBe(
                         RUNTIME_FOR_LANGUAGE[step.language],
                     );
+                    if (mission.runtime.kind === "static-analysis") {
+                        expect(
+                            step.tests.every(function structural(test): boolean {
+                                return (
+                                    test.kind === "static" ||
+                                    test.kind === "regex" ||
+                                    test.kind === "json"
+                                );
+                            }),
+                            `${mission.id}/${step.id}`,
+                        ).toBe(true);
+                    }
                 }
             }
             if (codeSteps.length === 0 && terminalSteps.length === 0 && gitSteps.length === 0) {
                 expect(mission.runtime.kind, mission.id).not.toBe("browser-javascript");
             }
+        }
+    });
+
+    it("publishes assessed tracks for every required language and framework", async function breadth(): Promise<void> {
+        const loaded = await content();
+        const requiredTracks = [
+            "typescript",
+            "python-foundations",
+            "java",
+            "c",
+            "cpp",
+            "csharp",
+            "go",
+            "rust",
+            "kotlin",
+            "swift",
+            "ruby",
+            "zig",
+            "lua",
+            "react",
+            "vue",
+            "solidjs",
+            "angular",
+            "svelte",
+            "node-services",
+            "express",
+            "fastify",
+            "nestjs",
+            "spring-boot",
+            "aspnet-core",
+            "fastapi",
+            "django",
+            "cmake",
+            "cargo",
+            "database-engineering",
+            "algorithms-advanced",
+            "systems-architecture",
+            "devops-practice",
+            "ai-practice",
+            "native",
+        ];
+        for (const trackId of requiredTracks) {
+            const track = loaded.tracks.find(function matches(item): boolean {
+                return item.id === trackId;
+            });
+            expect(track, trackId).toBeDefined();
+            if (track === undefined) {
+                continue;
+            }
+            expect(track.missionIds.length, trackId).toBeGreaterThanOrEqual(2);
+            for (const missionId of track.missionIds) {
+                const mission = loaded.missions.find(function matches(item): boolean {
+                    return item.id === missionId;
+                });
+                expect(mission, `${trackId}/${missionId}`).toBeDefined();
+                expect(
+                    mission?.steps.some(function assessed(step): boolean {
+                        return step.kind !== "lesson";
+                    }),
+                    `${trackId}/${missionId}`,
+                ).toBe(true);
+            }
+        }
+        for (const skillId of [
+            "web.html",
+            "web.css",
+            "js.functions",
+            "js.conditions",
+            "js.loops",
+        ]) {
+            expect(
+                loaded.missions.some(function teaches(mission): boolean {
+                    return mission.skills.includes(skillId);
+                }),
+                skillId,
+            ).toBe(true);
         }
     });
 
