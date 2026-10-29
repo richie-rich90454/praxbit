@@ -4,6 +4,7 @@ import {
     type AchievementDefinition,
     type CodeStep,
     type CodeTest,
+    type ContentLanguage,
     type Mission,
     type MissionStep,
     type ProjectDefinition,
@@ -14,15 +15,7 @@ import { isSafeRelativePath } from "./paths.ts";
 import { errorIssue, warningIssue } from "./types.ts";
 import type { LoadedContent, ValidationIssue } from "./types.ts";
 
-export type CodeLanguage =
-    | "javascript"
-    | "typescript"
-    | "html"
-    | "css"
-    | "json"
-    | "python"
-    | "sql"
-    | "text";
+export type CodeLanguage = ContentLanguage;
 
 const VALID_TEST_KINDS: Readonly<Record<CodeLanguage, readonly CodeTest["kind"][]>> = {
     javascript: ["function", "dom", "css", "regex", "static", "json"],
@@ -33,6 +26,17 @@ const VALID_TEST_KINDS: Readonly<Record<CodeLanguage, readonly CodeTest["kind"][
     python: ["function", "regex", "static"],
     sql: ["sql"],
     text: ["regex", "static"],
+    java: ["regex", "static"],
+    c: ["regex", "static"],
+    cpp: ["regex", "static"],
+    csharp: ["regex", "static"],
+    go: ["regex", "static"],
+    rust: ["regex", "static"],
+    kotlin: ["regex", "static"],
+    swift: ["regex", "static"],
+    ruby: ["regex", "static"],
+    zig: ["regex", "static"],
+    lua: ["regex", "static"],
 };
 
 const RUNTIME_FOR_LANGUAGE: Readonly<Record<CodeLanguage, string>> = {
@@ -44,6 +48,17 @@ const RUNTIME_FOR_LANGUAGE: Readonly<Record<CodeLanguage, string>> = {
     python: "browser-python",
     sql: "browser-sql",
     text: "static-analysis",
+    java: "static-analysis",
+    c: "static-analysis",
+    cpp: "static-analysis",
+    csharp: "static-analysis",
+    go: "static-analysis",
+    rust: "static-analysis",
+    kotlin: "static-analysis",
+    swift: "static-analysis",
+    ruby: "static-analysis",
+    zig: "static-analysis",
+    lua: "static-analysis",
 };
 
 const PIP_POSES = new Set(["observing", "explaining", "thinking", "alert", "celebrating"]);
