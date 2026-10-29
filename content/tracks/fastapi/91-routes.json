@@ -1,0 +1,245 @@
+{
+    "id": "fastapi.routes",
+    "version": 1,
+    "sequence": 91,
+    "courseId": "fastapi",
+    "title": "Typed routes with Pydantic",
+    "summary": "Register a FastAPI app, parse a Pydantic request body, and return a typed item.",
+    "skills": ["fastapi.routes"],
+    "prerequisites": ["python.functions", "http.basics"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "routes",
+        "briefing": "The campus lab keeps its equipment list in a small Python service. The first endpoint must accept a typed request body and return the stored item with an id instead of echoing raw JSON."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastapi"],
+    "hints": [
+        "The app and both routes are already registered.",
+        "read_item receives item_id; use it to pick the matching record.",
+        "The stored records use one-based ids, so index with item_id - 1.",
+        "Build the response with Item(**item) after looking up the record."
+    ],
+    "misconceptions": [
+        {
+            "id": "echo-body",
+            "description": "Returning the raw request payload from a typed route.",
+            "stepId": "apply",
+            "feedback": "The route promises an Item with an id. Construct the response model so missing or extra fields are handled explicitly."
+        },
+        {
+            "id": "ignore-path",
+            "description": "Ignoring the path parameter and returning the first record.",
+            "stepId": "apply",
+            "feedback": "Each URL identifies a different record. Use item_id in the lookup."
+        },
+        {
+            "id": "text-path",
+            "description": "Assuming a path parameter arrives as text.",
+            "stepId": "apply",
+            "feedback": "Annotate the parameter as int so FastAPI converts and validates it; invalid text returns 422."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "An app is a route table",
+                "body": "`FastAPI()` creates the application object. Each decorator such as `@app.get(\"/items/{item_id}\")` registers a path and an HTTP method, and the `{item_id}` segment becomes the handler parameter with the same name."
+            },
+            {
+                "title": "Pydantic models guard both directions",
+                "body": "A parameter annotated with a Pydantic model is read from the JSON body and validated before the handler runs. The return annotation tells FastAPI what shape to serialize; `Item(**item)` builds that shape from the stored record. Invalid input becomes a 422 response instead of a crash."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Route",
+                "definition": "A path and HTTP method bound to a handler function."
+            },
+            {
+                "term": "Path parameter",
+                "definition": "A variable URL segment that FastAPI passes to the handler."
+            },
+            {
+                "term": "Pydantic model",
+                "definition": "A typed class that validates input and serializes output."
+            },
+            {
+                "term": "Request body",
+                "definition": "The JSON payload a client sends with a POST or PUT request."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Routes and Pydantic models",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "An app is a route table",
+                    "body": "`FastAPI()` creates the application object. Each decorator such as `@app.get(\"/items/{item_id}\")` registers a path and an HTTP method, and the `{item_id}` segment becomes the handler parameter with the same name."
+                },
+                {
+                    "title": "Pydantic models guard both directions",
+                    "body": "A parameter annotated with a Pydantic model is read from the JSON body and validated before the handler runs. The return annotation tells FastAPI what shape to serialize; `Item(**item)` builds that shape from the stored record. Invalid input becomes a 422 response instead of a crash."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Route",
+                    "definition": "A path and HTTP method bound to a handler function."
+                },
+                {
+                    "term": "Path parameter",
+                    "definition": "A variable URL segment that FastAPI passes to the handler."
+                },
+                {
+                    "term": "Pydantic model",
+                    "definition": "A typed class that validates input and serializes output."
+                },
+                {
+                    "term": "Request body",
+                    "definition": "The JSON payload a client sends with a POST or PUT request."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Create a typed item route",
+            "prompt": "Edit main.py. Keep the FastAPI app and Pydantic models, add a GET /items/{item_id} route that returns the stored Item, and keep the POST route typed. Run the checks when done.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "main.py",
+                    "content": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nitems = [\n    {\"id\": 1, \"name\": \"Microscope\", \"quantity\": 4},\n]\n\n\nclass ItemCreate(BaseModel):\n    name: str\n    quantity: int = 1\n\n\nclass Item(BaseModel):\n    id: int\n    name: str\n    quantity: int\n\n\n@app.get(\"/items/{item_id}\")\ndef read_item(item_id: int) -> Item:\n    # TODO: return the requested item as a typed Item\n    return items[0]\n\n\n@app.post(\"/items\")\ndef create_item(payload: ItemCreate) -> Item:\n    item = Item(id=len(items) + 1, name=payload.name, quantity=payload.quantity)\n    items.append(item.model_dump())\n    return item\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "main.py",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The app and GET route are registered with FastAPI decorators.",
+                    "file": "main.py",
+                    "includes": ["app = FastAPI()", "@app.get(\"/items/{item_id}\")"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The POST body is parsed by a Pydantic request model.",
+                    "file": "main.py",
+                    "includes": [
+                        "class ItemCreate(BaseModel):",
+                        "quantity: int = 1",
+                        "def create_item(payload: ItemCreate) -> Item:"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The GET handler uses its path parameter and returns a typed Item.",
+                    "file": "main.py",
+                    "includes": [
+                        "def read_item(item_id: int) -> Item:",
+                        "item = items[item_id - 1]",
+                        "return Item(**item)"
+                    ],
+                    "excludes": ["return items[0]"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The app also exposes a typed POST route.",
+                    "file": "main.py",
+                    "includes": ["@app.post(\"/items\")"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.py",
+                    "includes": ["app = FastAPI()"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Routes and models",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "signature",
+                    "label": "FastAPI reads parameter and return annotations to parse requests and serialize responses.",
+                    "correct": true
+                },
+                {
+                    "id": "body",
+                    "label": "A Pydantic model parameter is filled from the JSON request body.",
+                    "correct": true
+                },
+                {
+                    "id": "path-text",
+                    "label": "An int path parameter reaches the handler as a string.",
+                    "correct": false
+                },
+                {
+                    "id": "decorator",
+                    "label": "The decorator's HTTP method must match the verb the client sends.",
+                    "correct": true
+                },
+                {
+                    "id": "untyped",
+                    "label": "A handler may omit all type annotations and still get request validation.",
+                    "correct": false
+                }
+            ],
+            "explanation": "FastAPI derives parsing and serialization from annotations. Path parameters are converted to their declared types, Pydantic models validate the body, and the return annotation describes the response."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The FastAPI workspace is keyboard accessible. Checks verify source structure; they do not compile or run FastAPI.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
