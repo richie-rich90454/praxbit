@@ -172,6 +172,7 @@ describe("catalog, health, and transport protections", function catalogSuite(): 
                 "utf8",
             );
             await writeFile(join(webDirectory, "app.js"), "console.log('praxbit');", "utf8");
+            await writeFile(join(webDirectory, "pyodide.mjs"), "export {};", "utf8");
             const app = createApplication({
                 config: context.config,
                 pool: context.pool,
@@ -193,6 +194,21 @@ describe("catalog, health, and transport protections", function catalogSuite(): 
             const clientRoute = await client.get("/learn");
             expect(clientRoute.status).toBe(200);
             expect(await clientRoute.text()).toContain("Praxbit shell");
+
+            const missionRoute = await client.get("/missions/python.collections");
+            expect(missionRoute.status).toBe(200);
+            expect(await missionRoute.text()).toContain("Praxbit shell");
+
+            const projectRoute = await client.get("/projects/projects.campus-status-board");
+            expect(projectRoute.status).toBe(200);
+            expect(await projectRoute.text()).toContain("Praxbit shell");
+
+            const module = await client.get("/pyodide.mjs");
+            expect(module.status).toBe(200);
+            expect(module.headers.get("content-type")).toBe("text/javascript; charset=utf-8");
+
+            const missingAsset = await client.get("/missing.png");
+            expect(missingAsset.status).toBe(404);
 
             const missingApi = await client.get("/api/v1/does-not-exist");
             expect(missingApi.status).toBe(404);
