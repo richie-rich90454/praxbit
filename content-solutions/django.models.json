@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "models.py": "from django.db import models\n\n\nclass Item(models.Model):\n    name = models.CharField(max_length=120)\n    price = models.DecimalField(max_digits=8, decimal_places=2)\n    quantity = models.IntegerField(default=0)\n\n    def __str__(self) -> str:\n        return self.name\n"
+            }
+        }
+    }
+}
