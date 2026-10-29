@@ -5,7 +5,7 @@
     "courseId": "campus",
     "title": "Nothing works together",
     "summary": "Make an order and inventory calculation validate first, then update state atomically.",
-    "skills": ["testing.integration", "api.validation", "concept.state"],
+    "skills": ["testing.integration", "api.validation", "concept.state", "architecture.modularity"],
     "prerequisites": ["http.basics", "testing.boundaries"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
