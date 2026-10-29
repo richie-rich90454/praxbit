@@ -1,0 +1,204 @@
+{
+    "id": "cpp.values",
+    "version": 1,
+    "sequence": 53,
+    "courseId": "cpp",
+    "title": "References and loops in C++",
+    "summary": "Use a const reference and a range-for loop to inspect a vector.",
+    "skills": ["cpp.syntax"],
+    "prerequisites": ["c.syntax", "concept.conditions"],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "values",
+        "briefing": "A robotics console summarizes sensor changes held in a vector. Count the positive changes without copying the vector."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-check",
+            "description": "Explain the semantics accurately.",
+            "stepIds": ["check"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:cpp"],
+    "hints": [
+        "The vector is already passed by const reference.",
+        "The loop visits every value.",
+        "Add an if that tests value > 0.",
+        "Increment count inside the branch."
+    ],
+    "misconceptions": [
+        {
+            "id": "copy",
+            "description": "Passing large objects by value by default.",
+            "stepId": "apply",
+            "feedback": "Use const references for read-only parameters to avoid copies."
+        },
+        {
+            "id": "bounds",
+            "description": "Assuming operator[] validates the index.",
+            "stepId": "apply",
+            "feedback": "operator[] does not check bounds. Use at() when a checked access is required."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "C++ values and decisions",
+                "body": "C++ declares values with a type: int count = 3; double price = 12.50; bool ready = true; and std::string name = \"Ada\";. References name an existing object without copying it, and const prevents writes through that name. if and switch select branches, and the condition must be convertible to bool. A range-for loop visits every element: for (const int value : values) { ... }."
+            },
+            {
+                "title": "C++ source files",
+                "body": "C++ compiles translation units separately and links them. Headers declare interfaces; source files provide definitions."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Reference",
+                "definition": "An alias for an existing object, declared with &."
+            },
+            {
+                "term": "const",
+                "definition": "A promise that a name or object will not be modified through that path."
+            },
+            {
+                "term": "Translation unit",
+                "definition": "One source file plus the headers it includes, compiled independently."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "C++ values and decisions",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "C++ values and decisions",
+                    "body": "C++ declares values with a type: int count = 3; double price = 12.50; bool ready = true; and std::string name = \"Ada\";. References name an existing object without copying it, and const prevents writes through that name. if and switch select branches, and the condition must be convertible to bool. A range-for loop visits every element: for (const int value : values) { ... }."
+                },
+                {
+                    "title": "C++ source files",
+                    "body": "C++ compiles translation units separately and links them. Headers declare interfaces; source files provide definitions."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Reference",
+                    "definition": "An alias for an existing object, declared with &."
+                },
+                {
+                    "term": "const",
+                    "definition": "A promise that a name or object will not be modified through that path."
+                },
+                {
+                    "term": "Translation unit",
+                    "definition": "One source file plus the headers it includes, compiled independently."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count positive sensor changes",
+            "prompt": "Edit main.cpp. count_positive receives a const reference to a vector and returns the number of positive values.",
+            "evidence": "construction",
+            "language": "cpp",
+            "files": [
+                {
+                    "path": "main.cpp",
+                    "content": "#include <iostream>\n#include <vector>\n\nint count_positive(const std::vector<int>& values) {\n    int count = 0;\n    for (const int value : values) {\n        count += 0; // TODO: count positive values\n    }\n    return count;\n}\n\nint main() {\n    const std::vector<int> values = { 3, -1, 2 };\n    std::cout << count_positive(values) << \"\\n\";\n    return 0;\n}\n",
+                    "editable": true,
+                    "language": "cpp"
+                }
+            ],
+            "entry": "main.cpp",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function accepts a const vector reference.",
+                    "file": "main.cpp",
+                    "includes": ["int count_positive(const std::vector<int>& values)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The range-for loop counts positive values.",
+                    "file": "main.cpp",
+                    "includes": ["if (value > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.cpp",
+                    "includes": ["int count_positive(const std::vector<int>& values)"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "Check the semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "reference",
+                    "label": "A const reference lets the function read a vector without copying it.",
+                    "correct": true
+                },
+                {
+                    "id": "range",
+                    "label": "A range-for loop visits each element in order.",
+                    "correct": true
+                },
+                {
+                    "id": "bounds",
+                    "label": "std::vector checks operator[] bounds on every access.",
+                    "correct": false
+                },
+                {
+                    "id": "copy",
+                    "label": "Passing a vector by value is always cheaper than by reference.",
+                    "correct": false
+                }
+            ],
+            "explanation": "A const reference avoids a copy while preserving read-only access. A range-for loop hides the iterator mechanics."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The C++ workspace is keyboard accessible. Checks verify source structure; they do not compile or run C++.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "games"]
+}
