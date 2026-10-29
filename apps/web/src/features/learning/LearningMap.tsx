@@ -70,14 +70,9 @@ export function LearningMap(props: { readonly track: Track }): JSX.Element {
                     of {missions().length} complete
                 </span>
             </div>
-            <div
-                class="map-strip"
-                role="list"
-                aria-label={`${props.track.title} missions`}
-                tabindex="0"
-            >
+            <div class="map-strip" role="list" aria-label={`${props.track.title} missions`}>
                 <For each={missions()}>
-                    {function missionNode(mission, index): JSX.Element {
+                    {function missionNode(mission): JSX.Element {
                         const status = createMemo(function currentStatus(): NodeStatus {
                             return statusOf(mission);
                         });
@@ -88,9 +83,6 @@ export function LearningMap(props: { readonly track: Track }): JSX.Element {
                         });
                         return (
                             <div class="map-node-wrap" role="listitem">
-                                {index() > 0 ? (
-                                    <span class="map-connector" aria-hidden="true" />
-                                ) : null}
                                 {status() === "locked" ? (
                                     <div class={`map-node map-node--locked`} aria-disabled="true">
                                         <span class="map-node__index">
