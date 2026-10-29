@@ -76,7 +76,14 @@ const HARNESS_SCRIPT = String.raw`
             if (!element) {
                 return { description: check.description, passed: false, error: "Element not found: " + check.selector };
             }
-            var computed = window.getComputedStyle(element).getPropertyValue(check.property);
+            var style = window.getComputedStyle(element);
+            var computed = style.getPropertyValue(check.property);
+            if (!computed) {
+                var camel = check.property.replace(/-([a-z])/g, function (_match, letter) {
+                    return letter.toUpperCase();
+                });
+                computed = style[camel] || "";
+            }
             var actualCss = String(computed).replace(/\s+/g, " ").trim();
             return {
                 description: check.description,
@@ -113,10 +120,12 @@ const HARNESS_SCRIPT = String.raw`
         if (!event.data || event.data.type !== "praxbit-preview-run") {
             return;
         }
+        void document.body.offsetHeight;
         var results = [];
         for (var index = 0; index < event.data.checks.length; index += 1) {
             if (index > 0) {
                 resetDocument();
+                void document.body.offsetHeight;
             }
             try {
                 results.push(runCheck(event.data.checks[index]));
@@ -192,9 +201,14 @@ async function runSinglePreviewCheck(
     iframe.style.width = "1024px";
     iframe.style.height = "768px";
     iframe.style.border = "0";
-    iframe.style.position = "absolute";
-    iframe.style.left = "-10000px";
+    iframe.style.position = "fixed";
+    iframe.style.left = "0";
     iframe.style.top = "0";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    iframe.style.zIndex = "-1";
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.tabIndex = -1;
     iframe.srcdoc = buildPreviewDocument(files);
 
     return await new Promise(function executor(resolve): void {
@@ -258,7 +272,14 @@ export async function runPreviewChecks(
     const outcomes: PreviewCheckOutcome[] = [];
     let timedOut = false;
     for (const check of checks) {
-        const result = await runSinglePreviewCheck(files, check, timeoutMs);
+        let result = await runSinglePreviewCheck(files, check, timeoutMs);
+        if (check.kind === "css" && result.outcome.actual === "") {
+            // Firefox can report an empty computed value before the fresh iframe applies its stylesheet.
+            await new Promise<void>(function wait(resolve): void {
+                setTimeout(resolve, 50);
+            });
+            result = await runSinglePreviewCheck(files, check, timeoutMs);
+        }
         outcomes.push(result.outcome);
         if (result.timedOut) {
             timedOut = true;
