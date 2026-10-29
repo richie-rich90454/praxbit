@@ -1,0 +1,281 @@
+{
+    "id": "svelte.stores",
+    "version": 1,
+    "sequence": 80,
+    "courseId": "svelte",
+    "title": "Writable stores with derived state",
+    "summary": "Share cart state through a store, derive the item count, and read browser storage safely.",
+    "skills": ["svelte.reactivity", "svelte.stores", "web.browser-apis"],
+    "prerequisites": ["svelte.components", "concept.state"],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "stores",
+        "briefing": "The cart page crashes during the production build where localStorage does not exist. Rebuild cart.ts so the store hydrates only in the browser, derives the item count, and updates immutably."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:svelte"],
+    "hints": [
+        "Create the array with writable<CartLine[]>(loadSaved()).",
+        "Guard localStorage with typeof localStorage === \"undefined\" before reading it.",
+        "Export itemCount with derived(cart, function count(lines) and total line.quantity.",
+        "Update with [...lines, line] instead of lines.push(line)."
+    ],
+    "misconceptions": [
+        {
+            "id": "mutate-store",
+            "description": "Calling cart.update and mutating the array in place.",
+            "stepId": "apply",
+            "feedback": "Svelte compares the value returned by update. A mutated array keeps the same reference, so subscribers may not see a change. Return a new array."
+        },
+        {
+            "id": "module-browser",
+            "description": "Reading localStorage at module scope.",
+            "stepId": "apply",
+            "feedback": "The module also runs during a server or prerender build where localStorage is absent. Read browser storage inside a guarded function."
+        },
+        {
+            "id": "forget-unsubscribe",
+            "description": "Calling subscribe in onMount without returning the unsubscribe function.",
+            "stepId": "review",
+            "feedback": "onMount treats a returned function as cleanup. Return the unsubscribe function so the callback stops when the component is destroyed."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Stores hold shared reactive state",
+                "body": "writable creates a store with set and update methods. Any component can subscribe, and the compiler turns a $cart reference into an automatic subscription that is cleaned up with the component."
+            },
+            {
+                "title": "Derived stores compute from their sources",
+                "body": "derived subscribes to the source stores and recomputes when they change. itemCount stays a read-only projection of the cart instead of a second copy that can drift."
+            },
+            {
+                "title": "Manual subscriptions need cleanup",
+                "body": "A direct store.subscribe call returns an unsubscribe function. It must be called when the component is destroyed, or the callback keeps running against stale state."
+            },
+            {
+                "title": "Browser APIs are conditional",
+                "body": "localStorage does not exist during a server or prerender build. Read it inside a guard such as typeof localStorage === \"undefined\", and treat persisted JSON as untrusted input."
+            },
+            {
+                "title": "The production build changes the assumptions",
+                "body": "A Svelte build prerenders or server-renders when configured, so module-level browser access runs where window and localStorage are absent. Keep browser access inside functions that run in the browser."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Store",
+                "definition": "An object with subscribe, set, and update that holds shared reactive state."
+            },
+            {
+                "term": "Derived store",
+                "definition": "A read-only store computed from one or more source stores."
+            },
+            {
+                "term": "Unsubscribe",
+                "definition": "The function returned by subscribe that stops future notifications."
+            },
+            {
+                "term": "Prerender",
+                "definition": "Rendering a page during the build instead of in the browser."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Stores, derivation, and browser boundaries",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Stores hold shared reactive state",
+                    "body": "writable creates a store with set and update methods. Any component can subscribe, and the compiler turns a $cart reference into an automatic subscription that is cleaned up with the component."
+                },
+                {
+                    "title": "Derived stores compute from their sources",
+                    "body": "derived subscribes to the source stores and recomputes when they change. itemCount stays a read-only projection of the cart instead of a second copy that can drift."
+                },
+                {
+                    "title": "Manual subscriptions need cleanup",
+                    "body": "A direct store.subscribe call returns an unsubscribe function. It must be called when the component is destroyed, or the callback keeps running against stale state."
+                },
+                {
+                    "title": "Browser APIs are conditional",
+                    "body": "localStorage does not exist during a server or prerender build. Read it inside a guard such as typeof localStorage === \"undefined\", and treat persisted JSON as untrusted input."
+                },
+                {
+                    "title": "The production build changes the assumptions",
+                    "body": "A Svelte build prerenders or server-renders when configured, so module-level browser access runs where window and localStorage are absent. Keep browser access inside functions that run in the browser."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Store",
+                    "definition": "An object with subscribe, set, and update that holds shared reactive state."
+                },
+                {
+                    "term": "Derived store",
+                    "definition": "A read-only store computed from one or more source stores."
+                },
+                {
+                    "term": "Unsubscribe",
+                    "definition": "The function returned by subscribe that stops future notifications."
+                },
+                {
+                    "term": "Prerender",
+                    "definition": "Rendering a page during the build instead of in the browser."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Build a safe cart store",
+            "prompt": "Edit cart.ts. Create a writable cart store, derive itemCount, load saved lines only when localStorage exists, and append lines without mutating the current array.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "cart.ts",
+                    "content": "import { writable } from \"svelte/store\";\n\nexport interface CartLine {\n    sku: string;\n    quantity: number;\n}\n\nconst stored = localStorage.getItem(\"cart\");\n// TODO: build the cart store, derive the item count, and load saved lines without touching browser APIs during a build\nexport const cart = writable<CartLine[]>(stored === null ? [] : JSON.parse(stored));\n\nexport function addLine(line: CartLine): void {\n    cart.update(function append(lines) {\n        lines.push(line);\n        return lines;\n    });\n}\n",
+                    "editable": true,
+                    "language": "html"
+                }
+            ],
+            "entry": "cart.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The store reads browser storage defensively.",
+                    "file": "cart.ts",
+                    "includes": ["typeof localStorage === \"undefined\"", "Array.isArray(parsed)"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The writable store hydrates through the loader.",
+                    "file": "cart.ts",
+                    "includes": ["export const cart = writable<CartLine[]>(loadSaved())"],
+                    "excludes": ["JSON.parse(stored)"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The derived store counts quantities.",
+                    "file": "cart.ts",
+                    "includes": [
+                        "export const itemCount = derived(cart, function count(lines)",
+                        "return sum + line.quantity;"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Adding a line keeps the existing array.",
+                    "file": "cart.ts",
+                    "includes": ["return [...lines, line]"],
+                    "excludes": ["lines.push(line)", "TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "cart.ts",
+                    "includes": ["typeof localStorage === \"undefined\""],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the cart subscription",
+            "prompt": "Review CartSummary.svelte and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "CartSummary.svelte",
+                "caption": "The summary subscribes by hand and clears the cart by mutating the current array.",
+                "kind": "code",
+                "language": "html",
+                "content": "<script lang=\"ts\">\n    import { onMount } from \"svelte\";\n    import { cart, type CartLine } from \"./cart\";\n\n    let lines: CartLine[] = [];\n\n    onMount(() => {\n        cart.subscribe((value) => {\n            lines = value;\n        });\n    });\n\n    function clearCart(): void {\n        $cart.length = 0;\n    }\n</script>\n\n<ul>\n    {#each lines as line (line.sku)}\n        <li>{line.sku} x {line.quantity}</li>\n    {/each}\n</ul>\n\n<button type=\"button\" on:click={clearCart}>Clear cart</button>\n"
+            },
+            "findings": [
+                {
+                    "id": "leak",
+                    "label": "The onMount subscription never returns an unsubscribe function.",
+                    "correct": true
+                },
+                {
+                    "id": "mutate",
+                    "label": "clearCart mutates the array through $cart instead of calling set or update.",
+                    "correct": true
+                },
+                {
+                    "id": "auto",
+                    "label": "The $cart reference in clearCart leaves a dangling subscription.",
+                    "correct": false
+                },
+                {
+                    "id": "key",
+                    "label": "The keyed each block causes the subscription to leak.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the subscription has cleanup and the store is updated through set or update."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the component is destroyed only when the page closes."
+                },
+                {
+                    "id": "style",
+                    "label": "Only naming and formatting remain."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The manual subscription in onMount runs after the component is destroyed because nothing returns the unsubscribe function. clearCart mutates the array held by the store, so the store never notifies subscribers and derived values go stale. Use $cart in markup or return the unsubscribe function, and replace the array through update."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Svelte workspace is keyboard accessible. Checks verify source structure; they do not compile or run Svelte.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
