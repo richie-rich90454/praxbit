@@ -1,4 +1,4 @@
-import type { CodeTest } from "@praxbit/contracts";
+import type { CodeTest, ContentLanguage } from "@praxbit/contracts";
 import type { TestOutcome, TestRunResult } from "../types.ts";
 import { runJavaScriptTests } from "./javascript.ts";
 import { runCssDeferred, runDomTests } from "./html.ts";
@@ -6,18 +6,10 @@ import { runPythonFunctionTests } from "./python.ts";
 import { runSqlTests, type SqlDatabaseFixture } from "./sql.ts";
 import { runStaticTests } from "./static.ts";
 
-export type CodeLanguage =
-    | "javascript"
-    | "typescript"
-    | "html"
-    | "css"
-    | "json"
-    | "python"
-    | "sql"
-    | "text";
+export type CodeLanguage = ContentLanguage;
 
 export interface CodeRunInput {
-    readonly language: CodeLanguage;
+    readonly language: ContentLanguage;
     readonly files: Readonly<Record<string, string>>;
     readonly entry: string;
     readonly tests: readonly CodeTest[];
