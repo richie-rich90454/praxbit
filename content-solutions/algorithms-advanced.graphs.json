@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "graphs.ts": "export function shortestPath(\n    graph: Map<string, string[]>,\n    start: string,\n    goal: string,\n): string[] | null {\n    const queue = [start];\n    const visited = new Set<string>([start]);\n    const parent = new Map<string, string>();\n    let head = 0;\n\n    while (head < queue.length) {\n        const node = queue[head];\n        head += 1;\n        if (node === goal) {\n            return rebuild(parent, start, goal);\n        }\n        for (const next of graph.get(node) ?? []) {\n            if (visited.has(next)) {\n                continue;\n            }\n            visited.add(next);\n            parent.set(next, node);\n            queue.push(next);\n        }\n    }\n\n    return null;\n}\n\nfunction rebuild(\n    parent: Map<string, string>,\n    start: string,\n    goal: string,\n): string[] {\n    const path = [goal];\n    let current = goal;\n    while (current !== start) {\n        const previous = parent.get(current);\n        if (previous === undefined) {\n            return [];\n        }\n        path.push(previous);\n        current = previous;\n    }\n    return path.reverse();\n}\n"
+            }
+        }
+    }
+}
