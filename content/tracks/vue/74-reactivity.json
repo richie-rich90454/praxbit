@@ -1,0 +1,233 @@
+{
+    "id": "vue.reactivity",
+    "version": 1,
+    "sequence": 74,
+    "courseId": "vue",
+    "title": "Shared cart state and guarded routes",
+    "summary": "Keep cart items in a shared ref, derive the total with computed, and guard checkout routes.",
+    "skills": ["vue.reactivity", "vue.routing", "web.state-management"],
+    "prerequisites": ["vue.components", "concept.state"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "reactivity",
+        "briefing": "The cart total drifts from the item list because a watcher copies it into a second ref. Checkout also opens with an empty cart. Derive the total and guard the route."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Apply the taught syntax in a working file.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review an artifact and identify the concrete risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:vue"],
+    "hints": [
+        "Keep items in a module-scope ref so every caller sees the same cart.",
+        "Replace the total ref and watcher with computed(function sum() { ... }).",
+        "Update existing quantities through the shared ref so Vue can track the change.",
+        "Register the guard with router.beforeEach and return a catalog route for an empty cart."
+    ],
+    "misconceptions": [
+        {
+            "id": "watcher-derived",
+            "description": "Synchronizing derived state with a watcher.",
+            "stepId": "apply",
+            "feedback": "Derived values should be computed from their source. A watcher creates a second source of truth that can drift."
+        },
+        {
+            "id": "mutate-prop",
+            "description": "Writing to a prop in a child component.",
+            "stepId": "apply",
+            "feedback": "Props are read-only. Emit an event and let the owner update the state."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Derived state has one source",
+                "body": "A total is a function of the items. computed caches that function and invalidates it when a dependency changes, so there is no second ref to keep in sync."
+            },
+            {
+                "title": "Shared state lives above components",
+                "body": "A ref declared at module scope is shared by every caller of the composable. Components subscribe to the same source instead of copying it."
+            },
+            {
+                "title": "Guards decide before navigation",
+                "body": "A router.beforeEach guard runs before the destination renders. Returning a route location redirects, and returning true allows navigation."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "ref",
+                "definition": "A reactive container for a single value, read through .value in script code."
+            },
+            {
+                "term": "computed",
+                "definition": "A cached value derived from reactive dependencies."
+            },
+            {
+                "term": "Navigation guard",
+                "definition": "A function that can allow, redirect, or cancel a route change."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Vue reactivity, shared state, and guards",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Derived state has one source",
+                    "body": "A total is a function of the items. computed caches that function and invalidates it when a dependency changes, so there is no second ref to keep in sync."
+                },
+                {
+                    "title": "Shared state lives above components",
+                    "body": "A ref declared at module scope is shared by every caller of the composable. Components subscribe to the same source instead of copying it."
+                },
+                {
+                    "title": "Guards decide before navigation",
+                    "body": "A router.beforeEach guard runs before the destination renders. Returning a route location redirects, and returning true allows navigation."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "ref",
+                    "definition": "A reactive container for a single value, read through .value in script code."
+                },
+                {
+                    "term": "computed",
+                    "definition": "A cached value derived from reactive dependencies."
+                },
+                {
+                    "term": "Navigation guard",
+                    "definition": "A function that can allow, redirect, or cancel a route change."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Derive cart state and guard checkout",
+            "prompt": "Edit useCart.ts. Replace the watcher with computed state, share the cart through module scope, and redirect an empty cart away from checkout.",
+            "evidence": "construction",
+            "language": "text",
+            "files": [
+                {
+                    "path": "useCart.ts",
+                    "content": "import { ref, watch } from \"vue\";\nimport type { Router } from \"vue-router\";\n\nexport type CartItem = {\n  id: string;\n  name: string;\n  price: number;\n  quantity: number;\n};\n\nconst items = ref<CartItem[]>([]);\nconst total = ref(0);\n\nwatch(\n  items,\n  function updateTotal() {\n    total.value = items.value.reduce(function sum(value, item) {\n      return value + item.price * item.quantity;\n    }, 0);\n  },\n  { deep: true, immediate: true },\n);\n\nexport function useCart() {\n  // TODO: derive total with computed and share the cart across callers\n  function add(item: Omit<CartItem, \"quantity\">) {\n    items.value.push({ ...item, quantity: 1 });\n  }\n\n  return { items, total, add };\n}\n\nexport function installCartGuard(router: Router) {\n  // TODO: redirect to the catalog when the cart is empty\n}\n",
+                    "editable": true,
+                    "language": "vue"
+                }
+            ],
+            "entry": "useCart.ts",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The total is derived with computed instead of a watcher.",
+                    "file": "useCart.ts",
+                    "includes": ["const total = computed(", "item.price * item.quantity"],
+                    "excludes": ["watch("]
+                },
+                {
+                    "kind": "static",
+                    "description": "The shared cart state drives a navigation guard.",
+                    "file": "useCart.ts",
+                    "includes": [
+                        "router.beforeEach(",
+                        "to.meta.requiresCart === true",
+                        "return { name: \"catalog\" }"
+                    ],
+                    "excludes": ["TODO"]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "useCart.ts",
+                    "includes": ["const total = computed("],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the cart component",
+            "prompt": "Review the artifact and select every real problem.",
+            "evidence": "review",
+            "artifact": {
+                "title": "CartLine.vue",
+                "caption": "The component mutates a prop and keeps a derived total in a watcher.",
+                "kind": "code",
+                "language": "vue",
+                "content": "<script setup lang=\"ts\">\nimport { ref, watch } from \"vue\";\n\nconst props = defineProps<{\n  price: number;\n  quantity: number;\n}>();\n\nconst total = ref(0);\n\nwatch(\n  function source() {\n    return [props.price, props.quantity];\n  },\n  function updateTotal() {\n    total.value = props.price * props.quantity;\n  },\n  { immediate: true },\n);\n\nfunction increase() {\n  props.quantity += 1;\n}\n</script>\n\n<template>\n  <article>\n    <h3>Line item</h3>\n    <p>{{ total.toFixed(2) }}</p>\n    <button type=\"button\" @click=\"increase\">Add one</button>\n  </article>\n</template>\n"
+            },
+            "findings": [
+                {
+                    "id": "mutate-prop",
+                    "label": "The increase handler assigns directly to a prop.",
+                    "correct": true
+                },
+                {
+                    "id": "watcher-derived",
+                    "label": "The watcher copies a derived total into its own ref instead of using computed.",
+                    "correct": true
+                },
+                {
+                    "id": "computed",
+                    "label": "The artifact derives the total with computed instead of a watcher.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change; the prop mutation and duplicated derived state must be fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the watcher keeps the total in sync."
+                },
+                {
+                    "id": "style",
+                    "label": "Only the template formatting needs work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The child writes to props.quantity, which Vue treats as read-only and the parent never sees. The watcher also mirrors price times quantity into a second ref, creating two sources of truth that can drift."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The Vue workspace is keyboard accessible. Checks verify source structure; they do not compile or run Vue.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
