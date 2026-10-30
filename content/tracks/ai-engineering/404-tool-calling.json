@@ -1,18 +1,28 @@
 {
     "id": "ai.tool-calling",
     "version": 1,
-    "sequence": 404,
+    "sequence": 54,
     "courseId": "ai-engineering",
     "title": "Tools are contracts with consequences",
     "summary": "Validate model-chosen tool arguments, require approval for irreversible actions, and keep tool use idempotent.",
-    "skills": ["ai.agents", "ai.prompting"],
-    "prerequisites": ["ai.agents", "api.validation"],
+    "skills": [
+        "ai.agents",
+        "ai.prompting"
+    ],
+    "prerequisites": [
+        "ai.agents",
+        "api.validation"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +34,31 @@
         {
             "id": "validate",
             "description": "Validate tool names and arguments before execution.",
-            "stepIds": ["validate-call"]
+            "stepIds": [
+                "validate-call"
+            ]
         },
         {
             "id": "approve",
             "description": "Decide when a human approval is required.",
-            "stepIds": ["approval-check"]
+            "stepIds": [
+                "approval-check"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain scoped, idempotent, auditable tool use.",
-            "stepIds": ["tool-transfer"]
+            "stepIds": [
+                "tool-transfer"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:tool"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:tool"
+    ],
     "hints": [
         "Treat the model's tool call as untrusted input.",
         "Check the tool name against an allowlist and validate every argument.",
@@ -284,7 +305,9 @@
                     "kind": "function",
                     "description": "Rejects a null call.",
                     "name": "isValidToolCall",
-                    "args": [null],
+                    "args": [
+                        null
+                    ],
                     "expected": false
                 }
             ]
@@ -384,5 +407,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
