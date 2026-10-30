@@ -5,23 +5,14 @@
     "courseId": "css",
     "title": "Transitions and reduced motion",
     "summary": "Animate state changes smoothly and respect prefers-reduced-motion.",
-    "skills": [
-        "web.css",
-        "web.accessibility"
-    ],
-    "prerequisites": [
-        "web.css"
-    ],
+    "skills": ["web.css", "web.accessibility"],
+    "prerequisites": ["web.css"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-css",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "computed-style-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "computed-style-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "transition",
             "description": "Add a transition to button state changes.",
-            "stepIds": [
-                "fix-motion"
-            ]
+            "stepIds": ["fix-motion"]
         },
         {
             "id": "reduced-motion",
             "description": "Respect prefers-reduced-motion.",
-            "stepIds": [
-                "fix-motion"
-            ]
+            "stepIds": ["fix-motion"]
         },
         {
             "id": "transfer",
             "description": "Transfer motion decisions to a new component.",
-            "stepIds": [
-                "motion-transfer"
-            ]
+            "stepIds": ["motion-transfer"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:animation"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:animation"],
     "hints": [
         "Transition background-color and transform over about 150ms.",
         "Use prefers-reduced-motion to disable non-essential animation.",
@@ -248,7 +228,5 @@
         "screenReaderNotes": "Each test announces selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
