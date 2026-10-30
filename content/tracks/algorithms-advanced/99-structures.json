@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "shift-constant",
-            "description": "Treating Array.shift as O(1).",
+            "description": "Believing Array.shift is constant time.",
             "stepId": "apply",
-            "feedback": "shift copies every remaining element down one index. A ring buffer moves an index instead."
+            "testDescription": "Dequeue reads the head, clears the slot, and advances with modulo.",
+            "feedback": "shift moves every remaining element, so it is linear. A ring buffer advances the head index instead.",
+            "followUpSkill": "algorithms.arrays"
         },
         {
             "id": "wrap-tail",
-            "description": "Writing at head + count without wrapping.",
+            "description": "Letting the tail index run past the capacity.",
             "stepId": "apply",
-            "feedback": "Once the tail passes the last slot it must wrap to the front. Use modulo capacity."
+            "testDescription": "Enqueue writes at the wrapped tail and increments the count.",
+            "feedback": "The tail must wrap with modulo so the next slot is inside the array."
         },
         {
             "id": "iterator-mutation",
-            "description": "Removing nodes while an iterator holds a pointer into the list.",
+            "description": "Mutating a collection while iterating it.",
             "stepId": "check",
-            "feedback": "The iterator's next pointer can skip or revisit nodes. Snapshot the values or invalidate the iterator on mutation."
+            "answer": "mutate",
+            "feedback": "Mutation during iteration can skip or repeat elements. Iterate over a stable snapshot or use the collection's supported removal API."
         }
     ],
     "lesson": {
@@ -216,7 +220,18 @@
                     "includes": ["export class FrameQueue<T> {"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Map the ring buffer indexes with modulo.",
+                "Keep an explicit size instead of scanning slots.",
+                "Write at the tail, read at the head, and clear the dequeued slot.",
+                "Use head = (head + 1) % capacity, tail = (tail + 1) % capacity, and return the stored size."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "explain",
@@ -251,7 +266,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "The ring buffer makes dequeue constant time by moving an index and clearing the vacated slot. A linked list can match that cost when it keeps both ends, but arbitrary access and deletion require a walk. Mutation invalidates iterators because their stored position no longer describes the same element."
+            "explanation": "The ring buffer makes dequeue constant time by moving an index and clearing the vacated slot. A linked list can match that cost when it keeps both ends, but arbitrary access and deletion require a walk. Mutation invalidates iterators because their stored position no longer describes the same element.",
+            "hints": [
+                "A ring buffer wraps indexes instead of shifting elements.",
+                "Dequeue must not leave a stale reference in the slot.",
+                "Mutating while iterating changes what the iterator sees.",
+                "Select wrapping, tail progress, and a stored count; reject shift and iterator mutation."
+            ]
         }
     ],
     "evaluation": {
