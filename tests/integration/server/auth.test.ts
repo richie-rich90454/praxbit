@@ -88,7 +88,7 @@ describe("authentication, sessions, and account lifecycle", function authSuite()
 
     it("supports native bearer sessions without CSRF and revokes them", async function testNative(): Promise<void> {
         const client = new TestClient(context.app);
-        const auth = await register(client, "native_user", { native: true, csrf: true });
+        const auth = await register(client, "native_user", { native: true, csrf: false });
         expect(auth.nativeToken).toBeDefined();
         const token = auth.nativeToken ?? "";
 
