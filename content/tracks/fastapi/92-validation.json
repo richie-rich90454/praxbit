@@ -5,23 +5,14 @@
     "courseId": "fastapi",
     "title": "Response contracts and dependency overrides",
     "summary": "Use response_model and HTTPException, then replace a dependency in tests.",
-    "skills": [
-        "fastapi.validation",
-        "fastapi.testing"
-    ],
-    "prerequisites": [
-        "fastapi.routes",
-        "api.validation"
-    ],
+    "skills": ["fastapi.validation", "fastapi.testing"],
+    "prerequisites": ["fastapi.routes", "api.validation"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:fastapi"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastapi"],
     "hints": [
         "Import get_items from main next to app.",
         "Assign app.dependency_overrides[get_items] = fake_items before creating the client.",
@@ -184,9 +166,7 @@
                     "kind": "static",
                     "description": "The test imports the app and the dependency it replaces.",
                     "file": "test_main.py",
-                    "includes": [
-                        "from main import app, get_items"
-                    ],
+                    "includes": ["from main import app, get_items"],
                     "excludes": []
                 },
                 {
@@ -223,21 +203,15 @@
                     "kind": "static",
                     "description": "The override is cleared after each test.",
                     "file": "test_main.py",
-                    "includes": [
-                        "app.dependency_overrides.clear()"
-                    ],
+                    "includes": ["app.dependency_overrides.clear()"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "test_main.py",
-                    "includes": [
-                        "from main import app, get_items"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["from main import app, get_items"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -328,8 +302,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
