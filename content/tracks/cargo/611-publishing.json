@@ -5,23 +5,14 @@
     "courseId": "cargo",
     "title": "Publishable metadata and a clean package",
     "summary": "Add the identity metadata crates.io requires, exclude local secrets, and use cargo package to inspect the result.",
-    "skills": [
-        "cargo.packages",
-        "cargo.workspace"
-    ],
-    "prerequisites": [
-        "cargo.packages",
-        "git.basics"
-    ],
+    "skills": ["cargo.packages", "cargo.workspace"],
+    "prerequisites": ["cargo.packages", "git.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-metadata",
             "description": "Declare publish metadata and package exclusions.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-package",
             "description": "Explain what cargo package includes and publishes.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         },
         {
             "id": "objective-transfer",
             "description": "Resolve a path-only dependency before publishing.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:server-room",
-        "icon:cargo"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:cargo"],
     "hints": [
         "crates.io requires a description and a license expression.",
         "Add repository, keywords, and categories for discoverability.",
@@ -220,22 +200,15 @@
                     "kind": "static",
                     "description": "The package excludes local secrets.",
                     "file": "Cargo.toml",
-                    "includes": [
-                        "exclude = [\".env\", \"fixtures/private/*\"]"
-                    ],
+                    "includes": ["exclude = [\".env\", \"fixtures/private/*\"]"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Dependency versions are concrete.",
                     "file": "Cargo.toml",
-                    "includes": [
-                        "serde = { version = \"1.0.203\", features = [\"derive\"] }"
-                    ],
-                    "excludes": [
-                        "version = \"*\"",
-                        "TODO"
-                    ]
+                    "includes": ["serde = { version = \"1.0.203\", features = [\"derive\"] }"],
+                    "excludes": ["version = \"*\"", "TODO"]
                 }
             ],
             "language": "text"
@@ -335,7 +308,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
