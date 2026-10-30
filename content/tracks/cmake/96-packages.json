@@ -5,22 +5,14 @@
     "courseId": "cmake",
     "title": "Dependencies, installs, and exported targets",
     "summary": "Find a package, link its imported target, and install an exported target set.",
-    "skills": [
-        "cmake.packages"
-    ],
-    "prerequisites": [
-        "cmake.targets",
-        "git.basics"
-    ],
+    "skills": ["cmake.packages"],
+    "prerequisites": ["cmake.targets", "git.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:cmake"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cmake"],
     "hints": [
         "find_package(fmt 10 REQUIRED) defines the imported target fmt::fmt.",
         "Link fmt::fmt and Threads::Threads with target_link_libraries, not archive paths.",
@@ -154,13 +137,8 @@
                     "kind": "static",
                     "description": "fmt and Threads are found as packages.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "find_package(fmt 10 REQUIRED)",
-                        "find_package(Threads REQUIRED)"
-                    ],
-                    "excludes": [
-                        "/usr/local"
-                    ]
+                    "includes": ["find_package(fmt 10 REQUIRED)", "find_package(Threads REQUIRED)"],
+                    "excludes": ["/usr/local"]
                 },
                 {
                     "kind": "static",
@@ -180,29 +158,21 @@
                         "install(EXPORT campus_reportTargets",
                         "NAMESPACE campus::"
                     ],
-                    "excludes": [
-                        "include_directories(include)"
-                    ]
+                    "excludes": ["include_directories(include)"]
                 },
                 {
                     "kind": "static",
                     "description": "The build is configured out of source.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "cmake -S . -B build"
-                    ],
+                    "includes": ["cmake -S . -B build"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "find_package(fmt 10 REQUIRED)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["find_package(fmt 10 REQUIRED)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -293,7 +263,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
