@@ -1,0 +1,345 @@
+{
+    "id": "django.testing",
+    "version": 1,
+    "sequence": 172,
+    "courseId": "django",
+    "title": "Tests that isolate the database",
+    "summary": "Create test data once, assert the JSON contract, count queries, and cover a missing row with Django's TestCase.",
+    "skills": [
+        "django.testing",
+        "python.testing"
+    ],
+    "prerequisites": [
+        "django.models",
+        "django.views"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "testing",
+        "briefing": "The inventory tests depend on rows that happen to exist in the development database, and they never notice the N+1 query. Build a self-contained TestCase with its own data and assertions."
+    },
+    "objectives": [
+        {
+            "id": "objective-data",
+            "description": "Create isolated test data for a TestCase.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-isolation",
+            "description": "Explain how Django isolates and rolls back each test.",
+            "stepIds": [
+                "check"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Choose where a per-test login belongs.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:django"
+    ],
+    "hints": [
+        "Django creates a separate test database from the migrations.",
+        "setUpTestData runs once per class; setUp runs before each test.",
+        "assertNumQueries counts the queries in a block.",
+        "Use reverse with args for the detail route."
+    ],
+    "misconceptions": [
+        {
+            "id": "shared-row",
+            "description": "Depending on rows that already exist in the development database.",
+            "stepId": "apply",
+            "testDescription": "Test data is created once for the class.",
+            "feedback": "The test database starts empty. Create the rows the test needs in setUpTestData.",
+            "followUpSkill": "django.testing"
+        },
+        {
+            "id": "no-query-count",
+            "description": "Asserting the response body but not the query count.",
+            "stepId": "apply",
+            "testDescription": "The query count is bounded.",
+            "feedback": "A correct body can still hide an N+1 query. assertNumQueries makes the query shape part of the test."
+        },
+        {
+            "id": "test-database",
+            "description": "Believing TestCase writes to the development database.",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that TestCase reuses the development database.",
+            "feedback": "The test runner creates a separate database and TestCase rolls each test back in a transaction."
+        },
+        {
+            "id": "login-in-class",
+            "description": "Logging in once in setUpTestData for every test.",
+            "stepId": "transfer",
+            "answer": "set-up-test-data",
+            "feedback": "setUpTestData prepares shared objects. Authentication state belongs in setUp or in each test so it cannot leak between methods.",
+            "followUpSkill": "django.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The test database is disposable",
+                "body": "The Django test runner creates a separate database, applies migrations, and removes it afterward. TestCase wraps each test in a transaction and rolls it back, so one test cannot see another test's writes. The development database is never the test target."
+            },
+            {
+                "title": "Share setup, not state",
+                "body": "setUpTestData runs once per class inside a class-level transaction. It is the right place for rows that every test reads. setUp runs before each test and is the place for per-test state, such as a logged-in client."
+            },
+            {
+                "title": "Query counts are assertions",
+                "body": "A response can look correct while the view issues one query per row. assertNumQueries(1) around the client call makes the query shape visible and fails when a lazy relation starts querying."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "TestCase",
+                "definition": "A Django test class that wraps each test in a transaction."
+            },
+            {
+                "term": "setUpTestData",
+                "definition": "A class method that creates shared rows once per test class."
+            },
+            {
+                "term": "assertNumQueries",
+                "definition": "A context manager that asserts how many queries a block runs."
+            },
+            {
+                "term": "Test database",
+                "definition": "A separate database created for a test run and discarded afterward."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Isolation, shared data, and query counts",
+            "prompt": "Read the explanation, then build the test case.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The test database is disposable",
+                    "body": "The Django test runner creates a separate database, applies migrations, and removes it afterward. TestCase wraps each test in a transaction and rolls it back, so one test cannot see another test's writes. The development database is never the test target."
+                },
+                {
+                    "title": "Share setup, not state",
+                    "body": "setUpTestData runs once per class inside a class-level transaction. It is the right place for rows that every test reads. setUp runs before each test and is the place for per-test state, such as a logged-in client."
+                },
+                {
+                    "title": "Query counts are assertions",
+                    "body": "A response can look correct while the view issues one query per row. assertNumQueries(1) around the client call makes the query shape visible and fails when a lazy relation starts querying."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "TestCase",
+                    "definition": "A Django test class that wraps each test in a transaction."
+                },
+                {
+                    "term": "setUpTestData",
+                    "definition": "A class method that creates shared rows once per test class."
+                },
+                {
+                    "term": "assertNumQueries",
+                    "definition": "A context manager that asserts how many queries a block runs."
+                },
+                {
+                    "term": "Test database",
+                    "definition": "A separate database created for a test run and discarded afterward."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Build the isolated test case",
+            "prompt": "Edit tests.py. Create a category and item in setUpTestData, assert the JSON contract, bound the list query count, and test the missing detail row.",
+            "evidence": "construction",
+            "hints": [
+                "Use a classmethod named setUpTestData.",
+                "Create a Category first, then pass it to Item.objects.create.",
+                "Assert response.json()[\"items\"][0][\"name\"].",
+                "Wrap the list request in assertNumQueries and request the detail route with args=[99]."
+            ],
+            "files": [
+                {
+                    "path": "tests.py",
+                    "content": "from django.test import TestCase\nfrom django.urls import reverse\n\nfrom .models import Category, Item\n\n\nclass ItemViewTests(TestCase):\n    def test_list_returns_items(self):\n        # TODO: create data once and assert the JSON contract\n        response = self.client.get(reverse(\"item-list\"))\n        self.assertEqual(response.status_code, 200)\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "tests.py",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "python manage.py test",
+                "description": "Run the inventory TestCase against a disposable test database."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Test data is created once for the class.",
+                    "file": "tests.py",
+                    "includes": [
+                        "@classmethod",
+                        "def setUpTestData(cls):",
+                        "Category.objects.create(name=\"Lab\")"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The JSON contract is asserted.",
+                    "file": "tests.py",
+                    "includes": [
+                        "response.json()[\"items\"][0][\"name\"]",
+                        "\"Microscope\""
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The query count is bounded.",
+                    "file": "tests.py",
+                    "includes": [
+                        "with self.assertNumQueries(1):"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Missing rows are tested as 404.",
+                    "file": "tests.py",
+                    "includes": [
+                        "reverse(\"item-detail\", args=[99])",
+                        "self.assertEqual(response.status_code, 404)"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "How Django isolates tests",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Think about which database the test runner uses.",
+                "TestCase uses a transaction per test.",
+                "setUpTestData runs once for the class.",
+                "The test client still runs middleware and URL resolution."
+            ],
+            "statements": [
+                {
+                    "id": "separate-database",
+                    "label": "The test runner creates a separate database instead of using the development one.",
+                    "correct": true
+                },
+                {
+                    "id": "rollback",
+                    "label": "TestCase rolls each test back in a transaction.",
+                    "correct": true
+                },
+                {
+                    "id": "set-up-test-data",
+                    "label": "setUpTestData runs once per test class.",
+                    "correct": true
+                },
+                {
+                    "id": "no-middleware",
+                    "label": "client.get executes the view without middleware or URL resolution.",
+                    "correct": false
+                },
+                {
+                    "id": "shared-state",
+                    "label": "Data written by one test is visible to the next test in the same class.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Django builds a separate test database, TestCase rolls each test back, and setUpTestData shares read-only setup rows once per class. The test client still resolves URLs and runs middleware, and test writes do not leak into the next test."
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a per-test login",
+            "prompt": "Every test in a class needs the same signed-in user, but each test may log out or change the session. Where should force_login run?",
+            "evidence": "transfer",
+            "hints": [
+                "The user object can be created once for the class.",
+                "The session state must be fresh for each test.",
+                "setUpTestData is for shared database rows.",
+                "setUp runs before each test."
+            ],
+            "quiz": {
+                "prompt": "Every test in a class needs the same signed-in user, but each test may log out or change the session. Where should force_login run?",
+                "options": [
+                    {
+                        "id": "set-up",
+                        "label": "In setUp, after reusing a user created in setUpTestData."
+                    },
+                    {
+                        "id": "set-up-test-data",
+                        "label": "In setUpTestData, because it runs only once and saves time."
+                    },
+                    {
+                        "id": "module-import",
+                        "label": "At module import time, before the test class is created."
+                    },
+                    {
+                        "id": "after-assertions",
+                        "label": "After the assertions so the session cannot affect the request."
+                    }
+                ],
+                "correctId": "set-up",
+                "explanation": "Create the shared user once in setUpTestData, then establish the session in setUp so each test starts authenticated and cannot inherit a previous test's session changes."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
