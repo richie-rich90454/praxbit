@@ -1,0 +1,279 @@
+{
+    "id": "nestjs.providers",
+    "version": 1,
+    "sequence": 230,
+    "courseId": "nestjs",
+    "title": "Custom providers and export boundaries",
+    "summary": "Register a repository behind a token and export it, then review a module that hides the dependency behind a concrete class.",
+    "skills": ["nestjs.providers", "architecture.modularity"],
+    "prerequisites": ["nestjs.modules", "testing.boundaries"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "providers",
+        "briefing": "The catalog service depends on a concrete repository, so tests cannot substitute it and another module cannot inject it. The module also exports nothing."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Register a token-based provider and export it.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review a module for provider and export risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "hints": [
+        "Import the repository class and its token.",
+        "Add the repository class to the provider list.",
+        "Map the token to the class with useExisting.",
+        "Export the token, not the controller."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-token",
+            "description": "Registering the concrete class and expecting the token to resolve.",
+            "stepId": "apply",
+            "testDescription": "The module imports the repository token.",
+            "feedback": "The token is a separate provider key. Without the token mapping, consumers that inject the token cannot resolve it.",
+            "followUpSkill": "nestjs.providers"
+        },
+        {
+            "id": "hidden-export",
+            "description": "Keeping the provider private and expecting another module to inject it.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "A provider is private until the module exports it. Another feature must import this module, and the module must export the token.",
+            "followUpSkill": "architecture.modularity"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A token is the seam",
+                "body": "Injecting a concrete class couples callers to an implementation. A token lets the module provide that class, a fake, or a different adapter without changing the consumer."
+            },
+            {
+                "title": "Custom providers are module data",
+                "body": "A provider entry can map a token to useClass, useValue, useFactory, or useExisting. The mapping belongs in the module so the dependency graph is visible in one place."
+            },
+            {
+                "title": "Export is deliberate",
+                "body": "A provider is private to its module until the module exports it. Other features must import the module, not reach into its provider list."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Provider token",
+                "definition": "The key used to look up a provider in the injector."
+            },
+            {
+                "term": "useExisting",
+                "definition": "A provider mapping that aliases another registered provider."
+            },
+            {
+                "term": "Export",
+                "definition": "A module declaration that makes a provider available to importers."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Tokens, custom providers, and exports",
+            "prompt": "Read the explanation, then register the provider.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A token is the seam",
+                    "body": "Injecting a concrete class couples callers to an implementation. A token lets the module provide that class, a fake, or a different adapter without changing the consumer."
+                },
+                {
+                    "title": "Custom providers are module data",
+                    "body": "A provider entry can map a token to useClass, useValue, useFactory, or useExisting. The mapping belongs in the module so the dependency graph is visible in one place."
+                },
+                {
+                    "title": "Export is deliberate",
+                    "body": "A provider is private to its module until the module exports it. Other features must import the module, not reach into its provider list."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Provider token",
+                    "definition": "The key used to look up a provider in the injector."
+                },
+                {
+                    "term": "useExisting",
+                    "definition": "A provider mapping that aliases another registered provider."
+                },
+                {
+                    "term": "Export",
+                    "definition": "A module declaration that makes a provider available to importers."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Register the catalog repository",
+            "prompt": "Edit catalog.module.ts. Import the repository and its token, register both, and export the token so other modules can inject it.",
+            "evidence": "construction",
+            "hints": [
+                "Import CatalogRepository and CATALOG_REPOSITORY from the repository file.",
+                "Add CatalogRepository to catalogProviders.",
+                "Map CATALOG_REPOSITORY with useExisting.",
+                "Put only the token in catalogExports."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "catalog.module.ts",
+                    "content": "import { Module } from \"@nestjs/common\";\nimport { CatalogController } from \"./catalog.controller\";\n\nexport const catalogProviders = [];\nexport const catalogExports = [];\n\n@Module({\n  controllers: [CatalogController],\n  providers: catalogProviders,\n  exports: catalogExports,\n})\nexport class CatalogModule {}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "catalog.module.ts",
+            "preview": "none",
+            "verification": "ast",
+            "tests": [
+                {
+                    "kind": "ast",
+                    "description": "The module imports the repository token.",
+                    "file": "catalog.module.ts",
+                    "language": "typescript",
+                    "require": [
+                        {
+                            "node": "import",
+                            "name": "./catalog.repository"
+                        },
+                        {
+                            "node": "import",
+                            "name": "CATALOG_REPOSITORY"
+                        }
+                    ]
+                },
+                {
+                    "kind": "ast",
+                    "description": "The module declares provider and export lists.",
+                    "file": "catalog.module.ts",
+                    "language": "typescript",
+                    "require": [
+                        {
+                            "node": "variable-declaration",
+                            "name": "catalogProviders"
+                        },
+                        {
+                            "node": "variable-declaration",
+                            "name": "catalogExports"
+                        }
+                    ]
+                },
+                {
+                    "kind": "ast",
+                    "description": "The module class is declared.",
+                    "file": "catalog.module.ts",
+                    "language": "typescript",
+                    "require": [
+                        {
+                            "node": "class-declaration",
+                            "name": "CatalogModule"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the catalog module",
+            "prompt": "Review catalog.module.ts and select every real provider or export problem.",
+            "evidence": "review",
+            "hints": [
+                "Check the exports array.",
+                "Ask how a test would replace the repository.",
+                "Confirm whether the module registers its controller.",
+                "Reject claims about request scope the artifact does not declare."
+            ],
+            "artifact": {
+                "title": "catalog.module.ts",
+                "caption": "The module registers the concrete repository but exports nothing and offers no token for substitution.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { Module } from \"@nestjs/common\";\nimport { CatalogController } from \"./catalog.controller\";\nimport { CatalogRepository } from \"./catalog.repository\";\n\n@Module({\n  controllers: [CatalogController],\n  providers: [CatalogRepository],\n})\nexport class CatalogModule {}\n"
+            },
+            "findings": [
+                {
+                    "id": "no-export",
+                    "label": "Other modules cannot inject the repository because the module exports nothing.",
+                    "correct": true
+                },
+                {
+                    "id": "no-token",
+                    "label": "The repository is provided only as a concrete class, so tests cannot substitute it through a token.",
+                    "correct": true
+                },
+                {
+                    "id": "controller",
+                    "label": "The controller is registered in the module.",
+                    "correct": false
+                },
+                {
+                    "id": "scope",
+                    "label": "The repository is request-scoped, so every request gets a new instance.",
+                    "correct": false
+                },
+                {
+                    "id": "private",
+                    "label": "A provider is private to its module until the module exports it.",
+                    "correct": true
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The module provides the class but exports nothing and exposes no token. Other modules cannot inject it, and tests are coupled to the concrete class. The controller is registered, and no request scope is declared."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
