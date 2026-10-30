@@ -1,18 +1,26 @@
 {
     "id": "zig.values",
     "version": 1,
-    "sequence": 67,
+    "sequence": 115,
     "courseId": "zig",
     "title": "Explicit values in Zig",
     "summary": "Declare typed values, iterate a slice with a capture, and count positives.",
-    "skills": ["zig.syntax"],
-    "prerequisites": ["concept.state", "concept.conditions"],
+    "skills": [
+        "zig.syntax"
+    ],
+    "prerequisites": [
+        "concept.state",
+        "concept.conditions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +32,31 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         },
         {
             "id": "objective-transfer",
             "description": "Predict the result of the same counting rule on new input.",
-            "stepIds": ["count"]
+            "stepIds": [
+                "count"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:zig"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:zig"
+    ],
     "hints": [
         "The for loop already visits every value.",
         "Compare the captured value with zero.",
@@ -176,22 +195,34 @@
                     "kind": "static",
                     "description": "The function keeps the typed slice parameter and return type.",
                     "file": "main.zig",
-                    "includes": ["fn countPositive(values: []const i32) u32"],
+                    "includes": [
+                        "fn countPositive(values: []const i32) u32"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The for loop binds each value and counts only positives.",
                     "file": "main.zig",
-                    "includes": ["for (values) |value|", "if (value > 0)", "count += 1;"],
-                    "excludes": ["count += 0"]
+                    "includes": [
+                        "for (values) |value|",
+                        "if (value > 0)",
+                        "count += 1;"
+                    ],
+                    "excludes": [
+                        "count += 0"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.zig",
-                    "includes": ["fn countPositive(values: []const i32) u32"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "fn countPositive(values: []const i32) u32"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ]
         },
@@ -285,5 +316,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems"]
+    "tags": [
+        "systems"
+    ]
 }
