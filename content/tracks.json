@@ -20,7 +20,9 @@
                 "before-code.break-it-into-parts",
                 "before-code.can-we-trust-the-result"
             ],
-            "interests": ["everything"]
+            "interests": [
+                "everything"
+            ]
         },
         {
             "id": "campus",
@@ -47,7 +49,12 @@
                 "campus.nothing-works-together",
                 "campus.the-campus-incident"
             ],
-            "interests": ["web", "professional", "systems", "ai"]
+            "interests": [
+                "web",
+                "professional",
+                "systems",
+                "ai"
+            ]
         },
         {
             "id": "python-foundations",
@@ -61,15 +68,27 @@
                 "python.collections",
                 "python.testing"
             ],
-            "interests": ["ai", "professional"]
+            "interests": [
+                "ai",
+                "professional"
+            ]
         },
         {
             "id": "sql-data",
             "title": "SQL and data",
             "summary": "Ask precise questions of relational data and keep results trustworthy.",
             "kind": "language",
-            "missionIds": ["sql.filter-orders", "sql.join-customers", "sql.review-model"],
-            "interests": ["professional", "web"]
+            "missionIds": [
+                "sql.filter-orders",
+                "sql.join-customers",
+                "sql.review-model",
+                "sql.indexes-performance",
+                "sql.transactions-isolation"
+            ],
+            "interests": [
+                "professional",
+                "web"
+            ]
         },
         {
             "id": "algorithms",
@@ -79,33 +98,66 @@
             "missionIds": [
                 "algorithms.binary-search",
                 "algorithms.frequency-map",
-                "algorithms.complexity"
+                "algorithms.complexity",
+                "algorithms.sorting",
+                "algorithms.recursion"
             ],
-            "interests": ["professional", "systems"]
+            "interests": [
+                "professional",
+                "systems"
+            ]
         },
         {
             "id": "security",
             "title": "Security",
             "summary": "Injection, sessions, and the boundaries where trust must stop.",
             "kind": "discipline",
-            "missionIds": ["security.injection", "security.sessions"],
-            "interests": ["systems", "professional", "web"]
+            "missionIds": [
+                "security.injection",
+                "security.sessions",
+                "security.access-control",
+                "security.cryptography",
+                "security.supply-chain-incident"
+            ],
+            "interests": [
+                "systems",
+                "professional",
+                "web"
+            ]
         },
         {
             "id": "ai-engineering",
             "title": "AI engineering",
             "summary": "Prompts, evaluation, and bounded delegation that keeps responsibility with the engineer.",
             "kind": "discipline",
-            "missionIds": ["ai.prompt-contract", "ai.evaluate-output", "ai.agent-permissions"],
-            "interests": ["ai", "professional"]
+            "missionIds": [
+                "ai.prompt-contract",
+                "ai.evaluate-output",
+                "ai.agent-permissions",
+                "ai.tool-calling",
+                "ai.cost-privacy"
+            ],
+            "interests": [
+                "ai",
+                "professional"
+            ]
         },
         {
             "id": "devops",
             "title": "DevOps",
             "summary": "Containers, pipelines, and releases that can be verified and reversed.",
             "kind": "discipline",
-            "missionIds": ["devops.container-limits", "devops.pipeline-checks"],
-            "interests": ["systems", "professional"]
+            "missionIds": [
+                "devops.container-limits",
+                "devops.pipeline-checks",
+                "devops.monitoring",
+                "devops.backups",
+                "devops.infrastructure-security"
+            ],
+            "interests": [
+                "systems",
+                "professional"
+            ]
         },
         {
             "id": "typescript",
@@ -115,217 +167,428 @@
             "missionIds": [
                 "typescript.narrowing",
                 "typescript.generics",
-                "typescript.runtime-guards"
+                "typescript.runtime-guards",
+                "typescript.generic-constraints",
+                "typescript.exhaustive-unions"
             ],
-            "interests": ["web", "professional"]
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "node-services",
             "title": "Node services",
             "summary": "Middleware order, validation, and error boundaries in Hono services.",
             "kind": "framework",
-            "missionIds": ["node.middleware-order", "node.http", "node.errors"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "node.middleware-order",
+                "node.http",
+                "node.errors",
+                "node.routing"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "java",
             "title": "Java",
             "summary": "Typed values, objects, collections, concurrency, and the build tools a Java service needs.",
             "kind": "language",
-            "missionIds": ["java.values", "java.objects"],
-            "interests": ["professional"]
+            "missionIds": [
+                "java.values",
+                "java.objects",
+                "java.collections-streams",
+                "java.concurrency-executors",
+                "java.maven-build"
+            ],
+            "interests": [
+                "professional"
+            ]
         },
         {
             "id": "c",
             "title": "C",
             "summary": "Typed values, pointers, memory, and the compiler warnings that keep C honest.",
             "kind": "language",
-            "missionIds": ["c.values", "c.memory"],
-            "interests": ["systems"]
+            "missionIds": [
+                "c.values",
+                "c.memory",
+                "c.dynamic-memory",
+                "c.sockets",
+                "c.make-build"
+            ],
+            "interests": [
+                "systems"
+            ]
         },
         {
             "id": "cpp",
             "title": "C++",
             "summary": "References, RAII, STL containers, templates, and the build boundary.",
             "kind": "language",
-            "missionIds": ["cpp.values", "cpp.raii"],
-            "interests": ["systems", "games"]
+            "missionIds": [
+                "cpp.values",
+                "cpp.raii",
+                "cpp.stl-algorithms",
+                "cpp.templates",
+                "cpp.threads-cmake"
+            ],
+            "interests": [
+                "systems",
+                "games"
+            ]
         },
         {
             "id": "csharp",
             "title": "C#",
             "summary": "Typed values, LINQ, async work, dependency injection, and the .NET CLI.",
             "kind": "language",
-            "missionIds": ["csharp.values", "csharp.linq"],
-            "interests": ["professional", "games"]
+            "missionIds": [
+                "csharp.values",
+                "csharp.linq",
+                "csharp.async-cancellation",
+                "csharp.dependency-injection",
+                "csharp.aspnet-core"
+            ],
+            "interests": [
+                "professional",
+                "games"
+            ]
         },
         {
             "id": "go",
             "title": "Go",
             "summary": "Small interfaces, explicit errors, goroutines, channels, modules, and HTTP services.",
             "kind": "language",
-            "missionIds": ["go.values", "go.concurrency"],
-            "interests": ["systems", "professional"]
+            "missionIds": [
+                "go.values",
+                "go.concurrency",
+                "go.interfaces-contracts",
+                "go.modules-packages",
+                "go.http-service"
+            ],
+            "interests": [
+                "systems",
+                "professional"
+            ]
         },
         {
             "id": "rust",
             "title": "Rust",
             "summary": "Ownership, borrowing, traits, async work, Cargo, and systems-level correctness.",
             "kind": "language",
-            "missionIds": ["rust.values", "rust.ownership"],
-            "interests": ["systems"]
+            "missionIds": [
+                "rust.values",
+                "rust.ownership",
+                "rust.traits-generics",
+                "rust.lifetimes",
+                "rust.async-tokio"
+            ],
+            "interests": [
+                "systems"
+            ]
         },
         {
             "id": "kotlin",
             "title": "Kotlin",
             "summary": "Null-safe types, data classes, coroutines, and Gradle-based JVM work.",
             "kind": "language",
-            "missionIds": ["kotlin.values", "kotlin.coroutines"],
-            "interests": ["professional"]
+            "missionIds": [
+                "kotlin.values",
+                "kotlin.coroutines",
+                "kotlin.data-classes",
+                "kotlin.testing",
+                "kotlin.flow"
+            ],
+            "interests": [
+                "professional"
+            ]
         },
         {
             "id": "swift",
             "title": "Swift",
             "summary": "Optionals, value semantics, async work, and Swift Package Manager.",
             "kind": "language",
-            "missionIds": ["swift.values", "swift.optionals"],
-            "interests": ["professional"]
+            "missionIds": [
+                "swift.values",
+                "swift.optionals",
+                "swift.collections",
+                "swift.errors",
+                "swift.packages"
+            ],
+            "interests": [
+                "professional"
+            ]
         },
         {
             "id": "ruby",
             "title": "Ruby",
             "summary": "Dynamic values, blocks, objects, and the Ruby toolchain.",
             "kind": "language",
-            "missionIds": ["ruby.values", "ruby.blocks"],
-            "interests": ["professional", "web"]
+            "missionIds": [
+                "ruby.values",
+                "ruby.blocks",
+                "ruby.hashes",
+                "ruby.errors",
+                "ruby.tooling"
+            ],
+            "interests": [
+                "professional",
+                "web"
+            ]
         },
         {
             "id": "zig",
             "title": "Zig",
             "summary": "Explicit types, slices, allocators, and the build steps a Zig program needs.",
             "kind": "language",
-            "missionIds": ["zig.values", "zig.memory"],
-            "interests": ["systems"]
+            "missionIds": [
+                "zig.values",
+                "zig.memory",
+                "zig.errors",
+                "zig.build",
+                "zig.testing"
+            ],
+            "interests": [
+                "systems"
+            ]
         },
         {
             "id": "lua",
             "title": "Lua",
             "summary": "Local values, tables, metatables, and modules for game scripts.",
             "kind": "language",
-            "missionIds": ["lua.values", "lua.tables"],
-            "interests": ["games", "systems"]
+            "missionIds": [
+                "lua.values",
+                "lua.tables",
+                "lua.functions",
+                "lua.modules",
+                "lua.metatables"
+            ],
+            "interests": [
+                "games",
+                "systems"
+            ]
         },
         {
             "id": "react",
             "title": "React interfaces",
             "summary": "Build typed React components and load remote data without leaking requests.",
             "kind": "framework",
-            "missionIds": ["react.components", "react.data"],
-            "interests": ["web"]
+            "missionIds": [
+                "react.components",
+                "react.data",
+                "react.routing",
+                "react.testing"
+            ],
+            "interests": [
+                "web"
+            ]
         },
         {
             "id": "vue",
             "title": "Vue interfaces",
             "summary": "Build Vue single-file components and keep shared cart state derived and guarded.",
             "kind": "framework",
-            "missionIds": ["vue.components", "vue.reactivity"],
-            "interests": ["web"]
+            "missionIds": [
+                "vue.components",
+                "vue.reactivity",
+                "vue.routing",
+                "vue.testing"
+            ],
+            "interests": [
+                "web"
+            ]
         },
         {
             "id": "solidjs",
             "title": "SolidJS interfaces",
             "summary": "Build fine-grained SolidJS components and a cart store that updates without a virtual DOM.",
             "kind": "framework",
-            "missionIds": ["solidjs.components", "solidjs.signals"],
-            "interests": ["web"]
+            "missionIds": [
+                "solidjs.components",
+                "solidjs.signals",
+                "solidjs.control-flow",
+                "solidjs.testing"
+            ],
+            "interests": [
+                "web"
+            ]
         },
         {
             "id": "angular",
             "title": "Angular",
             "summary": "Standalone components, injected services, and the HTTP and routing boundaries a production Angular app needs.",
             "kind": "framework",
-            "missionIds": ["angular.components", "angular.services"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "angular.components",
+                "angular.services",
+                "angular.routing",
+                "angular.testing"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "svelte",
             "title": "Svelte",
             "summary": "Components, props, and stores that compile to precise DOM updates.",
             "kind": "framework",
-            "missionIds": ["svelte.components", "svelte.stores"],
-            "interests": ["web"]
+            "missionIds": [
+                "svelte.components",
+                "svelte.stores",
+                "svelte.routing",
+                "svelte.testing"
+            ],
+            "interests": [
+                "web"
+            ]
         },
         {
             "id": "express",
             "title": "Express",
             "summary": "Express routes, middleware order, and a four-argument error boundary that keeps failures predictable.",
             "kind": "framework",
-            "missionIds": ["express.routing", "express.middleware"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "express.routing",
+                "express.middleware",
+                "express.validation",
+                "express.auth"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "fastify",
             "title": "Fastify",
             "summary": "Fastify routes with typed parameters, JSON schemas that reject extra fields, and encapsulated plugins.",
             "kind": "framework",
-            "missionIds": ["fastify.routing", "fastify.schemas"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "fastify.routing",
+                "fastify.schemas",
+                "fastify.plugins",
+                "fastify.auth"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "nestjs",
             "title": "NestJS",
             "summary": "NestJS feature modules, constructor-injected providers, and guards that decide before a handler runs.",
             "kind": "framework",
-            "missionIds": ["nestjs.modules", "nestjs.guards"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "nestjs.modules",
+                "nestjs.guards",
+                "nestjs.providers",
+                "nestjs.testing"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "spring-boot",
             "title": "Spring Boot",
             "summary": "Annotated Java controllers, validation, Spring Data repositories, and transactional service boundaries.",
             "kind": "framework",
-            "missionIds": ["spring-boot.controllers", "spring-boot.data"],
-            "interests": ["professional"]
+            "missionIds": [
+                "spring-boot.controllers",
+                "spring-boot.data",
+                "spring-boot.validation",
+                "spring-boot.security"
+            ],
+            "interests": [
+                "professional"
+            ]
         },
         {
             "id": "aspnet-core",
             "title": "ASP.NET Core",
             "summary": "Attribute-routed C# APIs, typed action results, dependency injection lifetimes, and an ordered middleware pipeline.",
             "kind": "framework",
-            "missionIds": ["aspnet-core.controllers", "aspnet-core.di"],
-            "interests": ["professional", "web"]
+            "missionIds": [
+                "aspnet-core.controllers",
+                "aspnet-core.di",
+                "aspnet-core.validation",
+                "aspnet-core.auth"
+            ],
+            "interests": [
+                "professional",
+                "web"
+            ]
         },
         {
             "id": "fastapi",
             "title": "FastAPI",
             "summary": "Typed Python HTTP APIs with Pydantic contracts, explicit errors, and deterministic tests.",
             "kind": "framework",
-            "missionIds": ["fastapi.routes", "fastapi.validation"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "fastapi.routes",
+                "fastapi.validation",
+                "fastapi.security",
+                "fastapi.errors"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "django",
             "title": "Django",
             "summary": "Django models, migrations, and JSON views that keep queries and response fields explicit.",
             "kind": "framework",
-            "missionIds": ["django.models", "django.views"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "django.models",
+                "django.views",
+                "django.auth",
+                "django.testing"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
         },
         {
             "id": "cmake",
             "title": "CMake",
             "summary": "Targets, packages, installs, and the build graph a C++ project needs.",
             "kind": "framework",
-            "missionIds": ["cmake.targets", "cmake.packages"],
-            "interests": ["systems"]
+            "missionIds": [
+                "cmake.targets",
+                "cmake.packages",
+                "cmake.testing",
+                "cmake.install"
+            ],
+            "interests": [
+                "systems"
+            ]
         },
         {
             "id": "cargo",
             "title": "Cargo",
             "summary": "Crates, features, and workspaces that keep a Rust build reproducible.",
             "kind": "framework",
-            "missionIds": ["cargo.packages", "cargo.workspace"],
-            "interests": ["systems"]
+            "missionIds": [
+                "cargo.packages",
+                "cargo.workspace",
+                "cargo.testing",
+                "cargo.publishing"
+            ],
+            "interests": [
+                "systems"
+            ]
         },
         {
             "id": "database-engineering",
@@ -336,9 +599,14 @@
                 "database-engineering.indexes",
                 "database-engineering.transactions",
                 "database-engineering.dialects",
-                "database-engineering.redis"
+                "database-engineering.redis",
+                "database-engineering.query-performance"
             ],
-            "interests": ["professional", "systems", "web"]
+            "interests": [
+                "professional",
+                "systems",
+                "web"
+            ]
         },
         {
             "id": "algorithms-advanced",
@@ -348,25 +616,48 @@
             "missionIds": [
                 "algorithms-advanced.structures",
                 "algorithms-advanced.trees",
-                "algorithms-advanced.graphs"
+                "algorithms-advanced.graphs",
+                "algorithms-advanced.dynamic-programming",
+                "algorithms-advanced.greedy"
             ],
-            "interests": ["professional", "systems"]
+            "interests": [
+                "professional",
+                "systems"
+            ]
         },
         {
             "id": "devops-practice",
             "title": "DevOps practice",
             "summary": "Linux permissions, service diagnosis, DNS, TLS, and reverse-proxy boundaries.",
             "kind": "discipline",
-            "missionIds": ["devops-practice.linux", "devops-practice.networking"],
-            "interests": ["systems", "professional"]
+            "missionIds": [
+                "devops-practice.linux",
+                "devops-practice.networking",
+                "devops-practice.services",
+                "devops-practice.tls",
+                "devops-practice.proxy"
+            ],
+            "interests": [
+                "systems",
+                "professional"
+            ]
         },
         {
             "id": "ai-practice",
             "title": "AI practice",
             "summary": "Retrieval, structured output, evaluation, cost, and bounded delegation.",
             "kind": "discipline",
-            "missionIds": ["ai-practice.retrieval", "ai-practice.structured"],
-            "interests": ["ai", "professional"]
+            "missionIds": [
+                "ai-practice.retrieval",
+                "ai-practice.structured",
+                "ai-practice.evaluation",
+                "ai-practice.cost",
+                "ai-practice.privacy"
+            ],
+            "interests": [
+                "ai",
+                "professional"
+            ]
         },
         {
             "id": "systems-architecture",
@@ -376,17 +667,79 @@
             "missionIds": [
                 "systems-architecture.processes",
                 "systems-architecture.compilers",
-                "systems-architecture.distributed"
+                "systems-architecture.distributed",
+                "systems-architecture.parallelism",
+                "systems-architecture.observability"
             ],
-            "interests": ["systems", "professional"]
+            "interests": [
+                "systems",
+                "professional"
+            ]
         },
         {
             "id": "native",
             "title": "Native and offline",
             "summary": "Installable PWAs, service-worker caches, Capacitor boundaries, secure storage, deep links, and cross-device synchronization.",
             "kind": "discipline",
-            "missionIds": ["native.pwa", "native.capacitor"],
-            "interests": ["web", "professional"]
+            "missionIds": [
+                "native.pwa",
+                "native.capacitor",
+                "native.secure-storage",
+                "native.deep-links",
+                "native.notifications"
+            ],
+            "interests": [
+                "web",
+                "professional"
+            ]
+        },
+        {
+            "id": "html",
+            "title": "HTML foundations",
+            "summary": "Build semantic, accessible documents with real browser checks.",
+            "kind": "language",
+            "interests": [
+                "web"
+            ],
+            "missionIds": [
+                "html.document-structure",
+                "html.semantic-structure",
+                "html.forms",
+                "html.accessibility",
+                "html.links-media"
+            ]
+        },
+        {
+            "id": "css",
+            "title": "CSS foundations",
+            "summary": "Master the cascade, layout, responsive design, and accessible color.",
+            "kind": "language",
+            "interests": [
+                "web"
+            ],
+            "missionIds": [
+                "css.cascade-layers",
+                "css.box-model",
+                "css.responsive-design",
+                "css.color-contrast",
+                "css.transitions-reduced-motion"
+            ]
+        },
+        {
+            "id": "javascript",
+            "title": "JavaScript foundations",
+            "summary": "Write, test, and debug real browser programs.",
+            "kind": "language",
+            "interests": [
+                "web"
+            ],
+            "missionIds": [
+                "javascript.functions",
+                "javascript.control-flow",
+                "javascript.arrays-objects",
+                "javascript.dom-events",
+                "javascript.testing-debugging"
+            ]
         }
     ]
 }
