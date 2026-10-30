@@ -47,15 +47,25 @@
     "misconceptions": [
         {
             "id": "deploy-first",
-            "description": "Deploying to discover whether checks pass.",
+            "description": "Deploying before static checks and tests run.",
             "stepId": "pipeline",
-            "feedback": "Deployment must follow successful verification. Shipping first turns a test failure into an incident."
+            "answer": "checkout,install,build,deploy,lint,typecheck,test,content",
+            "feedback": "Deploying before checks publishes unverified code. Run lint, typecheck, tests, and content checks before build and deploy.",
+            "followUpSkill": "devops.ci"
         },
         {
             "id": "no-lock",
-            "description": "Installing without a frozen lockfile.",
+            "description": "Installing the newest matching versions in CI.",
             "stepId": "pipeline-check",
-            "feedback": "A frozen lockfile makes CI reproducible. Floating installs can pass locally and fail elsewhere."
+            "answer": "latest",
+            "feedback": "Installing latest versions makes the pipeline depend on the clock. Use a frozen lockfile install."
+        },
+        {
+            "id": "green-means-shipped",
+            "description": "Treating a green pipeline as proof the change is correct.",
+            "stepId": "pipeline-claims",
+            "answer": "success",
+            "feedback": "A green run proves the configured checks passed. It does not prove the feature is correct or safe to deploy."
         }
     ],
     "lesson": {
@@ -135,7 +145,13 @@
                 "build",
                 "deploy"
             ],
-            "explanation": "Acquire the revision, install reproducibly, run fast checks, run tests and content validation, build, then deploy. Any failure stops the chain."
+            "explanation": "Acquire the revision, install reproducibly, run fast checks, run tests and content validation, build, then deploy. Any failure stops the chain.",
+            "hints": [
+                "Start by getting the exact source revision.",
+                "Install from the lockfile before running checks.",
+                "Fast static checks should fail before slower tests and builds.",
+                "Order: checkout, install, lint, typecheck, test, content, build, deploy."
+            ]
         },
         {
             "kind": "quiz",
@@ -167,10 +183,10 @@
                 "explanation": "A frozen lockfile makes installs reproducible, so CI checks the same dependency graph that was reviewed."
             },
             "hints": [
-                "The lockfile records resolved versions.",
-                "CI needs to match the reviewed dependency set.",
-                "Frozen installs do not silently upgrade.",
-                "It reproduces exact locked versions."
+                "The lockfile records exact versions and integrity hashes.",
+                "A frozen install refuses to rewrite the lockfile.",
+                "Speed and freshness are not the goal of CI installation.",
+                "Choose reproducibility from the recorded dependency versions."
             ]
         },
         {
@@ -201,7 +217,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "A gate is only useful if it stops release and preserves evidence when it fails."
+            "explanation": "A gate is only useful if it stops release and preserves evidence when it fails.",
+            "hints": [
+                "A green pipeline is evidence about the checks it ran.",
+                "The same commit and lockfile should produce the same dependency set.",
+                "Deployment is a separate, reversible step.",
+                "Select stopping on failure, reproducible installs, and retained logs; reject green as proof of correctness."
+            ]
         }
     ],
     "evaluation": {
