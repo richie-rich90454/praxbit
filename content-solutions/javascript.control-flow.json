@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "implement-filter": {
+            "files": {
+                "main.js": "function completedTitles(tasks) {\n  const result = [];\n  for (const task of tasks) {\n    if (task.done === true) {\n      result.push(task.title);\n    }\n  }\n  return result;\n}\n"
+            }
+        }
+    }
+}
