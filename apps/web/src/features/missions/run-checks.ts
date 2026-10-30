@@ -1,5 +1,5 @@
 import type { CodeTest } from "@praxbit/contracts";
-import { runJavaScriptTests } from "@praxbit/execution/browser";
+import { runAstTests, runJavaScriptTests } from "@praxbit/execution/browser";
 import { runPreviewChecks, type PreviewCheck } from "@praxbit/execution/browser";
 import { runSqlChecks } from "@praxbit/execution/wasm";
 import sqlWasmUrl from "sql.js/dist/sql-wasm.wasm?url";
@@ -33,6 +33,7 @@ export interface CheckRunInput {
 
 type FunctionTest = Extract<CodeTest, { kind: "function" }>;
 type SqlTest = Extract<CodeTest, { kind: "sql" }>;
+type AstTest = Extract<CodeTest, { kind: "ast" }>;
 
 function isFunctionTest(test: CodeTest): test is FunctionTest {
     return test.kind === "function";
@@ -40,6 +41,10 @@ function isFunctionTest(test: CodeTest): test is FunctionTest {
 
 function isSqlTest(test: CodeTest): test is SqlTest {
     return test.kind === "sql";
+}
+
+function isAstTest(test: CodeTest): test is AstTest {
+    return test.kind === "ast";
 }
 
 function normalizeJson(value: unknown): string {
@@ -144,6 +149,24 @@ function staticChecks(
     return outcomes;
 }
 
+async function astChecks(
+    files: Readonly<Record<string, string>>,
+    tests: readonly CodeTest[],
+): Promise<CheckOutcome[]> {
+    const astTests = tests.filter(isAstTest);
+    if (astTests.length === 0) {
+        return [];
+    }
+    const outcomes = await runAstTests(files, astTests);
+    return outcomes.map(function toOutcome(outcome): CheckOutcome {
+        return Object.assign(
+            { description: outcome.description, passed: outcome.passed },
+            outcome.actual === undefined ? {} : { actual: outcome.actual },
+            outcome.error === undefined ? {} : { error: outcome.error },
+        );
+    });
+}
+
 function sourceForJavaScript(files: Readonly<Record<string, string>>, entry: string): string {
     const parts: string[] = [];
     for (const [path, content] of Object.entries(files)) {
@@ -158,11 +181,18 @@ function sourceForJavaScript(files: Readonly<Record<string, string>>, entry: str
 async function executeJavaScript(
     input: CheckRunInput,
     extraDiagnostics: readonly { message: string; severity: "error" | "warning" }[],
+    astSourceFiles: Readonly<Record<string, string>> = input.files,
 ): Promise<CheckRunResult> {
     const functionTests = input.tests.filter(isFunctionTest);
     const staticOutcomes = staticChecks(input.files, input.tests);
+    const syntaxOutcomes = await astChecks(astSourceFiles, input.tests);
     if (functionTests.length === 0) {
-        return { outcomes: staticOutcomes, stdout: "", stderr: "", diagnostics: extraDiagnostics };
+        return {
+            outcomes: [...staticOutcomes, ...syntaxOutcomes],
+            stdout: "",
+            stderr: "",
+            diagnostics: extraDiagnostics,
+        };
     }
     const report = await runJavaScriptTests({
         source: sourceForJavaScript(input.files, input.entry),
@@ -193,7 +223,7 @@ async function executeJavaScript(
         },
     );
     return {
-        outcomes: [...outcomes, ...staticOutcomes],
+        outcomes: [...outcomes, ...staticOutcomes, ...syntaxOutcomes],
         stdout: report.stdout,
         stderr: report.stderr,
         diagnostics: extraDiagnostics,
@@ -241,6 +271,7 @@ async function executeTypeScript(input: CheckRunInput): Promise<CheckRunResult> 
     return executeJavaScript(
         { ...input, files: { ...input.files, [input.entry]: result.outputText } },
         diagnostics,
+        input.files,
     );
 }
 
