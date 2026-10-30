@@ -97,6 +97,7 @@ pnpm test:e2e
 pnpm test:e2e:no-ai
 pnpm test:a11y
 pnpm test:wcag
+pnpm test:wcag:report
 pnpm test:visual
 pnpm content:report
 pnpm verify:hosting -- --base http://127.0.0.1:8787
