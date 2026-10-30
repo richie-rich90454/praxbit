@@ -1,18 +1,27 @@
 {
     "id": "security.cryptography",
     "version": 1,
-    "sequence": 402,
+    "sequence": 49,
     "courseId": "security",
     "title": "Hash, encrypt, or throw away",
     "summary": "Choose the right cryptographic tool for passwords and reset tokens, and review a token flow that chose wrong.",
-    "skills": ["security.auth", "concept.security"],
-    "prerequisites": ["security.auth", "http.basics"],
+    "skills": [
+        "security.auth",
+        "concept.security"
+    ],
+    "prerequisites": [
+        "security.auth",
+        "http.basics"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["configuration-review", "no-execution"]
+        "capabilities": [
+            "configuration-review",
+            "no-execution"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +33,31 @@
         {
             "id": "choose-tool",
             "description": "Match passwords and tokens to the right cryptographic operation.",
-            "stepIds": ["hash-choice"]
+            "stepIds": [
+                "hash-choice"
+            ]
         },
         {
             "id": "review-flow",
             "description": "Identify weak token generation, storage, and expiry.",
-            "stepIds": ["token-review"]
+            "stepIds": [
+                "token-review"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain password, token, and transport protections.",
-            "stepIds": ["crypto-transfer"]
+            "stepIds": [
+                "crypto-transfer"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:lock"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:lock"
+    ],
     "hints": [
         "Passwords need a slow, salted, one-way function.",
         "Reset tokens need unpredictable randomness and hashed storage.",
@@ -313,5 +333,9 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional", "web"]
+    "tags": [
+        "systems",
+        "professional",
+        "web"
+    ]
 }
