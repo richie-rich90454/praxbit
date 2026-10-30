@@ -1,6 +1,6 @@
 {
     "id": "before-code.fix-the-instructions",
-    "version": 1,
+    "version": 2,
     "sequence": 7,
     "courseId": "before-code",
     "title": "Fix the instructions",
@@ -50,13 +50,30 @@
             "description": "Changing the scan step instead of the movement.",
             "stepId": "robot-fault",
             "answer": "scan:rescan",
-            "feedback": "Rescanning repeats the same wrong placement. The evidence points to movement, not scanning."
+            "feedback": "Rescanning repeats the same wrong placement. The evidence points to movement, not scanning.",
+            "followUpSkill": "concept.debugging"
         },
         {
             "id": "multiple-changes",
             "description": "Changing several instructions at once.",
             "stepId": "robot-fault",
+            "diagnostic": "Changes more than one instruction before rerunning, so the cause of the fix cannot be identified.",
             "feedback": "If you change two things, you cannot tell which change fixed the behavior. Make one justified change, then verify."
+        },
+        {
+            "id": "looks-right-is-proof",
+            "description": "Accepting a change because it looks correct.",
+            "stepId": "verification-check",
+            "answer": "assume",
+            "feedback": "Appearance is not evidence. Rerun the task and check the actual bin and scan result.",
+            "followUpSkill": "concept.testing"
+        },
+        {
+            "id": "rewrite-at-first-failure",
+            "description": "Rewriting the whole project at the first failure.",
+            "stepId": "debug-claims",
+            "answer": "random",
+            "feedback": "A wholesale rewrite discards evidence and may reintroduce the same fault. Isolate the cause and change one thing."
         }
     ],
     "lesson": {
@@ -89,6 +106,12 @@
         {
             "kind": "debug",
             "id": "robot-fault",
+            "hints": [
+                "Use the bin's position to decide which instruction sends the robot the wrong way.",
+                "A debugger isolates one faulty instruction, then chooses the smallest repair.",
+                "If a recipe says turn left toward a target on the right, the direction is the fault, not the number of steps.",
+                "Check the turn against the stated bin position, then pick a fix that changes only the direction."
+            ],
             "title": "Find the faulty instruction",
             "prompt": "The recycling bin is to the robot's right. Choose the instruction that is wrong, then choose the smallest repair.",
             "evidence": "debugging",
@@ -162,15 +185,21 @@
                 "explanation": "Running the actual behavior and checking its outcome is stronger evidence than appearance or opinion."
             },
             "hints": [
-                "What evidence would show the robot now reaches the bin?",
-                "Run the behavior, do not just read it.",
-                "Check both the physical destination and the scan result.",
-                "Rerun the task and inspect where the can ends up."
+                "Choose the action that produces independent evidence the task now works.",
+                "Verification reruns the behavior and checks the observed result.",
+                "If a lamp does not light, replacing the bulb and then checking the switch proves more than assuming.",
+                "Prefer rerunning the sorting task and inspecting the bin and scan over opinions or extra changes."
             ]
         },
         {
             "kind": "explain",
             "id": "debug-claims",
+            "hints": [
+                "Select statements that describe disciplined debugging.",
+                "Careful debugging changes one suspected cause and verifies with evidence.",
+                "A mechanic who replaces every part at once cannot tell which repair fixed the engine.",
+                "Two statements are sound; reject wholesale rewrites and treating symptoms as root causes."
+            ],
             "title": "Debugging practice",
             "prompt": "Select every statement that describes careful debugging.",
             "evidence": "explanation",
