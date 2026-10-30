@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "score-cases": {
+            "files": {
+                "evaluate.js": "function canonical(value) {\n  if (Array.isArray(value)) {\n    return \"[\" + value.map(canonical).join(\",\") + \"]\";\n  }\n  if (typeof value === \"object\" && value !== null) {\n    return (\n      \"{\" +\n      Object.keys(value)\n        .sort()\n        .map(function keyOf(key) {\n          return JSON.stringify(key) + \":\" + canonical(value[key]);\n        })\n        .join(\",\") +\n      \"}\"\n    );\n  }\n  return JSON.stringify(value);\n}\n\nfunction scoreCases(cases) {\n  const failed = [];\n  let passed = 0;\n  for (const item of cases) {\n    if (canonical(item.expected) === canonical(item.actual)) {\n      passed += 1;\n    } else {\n      failed.push(item.id);\n    }\n  }\n  return { total: cases.length, passed: passed, failed: failed };\n}\n"
+            }
+        }
+    }
+}
