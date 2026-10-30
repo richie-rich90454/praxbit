@@ -1,18 +1,29 @@
 {
     "id": "nestjs.testing",
     "version": 1,
-    "sequence": 231,
+    "sequence": 156,
     "courseId": "nestjs",
     "title": "Test guard decisions before the handler",
     "summary": "Implement an admin policy that rejects suspended accounts, then design unit and integration cases that prove the guard protects the route.",
-    "skills": ["testing.integration", "nestjs.guards", "concept.testing"],
-    "prerequisites": ["nestjs.guards", "testing.integration"],
+    "skills": [
+        "testing.integration",
+        "nestjs.guards",
+        "concept.testing"
+    ],
+    "prerequisites": [
+        "nestjs.guards",
+        "testing.integration"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-apply",
             "description": "Implement a guard policy with account-state checks.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-design",
             "description": "Select the unit and integration cases for a guard.",
-            "stepIds": ["design"]
+            "stepIds": [
+                "design"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:nestjs"
+    ],
     "hints": [
         "Reject a null principal first.",
         "Reject a suspended principal before checking the role.",
@@ -160,7 +180,9 @@
                     "kind": "function",
                     "description": "Anonymous requests are rejected.",
                     "name": "canActivateAdmin",
-                    "args": [null],
+                    "args": [
+                        null
+                    ],
                     "expected": false
                 },
                 {
@@ -270,5 +292,8 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
