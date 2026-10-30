@@ -1,0 +1,343 @@
+{
+    "version": 1,
+    "courseId": "ruby",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "ruby-build",
+        "briefing": "The campus store's Ruby service needs one command that installs the pinned test tool and runs the suite the same way in CI."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ],
+    "accessibility": {
+        "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "ruby.tooling",
+    "sequence": 209,
+    "title": "Make the test task reproducible",
+    "summary": "Declare the test gem, wire a Rake test task, and diagnose a local command that bypasses Bundler.",
+    "skills": [
+        "ruby.tooling",
+        "ruby.syntax"
+    ],
+    "prerequisites": [
+        "ruby.syntax",
+        "git.basics"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Declare a test dependency and a Rake task.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find a command that ignores the bundle.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Explain why bundle exec changes dependency resolution.",
+            "stepIds": [
+                "reproduce"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:ruby"
+    ],
+    "hints": [
+        "The Gemfile names gems; Bundler resolves and locks versions.",
+        "A Rake test task loads a test library and a file pattern.",
+        "t.libs adds the test directory to the load path.",
+        "task default: :test makes the test task the default."
+    ],
+    "misconceptions": [
+        {
+            "id": "global-gem",
+            "description": "Relying on a globally installed test gem.",
+            "stepId": "diagnose",
+            "answer": "install-global",
+            "feedback": "A global gem ignores the project's lockfile. bundle exec runs the versions Bundler resolved.",
+            "followUpSkill": "ruby.tooling"
+        },
+        {
+            "id": "no-test-task",
+            "description": "Leaving the default task as a placeholder.",
+            "stepId": "apply",
+            "testDescription": "The Rakefile defines a test task over test/**/*_test.rb.",
+            "feedback": "A default task that only prints a message reports success without running tests. Define a real Rake::TestTask.",
+            "followUpSkill": "ruby.tooling"
+        },
+        {
+            "id": "bundler-identical",
+            "description": "Assuming rake and bundle exec rake are equivalent.",
+            "stepId": "reproduce",
+            "answer": "identical",
+            "feedback": "bundle exec constrains the load path to the bundle's locked gems. Plain rake may load a different installed version."
+        },
+        {
+            "id": "unpinned-gem",
+            "description": "Installing a test gem without a version constraint.",
+            "stepId": "apply",
+            "diagnostic": "Declaring gem \"minitest\" with no version so CI can resolve a different release than development.",
+            "feedback": "A version constraint plus Gemfile.lock keeps local and CI runs on the same release."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The Gemfile is the dependency contract",
+                "body": "A Gemfile starts with source \"https://rubygems.org\" and lists gems such as gem \"minitest\", \"~> 5.25\". bundle install resolves versions and writes Gemfile.lock. Commit the lockfile so CI installs the same graph. bundle exec then runs a command with exactly those gems on the load path."
+            },
+            {
+                "title": "Rake names the work",
+                "body": "require \"rake/testtask\" loads the test task helper. Rake::TestTask.new(:test) do |t| ... end configures a task: t.libs << \"test\" adds the test directory, and t.pattern selects test/**/*_test.rb. task default: :test makes a bare rake run the suite."
+            },
+            {
+                "title": "Reproduce the CI command",
+                "body": "If CI runs bundle exec rake test, run the same command locally. ruby -Itest test/inventory_test.rb bypasses Bundler and can load another installed minitest. For a one-off file, bundle exec ruby -Itest test/inventory_test.rb keeps the bundle. The lockfile is the evidence that both environments agree."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Gemfile",
+                "definition": "The file that declares a Ruby project's gem dependencies."
+            },
+            {
+                "term": "Bundler",
+                "definition": "The tool that resolves, locks, and loads a project's gem versions."
+            },
+            {
+                "term": "Rake task",
+                "definition": "A named unit of work defined in a Rakefile."
+            },
+            {
+                "term": "bundle exec",
+                "definition": "A command prefix that runs with the bundle's locked gem versions."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Bundler and Rake",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The Gemfile is the dependency contract",
+                    "body": "A Gemfile starts with source \"https://rubygems.org\" and lists gems such as gem \"minitest\", \"~> 5.25\". bundle install resolves versions and writes Gemfile.lock. Commit the lockfile so CI installs the same graph. bundle exec then runs a command with exactly those gems on the load path."
+                },
+                {
+                    "title": "Rake names the work",
+                    "body": "require \"rake/testtask\" loads the test task helper. Rake::TestTask.new(:test) do |t| ... end configures a task: t.libs << \"test\" adds the test directory, and t.pattern selects test/**/*_test.rb. task default: :test makes a bare rake run the suite."
+                },
+                {
+                    "title": "Reproduce the CI command",
+                    "body": "If CI runs bundle exec rake test, run the same command locally. ruby -Itest test/inventory_test.rb bypasses Bundler and can load another installed minitest. For a one-off file, bundle exec ruby -Itest test/inventory_test.rb keeps the bundle. The lockfile is the evidence that both environments agree."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Gemfile",
+                    "definition": "The file that declares a Ruby project's gem dependencies."
+                },
+                {
+                    "term": "Bundler",
+                    "definition": "The tool that resolves, locks, and loads a project's gem versions."
+                },
+                {
+                    "term": "Rake task",
+                    "definition": "A named unit of work defined in a Rakefile."
+                },
+                {
+                    "term": "bundle exec",
+                    "definition": "A command prefix that runs with the bundle's locked gem versions."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Wire the reproducible test task",
+            "prompt": "Edit Gemfile and Rakefile. Declare the minitest dependency and run every test/**/*_test.rb file from a default task.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the rubygems source line.",
+                "Add minitest with a compatible version constraint.",
+                "Require rake/testtask before configuring the task.",
+                "Set t.pattern and make :test the default task."
+            ],
+            "language": "ruby",
+            "files": [
+                {
+                    "path": "Gemfile",
+                    "content": "source \"https://rubygems.org\"\n\n# TODO: add minitest\n",
+                    "editable": true,
+                    "language": "ruby"
+                },
+                {
+                    "path": "Rakefile",
+                    "content": "# TODO: define a test task that loads test/**/*_test.rb\ntask :default do\n  puts \"no tests configured\"\nend\n",
+                    "editable": true,
+                    "language": "ruby"
+                }
+            ],
+            "entry": "Rakefile",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "bundle exec rake test",
+                "description": "Installs the declared gems and runs the test task with Bundler's locked environment."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The Gemfile declares minitest.",
+                    "file": "Gemfile",
+                    "includes": [
+                        "gem \"minitest\"",
+                        "source \"https://rubygems.org\""
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The Rakefile defines a test task over test/**/*_test.rb.",
+                    "file": "Rakefile",
+                    "includes": [
+                        "require \"rake/testtask\"",
+                        "Rake::TestTask.new(:test)",
+                        "t.pattern = \"test/**/*_test.rb\"",
+                        "task default: :test"
+                    ],
+                    "excludes": [
+                        "no tests configured",
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "Local pass, CI fail",
+            "prompt": "CI uses a different minitest release than the developer machine. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "CI runs through Bundler.",
+                "The local command starts with ruby directly.",
+                "A direct ruby command can see globally installed gems.",
+                "Use bundle exec for the local run too."
+            ],
+            "instructions": [
+                {
+                    "id": "install",
+                    "label": "bundle install"
+                },
+                {
+                    "id": "local",
+                    "label": "ruby -Itest test/inventory_test.rb"
+                },
+                {
+                    "id": "ci",
+                    "label": "bundle exec rake test"
+                },
+                {
+                    "id": "end",
+                    "label": "# CI job"
+                }
+            ],
+            "buggyId": "local",
+            "fixes": [
+                {
+                    "id": "bundle-exec",
+                    "label": "Run bundle exec rake test locally as well."
+                },
+                {
+                    "id": "install-global",
+                    "label": "Install the newest minitest globally."
+                },
+                {
+                    "id": "delete-lock",
+                    "label": "Delete Gemfile.lock so both machines resolve fresh."
+                }
+            ],
+            "correctFixId": "bundle-exec",
+            "explanation": "bundle exec restricts the load path to the locked bundle. Running ruby directly can load a globally installed minitest, so the two environments test different code."
+        },
+        {
+            "kind": "quiz",
+            "id": "reproduce",
+            "title": "Why bundle exec matters",
+            "prompt": "A developer runs rake test while CI runs bundle exec rake test. What is the likely difference?",
+            "evidence": "transfer",
+            "hints": [
+                "Bundler controls which gem versions are visible.",
+                "rake alone uses the ambient Ruby environment.",
+                "The lockfile only helps when Bundler is used.",
+                "Different gem versions can produce different results."
+            ],
+            "quiz": {
+                "prompt": "A developer runs rake test while CI runs bundle exec rake test. What is the likely difference?",
+                "options": [
+                    {
+                        "id": "versions",
+                        "label": "The local run may load different gem versions than the lockfile."
+                    },
+                    {
+                        "id": "identical",
+                        "label": "Nothing; the two commands are equivalent."
+                    },
+                    {
+                        "id": "twice",
+                        "label": "bundle exec runs the test suite twice."
+                    },
+                    {
+                        "id": "ignore",
+                        "label": "bundle exec ignores the Rakefile."
+                    }
+                ],
+                "correctId": "versions",
+                "explanation": "bundle exec sets up the locked load path. Plain rake uses whatever gems the Ruby installation exposes, which can differ from CI."
+            }
+        }
+    ]
+}
