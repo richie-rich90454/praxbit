@@ -1,0 +1,349 @@
+{
+    "version": 1,
+    "courseId": "zig",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "test-suite",
+        "briefing": "The port parser needs tests for a valid value, a zero boundary, and malformed text before the rover console ships."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ],
+    "accessibility": {
+        "summary": "The Zig workspace is keyboard accessible. Checks verify source structure; they do not compile or run Zig.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "zig.testing",
+    "sequence": 212,
+    "title": "Assertions that fail for the right reason",
+    "summary": "Write value and error assertions with std.testing, then repair a test that swallows every failure.",
+    "skills": [
+        "zig.testing",
+        "zig.syntax"
+    ],
+    "prerequisites": [
+        "zig.syntax",
+        "concept.testing"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Write value and error assertions in test blocks.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find a test that ignores the error it should assert.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Predict how a failed expectEqual ends a test.",
+            "stepIds": [
+                "failure"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:zig"
+    ],
+    "hints": [
+        "Test blocks live beside the code they cover.",
+        "expectEqual compares a known value with the parser result.",
+        "expectError requires the exact expected error.",
+        "Unwrap a successful parse with try before comparing."
+    ],
+    "misconceptions": [
+        {
+            "id": "swallow-error",
+            "description": "Catching and discarding the error inside a test.",
+            "stepId": "diagnose",
+            "answer": "catch-unreachable",
+            "feedback": "An empty catch makes the test pass whether the parser succeeds or fails. Assert the error explicitly with expectError.",
+            "followUpSkill": "zig.testing"
+        },
+        {
+            "id": "empty-test",
+            "description": "Leaving a test block without assertions.",
+            "stepId": "apply",
+            "testDescription": "The valid-port test compares the parsed value.",
+            "feedback": "A test with no failing assertion proves nothing. Call expectEqual or expectError and unwrap successes with try.",
+            "followUpSkill": "zig.testing"
+        },
+        {
+            "id": "print-pass",
+            "description": "Believing a failed expectation only prints a message.",
+            "stepId": "failure",
+            "answer": "prints",
+            "feedback": "std.testing.expectEqual returns an error on mismatch. In a test, returning that error marks the test as failed."
+        },
+        {
+            "id": "any-error",
+            "description": "Accepting any error instead of the exact case.",
+            "stepId": "apply",
+            "diagnostic": "Calling expectError(anyerror, ...) so a wrong failure still passes the boundary test.",
+            "feedback": "Assert the specific expected error. anyerror hides a parser that returns the wrong failure for the right input."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Tests live beside the code",
+                "body": "A Zig test block is declared with test \"name\" { ... } and compiled only for test builds. Put boundary tests in the same file as the parser so they can call private functions. zig test src/main.zig runs them directly; zig build test runs the named step from the build graph."
+            },
+            {
+                "title": "Assert values and errors",
+                "body": "std.testing.expectEqual(expected, actual) compares values and returns an error on mismatch. expectError(expected_error, error_union) requires the exact error. A successful parse is unwrapped with try inside the test so the value can be compared."
+            },
+            {
+                "title": "A test must be able to fail",
+                "body": "An empty test block passes, and a catch that ignores the error passes whether the parser works or not. Make each test assert a specific outcome. Boundary inputs such as zero, 65535, 65536, and malformed text are more valuable than several copies of the happy path."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "test block",
+                "definition": "A named test compiled and run by the Zig test runner."
+            },
+            {
+                "term": "expectEqual",
+                "definition": "A standard assertion that returns an error when two values differ."
+            },
+            {
+                "term": "expectError",
+                "definition": "A standard assertion that requires a specific error from an error union."
+            },
+            {
+                "term": "Boundary test",
+                "definition": "A test at the edge of an accepted range, such as zero or the maximum."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Zig test blocks",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Tests live beside the code",
+                    "body": "A Zig test block is declared with test \"name\" { ... } and compiled only for test builds. Put boundary tests in the same file as the parser so they can call private functions. zig test src/main.zig runs them directly; zig build test runs the named step from the build graph."
+                },
+                {
+                    "title": "Assert values and errors",
+                    "body": "std.testing.expectEqual(expected, actual) compares values and returns an error on mismatch. expectError(expected_error, error_union) requires the exact error. A successful parse is unwrapped with try inside the test so the value can be compared."
+                },
+                {
+                    "title": "A test must be able to fail",
+                    "body": "An empty test block passes, and a catch that ignores the error passes whether the parser works or not. Make each test assert a specific outcome. Boundary inputs such as zero, 65535, 65536, and malformed text are more valuable than several copies of the happy path."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "test block",
+                    "definition": "A named test compiled and run by the Zig test runner."
+                },
+                {
+                    "term": "expectEqual",
+                    "definition": "A standard assertion that returns an error when two values differ."
+                },
+                {
+                    "term": "expectError",
+                    "definition": "A standard assertion that requires a specific error from an error union."
+                },
+                {
+                    "term": "Boundary test",
+                    "definition": "A test at the edge of an accepted range, such as zero or the maximum."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Test the valid value and zero boundary",
+            "prompt": "Edit main.zig. Fill both test blocks: one compares 8080 with a successful parse, and one expects OutOfRange for zero.",
+            "evidence": "testing",
+            "hints": [
+                "The valid test needs expectEqual and a try around parsePort.",
+                "Cast 8080 to u16 so the expected type is explicit.",
+                "The zero test uses expectError.",
+                "Pass parsePort(\"0\") directly to expectError."
+            ],
+            "language": "zig",
+            "files": [
+                {
+                    "path": "main.zig",
+                    "content": "const std = @import(\"std\");\n\nfn parsePort(text: []const u8) !u16 {\n    const value = std.fmt.parseInt(u32, text, 10) catch return error.InvalidNumber;\n    if (value == 0 or value > 65535) return error.OutOfRange;\n    return @intCast(value);\n}\n\ntest \"parses a valid port\" {\n    // TODO: assert parsePort(\"8080\") equals 8080\n}\n\ntest \"rejects zero\" {\n    // TODO: expect OutOfRange\n}\n",
+                    "editable": true,
+                    "language": "zig"
+                }
+            ],
+            "entry": "main.zig",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "zig test main.zig",
+                "description": "Compiles and runs the test blocks in main.zig with the Zig test runner."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The parser keeps the error union signature.",
+                    "file": "main.zig",
+                    "includes": [
+                        "fn parsePort(text: []const u8) !u16"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The valid-port test compares the parsed value.",
+                    "file": "main.zig",
+                    "includes": [
+                        "test \"parses a valid port\"",
+                        "try std.testing.expectEqual(@as(u16, 8080), try parsePort(\"8080\"));"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The boundary test expects the exact error.",
+                    "file": "main.zig",
+                    "includes": [
+                        "test \"rejects zero\"",
+                        "try std.testing.expectError(error.OutOfRange, parsePort(\"0\"));"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.zig",
+                    "includes": [
+                        "fn parsePort"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The test that cannot fail",
+            "prompt": "A boundary test passes even when the parser returns a value for zero. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The test catches the error and does nothing with it.",
+                "If parsing succeeds, the test also reaches the end.",
+                "The expected error must be asserted explicitly.",
+                "Use expectError with error.OutOfRange."
+            ],
+            "instructions": [
+                {
+                    "id": "test",
+                    "label": "test \"rejects zero\" {"
+                },
+                {
+                    "id": "swallow",
+                    "label": "    _ = parsePort(\"0\") catch {};"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "swallow",
+            "fixes": [
+                {
+                    "id": "expect",
+                    "label": "Use try std.testing.expectError(error.OutOfRange, parsePort(\"0\"));"
+                },
+                {
+                    "id": "catch-unreachable",
+                    "label": "Use catch unreachable instead."
+                },
+                {
+                    "id": "assert-true",
+                    "label": "Assert that the result is true."
+                }
+            ],
+            "correctFixId": "expect",
+            "explanation": "The empty catch discards the error, and a success path simply falls off the end. expectError fails the test unless the parser returns exactly OutOfRange."
+        },
+        {
+            "kind": "quiz",
+            "id": "failure",
+            "title": "How a failed expectation behaves",
+            "prompt": "A test runs `try std.testing.expectEqual(@as(u16, 8080), try parsePort(\"8081\"))`. What happens on the mismatch?",
+            "evidence": "transfer",
+            "hints": [
+                "expectEqual returns an error union.",
+                "The test body uses try, so that error leaves the block.",
+                "The test runner treats the error as a failure.",
+                "No panic is required."
+            ],
+            "quiz": {
+                "prompt": "A test runs `try std.testing.expectEqual(@as(u16, 8080), try parsePort(\"8081\"))`. What happens on the mismatch?",
+                "options": [
+                    {
+                        "id": "error",
+                        "label": "expectEqual returns an error, and the test is marked failed."
+                    },
+                    {
+                        "id": "prints",
+                        "label": "It prints a message and the test still passes."
+                    },
+                    {
+                        "id": "panic",
+                        "label": "It always panics the entire process."
+                    },
+                    {
+                        "id": "skip",
+                        "label": "It skips the remaining tests in the file."
+                    }
+                ],
+                "correctId": "error",
+                "explanation": "std.testing assertions return errors. The try propagates that error out of the test block, and the test runner reports a failure."
+            }
+        }
+    ]
+}
