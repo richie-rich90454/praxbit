@@ -1,0 +1,359 @@
+{
+    "id": "django.auth",
+    "version": 1,
+    "sequence": 171,
+    "courseId": "django",
+    "title": "Authentication at the view boundary",
+    "summary": "Require an authenticated member in one decorator and test the 401 and 200 paths with Django's test client.",
+    "skills": [
+        "django.views",
+        "django.testing"
+    ],
+    "prerequisites": [
+        "django.views",
+        "security.auth"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "authentication",
+        "briefing": "The inventory JSON view is open, and request.user is read without checking whether anyone is signed in. Add one authentication boundary and prove both the anonymous and member paths."
+    },
+    "objectives": [
+        {
+            "id": "objective-guard",
+            "description": "Protect a view with a reusable authentication check.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-test",
+            "description": "Test the anonymous and authenticated paths.",
+            "stepIds": [
+                "test"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Distinguish authentication from permission.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:django"
+    ],
+    "hints": [
+        "AuthenticationMiddleware fills request.user from the session.",
+        "Wrap the view so the check runs before the query.",
+        "Return a JSON 401 for an anonymous caller instead of redirecting an API request.",
+        "Use @wraps so the wrapped view keeps its name and metadata."
+    ],
+    "misconceptions": [
+        {
+            "id": "open-view",
+            "description": "Reading request.user without checking is_authenticated.",
+            "stepId": "apply",
+            "testDescription": "The inventory view is protected.",
+            "feedback": "Every caller reaches the view until a check stops them. Apply the decorator and test the anonymous path.",
+            "followUpSkill": "django.views"
+        },
+        {
+            "id": "decorator-missing",
+            "description": "Defining a guard but never applying it.",
+            "stepId": "apply",
+            "testDescription": "The inventory view is protected.",
+            "feedback": "A decorator only runs when it wraps the view. Put @require_member above item_list."
+        },
+        {
+            "id": "redirect-vs-401",
+            "description": "Using login_required on a JSON API and accepting a redirect.",
+            "stepId": "apply",
+            "testDescription": "Anonymous requests receive 401 JSON.",
+            "feedback": "login_required redirects a browser to a login page. A JSON client needs an explicit 401 response.",
+            "followUpSkill": "django.views"
+        },
+        {
+            "id": "test-200",
+            "description": "Asserting 200 for an anonymous request.",
+            "stepId": "test",
+            "testDescription": "The anonymous test checks 401.",
+            "feedback": "The test should fail before the guard is added. Assert 401 for the anonymous caller.",
+            "followUpSkill": "django.testing"
+        },
+        {
+            "id": "permission-401",
+            "description": "Using 401 for an authenticated caller who lacks permission.",
+            "stepId": "transfer",
+            "answer": "unauthorized",
+            "feedback": "The caller is authenticated, so the correct response is 403. 401 is for a missing identity.",
+            "followUpSkill": "django.views"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The middleware supplies a user",
+                "body": "AuthenticationMiddleware reads the session cookie and assigns request.user. For an anonymous visitor it sets an AnonymousUser whose is_authenticated property is false. Middleware identifies the caller; it does not decide which views require a signed-in user."
+            },
+            {
+                "title": "A decorator is a view boundary",
+                "body": "A decorator wraps the view function, so it can reject the request before the query runs. Returning JsonResponse with status 401 gives an API client a machine-readable answer. functools.wraps preserves the wrapped view's name and documentation."
+            },
+            {
+                "title": "Authentication and permission are separate",
+                "body": "is_authenticated answers whether the caller signed in. A permission answers whether that identity may perform the action. An authenticated user without inventory.view_item gets 403 when permission_required is configured with raise_exception=True; a missing identity gets 401."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "AuthenticationMiddleware",
+                "definition": "Django middleware that attaches the session user to each request."
+            },
+            {
+                "term": "Decorator",
+                "definition": "A function that wraps another function to add behavior around it."
+            },
+            {
+                "term": "401",
+                "definition": "The status for a request that has not authenticated."
+            },
+            {
+                "term": "403",
+                "definition": "The status for a known identity that lacks permission."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Request users and reusable guards",
+            "prompt": "Read the explanation, then add the guard and test both paths.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The middleware supplies a user",
+                    "body": "AuthenticationMiddleware reads the session cookie and assigns request.user. For an anonymous visitor it sets an AnonymousUser whose is_authenticated property is false. Middleware identifies the caller; it does not decide which views require a signed-in user."
+                },
+                {
+                    "title": "A decorator is a view boundary",
+                    "body": "A decorator wraps the view function, so it can reject the request before the query runs. Returning JsonResponse with status 401 gives an API client a machine-readable answer. functools.wraps preserves the wrapped view's name and documentation."
+                },
+                {
+                    "title": "Authentication and permission are separate",
+                    "body": "is_authenticated answers whether the caller signed in. A permission answers whether that identity may perform the action. An authenticated user without inventory.view_item gets 403 when permission_required is configured with raise_exception=True; a missing identity gets 401."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "AuthenticationMiddleware",
+                    "definition": "Django middleware that attaches the session user to each request."
+                },
+                {
+                    "term": "Decorator",
+                    "definition": "A function that wraps another function to add behavior around it."
+                },
+                {
+                    "term": "401",
+                    "definition": "The status for a request that has not authenticated."
+                },
+                {
+                    "term": "403",
+                    "definition": "The status for a known identity that lacks permission."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Guard the inventory view",
+            "prompt": "Edit views.py. Add a require_member decorator that returns 401 JSON for anonymous callers and apply it to item_list.",
+            "evidence": "construction",
+            "hints": [
+                "Import wraps from functools.",
+                "The decorator returns a wrapper that checks request.user.",
+                "Return JsonResponse with status 401 when the user is anonymous.",
+                "Apply @require_member above item_list."
+            ],
+            "files": [
+                {
+                    "path": "views.py",
+                    "content": "from django.http import JsonResponse\nfrom django.urls import path\n\nfrom .models import Item\n\n\ndef item_list(request):\n    # TODO: require an authenticated member before reading inventory\n    payload = [{\"id\": item.id, \"name\": item.name} for item in Item.objects.all()]\n    return JsonResponse({\"items\": payload})\n\n\nurlpatterns = [\n    path(\"items/\", item_list, name=\"item-list\"),\n]\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "views.py",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "python manage.py test",
+                "description": "Run the Django view authentication tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The view defines an authentication decorator.",
+                    "file": "views.py",
+                    "includes": [
+                        "from functools import wraps",
+                        "def require_member(view)",
+                        "request.user.is_authenticated"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Anonymous requests receive 401 JSON.",
+                    "file": "views.py",
+                    "includes": [
+                        "JsonResponse({\"error\": \"authentication_required\"}, status=401)"
+                    ],
+                    "excludes": [
+                        "redirect_to_login"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The inventory view is protected.",
+                    "file": "views.py",
+                    "includes": [
+                        "@require_member",
+                        "def item_list(request)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "code",
+            "id": "test",
+            "title": "Test the two paths",
+            "prompt": "Edit test_views.py. Assert that an anonymous request gets 401 and a signed-in member gets 200.",
+            "evidence": "testing",
+            "hints": [
+                "The test client can sign a user in with force_login.",
+                "Create the user with get_user_model().objects.create_user.",
+                "Change the anonymous expectation to 401.",
+                "Assert 200 after force_login."
+            ],
+            "files": [
+                {
+                    "path": "test_views.py",
+                    "content": "from django.contrib.auth import get_user_model\nfrom django.test import TestCase\nfrom django.urls import reverse\n\n\nclass InventoryAuthTests(TestCase):\n    def test_anonymous_request_is_rejected(self):\n        # TODO: assert that the API rejects anonymous callers\n        response = self.client.get(reverse(\"item-list\"))\n        self.assertEqual(response.status_code, 200)\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "test_views.py",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "python manage.py test",
+                "description": "Run the Django test client against the inventory view."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The anonymous test checks 401.",
+                    "file": "test_views.py",
+                    "includes": [
+                        "response = self.client.get(reverse(\"item-list\"))",
+                        "self.assertEqual(response.status_code, 401)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "A signed-in member reaches the view.",
+                    "file": "test_views.py",
+                    "includes": [
+                        "get_user_model().objects.create_user(\"ada\", password=\"secret\")",
+                        "self.client.force_login(user)",
+                        "self.assertEqual(response.status_code, 200)"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a missing permission",
+            "prompt": "A signed-in staff user lacks the inventory.view_item permission. The view uses @permission_required(\"inventory.view_item\", raise_exception=True). Which response is correct?",
+            "evidence": "transfer",
+            "hints": [
+                "The session authenticated the user.",
+                "The missing piece is a permission, not an identity.",
+                "raise_exception=True turns PermissionDenied into a response.",
+                "The handler returns 403, not 401."
+            ],
+            "quiz": {
+                "prompt": "A signed-in staff user lacks the inventory.view_item permission. The view uses @permission_required(\"inventory.view_item\", raise_exception=True). Which response is correct?",
+                "options": [
+                    {
+                        "id": "forbidden",
+                        "label": "403 because the user is authenticated but lacks the permission."
+                    },
+                    {
+                        "id": "unauthorized",
+                        "label": "401 because the permission check failed."
+                    },
+                    {
+                        "id": "redirect",
+                        "label": "302 to the login page because the permission is missing."
+                    },
+                    {
+                        "id": "success",
+                        "label": "200 because staff users bypass view permissions."
+                    }
+                ],
+                "correctId": "forbidden",
+                "explanation": "Authentication succeeded, so the identity is known. A missing permission produces PermissionDenied, and raise_exception=True turns it into 403. Staff status does not grant every model permission."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
