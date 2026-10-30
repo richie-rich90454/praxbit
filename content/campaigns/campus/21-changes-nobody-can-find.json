@@ -1,6 +1,6 @@
 {
     "id": "campus.changes-nobody-can-find",
-    "version": 2,
+    "version": 3,
     "sequence": 21,
     "courseId": "campus",
     "title": "Changes nobody can find",
@@ -215,7 +215,9 @@
         "unlocks": ["campus.two-developers-disagree"]
     },
     "persistence": {
-        "kind": "none"
+        "kind": "world-action",
+        "action": "resolve-merge",
+        "system": "dev-team"
     },
     "accessibility": {
         "summary": "The Git terminal is a labeled text input with an output log. Suggested commands are visible as text.",
