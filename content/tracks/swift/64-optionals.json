@@ -5,24 +5,14 @@
     "courseId": "swift",
     "title": "Optionals and async Swift",
     "summary": "Return an optional safely, then diagnose a forced unwrap in a lookup.",
-    "skills": [
-        "swift.optionals",
-        "swift.concurrency",
-        "swift.tooling"
-    ],
-    "prerequisites": [
-        "swift.syntax",
-        "concept.testing"
-    ],
+    "skills": ["swift.optionals", "swift.concurrency", "swift.tooling"],
+    "prerequisites": ["swift.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:swift"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:swift"],
     "hints": [
         "Keep the Int? return type.",
         "Iterate over the values.",
@@ -190,9 +169,7 @@
                     "kind": "static",
                     "description": "The function returns an optional Int.",
                     "file": "main.swift",
-                    "includes": [
-                        "func firstPositive(_ values: [Int]) -> Int?"
-                    ],
+                    "includes": ["func firstPositive(_ values: [Int]) -> Int?"],
                     "excludes": []
                 },
                 {
@@ -204,20 +181,14 @@
                         "return value",
                         "return nil"
                     ],
-                    "excludes": [
-                        "values.first!"
-                    ]
+                    "excludes": ["values.first!"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.swift",
-                    "includes": [
-                        "func firstPositive(_ values: [Int]) -> Int?"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["func firstPositive(_ values: [Int]) -> Int?"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -323,7 +294,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
