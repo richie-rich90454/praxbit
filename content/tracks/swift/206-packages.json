@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,9 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ],
+    "tags": ["professional"],
     "accessibility": {
         "summary": "The Swift workspace is keyboard accessible. Checks verify source structure; they do not compile or run Swift.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -39,45 +34,28 @@
     "sequence": 109,
     "title": "Package an async command-line tool",
     "summary": "Turn a library manifest into an executable package, protect shared counts with an actor, and repair a missing package dependency.",
-    "skills": [
-        "swift.tooling",
-        "swift.concurrency"
-    ],
-    "prerequisites": [
-        "swift.syntax",
-        "git.basics"
-    ],
+    "skills": ["swift.tooling", "swift.concurrency"],
+    "prerequisites": ["swift.syntax", "git.basics"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Configure an executable package target.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose an unresolved package product.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Apply Swift Package Manager source conventions.",
-            "stepIds": [
-                "sources"
-            ]
+            "stepIds": ["sources"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:swift"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:swift"],
     "hints": [
         "A product is what users build; a target is what the compiler builds.",
         "An executable target must also appear in products.",
@@ -235,33 +213,21 @@
                         ".executable(name: \"inventory\", targets: [\"Inventory\"])",
                         ".executableTarget(name: \"Inventory\")"
                     ],
-                    "excludes": [
-                        ".target(name: \"Inventory\")"
-                    ]
+                    "excludes": [".target(name: \"Inventory\")"]
                 },
                 {
                     "kind": "static",
                     "description": "The shared counter is an actor.",
                     "file": "Sources/Inventory/main.swift",
-                    "includes": [
-                        "actor UsageCounter",
-                        "private var total = 0"
-                    ],
-                    "excludes": [
-                        "final class UsageCounter"
-                    ]
+                    "includes": ["actor UsageCounter", "private var total = 0"],
+                    "excludes": ["final class UsageCounter"]
                 },
                 {
                     "kind": "static",
                     "description": "Main awaits actor work.",
                     "file": "Sources/Inventory/main.swift",
-                    "includes": [
-                        "static func main() async",
-                        "await counter.record()"
-                    ],
-                    "excludes": [
-                        "        counter.record()"
-                    ]
+                    "includes": ["static func main() async", "await counter.record()"],
+                    "excludes": ["        counter.record()"]
                 }
             ]
         },
