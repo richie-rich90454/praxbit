@@ -21,11 +21,23 @@ if (databaseUrl === undefined || databaseUrl.trim() === "") {
 }
 
 const direction = process.argv[2] === "down" ? "down" : "up";
+const configuredMigrationSchema = process.env["PRAXBIT_MIGRATION_SCHEMA"];
+const migrationSchema =
+    configuredMigrationSchema === undefined || configuredMigrationSchema.trim() === ""
+        ? undefined
+        : configuredMigrationSchema.trim();
 await runner({
     databaseUrl,
     dir: resolve(repositoryRoot, "database", "migrations"),
     direction,
     migrationsTable: "pgmigrations",
+    ...(migrationSchema === undefined
+        ? {}
+        : {
+              schema: migrationSchema,
+              migrationsSchema: migrationSchema,
+              createSchema: true,
+          }),
     ...(direction === "down" ? { count: 1 } : {}),
     log: function logMigration(message: string): void {
         console.info(message);
