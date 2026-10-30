@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.rb": "def totals_by_category(rows)\n  rows.each_with_object(Hash.new(0)) do |row, totals|\n    totals[row[:category]] += row[:amount]\n  end\nend\n\nputs totals_by_category([{ category: :tools, amount: 3 }, { category: :tools, amount: 2 }, { category: :paper, amount: 4 }])\n"
+            }
+        }
+    }
+}
