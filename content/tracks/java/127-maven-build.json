@@ -5,22 +5,14 @@
     "courseId": "java",
     "title": "Package a Java service with Maven",
     "summary": "Fix a POM so it compiles for Java 21 and keeps JUnit on the test classpath.",
-    "skills": [
-        "java.build"
-    ],
-    "prerequisites": [
-        "java.oop",
-        "git.basics"
-    ],
+    "skills": ["java.build"],
+    "prerequisites": ["java.oop", "git.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "fix-pom",
             "description": "Set the Java release and test dependency in the POM.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-command",
             "description": "Choose the Maven command that verifies the build.",
-            "stepIds": [
-                "maven-transfer"
-            ]
+            "stepIds": ["maven-transfer"]
         },
         {
             "id": "explain-build",
             "description": "Explain Maven, Gradle, and dependency scope accurately.",
-            "stepIds": [
-                "maven-check"
-            ]
+            "stepIds": ["maven-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:java"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
     "hints": [
         "Read the properties and dependencies sections of the POM.",
         "Set maven.compiler.release to 21.",
@@ -191,34 +172,22 @@
                     "kind": "static",
                     "description": "The compiler release is fixed to Java 21.",
                     "file": "pom.xml",
-                    "includes": [
-                        "<maven.compiler.release>21</maven.compiler.release>"
-                    ],
-                    "excludes": [
-                        "<maven.compiler.release>11</maven.compiler.release>"
-                    ]
+                    "includes": ["<maven.compiler.release>21</maven.compiler.release>"],
+                    "excludes": ["<maven.compiler.release>11</maven.compiler.release>"]
                 },
                 {
                     "kind": "static",
                     "description": "JUnit is available to tests only.",
                     "file": "pom.xml",
-                    "includes": [
-                        "<artifactId>junit-jupiter</artifactId>",
-                        "<scope>test</scope>"
-                    ],
+                    "includes": ["<artifactId>junit-jupiter</artifactId>", "<scope>test</scope>"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The project version is no longer a placeholder.",
                     "file": "pom.xml",
-                    "includes": [
-                        "<version>1.0.0</version>"
-                    ],
-                    "excludes": [
-                        "<version>0.0.0</version>",
-                        "TODO"
-                    ]
+                    "includes": ["<version>1.0.0</version>"],
+                    "excludes": ["<version>0.0.0</version>", "TODO"]
                 }
             ],
             "hints": [
@@ -323,7 +292,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
