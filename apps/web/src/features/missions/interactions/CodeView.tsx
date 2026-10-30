@@ -2,7 +2,9 @@ import { For, Show, createMemo, createSignal, onCleanup, onMount, type JSX } fro
 import { evaluateStep } from "@praxbit/domain";
 import type { CodeStep } from "@praxbit/contracts";
 import { buildPreviewDocument } from "@praxbit/execution/browser";
+import { announce } from "../../../app/AppShell.tsx";
 import { CodeEditor } from "../../../components/CodeEditor.tsx";
+import { TabPanel, Tabs, type TabItem } from "../../../components/Tabs.tsx";
 import { db } from "../../../platform/services.ts";
 import { executeChecks, type CheckOutcome } from "../run-checks.ts";
 import type { InteractionProps } from "./types.ts";
@@ -35,6 +37,7 @@ function statusLabel(passed: boolean): string {
 }
 
 export function CodeView(props: CodeViewProps): JSX.Element {
+    const tabPrefix = `code-files-${props.step.id}`;
     const initialFiles: Record<string, string> = {};
     for (const file of props.step.files) {
         initialFiles[file.path] = file.content;
@@ -51,9 +54,13 @@ export function CodeView(props: CodeViewProps): JSX.Element {
     const [runtimeError, setRuntimeError] = createSignal("");
     const [saved, setSaved] = createSignal(false);
 
-    const activeFile = createMemo(function file() {
-        return props.step.files.find(function match(item): boolean {
-            return item.path === activePath();
+    const tabItems = createMemo(function tabs(): readonly TabItem[] {
+        return props.step.files.map(function tab(file): TabItem {
+            return {
+                id: file.path,
+                label: file.path,
+                detail: file.editable ? "editable" : "read only",
+            };
         });
     });
 
@@ -145,6 +152,14 @@ export function CodeView(props: CodeViewProps): JSX.Element {
                 .map(function descriptionOf(outcome): string {
                     return outcome.description;
                 });
+            const firstDiagnostic = result.diagnostics[0];
+            announce(
+                `${passed.length} of ${result.outcomes.length} checks passed.` +
+                    (failed.length === 0 ? "" : ` ${failed.length} failed.`) +
+                    (firstDiagnostic === undefined
+                        ? ""
+                        : ` ${result.diagnostics.length} diagnostics. First: ${firstDiagnostic.message}`),
+            );
             props.onResult(
                 evaluateStep(props.step, {
                     kind: "code",
@@ -156,15 +171,19 @@ export function CodeView(props: CodeViewProps): JSX.Element {
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             setRuntimeError(message);
+            announce(`Runtime error. ${message}`);
             props.onResult(
-                evaluateStep(props.step, {
-                    kind: "code",
-                    passedTests: [],
-                    failedTests: props.step.tests.map(function descriptionOf(test): string {
-                        return test.description;
+                {
+                    ...evaluateStep(props.step, {
+                        kind: "code",
+                        passedTests: [],
+                        failedTests: props.step.tests.map(function descriptionOf(test): string {
+                            return test.description;
+                        }),
+                        totalTests: props.step.tests.length,
                     }),
-                    totalTests: props.step.tests.length,
-                }),
+                    diagnostic: message,
+                },
             );
         } finally {
             setRunning(false);
@@ -174,45 +193,45 @@ export function CodeView(props: CodeViewProps): JSX.Element {
     return (
         <div class="stack">
             <p class="meta">{runtimeLabel(props.step.language)}</p>
-            <div class="method-tabs" role="tablist" aria-label="Project files">
-                <For each={props.step.files}>
-                    {function file(item): JSX.Element {
-                        return (
-                            <button
-                                type="button"
-                                role="tab"
-                                class="method-tab"
-                                aria-selected={activePath() === item.path}
-                                onClick={function open(): void {
-                                    setActivePath(item.path);
-                                }}
-                            >
-                                <span class="method-tab__name">{item.path}</span>
-                                <span class="method-tab__detail">
-                                    {item.editable ? "editable" : "read only"}
-                                </span>
-                            </button>
-                        );
-                    }}
-                </For>
-            </div>
+            <Tabs
+                idPrefix={tabPrefix}
+                label="Project files"
+                items={tabItems()}
+                activeId={activePath()}
+                onSelect={setActivePath}
+            />
 
-            <Show when={activeFile() !== undefined}>
-                <CodeEditor
-                    value={files()[activePath()] ?? ""}
-                    language={activeFile()?.language ?? "text"}
-                    label={`${activePath()} editor`}
-                    readOnly={activeFile()?.editable === false}
-                    onChange={function change(value): void {
-                        setFiles(function update(current): Readonly<Record<string, string>> {
-                            return { ...current, [activePath()]: value };
-                        });
-                    }}
-                    onRun={function runEditor(): void {
-                        void run();
-                    }}
-                />
-            </Show>
+            <For each={props.step.files}>
+                {function file(item): JSX.Element {
+                    return (
+                        <TabPanel
+                            idPrefix={tabPrefix}
+                            id={item.path}
+                            activeId={activePath()}
+                            content={function editorPanel(): JSX.Element {
+                                return (
+                                    <CodeEditor
+                                        value={files()[item.path] ?? ""}
+                                        language={item.language ?? "text"}
+                                        label={`${item.path} editor`}
+                                        readOnly={item.editable === false}
+                                        onChange={function change(value): void {
+                                            setFiles(function update(current): Readonly<
+                                                Record<string, string>
+                                            > {
+                                                return { ...current, [item.path]: value };
+                                            });
+                                        }}
+                                        onRun={function runEditor(): void {
+                                            void run();
+                                        }}
+                                    />
+                                );
+                            }}
+                        />
+                    );
+                }}
+            </For>
 
             <div class="row">
                 <button
@@ -250,7 +269,9 @@ export function CodeView(props: CodeViewProps): JSX.Element {
             </Show>
 
             <Show when={runtimeError().length > 0}>
-                <p class="feedback feedback--error">{runtimeError()}</p>
+                <p class="feedback feedback--error" role="alert">
+                    {runtimeError()}
+                </p>
             </Show>
 
             <Show when={diagnostics().length > 0}>
@@ -274,9 +295,10 @@ export function CodeView(props: CodeViewProps): JSX.Element {
             </Show>
 
             <Show when={outcomes().length > 0}>
-                <div class="surface surface--quiet stack stack--tight">
+                <div class="surface surface--quiet stack stack--tight" aria-busy={running()}>
                     <h3>Test results</h3>
                     <table class="data-table">
+                        <caption class="meta">Test results for the current run</caption>
                         <thead>
                             <tr>
                                 <th scope="col">Check</th>
