@@ -1,18 +1,27 @@
 {
     "id": "django.views",
     "version": 1,
-    "sequence": 94,
+    "sequence": 170,
     "courseId": "django",
     "title": "JSON views without N+1 queries",
     "summary": "Return explicit fields with JsonResponse, handle missing rows, and load relations in one query.",
-    "skills": ["django.views", "django.testing"],
-    "prerequisites": ["django.models", "http.basics"],
+    "skills": [
+        "django.views",
+        "django.testing"
+    ],
+    "prerequisites": [
+        "django.models",
+        "http.basics"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:django"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:django"
+    ],
     "hints": [
         "The URLconf is already correct; focus on the two views.",
         "Add select_related(\"category\") before .all() in the list view.",
@@ -44,19 +62,24 @@
             "id": "n-plus-one",
             "description": "Accessing a foreign key inside a loop without select_related.",
             "stepId": "apply",
-            "feedback": "Each lazy access issues a query. select_related joins the related row into the original query."
+            "testDescription": "The list view loads each category with its item.",
+            "feedback": "Each lazy access issues a query. select_related joins the related row into the original query.",
+            "followUpSkill": "django.views"
         },
         {
             "id": "get-500",
             "description": "Using .get() for a detail route.",
             "stepId": "apply",
+            "testDescription": "The detail view returns a 404 for a missing row.",
             "feedback": "A missing row raises DoesNotExist and becomes a 500. get_object_or_404 returns a 404 response."
         },
         {
             "id": "csrf-exempt",
             "description": "Disabling CSRF on a session-authenticated POST view.",
             "stepId": "review",
-            "feedback": "Session cookies travel automatically, so another site can submit the request. Keep CSRF enforcement or use token auth without cookie credentials."
+            "diagnostic": "Approving a session-authenticated POST view that is marked csrf_exempt.",
+            "feedback": "Session cookies travel automatically, so another site can submit the request. Keep CSRF enforcement or use token auth without cookie credentials.",
+            "followUpSkill": "django.views"
         }
     ],
     "lesson": {
@@ -163,7 +186,9 @@
                     "kind": "static",
                     "description": "The list view loads each category with its item.",
                     "file": "views.py",
-                    "includes": ["Item.objects.select_related(\"category\").all()"],
+                    "includes": [
+                        "Item.objects.select_related(\"category\").all()"
+                    ],
                     "excludes": []
                 },
                 {
@@ -187,7 +212,9 @@
                         "get_object_or_404(",
                         "pk=item_id"
                     ],
-                    "excludes": ["Item.objects.get(pk=item_id)"]
+                    "excludes": [
+                        "Item.objects.get(pk=item_id)"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -203,10 +230,25 @@
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "views.py",
-                    "includes": ["Item.objects.select_related(\"category\").all()"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "Item.objects.select_related(\"category\").all()"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Add select_related(\"category\") before .all() in the list view.",
+                "Keep the explicit JSON field dictionary.",
+                "Use get_object_or_404 for the detail route.",
+                "Leave the URLconf paths unchanged."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "python manage.py test",
+                "description": "Run the Django test runner against a disposable test database."
+            }
         },
         {
             "kind": "review",
@@ -258,7 +300,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The category lookup inside the loop is an N+1 query, and the detail view returns a 500 instead of a 404 when the id is missing. Use select_related and get_object_or_404. Session-authenticated unsafe methods still need CSRF protection."
+            "explanation": "The category lookup inside the loop is an N+1 query, and the detail view returns a 500 instead of a 404 when the id is missing. Use select_related and get_object_or_404. Session-authenticated unsafe methods still need CSRF protection.",
+            "hints": [
+                "Inspect the query inside the loop and the detail lookup.",
+                "Each category access in the loop is another query.",
+                "A missing row from .get() raises an exception, not a 404 response.",
+                "Read-only GET views must not change data."
+            ]
         }
     ],
     "evaluation": {
@@ -278,5 +326,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
