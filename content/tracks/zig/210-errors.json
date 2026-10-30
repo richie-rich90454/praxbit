@@ -36,7 +36,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "zig.errors",
-    "sequence": 210,
+    "sequence": 117,
     "title": "Error unions at the input boundary",
     "summary": "Return typed errors from a port parser, then diagnose a catch that reports every failure as out of range.",
     "skills": [
