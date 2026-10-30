@@ -14,16 +14,16 @@ export default defineConfig({
     },
     reporter: [["list"], ["html", { open: "never" }]],
     use: {
-        baseURL: "http://localhost:4173",
+        baseURL: "http://127.0.0.1:4173",
         trace: "retain-on-failure",
         screenshot: "only-on-failure",
         reducedMotion: "reduce",
     },
     webServer: {
-        command: "pnpm --filter @praxbit/web preview --port 4173 --strictPort",
-        url: "http://localhost:4173",
-        reuseExistingServer: true,
-        timeout: 120_000,
+        command: "node scripts/e2e-server.mjs",
+        url: "http://127.0.0.1:4173",
+        reuseExistingServer: false,
+        timeout: 180_000,
     },
     projects: [
         {
