@@ -5,21 +5,14 @@
     "courseId": "go",
     "title": "Depend on a small interface",
     "summary": "Replace a concrete notifier with a consumer-defined interface and propagate errors.",
-    "skills": [
-        "go.interfaces"
-    ],
-    "prerequisites": [
-        "go.syntax"
-    ],
+    "skills": ["go.interfaces"],
+    "prerequisites": ["go.syntax"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,31 +24,20 @@
         {
             "id": "define-interface",
             "description": "Define and accept a small notifier interface.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "place-interface",
             "description": "Choose where a Go interface belongs.",
-            "stepIds": [
-                "interface-transfer"
-            ]
+            "stepIds": ["interface-transfer"]
         },
         {
             "id": "explain-interfaces",
             "description": "Explain implicit satisfaction and error propagation accurately.",
-            "stepIds": [
-                "interface-check"
-            ]
+            "stepIds": ["interface-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:go"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:go"],
     "hints": [
         "SendAll only calls Notify.",
         "Declare an interface with that one method.",
@@ -200,30 +182,21 @@
                         "Notify(message string) error",
                         "func SendAll(notifier Notifier"
                     ],
-                    "excludes": [
-                        "*EmailNotifier"
-                    ]
+                    "excludes": ["*EmailNotifier"]
                 },
                 {
                     "kind": "static",
                     "description": "Notification errors stop the loop.",
                     "file": "main.go",
-                    "includes": [
-                        "if err := notifier.Notify(message); err != nil",
-                        "return err"
-                    ],
+                    "includes": ["if err := notifier.Notify(message); err != nil", "return err"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter TODO is gone.",
                     "file": "main.go",
-                    "includes": [
-                        "func SendAll(notifier Notifier"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["func SendAll(notifier Notifier"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -312,9 +285,7 @@
     },
     "rewards": {
         "experience": 145,
-        "unlocks": [
-            "go.modules-packages"
-        ]
+        "unlocks": ["go.modules-packages"]
     },
     "persistence": {
         "kind": "none"
@@ -325,8 +296,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
