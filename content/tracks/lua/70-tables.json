@@ -44,13 +44,33 @@
             "id": "missing-key",
             "description": "Adding to a key that has never been set.",
             "stepId": "apply",
-            "feedback": "A missing key reads as nil, and arithmetic on nil raises an error. Default the read with or 0 before adding."
+            "testDescription": "Adding to an unseen item starts from zero.",
+            "feedback": "A missing key reads as nil, and arithmetic on nil raises an error. Default the read with or 0 before adding.",
+            "followUpSkill": "lua.tables"
+        },
+        {
+            "id": "global-module",
+            "description": "Exporting the module through a global instead of returning it.",
+            "stepId": "apply",
+            "diagnostic": "Assigning Inventory to a global and returning nothing, so require yields true.",
+            "feedback": "Return the module table so require can cache and provide it. Globals hide dependencies and collide between scripts.",
+            "followUpSkill": "lua.modules"
         },
         {
             "id": "pcall",
             "description": "Using pcall to turn every error into a default value.",
             "stepId": "review",
-            "feedback": "pcall returns false plus the error. Handle the failures you expect and let unexpected ones reach the caller."
+            "answer": "safe",
+            "feedback": "pcall returns false plus the error. Handle the failures you expect and let unexpected ones reach the caller.",
+            "followUpSkill": "lua.functions"
+        },
+        {
+            "id": "ship-default",
+            "description": "Accepting a silent zero as a safe fallback.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Defaults that erase every failure hide bad data. Validate the field and report it, or let unexpected errors surface.",
+            "followUpSkill": "lua.tables"
         }
     ],
     "lesson": {
@@ -125,6 +145,12 @@
             "title": "Build an inventory module",
             "prompt": "Edit main.lua. Inventory stores counts by name, resolves methods through __index, and totals the stock.",
             "evidence": "construction",
+            "hints": [
+                "Inventory.__index = Inventory makes method lookup fall back to the module table.",
+                "setmetatable({ items = {} }, Inventory) attaches that fallback to each instance.",
+                "Read the current count with self.items[name] or 0 before adding.",
+                "Use self.items[name] = (self.items[name] or 0) + count."
+            ],
             "language": "lua",
             "files": [
                 {
@@ -136,6 +162,11 @@
             ],
             "entry": "main.lua",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "lua main.lua",
+                "description": "Runs the module and prints the stock total, exercising metatable lookup and table defaults."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -176,6 +207,12 @@
             "title": "Review the stock module",
             "prompt": "Review the module and select every real problem.",
             "evidence": "review",
+            "hints": [
+                "A missing table key is nil.",
+                "nil + amount raises an error.",
+                "pcall returns a status and a value.",
+                "Collapsing every failure into zero hides bad data."
+            ],
             "artifact": {
                 "title": "stock.lua",
                 "caption": "Missing keys and a broad pcall both turn failures into silent defaults.",
