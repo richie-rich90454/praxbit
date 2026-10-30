@@ -1,0 +1,329 @@
+{
+    "id": "java.maven-build",
+    "version": 1,
+    "sequence": 74,
+    "courseId": "java",
+    "title": "Package a Java service with Maven",
+    "summary": "Fix a POM so it compiles for Java 21 and keeps JUnit on the test classpath.",
+    "skills": [
+        "java.build"
+    ],
+    "prerequisites": [
+        "java.oop",
+        "git.basics"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "java-maven",
+        "briefing": "A service POM still targets Java 11 and has no test dependency. Update the build so mvn verify compiles for Java 21 and runs JUnit tests without shipping them."
+    },
+    "objectives": [
+        {
+            "id": "fix-pom",
+            "description": "Set the Java release and test dependency in the POM.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-command",
+            "description": "Choose the Maven command that verifies the build.",
+            "stepIds": [
+                "maven-transfer"
+            ]
+        },
+        {
+            "id": "explain-build",
+            "description": "Explain Maven, Gradle, and dependency scope accurately.",
+            "stepIds": [
+                "maven-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:java"
+    ],
+    "hints": [
+        "Read the properties and dependencies sections of the POM.",
+        "Set maven.compiler.release to 21.",
+        "Add org.junit.jupiter:junit-jupiter with test scope.",
+        "Use mvn verify to run the full lifecycle."
+    ],
+    "misconceptions": [
+        {
+            "id": "old-release",
+            "description": "Leaving the compiler release at Java 11.",
+            "stepId": "apply",
+            "testDescription": "The compiler release is fixed to Java 21.",
+            "feedback": "The release property controls the bytecode target. Set it to 21 so the build matches the service runtime.",
+            "followUpSkill": "java.build"
+        },
+        {
+            "id": "compile-scope",
+            "description": "Using the default scope for a test library.",
+            "stepId": "maven-check",
+            "answer": "test-scope",
+            "feedback": "JUnit should use test scope so it is available to tests and excluded from the production artifact.",
+            "followUpSkill": "java.build"
+        },
+        {
+            "id": "compile-only",
+            "description": "Running only compile when tests and packaging matter.",
+            "stepId": "maven-transfer",
+            "answer": "compile",
+            "feedback": "mvn compile stops before tests and packaging. mvn verify runs the full lifecycle.",
+            "followUpSkill": "java.build"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Maven describes a build in a POM",
+                "body": "pom.xml declares the project coordinates, Java release, dependencies, and plugins. The lifecycle runs validate, compile, test, package, and verify in order. mvn verify runs the full sequence and is the usual local check before a commit."
+            },
+            {
+                "title": "Dependency scope limits availability",
+                "body": "Compile-scope dependencies are available to production code. Test-scope dependencies such as JUnit are available only to tests and are not packaged into the artifact. Keeping test libraries out of production reduces the attack surface and the artifact size."
+            },
+            {
+                "title": "Gradle solves the same problem differently",
+                "body": "Gradle uses a build script and a task graph instead of a fixed lifecycle. Both Maven and Gradle can compile, test, and package Java. The Maven Wrapper or the Gradle Wrapper pins the build tool version so a repository builds the same way on every machine."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "POM",
+                "definition": "The Project Object Model file that describes a Maven build."
+            },
+            {
+                "term": "Lifecycle",
+                "definition": "The ordered phases Maven runs for a build."
+            },
+            {
+                "term": "Dependency scope",
+                "definition": "The classpath and packaging rules for a dependency."
+            },
+            {
+                "term": "Wrapper",
+                "definition": "A checked-in script that downloads and runs a pinned build-tool version."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Maven describes a build in a POM",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Maven describes a build in a POM",
+                    "body": "pom.xml declares the project coordinates, Java release, dependencies, and plugins. The lifecycle runs validate, compile, test, package, and verify in order. mvn verify runs the full sequence and is the usual local check before a commit."
+                },
+                {
+                    "title": "Dependency scope limits availability",
+                    "body": "Compile-scope dependencies are available to production code. Test-scope dependencies such as JUnit are available only to tests and are not packaged into the artifact. Keeping test libraries out of production reduces the attack surface and the artifact size."
+                },
+                {
+                    "title": "Gradle solves the same problem differently",
+                    "body": "Gradle uses a build script and a task graph instead of a fixed lifecycle. Both Maven and Gradle can compile, test, and package Java. The Maven Wrapper or the Gradle Wrapper pins the build tool version so a repository builds the same way on every machine."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "POM",
+                    "definition": "The Project Object Model file that describes a Maven build."
+                },
+                {
+                    "term": "Lifecycle",
+                    "definition": "The ordered phases Maven runs for a build."
+                },
+                {
+                    "term": "Dependency scope",
+                    "definition": "The classpath and packaging rules for a dependency."
+                },
+                {
+                    "term": "Wrapper",
+                    "definition": "A checked-in script that downloads and runs a pinned build-tool version."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Fix the project POM",
+            "prompt": "Edit pom.xml. Target Java 21, set the project version to 1.0.0, and add JUnit Jupiter with test scope.",
+            "evidence": "construction",
+            "language": "java",
+            "files": [
+                {
+                    "path": "pom.xml",
+                    "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\n  <modelVersion>4.0.0</modelVersion>\n  <groupId>com.praxbit</groupId>\n  <artifactId>campus-service</artifactId>\n  <version>0.0.0</version>\n  <properties>\n    <maven.compiler.release>11</maven.compiler.release>\n  </properties>\n  <!-- TODO: add the JUnit test dependency -->\n</project>\n",
+                    "editable": true,
+                    "language": "xml"
+                },
+                {
+                    "path": "Main.java",
+                    "content": "public class Main {\n    static int add(int left, int right) {\n        return left + right;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(add(2, 3));\n    }\n}\n",
+                    "editable": false,
+                    "language": "java"
+                }
+            ],
+            "entry": "Main.java",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The compiler release is fixed to Java 21.",
+                    "file": "pom.xml",
+                    "includes": [
+                        "<maven.compiler.release>21</maven.compiler.release>"
+                    ],
+                    "excludes": [
+                        "<maven.compiler.release>11</maven.compiler.release>"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "JUnit is available to tests only.",
+                    "file": "pom.xml",
+                    "includes": [
+                        "<artifactId>junit-jupiter</artifactId>",
+                        "<scope>test</scope>"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The project version is no longer a placeholder.",
+                    "file": "pom.xml",
+                    "includes": [
+                        "<version>1.0.0</version>"
+                    ],
+                    "excludes": [
+                        "<version>0.0.0</version>",
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The release property currently says 11.",
+                "JUnit Jupiter belongs in a dependencies block.",
+                "Test libraries use the test scope.",
+                "Replace the placeholder version and remove the TODO."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "mvn -q verify",
+                "description": "Run the Maven lifecycle through tests and packaging."
+            }
+        },
+        {
+            "kind": "quiz",
+            "id": "maven-transfer",
+            "title": "Choose the verification command",
+            "prompt": "A change touches production code and tests. Which Maven command runs the full lifecycle through verification?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the command.",
+                "options": [
+                    {
+                        "id": "verify",
+                        "label": "mvn verify"
+                    },
+                    {
+                        "id": "compile",
+                        "label": "mvn compile"
+                    },
+                    {
+                        "id": "skip",
+                        "label": "mvn package -DskipTests"
+                    },
+                    {
+                        "id": "run",
+                        "label": "java -jar target/campus-service.jar"
+                    }
+                ],
+                "correctId": "verify",
+                "explanation": "mvn verify runs compile, test, package, and verification checks. compile stops early, skipping tests hides failures, and running the jar does not rebuild."
+            },
+            "hints": [
+                "The command should run tests and packaging.",
+                "Package alone can still skip checks.",
+                "The verify phase is the last lifecycle phase.",
+                "Choose mvn verify."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "maven-check",
+            "title": "Build lifecycle and scope",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "lifecycle",
+                    "label": "The Maven lifecycle runs compile, test, package, and verify in order.",
+                    "correct": true
+                },
+                {
+                    "id": "test-scope",
+                    "label": "Test-scope dependencies are packaged into production artifacts.",
+                    "correct": false
+                },
+                {
+                    "id": "wrapper",
+                    "label": "The Maven Wrapper pins the Maven version for a repository.",
+                    "correct": true
+                },
+                {
+                    "id": "gradle",
+                    "label": "Gradle uses a build script and can also run the same tests.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Maven orders build work by lifecycle phase. Test scope keeps test libraries out of the artifact, and wrappers make builds reproducible.",
+            "hints": [
+                "Three statements are accurate.",
+                "Test-scope dependencies are not packaged.",
+                "Both Maven and Gradle can compile and test Java.",
+                "Select lifecycle, wrapper, and gradle."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and checks are keyboard accessible. Checks verify source structure; they do not compile or run the language.",
+        "keyboardNotes": "Use Tab to move between the editor and the results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
