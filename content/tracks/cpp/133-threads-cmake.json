@@ -5,23 +5,14 @@
     "courseId": "cpp",
     "title": "Threads and CMake",
     "summary": "Link the platform thread library and reason about shared state.",
-    "skills": [
-        "cpp.build",
-        "cpp.stl"
-    ],
-    "prerequisites": [
-        "cpp.templates",
-        "concept.iteration"
-    ],
+    "skills": ["cpp.build", "cpp.stl"],
+    "prerequisites": ["cpp.templates", "concept.iteration"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "link-threads",
             "description": "Find and link the platform thread library in CMake.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-sync",
             "description": "Choose synchronization for a shared counter.",
-            "stepIds": [
-                "thread-transfer"
-            ]
+            "stepIds": ["thread-transfer"]
         },
         {
             "id": "explain-threads",
             "description": "Explain joins, data races, and CMake targets accurately.",
-            "stepIds": [
-                "thread-check"
-            ]
+            "stepIds": ["thread-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:cpp"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cpp"],
     "hints": [
         "CMake has a package for platform threads.",
         "Call find_package(Threads REQUIRED) before the target.",
@@ -197,30 +177,21 @@
                     "kind": "static",
                     "description": "CMake requires the thread package.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "find_package(Threads REQUIRED)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["find_package(Threads REQUIRED)"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The executable links the thread library.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "target_link_libraries(campus_worker PRIVATE Threads::Threads)"
-                    ],
+                    "includes": ["target_link_libraries(campus_worker PRIVATE Threads::Threads)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The target and C++ standard are still declared.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "add_executable(campus_worker main.cpp)",
-                        "CMAKE_CXX_STANDARD 20"
-                    ],
+                    "includes": ["add_executable(campus_worker main.cpp)", "CMAKE_CXX_STANDARD 20"],
                     "excludes": []
                 }
             ],
@@ -321,8 +292,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
