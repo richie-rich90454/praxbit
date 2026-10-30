@@ -5,23 +5,14 @@
     "courseId": "cargo",
     "title": "Tests, features, and failure cases",
     "summary": "Return typed errors, cover both failure variants in an integration test, and run the suite with all features.",
-    "skills": [
-        "cargo.packages",
-        "rust.cargo"
-    ],
-    "prerequisites": [
-        "cargo.packages",
-        "rust.syntax"
-    ],
+    "skills": ["cargo.packages", "rust.cargo"],
+    "prerequisites": ["cargo.packages", "rust.syntax"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-errors",
             "description": "Return typed errors instead of silently defaulting.",
-            "stepIds": [
-                "lib"
-            ]
+            "stepIds": ["lib"]
         },
         {
             "id": "objective-tests",
             "description": "Cover success and both failure variants in an integration test.",
-            "stepIds": [
-                "tests"
-            ]
+            "stepIds": ["tests"]
         },
         {
             "id": "objective-features",
             "description": "Explain which tests a default cargo test run compiles.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:server-room",
-        "icon:cargo"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:cargo"],
     "hints": [
         "Use map_err to turn a parse failure into QuantityError::NotANumber.",
         "Check for zero after a successful parse.",
@@ -203,25 +183,15 @@
                     "kind": "static",
                     "description": "Non-numeric input becomes a typed parse error.",
                     "file": "src/lib.rs",
-                    "includes": [
-                        "input.parse::<u32>()",
-                        "map_err(|_| QuantityError::NotANumber)"
-                    ],
-                    "excludes": [
-                        "unwrap_or(0)"
-                    ]
+                    "includes": ["input.parse::<u32>()", "map_err(|_| QuantityError::NotANumber)"],
+                    "excludes": ["unwrap_or(0)"]
                 },
                 {
                     "kind": "static",
                     "description": "Zero is rejected with its own error.",
                     "file": "src/lib.rs",
-                    "includes": [
-                        "if quantity == 0",
-                        "return Err(QuantityError::Zero);"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["if quantity == 0", "return Err(QuantityError::Zero);"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -267,18 +237,14 @@
                     "kind": "static",
                     "description": "The integration test uses the public crate API.",
                     "file": "tests/quantity.rs",
-                    "includes": [
-                        "use campus_core::parse_quantity;"
-                    ],
+                    "includes": ["use campus_core::parse_quantity;"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The success case remains covered.",
                     "file": "tests/quantity.rs",
-                    "includes": [
-                        "assert_eq!(parse_quantity(\"4\").unwrap(), 4);"
-                    ],
+                    "includes": ["assert_eq!(parse_quantity(\"4\").unwrap(), 4);"],
                     "excludes": []
                 },
                 {
@@ -291,9 +257,7 @@
                         "parse_quantity(\"many\")",
                         "QuantityError::NotANumber"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 }
             ],
             "language": "text"
@@ -352,7 +316,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
