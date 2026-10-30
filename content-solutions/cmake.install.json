@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "CMakeLists.txt": "cmake_minimum_required(VERSION 3.24)\nproject(campus_metrics LANGUAGES CXX)\n\ninclude(GNUInstallDirs)\n\nadd_library(metrics STATIC src/metrics.cpp)\ntarget_include_directories(metrics PUBLIC\n    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>\n    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)\n\ninstall(TARGETS metrics EXPORT campus_metricsTargets\n    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}\n    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})\ninstall(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})\ninstall(EXPORT campus_metricsTargets\n    FILE campus_metricsTargets.cmake\n    NAMESPACE campus::\n    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/campus_metrics)\n"
+            }
+        }
+    }
+}
