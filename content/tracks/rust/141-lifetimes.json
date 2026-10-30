@@ -1,0 +1,332 @@
+{
+    "id": "rust.lifetimes",
+    "version": 1,
+    "sequence": 98,
+    "courseId": "rust",
+    "title": "Name a borrow lifetime",
+    "summary": "Add lifetime parameters to a borrowing struct and a function that returns a reference.",
+    "skills": [
+        "rust.ownership",
+        "rust.syntax"
+    ],
+    "prerequisites": [
+        "rust.ownership"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "rust-lifetimes",
+        "briefing": "A telemetry excerpt stores a borrowed string, and a longest helper returns one of two borrowed strings. Neither declaration says how long the borrow lasts. Add the lifetime relationships the compiler needs."
+    },
+    "objectives": [
+        {
+            "id": "annotate-struct",
+            "description": "Add a lifetime parameter to a borrowing struct.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-declaration",
+            "description": "Choose the declaration for a struct that stores a reference.",
+            "stepIds": [
+                "lifetime-transfer"
+            ]
+        },
+        {
+            "id": "explain-lifetimes",
+            "description": "Explain elision, 'static, and borrow checking accurately.",
+            "stepIds": [
+                "lifetime-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:rust"
+    ],
+    "hints": [
+        "A struct that stores a reference needs a lifetime parameter.",
+        "The field type becomes &'a str.",
+        "The longest function needs one lifetime shared by both inputs and the output.",
+        "Use <'a> on the struct and the function."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-lifetime",
+            "description": "Storing a reference without declaring its lifetime.",
+            "stepId": "apply",
+            "testDescription": "The excerpt struct declares a lifetime for its borrow.",
+            "feedback": "A borrowed field needs a named lifetime so the struct's validity can be checked against the borrowed data.",
+            "followUpSkill": "rust.ownership"
+        },
+        {
+            "id": "static-always",
+            "description": "Using 'static for every borrowed field.",
+            "stepId": "lifetime-transfer",
+            "answer": "static-always",
+            "feedback": "'static requires the data to live for the whole program. A normal struct should borrow for its own lifetime parameter instead.",
+            "followUpSkill": "rust.ownership"
+        },
+        {
+            "id": "runtime-lifetime",
+            "description": "Believing lifetime annotations change runtime behavior.",
+            "stepId": "lifetime-check",
+            "answer": "runtime-lifetime",
+            "feedback": "Lifetimes are erased during compilation. They only describe and check borrow validity.",
+            "followUpSkill": "rust.ownership"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A lifetime is a validity bound",
+                "body": "A lifetime parameter tells the compiler how long a reference must remain valid. It does not create or extend storage. A struct that stores a reference declares a lifetime so the struct cannot outlive the borrowed data."
+            },
+            {
+                "title": "Elision rules cover common cases",
+                "body": "Rust infers lifetimes in simple signatures: one input reference gives the output the same lifetime, and a method with &self gives the output the lifetime of self. When a function has several inputs and returns a reference, the relationship must be written explicitly."
+            },
+            {
+                "title": "'static means the whole program",
+                "body": "'static describes a reference that can live for the entire program, such as a string literal. It is not a fix for a borrow-checker error. Most data should be tied to the scope that owns it, not forced into static storage."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Lifetime",
+                "definition": "A compile-time bound on how long a reference is valid."
+            },
+            {
+                "term": "Elision",
+                "definition": "The compiler's rules for inferring omitted lifetime parameters."
+            },
+            {
+                "term": "'static",
+                "definition": "A lifetime that can span the entire program."
+            },
+            {
+                "term": "Borrow checker",
+                "definition": "The compiler pass that enforces ownership and lifetime rules."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A lifetime is a validity bound",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A lifetime is a validity bound",
+                    "body": "A lifetime parameter tells the compiler how long a reference must remain valid. It does not create or extend storage. A struct that stores a reference declares a lifetime so the struct cannot outlive the borrowed data."
+                },
+                {
+                    "title": "Elision rules cover common cases",
+                    "body": "Rust infers lifetimes in simple signatures: one input reference gives the output the same lifetime, and a method with &self gives the output the lifetime of self. When a function has several inputs and returns a reference, the relationship must be written explicitly."
+                },
+                {
+                    "title": "'static means the whole program",
+                    "body": "'static describes a reference that can live for the entire program, such as a string literal. It is not a fix for a borrow-checker error. Most data should be tied to the scope that owns it, not forced into static storage."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Lifetime",
+                    "definition": "A compile-time bound on how long a reference is valid."
+                },
+                {
+                    "term": "Elision",
+                    "definition": "The compiler's rules for inferring omitted lifetime parameters."
+                },
+                {
+                    "term": "'static",
+                    "definition": "A lifetime that can span the entire program."
+                },
+                {
+                    "term": "Borrow checker",
+                    "definition": "The compiler pass that enforces ownership and lifetime rules."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Annotate the borrows",
+            "prompt": "Edit src/main.rs. Excerpt stores &'a str, and longest returns a reference tied to both inputs with one lifetime.",
+            "evidence": "construction",
+            "language": "rust",
+            "files": [
+                {
+                    "path": "src/main.rs",
+                    "content": "struct Excerpt {\n    text: &str,\n}\n\nfn longest(left: &str, right: &str) -> &str {\n    if left.len() > right.len() { left } else { right }\n}\n\nfn main() {\n    let text = String::from(\"campus power\");\n    let excerpt = Excerpt { text: &text };\n    println!(\"{}\", longest(excerpt.text, \"grid\"));\n}\n",
+                    "editable": true,
+                    "language": "rust"
+                },
+                {
+                    "path": "Cargo.toml",
+                    "content": "[package]\nname = \"campus-check\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n",
+                    "editable": false,
+                    "language": "toml"
+                }
+            ],
+            "entry": "src/main.rs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile and test the crate with Cargo."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The excerpt struct declares a lifetime for its borrow.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "struct Excerpt<'a>",
+                        "text: &'a str"
+                    ],
+                    "excludes": [
+                        "struct Excerpt {"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The longest function ties both inputs and the output to one lifetime.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "fn longest<'a>(left: &'a str, right: &'a str) -> &'a str"
+                    ],
+                    "excludes": [
+                        "fn longest(left: &str, right: &str) -> &str"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter TODO is gone.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "struct Excerpt<'a>"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The struct stores a reference, so it needs a lifetime.",
+                "The function has two inputs but one output reference.",
+                "Use the same lifetime on both inputs and the output.",
+                "Add 'a to Excerpt, longest, and the field type."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "lifetime-transfer",
+            "title": "Declare the borrowed field",
+            "prompt": "A struct stores a &str that belongs to its caller. How should the struct be declared?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the declaration.",
+                "options": [
+                    {
+                        "id": "lifetime",
+                        "label": "struct Excerpt<'a> { text: &'a str }"
+                    },
+                    {
+                        "id": "static-always",
+                        "label": "struct Excerpt { text: &'static str }"
+                    },
+                    {
+                        "id": "owned",
+                        "label": "struct Excerpt { text: String }"
+                    },
+                    {
+                        "id": "raw",
+                        "label": "struct Excerpt { text: *const str }"
+                    }
+                ],
+                "correctId": "lifetime",
+                "explanation": "A lifetime parameter ties the struct to the caller's data. 'static would require the data to live for the whole program, and an owned String would copy it."
+            },
+            "hints": [
+                "The struct should borrow, not own.",
+                "The borrow needs a named lifetime.",
+                "'static is stronger than necessary.",
+                "Choose struct Excerpt<'a> { text: &'a str }."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "lifetime-check",
+            "title": "Lifetimes and elision",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "elision",
+                    "label": "Elision infers lifetimes in common signatures such as a single input reference.",
+                    "correct": true
+                },
+                {
+                    "id": "static",
+                    "label": "'static describes a reference that can live for the entire program.",
+                    "correct": true
+                },
+                {
+                    "id": "runtime-lifetime",
+                    "label": "Lifetime annotations change the runtime layout of a reference.",
+                    "correct": false
+                },
+                {
+                    "id": "borrow",
+                    "label": "The borrow checker rejects a reference that outlives its owner.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Lifetimes are compile-time validity bounds. Elision covers simple cases, 'static is the strongest bound, and the borrow checker enforces the relationship.",
+            "hints": [
+                "Three statements are accurate.",
+                "Lifetimes are erased during compilation.",
+                "'static is about program lifetime.",
+                "Select elision, static, and borrow."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 155,
+        "unlocks": [
+            "rust.async-tokio"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
