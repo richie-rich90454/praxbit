@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "proxy-ip",
-            "description": "Assuming the upstream sees the client address.",
-            "stepId": "apply",
-            "feedback": "A reverse proxy opens its own connection to the upstream. Forward X-Forwarded-For and log it explicitly."
+            "description": "Letting the proxy hide the real client address.",
+            "stepId": "review",
+            "answer": "ship:no-client-ip,no-scheme,long-timeout,static-health",
+            "feedback": "Without forwarded client and scheme headers, logs, rate limits, and redirects use the proxy as the client and the wrong protocol. Accepting hides that loss.",
+            "followUpSkill": "devops.networking"
         },
         {
             "id": "long-timeout",
-            "description": "Setting a long read timeout to avoid errors.",
-            "stepId": "apply",
-            "feedback": "A long timeout hides a stalled upstream and ties up a worker. Set a deadline and let the client retry."
+            "description": "Using a ten-minute upstream timeout as a safety margin.",
+            "stepId": "review",
+            "answer": "ship:no-client-ip,no-scheme,long-timeout,static-health",
+            "feedback": "A long timeout holds connections and hides a stalled upstream. Use a bounded timeout and fail fast."
         },
         {
             "id": "process-health",
-            "description": "Treating a running process as a healthy service.",
+            "description": "Calling a static process check a readiness probe.",
             "stepId": "apply",
-            "feedback": "A process can run while its database is unreachable. Probe a dependency and fail the check when it is down."
+            "testDescription": "The health check proves a dependency, not just a running process.",
+            "feedback": "A health check that only proves the process is alive cannot detect a broken database dependency. Exercise the dependency."
         }
     ],
     "lesson": {
@@ -203,7 +207,18 @@
                     "includes": ["dig +short api.campus.test"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Trace the request from DNS through TLS to the proxy.",
+                "Ask what the application loses when the proxy rewrites the request.",
+                "Bound upstream waits and make the health check exercise a dependency.",
+                "Forward the client address and scheme, use a short timeout, and check the database in health."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -260,7 +275,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The config hides the client address and scheme from the upstream, keeps a stalled response open for ten minutes, and answers health checks without touching the database. Forwarding Host is correct behavior, so it is not a finding."
+            "explanation": "The config hides the client address and scheme from the upstream, keeps a stalled response open for ten minutes, and answers health checks without touching the database. Forwarding Host is correct behavior, so it is not a finding.",
+            "hints": [
+                "Compare the proxy config with what the application needs.",
+                "Check forwarded headers and timeout values.",
+                "Ask whether the health endpoint proves readiness or only that a process exists.",
+                "Block the config until client IP, scheme, timeout, and dependency health are correct."
+            ]
         }
     ],
     "evaluation": {
