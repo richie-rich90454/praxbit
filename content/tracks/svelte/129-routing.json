@@ -5,25 +5,14 @@
     "courseId": "svelte",
     "title": "SvelteKit load guards and focus",
     "summary": "Implement a load-time checkout decision, then review a page that renders for anonymous visitors and never announces the new view.",
-    "skills": [
-        "web.routing",
-        "web.accessibility",
-        "svelte.components"
-    ],
-    "prerequisites": [
-        "svelte.stores",
-        "web.routing"
-    ],
+    "skills": ["web.routing", "web.accessibility", "svelte.components"],
+    "prerequisites": ["svelte.stores", "web.routing"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "execution",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "execution", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -35,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Decide access in a load function before rendering.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review a page for load-time and accessibility risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:svelte"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:svelte"],
     "hints": [
         "Check signedIn before itemCount.",
         "Return a redirect to /login for a signed-out visitor.",
@@ -180,10 +160,7 @@
                     "kind": "function",
                     "description": "Signed-out visitors are redirected to login.",
                     "name": "loadCheckout",
-                    "args": [
-                        false,
-                        2
-                    ],
+                    "args": [false, 2],
                     "expected": {
                         "redirect": "/login"
                     }
@@ -192,10 +169,7 @@
                     "kind": "function",
                     "description": "An empty cart is redirected to the cart page.",
                     "name": "loadCheckout",
-                    "args": [
-                        true,
-                        0
-                    ],
+                    "args": [true, 0],
                     "expected": {
                         "redirect": "/cart"
                     }
@@ -204,10 +178,7 @@
                     "kind": "function",
                     "description": "A signed-in visitor with items receives the count.",
                     "name": "loadCheckout",
-                    "args": [
-                        true,
-                        2
-                    ],
+                    "args": [true, 2],
                     "expected": {
                         "itemCount": 2
                     }
@@ -216,10 +187,7 @@
                     "kind": "function",
                     "description": "Sign-in wins over the empty-cart redirect.",
                     "name": "loadCheckout",
-                    "args": [
-                        false,
-                        0
-                    ],
+                    "args": [false, 0],
                     "expected": {
                         "redirect": "/login"
                     }
@@ -307,7 +275,5 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
