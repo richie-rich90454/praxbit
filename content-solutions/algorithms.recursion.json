@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "sum-code": {
+            "files": {
+                "nested.js": "function sumNested(value) {\n  if (typeof value === \"number\") return value;\n  if (!Array.isArray(value)) return 0;\n  let total = 0;\n  for (const item of value) {\n    total += sumNested(item);\n  }\n  return total;\n}\n"
+            }
+        }
+    }
+}
