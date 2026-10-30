@@ -5,23 +5,14 @@
     "courseId": "spring-boot",
     "title": "Transactions and a stable API boundary",
     "summary": "Read products through a repository inside a read-only transaction and return a response record.",
-    "skills": [
-        "spring.data",
-        "spring.security"
-    ],
-    "prerequisites": [
-        "spring.controllers",
-        "sql.queries"
-    ],
+    "skills": ["spring.data", "spring.security"],
+    "prerequisites": ["spring.controllers", "sql.queries"],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:spring"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:spring"],
     "hints": [
         "The repository interface is already declared at the bottom of the file.",
         "Declare the repository as a private final field and assign it in the constructor.",
@@ -198,9 +180,7 @@
                         "private final ProductRepository repository;",
                         "public ProductService(ProductRepository repository)"
                     ],
-                    "excludes": [
-                        "@Autowired"
-                    ]
+                    "excludes": ["@Autowired"]
                 },
                 {
                     "kind": "static",
@@ -216,9 +196,7 @@
                     "kind": "static",
                     "description": "Reads run inside a read-only transaction.",
                     "file": "ProductService.java",
-                    "includes": [
-                        "@Transactional(readOnly = true)"
-                    ],
+                    "includes": ["@Transactional(readOnly = true)"],
                     "excludes": []
                 },
                 {
@@ -229,20 +207,14 @@
                         "record ProductResponse(long id, String name, int stock)",
                         "public ProductResponse find(long id)"
                     ],
-                    "excludes": [
-                        "public Product find(long id)"
-                    ]
+                    "excludes": ["public Product find(long id)"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductService.java",
-                    "includes": [
-                        "private final ProductRepository repository;"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["private final ProductRepository repository;"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -333,7 +305,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
