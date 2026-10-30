@@ -1,18 +1,26 @@
 {
     "id": "django.models",
     "version": 1,
-    "sequence": 93,
+    "sequence": 169,
     "courseId": "django",
     "title": "Models and migrations",
     "summary": "Define an inventory model with bounded fields, a readable label, and a migration path.",
-    "skills": ["django.models"],
-    "prerequisites": ["python.functions", "sql.modeling"],
+    "skills": [
+        "django.models"
+    ],
+    "prerequisites": [
+        "python.functions",
+        "sql.modeling"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:django"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:django"
+    ],
     "hints": [
         "Keep the class declaration and change the field types.",
         "CharField takes max_length; DecimalField takes max_digits and decimal_places.",
@@ -44,18 +61,22 @@
             "id": "float-money",
             "description": "Storing prices in FloatField.",
             "stepId": "apply",
-            "feedback": "Binary floating point cannot represent every decimal exactly. DecimalField keeps money exact."
+            "testDescription": "The price uses an exact decimal field with two places.",
+            "feedback": "Binary floating point cannot represent every decimal exactly. DecimalField keeps money exact.",
+            "followUpSkill": "django.models"
         },
         {
             "id": "migrate-generate",
             "description": "Expecting migrate to create migration files.",
-            "stepId": "apply",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that makemigrations applies schema changes to the database.",
             "feedback": "makemigrations writes the files; migrate applies them to the database."
         },
         {
             "id": "object-label",
             "description": "Leaving the default object label.",
             "stepId": "apply",
+            "testDescription": "The model renders a readable name.",
             "feedback": "Without __str__, Django prints Item object (1). Return a readable name instead."
         }
     ],
@@ -147,45 +168,74 @@
                     "kind": "static",
                     "description": "The model subclasses models.Model.",
                     "file": "models.py",
-                    "includes": ["class Item(models.Model):"],
+                    "includes": [
+                        "class Item(models.Model):"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The name uses a bounded character field.",
                     "file": "models.py",
-                    "includes": ["name = models.CharField(max_length=120)"],
+                    "includes": [
+                        "name = models.CharField(max_length=120)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The price uses an exact decimal field with two places.",
                     "file": "models.py",
-                    "includes": ["price = models.DecimalField(max_digits=8, decimal_places=2)"],
+                    "includes": [
+                        "price = models.DecimalField(max_digits=8, decimal_places=2)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The quantity is an integer with a default.",
                     "file": "models.py",
-                    "includes": ["quantity = models.IntegerField(default=0)"],
+                    "includes": [
+                        "quantity = models.IntegerField(default=0)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The model renders a readable name.",
                     "file": "models.py",
-                    "includes": ["def __str__(self) -> str:", "return self.name"],
-                    "excludes": ["models.FloatField", "models.TextField"]
+                    "includes": [
+                        "def __str__(self) -> str:",
+                        "return self.name"
+                    ],
+                    "excludes": [
+                        "models.FloatField",
+                        "models.TextField"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "models.py",
-                    "includes": ["class Item(models.Model):"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "class Item(models.Model):"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Keep the model class and choose field types that match the data.",
+                "CharField needs max_length; DecimalField needs max_digits and decimal_places.",
+                "IntegerField(default=0) supplies the quantity default.",
+                "Return self.name from __str__ so the admin shows a readable label."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "python manage.py test",
+                "description": "Run the Django test runner against a disposable test database."
+            }
         },
         {
             "kind": "explain",
@@ -220,7 +270,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "A model maps to a table, and each field maps to a column with a type and constraints. makemigrations writes migration files; migrate applies them. DecimalField is the safe choice for money, and __str__ gives rows a readable label."
+            "explanation": "A model maps to a table, and each field maps to a column with a type and constraints. makemigrations writes migration files; migrate applies them. DecimalField is the safe choice for money, and __str__ gives rows a readable label.",
+            "hints": [
+                "Separate writing migrations from applying them.",
+                "makemigrations writes files; migrate changes the database.",
+                "DecimalField is exact; FloatField is binary floating point.",
+                "CharField requires max_length in Django."
+            ]
         }
     ],
     "evaluation": {
@@ -240,5 +296,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
