@@ -141,7 +141,9 @@ export function MachineView(props: { readonly step: MachineStep } & InteractionP
                     </span>
                 </div>
                 <Show when={error().length > 0}>
-                    <p class="feedback feedback--error">{error()}</p>
+                    <p class="feedback feedback--error" role="alert">
+                        {error()}
+                    </p>
                 </Show>
                 <div class="stack stack--tight" aria-live="polite">
                     <span class="meta">{machine.outputLabel}</span>
