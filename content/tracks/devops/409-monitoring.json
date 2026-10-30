@@ -1,0 +1,315 @@
+{
+    "id": "devops.monitoring",
+    "version": 1,
+    "sequence": 409,
+    "courseId": "devops",
+    "title": "Alert on symptoms, not noise",
+    "summary": "Compute availability from request data, review noisy alert rules, and reason about SLOs and error budgets.",
+    "skills": ["api.observability", "ops.deployment"],
+    "prerequisites": ["devops.ci", "api.observability"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-sql",
+        "capabilities": ["source-editing", "sql-execution", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "monitoring",
+        "briefing": "The on-call rotation gets paged for CPU above forty percent, but nobody pages when checkout latency doubles. The dashboard reports request counts, not availability, and the alert file has grown one rule per incident. Start by computing availability from the request log."
+    },
+    "objectives": [
+        {
+            "id": "query",
+            "description": "Compute availability and error counts per service.",
+            "stepIds": ["slo-query"]
+        },
+        {
+            "id": "review",
+            "description": "Identify noisy and missing alert conditions.",
+            "stepIds": ["alert-review"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain symptoms, SLOs, burn rate, and cardinality.",
+            "stepIds": ["monitoring-transfer"]
+        }
+    ],
+    "assets": ["pip:observing", "scene:campus", "system:server-room", "icon:chart"],
+    "hints": [
+        "Availability is successful requests divided by all requests.",
+        "Treat 5xx responses as errors; 4xx responses are usually client errors.",
+        "Group by service and round consistently.",
+        "Alert on user-visible symptoms such as error rate and latency, not raw CPU alone."
+    ],
+    "misconceptions": [
+        {
+            "id": "count-not-rate",
+            "description": "Reporting request counts without a success ratio.",
+            "stepId": "slo-query",
+            "testDescription": "Reports availability per service.",
+            "feedback": "Counts do not show whether users succeeded. Divide successful requests by total requests for each service.",
+            "followUpSkill": "api.observability"
+        },
+        {
+            "id": "page-every-5xx",
+            "description": "Paging on every single 5xx response.",
+            "stepId": "alert-review",
+            "answer": "ship:cpu-page,every-5xx,missing-latency,disk-warning",
+            "feedback": "A single error can be noise. Alert on sustained error-budget burn or a user-visible symptom with a duration window."
+        },
+        {
+            "id": "more-alerts",
+            "description": "Believing more alerts improve reliability.",
+            "stepId": "monitoring-transfer",
+            "answer": "more",
+            "feedback": "Alert fatigue hides real incidents. Every page should be actionable and tied to a symptom users feel."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Measure what users experience",
+                "body": "Availability is the share of requests that succeed. Latency is how long they take. A dashboard full of CPU and memory can miss a checkout path that is failing while the machines look healthy."
+            },
+            {
+                "title": "Page on symptoms with a window",
+                "body": "A page should wake someone for a sustained, user-visible problem. A single 5xx is not a page; a burn rate that would exhaust the error budget within hours is. Use a duration window to suppress spikes."
+            },
+            {
+                "title": "Every alert needs an action",
+                "body": "If the responder cannot do anything differently after the page, it is a dashboard signal, not an alert. High cardinality labels such as user id multiply series and cost; keep labels bounded."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Availability",
+                "definition": "The fraction of requests that complete successfully."
+            },
+            {
+                "term": "SLO",
+                "definition": "A service-level objective: a measurable target for reliability or latency."
+            },
+            {
+                "term": "Error budget",
+                "definition": "The allowed amount of failure implied by an SLO."
+            },
+            {
+                "term": "Burn rate",
+                "definition": "How quickly the error budget is being consumed."
+            },
+            {
+                "term": "Cardinality",
+                "definition": "The number of distinct label combinations in a metric."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Reliability is a ratio",
+            "prompt": "Read the explanation, then compute availability.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Measure what users experience",
+                    "body": "Availability is the share of requests that succeed. Latency is how long they take. A dashboard full of CPU and memory can miss a checkout path that is failing while the machines look healthy."
+                },
+                {
+                    "title": "Page on symptoms with a window",
+                    "body": "A page should wake someone for a sustained, user-visible problem. A single 5xx is not a page; a burn rate that would exhaust the error budget within hours is. Use a duration window to suppress spikes."
+                },
+                {
+                    "title": "Every alert needs an action",
+                    "body": "If the responder cannot do anything differently after the page, it is a dashboard signal, not an alert. High cardinality labels such as user id multiply series and cost; keep labels bounded."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Availability",
+                    "definition": "The fraction of requests that complete successfully."
+                },
+                {
+                    "term": "SLO",
+                    "definition": "A service-level objective: a measurable target for reliability or latency."
+                },
+                {
+                    "term": "Error budget",
+                    "definition": "The allowed amount of failure implied by an SLO."
+                },
+                {
+                    "term": "Burn rate",
+                    "definition": "How quickly the error budget is being consumed."
+                },
+                {
+                    "term": "Cardinality",
+                    "definition": "The number of distinct label combinations in a metric."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "slo-query",
+            "title": "Compute availability per service",
+            "prompt": "Edit availability.sql. Return service, total request count, error count, and availability rounded to three decimals for each service, ordered by service. Treat status 500 and above as an error.",
+            "evidence": "construction",
+            "hints": [
+                "Group the request rows by service.",
+                "Count all rows and count the rows with status at least 500.",
+                "Divide successful rows by all rows as a decimal.",
+                "Use CASE inside SUM for both counts and round the ratio."
+            ],
+            "language": "sql",
+            "files": [
+                {
+                    "path": "availability.sql",
+                    "content": "SELECT service,\n       COUNT(*) AS total,\n       0 AS errors,\n       1.0 AS availability\nFROM requests\nGROUP BY service\nORDER BY service;\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "availability.sql",
+            "preview": "sql",
+            "database": {
+                "schemaSql": "CREATE TABLE requests (id INTEGER PRIMARY KEY, service TEXT NOT NULL, status INTEGER NOT NULL, latency_ms INTEGER NOT NULL, ts TEXT NOT NULL);",
+                "seedSql": "INSERT INTO requests (service, status, latency_ms, ts) VALUES\n('api', 200, 40, '2026-10-01T10:00:00Z'),\n('api', 200, 55, '2026-10-01T10:01:00Z'),\n('api', 500, 900, '2026-10-01T10:02:00Z'),\n('api', 200, 60, '2026-10-01T10:03:00Z'),\n('web', 200, 20, '2026-10-01T10:00:00Z'),\n('web', 503, 1200, '2026-10-01T10:01:00Z'),\n('worker', 200, 80, '2026-10-01T10:00:00Z');"
+            },
+            "tests": [
+                {
+                    "kind": "sql",
+                    "description": "Reports availability per service.",
+                    "expectedRows": [
+                        ["api", 4, 1, 0.75],
+                        ["web", 2, 1, 0.5],
+                        ["worker", 1, 0, 1]
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "alert-review",
+            "title": "Review the alert rules",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Ask whether each rule reflects something users feel.",
+                "Check the duration window on error and CPU alerts.",
+                "Look for a missing latency or availability objective.",
+                "Revise the rules: CPU pages are noisy, every 5xx pages, and latency has no alert."
+            ],
+            "artifact": {
+                "title": "alerts.yaml",
+                "caption": "The current production alert rules.",
+                "kind": "code",
+                "language": "yaml",
+                "content": "groups:\n  - name: campus\n    rules:\n      - alert: HighCpu\n        expr: cpu_percent > 40\n        for: 1m\n        severity: page\n      - alert: AnyServerError\n        expr: increase(http_requests_total{status=~\"5..\"}[1m]) > 0\n        for: 0m\n        severity: page\n      - alert: DiskAlmostFull\n        expr: disk_free_percent < 5\n        severity: ticket"
+            },
+            "findings": [
+                {
+                    "id": "cpu-page",
+                    "label": "CPU above forty percent pages after one minute even when requests are healthy.",
+                    "correct": true
+                },
+                {
+                    "id": "every-5xx",
+                    "label": "A single 5xx response pages immediately.",
+                    "correct": true
+                },
+                {
+                    "id": "missing-latency",
+                    "label": "There is no latency or availability objective for the checkout path.",
+                    "correct": true
+                },
+                {
+                    "id": "disk-warning",
+                    "label": "Disk pressure is only a ticket even at five percent free.",
+                    "correct": true
+                },
+                {
+                    "id": "more-rules",
+                    "label": "Adding a rule for every known cause improves the on-call signal.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "ship",
+                    "label": "Ship the rules"
+                },
+                {
+                    "id": "revise",
+                    "label": "Revise around user-facing SLOs and error-budget burn"
+                },
+                {
+                    "id": "mute",
+                    "label": "Mute the CPU alert only"
+                }
+            ],
+            "correctVerdict": "revise",
+            "explanation": "CPU is a cause, not a symptom. Page on sustained user-visible error and latency, and keep disk pressure actionable before it becomes an outage."
+        },
+        {
+            "kind": "explain",
+            "id": "monitoring-transfer",
+            "title": "Make paging meaningful",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "A page should correspond to something users feel.",
+                "Duration windows suppress transient spikes.",
+                "Labels with unbounded values multiply series.",
+                "Select symptoms, SLO burn, bounded labels, and actionable pages; reject more alerts as better."
+            ],
+            "statements": [
+                {
+                    "id": "symptom",
+                    "label": "Page on sustained user-visible errors or latency, not on a single cause metric.",
+                    "correct": true
+                },
+                {
+                    "id": "burn",
+                    "label": "Error-budget burn rate connects alerting to the reliability target.",
+                    "correct": true
+                },
+                {
+                    "id": "labels",
+                    "label": "Metric labels should stay bounded; user id is usually a bad label.",
+                    "correct": true
+                },
+                {
+                    "id": "action",
+                    "label": "Every page should have an action the responder can take.",
+                    "correct": true
+                },
+                {
+                    "id": "more",
+                    "label": "More alerts always produce better reliability.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Good alerting is selective, symptom-based, and actionable. More rules can reduce signal by exhausting the responder."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
