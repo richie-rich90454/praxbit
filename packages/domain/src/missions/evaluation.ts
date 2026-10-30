@@ -70,6 +70,8 @@ export interface StepEvaluation {
     readonly score: number;
     readonly detail: string;
     readonly answerKey?: string;
+    readonly failedTests?: readonly string[];
+    readonly diagnostic?: string;
 }
 
 function clampScore(value: number): number {
@@ -384,6 +386,8 @@ function evaluateCode(step: CodeStep, response: StepResponse): StepEvaluation {
         detail: passed
             ? "All tests pass. Passing tests are evidence, not proof that every possible behavior is correct."
             : `${response.failedTests.length} of ${response.totalTests} tests still fail.`,
+        failedTests: response.failedTests,
+        ...(response.failedTests[0] === undefined ? {} : { answerKey: response.failedTests[0] }),
     };
 }
 
