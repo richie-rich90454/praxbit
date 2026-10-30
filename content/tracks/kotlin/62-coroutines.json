@@ -5,24 +5,14 @@
     "courseId": "kotlin",
     "title": "Coroutines and null safety",
     "summary": "Run two suspend tasks in a coroutine scope, then diagnose a forced unwrap.",
-    "skills": [
-        "kotlin.oop",
-        "kotlin.coroutines",
-        "kotlin.tooling"
-    ],
-    "prerequisites": [
-        "kotlin.syntax",
-        "concept.testing"
-    ],
+    "skills": ["kotlin.oop", "kotlin.coroutines", "kotlin.tooling"],
+    "prerequisites": ["kotlin.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:kotlin"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:kotlin"],
     "hints": [
         "Return a coroutineScope block.",
         "Create two async blocks.",
@@ -190,34 +169,22 @@
                     "kind": "static",
                     "description": "The loader remains a suspend function.",
                     "file": "Main.kt",
-                    "includes": [
-                        "suspend fun loadTotal(): Int"
-                    ],
+                    "includes": ["suspend fun loadTotal(): Int"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The work runs in a coroutine scope with two async tasks.",
                     "file": "Main.kt",
-                    "includes": [
-                        "coroutineScope {",
-                        "async {",
-                        "await()"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["coroutineScope {", "async {", "await()"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.kt",
-                    "includes": [
-                        "suspend fun loadTotal(): Int"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["suspend fun loadTotal(): Int"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -323,7 +290,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
