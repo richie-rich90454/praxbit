@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "auth.ts": "type SessionUser = { id: string; role: \"member\" | \"admin\" } | null;\ntype AuthDecision =\n  | { status: 200; userId: string }\n  | { status: 401 }\n  | { status: 403 };\n\nfunction authorizeWrite(user: SessionUser): AuthDecision {\n  if (user === null) {\n    return { status: 401 };\n  }\n  if (user.role !== \"admin\") {\n    return { status: 403 };\n  }\n  return { status: 200, userId: user.id };\n}\n"
+            }
+        }
+    }
+}
