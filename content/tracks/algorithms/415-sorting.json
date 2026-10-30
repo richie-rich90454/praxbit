@@ -1,0 +1,462 @@
+{
+    "id": "algorithms.sorting",
+    "version": 1,
+    "sequence": 415,
+    "courseId": "algorithms",
+    "title": "Sort with evidence, not vibes",
+    "summary": "Implement a stable merge sort, choose the right ordering rule, and reason about comparison lower bounds.",
+    "skills": ["algorithms.sorting", "algorithms.complexity"],
+    "prerequisites": ["algorithms.arrays", "js.functions"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "sorting",
+        "briefing": "The advising queue is sorted by priority and then by name. The current report uses an unstable shortcut, so students with equal priority change order between runs. Implement a stable merge sort and explain why the comparison rule is part of correctness."
+    },
+    "objectives": [
+        {
+            "id": "sort",
+            "description": "Implement a stable merge sort with a comparator.",
+            "stepIds": ["merge-sort"]
+        },
+        {
+            "id": "choose",
+            "description": "Choose stability when the product requires it.",
+            "stepIds": ["sort-choice"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain comparison lower bounds and stability trade-offs.",
+            "stepIds": ["sort-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:sort"],
+    "hints": [
+        "Split the array until each piece has zero or one element.",
+        "Merge two sorted halves by repeatedly taking the smaller head.",
+        "When values compare equal, take from the left half to preserve stability.",
+        "Recurse on both halves, merge, and return a new array."
+    ],
+    "misconceptions": [
+        {
+            "id": "engine-sort",
+            "description": "Returning the input unchanged instead of sorting.",
+            "stepId": "merge-sort",
+            "testDescription": "Sorts records by descending score.",
+            "feedback": "The result must be ordered by the comparator. Returning the input preserves the original order.",
+            "followUpSkill": "algorithms.sorting"
+        },
+        {
+            "id": "unstable-merge",
+            "description": "Taking from the right half on equal keys.",
+            "stepId": "merge-sort",
+            "testDescription": "Preserves input order for equal scores.",
+            "feedback": "Stability requires taking from the left half when comparator values tie."
+        },
+        {
+            "id": "stable-default",
+            "description": "Assuming every sort implementation is stable.",
+            "stepId": "sort-choice",
+            "answer": "always",
+            "feedback": "Stability is a property of the algorithm, not a language guarantee across every implementation. Choose or verify it explicitly."
+        },
+        {
+            "id": "quicksort-worst",
+            "description": "Claiming comparison sorting can always beat n log n.",
+            "stepId": "sort-transfer",
+            "answer": "linear",
+            "feedback": "A comparison sort needs about n log n comparisons in the worst case. Linear time requires extra assumptions such as a bounded key range."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Divide, sort, merge",
+                "body": "Merge sort splits the input in half, sorts each half recursively, and merges the two sorted halves in linear time. The recursion has log n levels, so the total work is O(n log n)."
+            },
+            {
+                "title": "Stability is a visible rule",
+                "body": "A stable sort preserves the input order of elements that compare equal. When two students share a priority, stability keeps their arrival order. The merge step preserves it by taking the left element on a tie."
+            },
+            {
+                "title": "Comparison sorting has a floor",
+                "body": "Comparison-based sorting needs about n log n comparisons in the worst case. Counting or radix approaches can beat that only when keys have a bounded, known structure."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Merge sort",
+                "definition": "A divide-and-conquer sort that merges sorted halves in linear time."
+            },
+            {
+                "term": "Stable sort",
+                "definition": "A sort that preserves the input order of equal elements."
+            },
+            {
+                "term": "Comparator",
+                "definition": "A function that decides the relative order of two values."
+            },
+            {
+                "term": "Lower bound",
+                "definition": "The minimum work any algorithm for a problem must do in the worst case."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Ordering is a rule plus an algorithm",
+            "prompt": "Read the explanation, then implement the sort.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Divide, sort, merge",
+                    "body": "Merge sort splits the input in half, sorts each half recursively, and merges the two sorted halves in linear time. The recursion has log n levels, so the total work is O(n log n)."
+                },
+                {
+                    "title": "Stability is a visible rule",
+                    "body": "A stable sort preserves the input order of elements that compare equal. When two students share a priority, stability keeps their arrival order. The merge step preserves it by taking the left element on a tie."
+                },
+                {
+                    "title": "Comparison sorting has a floor",
+                    "body": "Comparison-based sorting needs about n log n comparisons in the worst case. Counting or radix approaches can beat that only when keys have a bounded, known structure."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Merge sort",
+                    "definition": "A divide-and-conquer sort that merges sorted halves in linear time."
+                },
+                {
+                    "term": "Stable sort",
+                    "definition": "A sort that preserves the input order of equal elements."
+                },
+                {
+                    "term": "Comparator",
+                    "definition": "A function that decides the relative order of two values."
+                },
+                {
+                    "term": "Lower bound",
+                    "definition": "The minimum work any algorithm for a problem must do in the worst case."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "merge-sort",
+            "title": "Implement stable merge sort",
+            "prompt": "Edit sorting.js. sortRecords(records) returns a new array sorted by score descending and then by name ascending. Implement mergeSort recursively; do not call Array.prototype.sort.",
+            "evidence": "construction",
+            "hints": [
+                "A one-element or empty half is already sorted.",
+                "Merge by comparing the heads of the two sorted halves.",
+                "On a tie, take the left record to keep the input order.",
+                "Return a new array and keep the original untouched."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "sorting.js",
+                    "content": "function sortRecords(records) {\n  return records;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "sorting.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Sorts records by descending score.",
+                    "name": "sortRecords",
+                    "args": [
+                        [
+                            {
+                                "name": "Ada",
+                                "score": 70
+                            },
+                            {
+                                "name": "Bo",
+                                "score": 95
+                            },
+                            {
+                                "name": "Cy",
+                                "score": 80
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        {
+                            "name": "Bo",
+                            "score": 95
+                        },
+                        {
+                            "name": "Cy",
+                            "score": 80
+                        },
+                        {
+                            "name": "Ada",
+                            "score": 70
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Breaks score ties by name.",
+                    "name": "sortRecords",
+                    "args": [
+                        [
+                            {
+                                "name": "Zoe",
+                                "score": 80
+                            },
+                            {
+                                "name": "Ada",
+                                "score": 80
+                            },
+                            {
+                                "name": "Mia",
+                                "score": 90
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        {
+                            "name": "Mia",
+                            "score": 90
+                        },
+                        {
+                            "name": "Ada",
+                            "score": 80
+                        },
+                        {
+                            "name": "Zoe",
+                            "score": 80
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Preserves input order for equal scores.",
+                    "name": "sortRecords",
+                    "args": [
+                        [
+                            {
+                                "name": "Ada",
+                                "score": 80
+                            },
+                            {
+                                "name": "Bo",
+                                "score": 80
+                            },
+                            {
+                                "name": "Cy",
+                                "score": 80
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        {
+                            "name": "Ada",
+                            "score": 80
+                        },
+                        {
+                            "name": "Bo",
+                            "score": 80
+                        },
+                        {
+                            "name": "Cy",
+                            "score": 80
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles an empty list.",
+                    "name": "sortRecords",
+                    "args": [[]],
+                    "expected": []
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles negative scores.",
+                    "name": "sortRecords",
+                    "args": [
+                        [
+                            {
+                                "name": "Ada",
+                                "score": -5
+                            },
+                            {
+                                "name": "Bo",
+                                "score": 3
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        {
+                            "name": "Bo",
+                            "score": 3
+                        },
+                        {
+                            "name": "Ada",
+                            "score": -5
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Preserves input order for identical keys.",
+                    "name": "sortRecords",
+                    "args": [
+                        [
+                            {
+                                "name": "Ada",
+                                "score": 80,
+                                "id": "first"
+                            },
+                            {
+                                "name": "Ada",
+                                "score": 80,
+                                "id": "second"
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        {
+                            "name": "Ada",
+                            "score": 80,
+                            "id": "first"
+                        },
+                        {
+                            "name": "Ada",
+                            "score": 80,
+                            "id": "second"
+                        }
+                    ]
+                },
+                {
+                    "kind": "ast",
+                    "description": "Uses a recursive merge sort instead of the built-in sort.",
+                    "file": "sorting.js",
+                    "language": "javascript",
+                    "require": [
+                        {
+                            "node": "function-declaration",
+                            "name": "mergeSort"
+                        },
+                        {
+                            "node": "function-call",
+                            "name": "mergeSort",
+                            "min": 1
+                        }
+                    ],
+                    "forbid": []
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "sort-choice",
+            "title": "Choose stability",
+            "prompt": "A report sorts by priority, then must keep arrival order within each priority. Which property matters?",
+            "evidence": "prediction",
+            "hints": [
+                "Equal priorities need a preserved order.",
+                "That property has a name.",
+                "It is not the same as speed or memory use.",
+                "Choose stability."
+            ],
+            "quiz": {
+                "prompt": "Which property preserves arrival order among equal keys?",
+                "options": [
+                    {
+                        "id": "stable",
+                        "label": "Stability"
+                    },
+                    {
+                        "id": "always",
+                        "label": "Every sort is stable by default"
+                    },
+                    {
+                        "id": "inplace",
+                        "label": "In-place operation"
+                    },
+                    {
+                        "id": "cache",
+                        "label": "Cache locality"
+                    }
+                ],
+                "correctId": "stable",
+                "explanation": "A stable sort keeps equal elements in their input order. Not every sort or library implementation guarantees it."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "sort-transfer",
+            "title": "Sorting trade-offs",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Think about the number of comparisons in the worst case.",
+                "Stability and in-place operation trade memory for behavior.",
+                "A bounded integer key allows a different algorithm.",
+                "Select n log n, stability, and linear-time special cases; reject guaranteed linear comparison sorting."
+            ],
+            "statements": [
+                {
+                    "id": "bound",
+                    "label": "Comparison sorting has an O(n log n) worst-case lower bound.",
+                    "correct": true
+                },
+                {
+                    "id": "stable",
+                    "label": "Stability preserves the input order of elements that compare equal.",
+                    "correct": true
+                },
+                {
+                    "id": "memory",
+                    "label": "Merge sort usually needs O(n) extra memory for the merge.",
+                    "correct": true
+                },
+                {
+                    "id": "radix",
+                    "label": "Counting or radix sort can run in linear time when keys have a bounded range.",
+                    "correct": true
+                },
+                {
+                    "id": "linear",
+                    "label": "A comparison sort can always be made linear with a better loop.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Comparison sorting pays a logarithmic factor. Linear-time sorts rely on key structure, and stability is a behavioral choice with a memory cost."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems"]
+}
