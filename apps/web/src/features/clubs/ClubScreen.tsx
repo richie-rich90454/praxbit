@@ -1,6 +1,6 @@
-import { For, Show, createEffect, createSignal, type JSX } from "solid-js";
+import { For, Show, createEffect, createMemo, createSignal, type JSX } from "solid-js";
 import { A } from "@solidjs/router";
-import type { Club, ClubDetail } from "@praxbit/contracts";
+import type { Club, ClubDetail, ClubInvite } from "@praxbit/contracts";
 import { api } from "../../platform/services.ts";
 import { useLearning } from "../learning/learning-store.tsx";
 import { Pip } from "../../design/Pip.tsx";
@@ -30,6 +30,60 @@ export function ClubScreen(): JSX.Element {
     const [submissionEventId, setSubmissionEventId] = createSignal("");
     const [submissionTone, setSubmissionTone] = createSignal<SubmissionTone>("info");
     const [submittingEventId, setSubmittingEventId] = createSignal("");
+    const [invites, setInvites] = createSignal<readonly ClubInvite[]>([]);
+    const [invitesLoading, setInvitesLoading] = createSignal(false);
+    const [inviteError, setInviteError] = createSignal("");
+    const [inviteMaxUses, setInviteMaxUses] = createSignal("5");
+    const [inviteExpiryHours, setInviteExpiryHours] = createSignal("24");
+    const [inviteCreating, setInviteCreating] = createSignal(false);
+    const [revokingInviteId, setRevokingInviteId] = createSignal("");
+    const [memberActionHandle, setMemberActionHandle] = createSignal("");
+    const [memberError, setMemberError] = createSignal("");
+    const [reportTargetType, setReportTargetType] = createSignal<"club" | "member" | "event">(
+        "club",
+    );
+    const [reportTargetHandle, setReportTargetHandle] = createSignal("");
+    const [reportTargetEventId, setReportTargetEventId] = createSignal("");
+    const [reportReason, setReportReason] = createSignal("");
+    const [reportDetails, setReportDetails] = createSignal("");
+    const [reportStatus, setReportStatus] = createSignal("");
+    const [reportTone, setReportTone] = createSignal<SubmissionTone>("info");
+    const [reportSubmitting, setReportSubmitting] = createSignal(false);
+
+    const ownerCount = createMemo(function owners(): number {
+        return (detail()?.members ?? []).filter(function owner(item): boolean {
+            return item.role === "owner";
+        }).length;
+    });
+
+    async function loadInvites(clubId: string): Promise<void> {
+        setInvitesLoading(true);
+        setInviteError("");
+        try {
+            const response = await api.listInvites(clubId);
+            setInvites(response.invites);
+        } catch (caught) {
+            setInvites([]);
+            setInviteError(
+                caught instanceof Error ? caught.message : "Invites could not be loaded.",
+            );
+        } finally {
+            setInvitesLoading(false);
+        }
+    }
+
+    async function showDetail(clubId: string): Promise<ClubDetail> {
+        const next = await api.getClub(clubId);
+        setDetail(next);
+        setMemberError("");
+        if (next.club.role === "owner") {
+            await loadInvites(next.club.id);
+        } else {
+            setInvites([]);
+            setInviteError("");
+        }
+        return next;
+    }
 
     async function refresh(): Promise<void> {
         if (learning.user() === undefined) {
@@ -43,9 +97,12 @@ export function ClubScreen(): JSX.Element {
             setClubs(list);
             const current = detail();
             if (current !== undefined) {
-                setDetail(await api.getClub(current.club.id));
+                await showDetail(current.club.id);
             } else if (list[0] !== undefined) {
-                setDetail(await api.getClub(list[0].id));
+                await showDetail(list[0].id);
+            } else {
+                setDetail(undefined);
+                setInvites([]);
             }
         } catch (caught) {
             setError(caught instanceof Error ? caught.message : "Clubs could not be loaded.");
@@ -73,7 +130,7 @@ export function ClubScreen(): JSX.Element {
             setClubName("");
             await refresh();
             try {
-                setDetail(await api.getClub(club.id));
+                await showDetail(club.id);
             } catch {
                 setError(
                     "The club was created, but its details could not be opened. Select it under Your clubs to try again.",
@@ -103,7 +160,7 @@ export function ClubScreen(): JSX.Element {
             setInviteCode("");
             await refresh();
             try {
-                setDetail(await api.getClub(club.id));
+                await showDetail(club.id);
             } catch {
                 setError(
                     "You joined the club, but its details could not be opened. Select it under Your clubs to try again.",
@@ -120,7 +177,7 @@ export function ClubScreen(): JSX.Element {
         setSubmissionMessage("");
         setSubmissionEventId("");
         try {
-            setDetail(await api.getClub(clubId));
+            await showDetail(clubId);
         } catch (caught) {
             setError(caught instanceof Error ? caught.message : "The club could not be opened.");
         } finally {
@@ -159,7 +216,7 @@ export function ClubScreen(): JSX.Element {
             const current = detail();
             if (current !== undefined) {
                 try {
-                    setDetail(await api.getClub(current.club.id));
+                    await showDetail(current.club.id);
                 } catch {
                     setError(
                         "Your answer was submitted, but the latest club totals could not be loaded. Your result is shown above.",
@@ -175,6 +232,155 @@ export function ClubScreen(): JSX.Element {
         return detail()?.submissions.find(function match(item): boolean {
             return item.eventId === eventId;
         });
+    }
+
+    async function changeMemberRole(handle: string, role: "owner" | "member"): Promise<void> {
+        const current = detail();
+        if (current === undefined || memberActionHandle().length > 0) {
+            return;
+        }
+        setMemberError("");
+        setMemberActionHandle(handle);
+        try {
+            await api.updateMemberRole(current.club.id, handle, role);
+            await showDetail(current.club.id);
+        } catch (caught) {
+            setMemberError(
+                caught instanceof Error ? caught.message : "The member role could not be changed.",
+            );
+        } finally {
+            setMemberActionHandle("");
+        }
+    }
+
+    async function removeMember(handle: string): Promise<void> {
+        const current = detail();
+        if (current === undefined || memberActionHandle().length > 0) {
+            return;
+        }
+        setMemberError("");
+        setMemberActionHandle(handle);
+        try {
+            await api.removeMember(current.club.id, handle);
+            await refresh();
+        } catch (caught) {
+            setMemberError(
+                caught instanceof Error ? caught.message : "The member could not be removed.",
+            );
+        } finally {
+            setMemberActionHandle("");
+        }
+    }
+
+    async function createInvite(): Promise<void> {
+        const current = detail();
+        const maxUses = Number.parseInt(inviteMaxUses(), 10);
+        const expiresInHours = Number.parseInt(inviteExpiryHours(), 10);
+        if (
+            current === undefined ||
+            inviteCreating() ||
+            !Number.isInteger(maxUses) ||
+            maxUses < 1 ||
+            maxUses > 100 ||
+            !Number.isInteger(expiresInHours) ||
+            expiresInHours < 1 ||
+            expiresInHours > 720
+        ) {
+            return;
+        }
+        setInviteError("");
+        setInviteCreating(true);
+        try {
+            const invite = await api.createInvite(current.club.id, { maxUses, expiresInHours });
+            setInvites(function prepend(items): readonly ClubInvite[] {
+                return [invite, ...items];
+            });
+        } catch (caught) {
+            setInviteError(
+                caught instanceof Error ? caught.message : "The invite could not be created.",
+            );
+        } finally {
+            setInviteCreating(false);
+        }
+    }
+
+    async function revokeInvite(inviteId: string): Promise<void> {
+        const current = detail();
+        if (current === undefined || revokingInviteId().length > 0) {
+            return;
+        }
+        setInviteError("");
+        setRevokingInviteId(inviteId);
+        try {
+            await api.revokeInvite(current.club.id, inviteId);
+            setInvites(function markRevoked(items): readonly ClubInvite[] {
+                return items.map(function revoked(item): ClubInvite {
+                    if (item.id !== inviteId) {
+                        return item;
+                    }
+                    return { ...item, revokedAt: new Date().toISOString() };
+                });
+            });
+        } catch (caught) {
+            setInviteError(
+                caught instanceof Error ? caught.message : "The invite could not be revoked.",
+            );
+        } finally {
+            setRevokingInviteId("");
+        }
+    }
+
+    async function submitReport(): Promise<void> {
+        const current = detail();
+        if (current === undefined || reportSubmitting()) {
+            return;
+        }
+        const reason = reportReason().trim();
+        const details = reportDetails().trim();
+        if (reason.length < 5) {
+            setReportTone("error");
+            setReportStatus("Describe the problem in at least five characters.");
+            return;
+        }
+        if (details.length > 0 && details.length < 5) {
+            setReportTone("error");
+            setReportStatus("Details need at least five characters, or leave them empty.");
+            return;
+        }
+        if (reportTargetType() === "member" && reportTargetHandle().length === 0) {
+            setReportTone("error");
+            setReportStatus("Choose the member you are reporting.");
+            return;
+        }
+        if (reportTargetType() === "event" && reportTargetEventId().length === 0) {
+            setReportTone("error");
+            setReportStatus("Choose the event you are reporting.");
+            return;
+        }
+        setReportStatus("");
+        setReportSubmitting(true);
+        try {
+            await api.reportClub(current.club.id, {
+                reason,
+                ...(details.length === 0 ? {} : { details }),
+                targetType: reportTargetType(),
+                ...(reportTargetType() === "member" ? { targetHandle: reportTargetHandle() } : {}),
+                ...(reportTargetType() === "event" ? { targetEventId: reportTargetEventId() } : {}),
+            });
+            setReportTone("success");
+            setReportStatus("Report filed. An administrator can review it.");
+            setReportReason("");
+            setReportDetails("");
+            setReportTargetHandle("");
+            setReportTargetEventId("");
+        } catch (caught) {
+            setReportTone("error");
+            setReportStatus(
+                caught instanceof Error ? caught.message : "The report could not be filed.",
+            );
+        } finally {
+            setReportSubmitting(false);
+        }
     }
 
     let loadedUserId: string | undefined;
@@ -417,7 +623,7 @@ export function ClubScreen(): JSX.Element {
                                                     when={current()?.club.inviteCode !== undefined}
                                                 >
                                                     <span class="meta">
-                                                        Invite code (share to add members):{" "}
+                                                        Legacy invite code (never expires):{" "}
                                                         <code class="inline-code">
                                                             {current()?.club.inviteCode}
                                                         </code>
@@ -426,6 +632,14 @@ export function ClubScreen(): JSX.Element {
                                             </div>
                                             <div class="stack stack--tight">
                                                 <h3>Members</h3>
+                                                <Show when={memberError().length > 0}>
+                                                    <p
+                                                        class="feedback feedback--error"
+                                                        role="alert"
+                                                    >
+                                                        {memberError()}
+                                                    </p>
+                                                </Show>
                                                 <Show
                                                     when={(current()?.members.length ?? 0) > 0}
                                                     fallback={
@@ -434,24 +648,288 @@ export function ClubScreen(): JSX.Element {
                                                         </p>
                                                     }
                                                 >
-                                                    <ul class="stack stack--tight">
+                                                    <ul class="club-member-list stack stack--tight">
                                                         <For each={current()?.members ?? []}>
                                                             {function member(item): JSX.Element {
+                                                                const isOwner =
+                                                                    current()?.club.role ===
+                                                                    "owner";
+                                                                const isLastOwner =
+                                                                    item.role === "owner" &&
+                                                                    ownerCount() <= 1;
+                                                                const busy =
+                                                                    memberActionHandle() ===
+                                                                    item.handle;
                                                                 return (
-                                                                    <li class="row row--between">
-                                                                        <span>
-                                                                            {item.displayName}
-                                                                        </span>
-                                                                        <span class="meta">
-                                                                            {roleLabel(item.role)}
-                                                                        </span>
+                                                                    <li class="club-member">
+                                                                        <div class="row row--between">
+                                                                            <span>
+                                                                                {item.displayName}{" "}
+                                                                                <span class="meta mono">
+                                                                                    @{item.handle}
+                                                                                </span>
+                                                                            </span>
+                                                                            <span class="meta">
+                                                                                {roleLabel(
+                                                                                    item.role,
+                                                                                )}
+                                                                            </span>
+                                                                        </div>
+                                                                        <Show when={isOwner}>
+                                                                            <div class="club-member__actions">
+                                                                                <Show
+                                                                                    when={
+                                                                                        item.role ===
+                                                                                        "member"
+                                                                                    }
+                                                                                    fallback={
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            class="button button--secondary button--small"
+                                                                                            disabled={
+                                                                                                busy ||
+                                                                                                isLastOwner
+                                                                                            }
+                                                                                            aria-label={`Demote ${item.displayName} to member`}
+                                                                                            aria-describedby={
+                                                                                                isLastOwner
+                                                                                                    ? "club-last-owner-hint"
+                                                                                                    : undefined
+                                                                                            }
+                                                                                            onClick={function demote(): void {
+                                                                                                void changeMemberRole(
+                                                                                                    item.handle,
+                                                                                                    "member",
+                                                                                                );
+                                                                                            }}
+                                                                                        >
+                                                                                            Demote
+                                                                                        </button>
+                                                                                    }
+                                                                                >
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        class="button button--secondary button--small"
+                                                                                        disabled={
+                                                                                            busy
+                                                                                        }
+                                                                                        aria-label={`Promote ${item.displayName} to owner`}
+                                                                                        onClick={function promote(): void {
+                                                                                            void changeMemberRole(
+                                                                                                item.handle,
+                                                                                                "owner",
+                                                                                            );
+                                                                                        }}
+                                                                                    >
+                                                                                        Promote
+                                                                                    </button>
+                                                                                </Show>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    class="button button--danger button--small"
+                                                                                    disabled={
+                                                                                        busy ||
+                                                                                        isLastOwner
+                                                                                    }
+                                                                                    aria-label={`Remove ${item.displayName} from the club`}
+                                                                                    onClick={function remove(): void {
+                                                                                        void removeMember(
+                                                                                            item.handle,
+                                                                                        );
+                                                                                    }}
+                                                                                >
+                                                                                    Remove
+                                                                                </button>
+                                                                            </div>
+                                                                        </Show>
                                                                     </li>
                                                                 );
                                                             }}
                                                         </For>
                                                     </ul>
+                                                    <p class="meta" id="club-last-owner-hint">
+                                                        A club always keeps at least one owner.
+                                                        Promote another member before demoting or
+                                                        removing the last owner.
+                                                    </p>
                                                 </Show>
                                             </div>
+                                            <Show when={current()?.club.role === "owner"}>
+                                                <div class="stack stack--tight">
+                                                    <h3>Controlled invites</h3>
+                                                    <p class="meta">
+                                                        Each invite expires and stops working after
+                                                        its use limit. Revoke one to block it
+                                                        immediately.
+                                                    </p>
+                                                    <form
+                                                        class="club-invite-form"
+                                                        onSubmit={function submitInvite(
+                                                            event,
+                                                        ): void {
+                                                            event.preventDefault();
+                                                            void createInvite();
+                                                        }}
+                                                    >
+                                                        <label class="field">
+                                                            <span>Maximum uses</span>
+                                                            <input
+                                                                class="input"
+                                                                type="number"
+                                                                min="1"
+                                                                max="100"
+                                                                value={inviteMaxUses()}
+                                                                onInput={function change(
+                                                                    event,
+                                                                ): void {
+                                                                    setInviteMaxUses(
+                                                                        event.currentTarget.value,
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </label>
+                                                        <label class="field">
+                                                            <span>Expires in hours</span>
+                                                            <input
+                                                                class="input"
+                                                                type="number"
+                                                                min="1"
+                                                                max="720"
+                                                                value={inviteExpiryHours()}
+                                                                onInput={function change(
+                                                                    event,
+                                                                ): void {
+                                                                    setInviteExpiryHours(
+                                                                        event.currentTarget.value,
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </label>
+                                                        <button
+                                                            type="submit"
+                                                            class="button"
+                                                            disabled={inviteCreating()}
+                                                        >
+                                                            {inviteCreating()
+                                                                ? "Creating invite…"
+                                                                : "Create invite"}
+                                                        </button>
+                                                    </form>
+                                                    <Show when={inviteError().length > 0}>
+                                                        <p
+                                                            class="feedback feedback--error"
+                                                            role="alert"
+                                                        >
+                                                            {inviteError()}
+                                                        </p>
+                                                    </Show>
+                                                    <Show
+                                                        when={!invitesLoading()}
+                                                        fallback={
+                                                            <p
+                                                                class="feedback feedback--info"
+                                                                role="status"
+                                                            >
+                                                                Loading invites…
+                                                            </p>
+                                                        }
+                                                    >
+                                                        <Show
+                                                            when={invites().length > 0}
+                                                            fallback={
+                                                                <p class="muted">
+                                                                    No controlled invites yet.
+                                                                    Create one when you need a
+                                                                    temporary code.
+                                                                </p>
+                                                            }
+                                                        >
+                                                            <ul class="club-invite-list stack stack--tight">
+                                                                <For each={invites()}>
+                                                                    {function invite(
+                                                                        entry,
+                                                                    ): JSX.Element {
+                                                                        const expired =
+                                                                            Date.parse(
+                                                                                entry.expiresAt,
+                                                                            ) <= Date.now();
+                                                                        const exhausted =
+                                                                            entry.usedCount >=
+                                                                            entry.maxUses;
+                                                                        const inactive =
+                                                                            entry.revokedAt !==
+                                                                                undefined ||
+                                                                            expired ||
+                                                                            exhausted;
+                                                                        return (
+                                                                            <li class="club-invite">
+                                                                                <div class="row row--between">
+                                                                                    <code class="inline-code">
+                                                                                        {entry.code}
+                                                                                    </code>
+                                                                                    <span class="meta">
+                                                                                        {
+                                                                                            entry.usedCount
+                                                                                        }{" "}
+                                                                                        of{" "}
+                                                                                        {
+                                                                                            entry.maxUses
+                                                                                        }{" "}
+                                                                                        uses
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="row row--between">
+                                                                                    <span class="meta">
+                                                                                        Expires{" "}
+                                                                                        {new Date(
+                                                                                            entry.expiresAt,
+                                                                                        ).toLocaleString()}
+                                                                                    </span>
+                                                                                    <Show
+                                                                                        when={
+                                                                                            !inactive
+                                                                                        }
+                                                                                        fallback={
+                                                                                            <span class="meta">
+                                                                                                {entry.revokedAt !==
+                                                                                                undefined
+                                                                                                    ? "Revoked"
+                                                                                                    : exhausted
+                                                                                                      ? "Used up"
+                                                                                                      : "Expired"}
+                                                                                            </span>
+                                                                                        }
+                                                                                    >
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            class="button button--secondary button--small"
+                                                                                            disabled={
+                                                                                                revokingInviteId() ===
+                                                                                                entry.id
+                                                                                            }
+                                                                                            aria-label={`Revoke invite ${entry.code}`}
+                                                                                            onClick={function revoke(): void {
+                                                                                                void revokeInvite(
+                                                                                                    entry.id,
+                                                                                                );
+                                                                                            }}
+                                                                                        >
+                                                                                            {revokingInviteId() ===
+                                                                                            entry.id
+                                                                                                ? "Revoking…"
+                                                                                                : "Revoke"}
+                                                                                        </button>
+                                                                                    </Show>
+                                                                                </div>
+                                                                            </li>
+                                                                        );
+                                                                    }}
+                                                                </For>
+                                                            </ul>
+                                                        </Show>
+                                                    </Show>
+                                                </div>
+                                            </Show>
                                         </section>
 
                                         <section
@@ -461,6 +939,57 @@ export function ClubScreen(): JSX.Element {
                                             <h2 id="club-events-heading">
                                                 Weekly engineering incidents
                                             </h2>
+                                            <p class="meta">
+                                                Active week of {current()?.week.activeWeekOf}. Only
+                                                that week's event accepts answers. Past events stay
+                                                readable and closed.
+                                            </p>
+                                            <Show when={current()?.cooperativeChallenge}>
+                                                {function challenge(value): JSX.Element {
+                                                    const progress = value();
+                                                    return (
+                                                        <div
+                                                            class="club-challenge"
+                                                            role="status"
+                                                            aria-live="polite"
+                                                        >
+                                                            <h3>{progress.title}</h3>
+                                                            <p class="small">
+                                                                {progress.description}
+                                                            </p>
+                                                            <progress
+                                                                class="club-progress"
+                                                                value={progress.verifiedMembers}
+                                                                max={progress.requiredMembers}
+                                                                aria-label={`Cooperative challenge progress: ${String(progress.verifiedMembers)} of ${String(progress.requiredMembers)} members verified`}
+                                                            >
+                                                                {progress.verifiedMembers} of{" "}
+                                                                {progress.requiredMembers}
+                                                            </progress>
+                                                            <p class="meta">
+                                                                {progress.verifiedMembers} of{" "}
+                                                                {progress.requiredMembers} members
+                                                                have a verified submission
+                                                                {progress.completed
+                                                                    ? ". Challenge complete."
+                                                                    : "."}
+                                                            </p>
+                                                            <Show
+                                                                when={
+                                                                    progress.participants.length > 0
+                                                                }
+                                                            >
+                                                                <p class="meta">
+                                                                    Verified participants:{" "}
+                                                                    {progress.participants.join(
+                                                                        ", ",
+                                                                    )}
+                                                                </p>
+                                                            </Show>
+                                                        </div>
+                                                    );
+                                                }}
+                                            </Show>
                                             <Show
                                                 when={(current()?.events.length ?? 0) > 0}
                                                 fallback={
@@ -473,8 +1002,28 @@ export function ClubScreen(): JSX.Element {
                                                 <For each={current()?.events ?? []}>
                                                     {function event(item): JSX.Element {
                                                         return (
-                                                            <div class="stack stack--tight">
-                                                                <h3>{item.title}</h3>
+                                                            <div class="stack stack--tight club-event">
+                                                                <div class="club-event__header">
+                                                                    <h3>{item.title}</h3>
+                                                                    <span
+                                                                        class={
+                                                                            item.participationOpen
+                                                                                ? "status status--success"
+                                                                                : "status"
+                                                                        }
+                                                                    >
+                                                                        <span
+                                                                            class="status__mark"
+                                                                            aria-hidden="true"
+                                                                        />
+                                                                        {item.participationOpen
+                                                                            ? "Open for answers"
+                                                                            : "Closed"}
+                                                                    </span>
+                                                                </div>
+                                                                <p class="meta">
+                                                                    Week of {item.weekOf}
+                                                                </p>
                                                                 <p class="small">{item.summary}</p>
                                                                 <Show
                                                                     when={verifiedSubmission(
@@ -491,87 +1040,100 @@ export function ClubScreen(): JSX.Element {
                                                                                 Verified answer
                                                                                 recorded ·{" "}
                                                                                 {entry().points}{" "}
-                                                                                points. Submitting
-                                                                                again replaces it.
+                                                                                points.
+                                                                                {item.participationOpen
+                                                                                    ? " Submitting again replaces it."
+                                                                                    : ""}
                                                                             </p>
                                                                         );
                                                                     }}
                                                                 </Show>
-                                                                <fieldset class="stack stack--tight">
-                                                                    <legend class="meta">
-                                                                        Choose one response
-                                                                    </legend>
-                                                                    <For each={item.options}>
-                                                                        {function option(
-                                                                            choice,
-                                                                        ): JSX.Element {
-                                                                            return (
-                                                                                <label class="choice">
-                                                                                    <input
-                                                                                        type="radio"
-                                                                                        name={`event-${item.id}`}
-                                                                                        checked={
-                                                                                            answers()[
-                                                                                                item
-                                                                                                    .id
-                                                                                            ] ===
-                                                                                            choice.id
-                                                                                        }
-                                                                                        onChange={function choose(): void {
-                                                                                            setAnswers(
-                                                                                                function update(
-                                                                                                    currentAnswers,
-                                                                                                ): Readonly<
-                                                                                                    Record<
-                                                                                                        string,
-                                                                                                        string
-                                                                                                    >
-                                                                                                > {
-                                                                                                    return {
-                                                                                                        ...currentAnswers,
-                                                                                                        [item.id]:
-                                                                                                            choice.id,
-                                                                                                    };
-                                                                                                },
-                                                                                            );
-                                                                                        }}
-                                                                                    />
-                                                                                    <span class="choice__text">
-                                                                                        {
-                                                                                            choice.label
-                                                                                        }
-                                                                                    </span>
-                                                                                </label>
-                                                                            );
-                                                                        }}
-                                                                    </For>
-                                                                </fieldset>
-                                                                <div class="row">
-                                                                    <button
-                                                                        type="button"
-                                                                        class="button button--small"
-                                                                        disabled={
-                                                                            answers()[item.id] ===
-                                                                                undefined ||
-                                                                            submittingEventId()
-                                                                                .length > 0
-                                                                        }
-                                                                        onClick={function submit(): void {
-                                                                            void submitEvent(
-                                                                                item.id,
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        {submittingEventId() ===
-                                                                        item.id
-                                                                            ? "Verifying answer…"
-                                                                            : "Submit verified answer"}
-                                                                    </button>
-                                                                    <span class="meta">
-                                                                        {item.points} points
-                                                                        available
-                                                                    </span>
-                                                                </div>
+                                                                <Show
+                                                                    when={item.participationOpen}
+                                                                    fallback={
+                                                                        <p class="meta">
+                                                                            This past event is
+                                                                            closed for new answers.
+                                                                        </p>
+                                                                    }
+                                                                >
+                                                                    <fieldset class="stack stack--tight">
+                                                                        <legend class="meta">
+                                                                            Choose one response
+                                                                        </legend>
+                                                                        <For each={item.options}>
+                                                                            {function option(
+                                                                                choice,
+                                                                            ): JSX.Element {
+                                                                                return (
+                                                                                    <label class="choice">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`event-${item.id}`}
+                                                                                            checked={
+                                                                                                answers()[
+                                                                                                    item
+                                                                                                        .id
+                                                                                                ] ===
+                                                                                                choice.id
+                                                                                            }
+                                                                                            onChange={function choose(): void {
+                                                                                                setAnswers(
+                                                                                                    function update(
+                                                                                                        currentAnswers,
+                                                                                                    ): Readonly<
+                                                                                                        Record<
+                                                                                                            string,
+                                                                                                            string
+                                                                                                        >
+                                                                                                    > {
+                                                                                                        return {
+                                                                                                            ...currentAnswers,
+                                                                                                            [item.id]:
+                                                                                                                choice.id,
+                                                                                                        };
+                                                                                                    },
+                                                                                                );
+                                                                                            }}
+                                                                                        />
+                                                                                        <span class="choice__text">
+                                                                                            {
+                                                                                                choice.label
+                                                                                            }
+                                                                                        </span>
+                                                                                    </label>
+                                                                                );
+                                                                            }}
+                                                                        </For>
+                                                                    </fieldset>
+                                                                    <div class="row">
+                                                                        <button
+                                                                            type="button"
+                                                                            class="button button--small"
+                                                                            disabled={
+                                                                                answers()[
+                                                                                    item.id
+                                                                                ] === undefined ||
+                                                                                submittingEventId()
+                                                                                    .length > 0
+                                                                            }
+                                                                            onClick={function submit(): void {
+                                                                                void submitEvent(
+                                                                                    item.id,
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            {submittingEventId() ===
+                                                                            item.id
+                                                                                ? "Verifying answer…"
+                                                                                : "Submit verified answer"}
+                                                                        </button>
+                                                                        <span class="meta">
+                                                                            {item.points} points
+                                                                            available
+                                                                        </span>
+                                                                    </div>
+                                                                </Show>
                                                                 <Show
                                                                     when={
                                                                         submissionEventId() ===
@@ -650,6 +1212,180 @@ export function ClubScreen(): JSX.Element {
                                                         </For>
                                                     </tbody>
                                                 </table>
+                                            </Show>
+                                        </section>
+
+                                        <section
+                                            class="surface stack"
+                                            aria-labelledby="club-report-heading"
+                                        >
+                                            <h2 id="club-report-heading">Report a concern</h2>
+                                            <p class="meta">
+                                                Reports go to administrators. Only file a report for
+                                                a specific member, event, or club problem.
+                                            </p>
+                                            <form
+                                                class="stack stack--tight"
+                                                onSubmit={function submitReportForm(event): void {
+                                                    event.preventDefault();
+                                                    void submitReport();
+                                                }}
+                                            >
+                                                <label class="field">
+                                                    <span>What are you reporting?</span>
+                                                    <select
+                                                        class="select"
+                                                        value={reportTargetType()}
+                                                        onChange={function change(event): void {
+                                                            setReportTargetType(
+                                                                event.currentTarget.value as
+                                                                    | "club"
+                                                                    | "member"
+                                                                    | "event",
+                                                            );
+                                                            setReportStatus("");
+                                                            setReportTargetHandle("");
+                                                            setReportTargetEventId("");
+                                                        }}
+                                                    >
+                                                        <option value="club">
+                                                            The club in general
+                                                        </option>
+                                                        <option value="member">
+                                                            A club member
+                                                        </option>
+                                                        <option value="event">A club event</option>
+                                                    </select>
+                                                </label>
+                                                <Show when={reportTargetType() === "member"}>
+                                                    <label class="field">
+                                                        <span>Member</span>
+                                                        <select
+                                                            class="select"
+                                                            value={reportTargetHandle()}
+                                                            onChange={function change(event): void {
+                                                                setReportTargetHandle(
+                                                                    event.currentTarget.value,
+                                                                );
+                                                            }}
+                                                        >
+                                                            <option value="">
+                                                                Choose a member
+                                                            </option>
+                                                            <For each={current()?.members ?? []}>
+                                                                {function member(
+                                                                    item,
+                                                                ): JSX.Element {
+                                                                    return (
+                                                                        <option value={item.handle}>
+                                                                            {item.displayName} (@
+                                                                            {item.handle})
+                                                                        </option>
+                                                                    );
+                                                                }}
+                                                            </For>
+                                                        </select>
+                                                    </label>
+                                                </Show>
+                                                <Show when={reportTargetType() === "event"}>
+                                                    <label class="field">
+                                                        <span>Event</span>
+                                                        <select
+                                                            class="select"
+                                                            value={reportTargetEventId()}
+                                                            onChange={function change(event): void {
+                                                                setReportTargetEventId(
+                                                                    event.currentTarget.value,
+                                                                );
+                                                            }}
+                                                        >
+                                                            <option value="">
+                                                                Choose an event
+                                                            </option>
+                                                            <For each={current()?.events ?? []}>
+                                                                {function event(item): JSX.Element {
+                                                                    return (
+                                                                        <option value={item.id}>
+                                                                            {item.title} (week of{" "}
+                                                                            {item.weekOf})
+                                                                        </option>
+                                                                    );
+                                                                }}
+                                                            </For>
+                                                        </select>
+                                                    </label>
+                                                </Show>
+                                                <label class="field">
+                                                    <span>Reason</span>
+                                                    <input
+                                                        class="input"
+                                                        maxlength={500}
+                                                        value={reportReason()}
+                                                        aria-describedby="club-report-reason-hint"
+                                                        onInput={function change(event): void {
+                                                            setReportReason(
+                                                                event.currentTarget.value,
+                                                            );
+                                                            setReportStatus("");
+                                                        }}
+                                                    />
+                                                    <span class="meta" id="club-report-reason-hint">
+                                                        5-500 characters.
+                                                    </span>
+                                                </label>
+                                                <label class="field">
+                                                    <span>Details (optional)</span>
+                                                    <textarea
+                                                        class="textarea"
+                                                        maxlength={1000}
+                                                        value={reportDetails()}
+                                                        aria-describedby="club-report-details-hint"
+                                                        onInput={function change(event): void {
+                                                            setReportDetails(
+                                                                event.currentTarget.value,
+                                                            );
+                                                            setReportStatus("");
+                                                        }}
+                                                    />
+                                                    <span
+                                                        class="meta"
+                                                        id="club-report-details-hint"
+                                                    >
+                                                        Add context an administrator needs.
+                                                    </span>
+                                                </label>
+                                                <div class="row">
+                                                    <button
+                                                        type="submit"
+                                                        class="button"
+                                                        disabled={
+                                                            reportSubmitting() ||
+                                                            reportReason().trim().length < 5
+                                                        }
+                                                    >
+                                                        {reportSubmitting()
+                                                            ? "Filing report…"
+                                                            : "File report"}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                            <Show when={reportStatus().length > 0}>
+                                                <p
+                                                    class={`feedback ${
+                                                        reportTone() === "success"
+                                                            ? "feedback--success"
+                                                            : reportTone() === "error"
+                                                              ? "feedback--error"
+                                                              : "feedback--info"
+                                                    }`}
+                                                    role={
+                                                        reportTone() === "error"
+                                                            ? "alert"
+                                                            : "status"
+                                                    }
+                                                >
+                                                    {reportStatus()}
+                                                </p>
                                             </Show>
                                         </section>
                                     </div>
