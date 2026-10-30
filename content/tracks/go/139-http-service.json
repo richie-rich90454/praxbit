@@ -1,0 +1,331 @@
+{
+    "id": "go.http-service",
+    "version": 1,
+    "sequence": 94,
+    "courseId": "go",
+    "title": "Serve JSON over HTTP",
+    "summary": "Replace a plain-text handler with a routed JSON response and reason about headers.",
+    "skills": [
+        "go.web"
+    ],
+    "prerequisites": [
+        "go.interfaces"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "go-http",
+        "briefing": "The order endpoint returns a plain string with no content type. Return a JSON object for /orders/ and keep the route table explicit."
+    },
+    "objectives": [
+        {
+            "id": "write-json",
+            "description": "Write a JSON response from an HTTP handler.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "header-order",
+            "description": "Reason about headers after the response starts.",
+            "stepIds": [
+                "http-transfer"
+            ]
+        },
+        {
+            "id": "explain-http",
+            "description": "Explain routing, headers, and handler concurrency accurately.",
+            "stepIds": [
+                "http-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:go"
+    ],
+    "hints": [
+        "Set the Content-Type header before writing the body.",
+        "json.NewEncoder can encode a struct directly to the writer.",
+        "Register the handler on the mux.",
+        "Start the server with http.ListenAndServe."
+    ],
+    "misconceptions": [
+        {
+            "id": "plain-text",
+            "description": "Writing a plain string without a content type.",
+            "stepId": "apply",
+            "testDescription": "The handler writes a JSON response.",
+            "feedback": "Set Content-Type to application/json and encode a value. A bare string does not describe the response shape.",
+            "followUpSkill": "go.web"
+        },
+        {
+            "id": "header-panic",
+            "description": "Believing late header changes panic.",
+            "stepId": "http-transfer",
+            "answer": "panic",
+            "feedback": "Headers after WriteHeader are ignored, not fatal. Set them before the first write.",
+            "followUpSkill": "go.web"
+        },
+        {
+            "id": "serial-handlers",
+            "description": "Believing net/http runs handlers one at a time.",
+            "stepId": "http-check",
+            "answer": "serial-handlers",
+            "feedback": "Each request runs in its own goroutine. Shared maps need a mutex or another synchronization mechanism.",
+            "followUpSkill": "go.web"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Handlers write a response",
+                "body": "An http.HandlerFunc receives a ResponseWriter and a Request. Write headers before the first body byte. Once WriteHeader is called, later header changes are ignored. Set Content-Type before encoding the body."
+            },
+            {
+                "title": "A mux routes by pattern",
+                "body": "http.ServeMux matches the longest registered pattern. A pattern ending in a slash matches a subtree, while an exact pattern matches one path. Register handlers on the mux and pass it to http.ListenAndServe."
+            },
+            {
+                "title": "Servers need timeouts and error handling",
+                "body": "The default server has no read or write timeout, which lets slow clients hold connections. Configure timeouts on http.Server and handle encoding errors. Handlers run concurrently, so shared state needs synchronization."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "ServeMux",
+                "definition": "An HTTP request router that maps patterns to handlers."
+            },
+            {
+                "term": "HandlerFunc",
+                "definition": "A function adapter that implements http.Handler."
+            },
+            {
+                "term": "ResponseWriter",
+                "definition": "The interface for writing status, headers, and body."
+            },
+            {
+                "term": "JSON encoding",
+                "definition": "Converting a Go value into a JSON response body."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Handlers write a response",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Handlers write a response",
+                    "body": "An http.HandlerFunc receives a ResponseWriter and a Request. Write headers before the first body byte. Once WriteHeader is called, later header changes are ignored. Set Content-Type before encoding the body."
+                },
+                {
+                    "title": "A mux routes by pattern",
+                    "body": "http.ServeMux matches the longest registered pattern. A pattern ending in a slash matches a subtree, while an exact pattern matches one path. Register handlers on the mux and pass it to http.ListenAndServe."
+                },
+                {
+                    "title": "Servers need timeouts and error handling",
+                    "body": "The default server has no read or write timeout, which lets slow clients hold connections. Configure timeouts on http.Server and handle encoding errors. Handlers run concurrently, so shared state needs synchronization."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "ServeMux",
+                    "definition": "An HTTP request router that maps patterns to handlers."
+                },
+                {
+                    "term": "HandlerFunc",
+                    "definition": "A function adapter that implements http.Handler."
+                },
+                {
+                    "term": "ResponseWriter",
+                    "definition": "The interface for writing status, headers, and body."
+                },
+                {
+                    "term": "JSON encoding",
+                    "definition": "Converting a Go value into a JSON response body."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Return an order as JSON",
+            "prompt": "Edit main.go. The /orders/ handler sets Content-Type to application/json and encodes an order with id o1 and total 2500. Keep the mux and the listen call.",
+            "evidence": "construction",
+            "language": "go",
+            "files": [
+                {
+                    "path": "main.go",
+                    "content": "package main\n\nimport (\n    \"fmt\"\n    \"net/http\"\n)\n\nfunc main() {\n    mux := http.NewServeMux()\n    mux.HandleFunc(\"/orders/\", func(w http.ResponseWriter, r *http.Request) {\n        // TODO: return JSON\n        fmt.Fprintln(w, \"order\")\n    })\n    http.ListenAndServe(\":8080\", mux)\n}\n",
+                    "editable": true,
+                    "language": "go"
+                },
+                {
+                    "path": "go.mod",
+                    "content": "module campus/check\n\ngo 1.23\n",
+                    "editable": false,
+                    "language": "go"
+                }
+            ],
+            "entry": "main.go",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "go test ./...",
+                "description": "Compile and test the module with the Go toolchain."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The handler writes a JSON response.",
+                    "file": "main.go",
+                    "includes": [
+                        "w.Header().Set(\"Content-Type\", \"application/json\")",
+                        "json.NewEncoder(w).Encode("
+                    ],
+                    "excludes": [
+                        "fmt.Fprintln(w, \"order\")"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The server uses a mux and a listen address.",
+                    "file": "main.go",
+                    "includes": [
+                        "http.NewServeMux()",
+                        "mux.HandleFunc(\"/orders/\",",
+                        "http.ListenAndServe(\":8080\", mux)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter TODO is gone.",
+                    "file": "main.go",
+                    "includes": [
+                        "\"encoding/json\""
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The handler currently writes a bare string.",
+                "Set the Content-Type header before encoding.",
+                "Define an order struct with JSON tags.",
+                "Use json.NewEncoder(w).Encode(order{...})."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "http-transfer",
+            "title": "Headers after the body starts",
+            "prompt": "A handler calls WriteHeader(200), writes the body, and then sets another header. What happens to the later header?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the result.",
+                "options": [
+                    {
+                        "id": "ignored",
+                        "label": "It is ignored because the response has already started."
+                    },
+                    {
+                        "id": "panic",
+                        "label": "The handler panics."
+                    },
+                    {
+                        "id": "rewritten",
+                        "label": "It replaces the earlier headers in the response."
+                    },
+                    {
+                        "id": "duplicated",
+                        "label": "It is sent as a second response."
+                    }
+                ],
+                "correctId": "ignored",
+                "explanation": "The status and headers are flushed when the first body write happens. Later header changes do not reach the client."
+            },
+            "hints": [
+                "Headers travel with the status line.",
+                "The response starts at the first write.",
+                "Late changes cannot alter bytes already sent.",
+                "Choose ignored."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "http-check",
+            "title": "Routing, JSON, and concurrency",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "longest",
+                    "label": "ServeMux chooses the longest matching registered pattern.",
+                    "correct": true
+                },
+                {
+                    "id": "headers",
+                    "label": "A header set after WriteHeader is ignored.",
+                    "correct": true
+                },
+                {
+                    "id": "encode-error",
+                    "label": "json.Encoder.Encode can return an error.",
+                    "correct": true
+                },
+                {
+                    "id": "serial-handlers",
+                    "label": "net/http runs handlers one at a time.",
+                    "correct": false
+                }
+            ],
+            "explanation": "The mux matches the most specific pattern, headers are committed early, encoding can fail, and handlers run concurrently.",
+            "hints": [
+                "Three statements are accurate.",
+                "net/http starts a goroutine per request.",
+                "Encoding writes to the response and can fail.",
+                "Select longest, headers, and encode-error."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 155,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional",
+        "web"
+    ]
+}
