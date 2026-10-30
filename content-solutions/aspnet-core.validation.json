@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "ProductsController.cs": "using System.ComponentModel.DataAnnotations;\nusing Microsoft.AspNetCore.Mvc;\n\nnamespace Praxbit.Catalog.Controllers;\n\n[ApiController]\n[Route(\"api/[controller]\")]\npublic class ProductsController : ControllerBase\n{\n    private readonly IProductService _service;\n\n    public ProductsController(IProductService service) => _service = service;\n\n    [HttpPost]\n    public ActionResult<Product> Create(CreateProductRequest request)\n    {\n        var product = _service.Create(request.Name, request.Stock);\n        return Created($\"/api/products/{product.Id}\", product);\n    }\n}\n\npublic record CreateProductRequest(\n    [property: Required, StringLength(120)] string Name,\n    [property: Range(0, 100000)] int Stock);\n"
+            }
+        }
+    }
+}
