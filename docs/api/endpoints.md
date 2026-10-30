@@ -14,6 +14,16 @@ Public. Reports runtime features that the client must not assume:
 
 `aiTutor` is true only when a complete AI provider configuration is present. It never exposes the provider URL, key, or model. The web client hides the live tutor and keeps curated hints when it is false.
 
+## Operations
+
+### `GET /metrics`
+
+Prometheus text format. In development and test it is open. In production it is available only from loopback, with `PRAXBIT_METRICS_TOKEN`, or to an administrator bearer session. It exposes request counts, latency histograms, process memory, event-loop lag, database pool state, and readiness. It never exposes bodies, cookies, authorization headers, user handles, raw paths, or connection strings.
+
+### `GET /healthz` and `GET /readyz`
+
+`/healthz` reports process liveness, version, environment, capabilities, and whether the web build is present. `/readyz` returns 200 only when the database is reachable and the required web build exists; otherwise it returns 503 with the failing check.
+
 ## Auth
 
 ### `GET /auth/csrf`
