@@ -44,19 +44,30 @@
             "id": "no-overlap",
             "description": "Cutting chunks at fixed offsets with no overlap.",
             "stepId": "apply",
-            "feedback": "A sentence split across the boundary is lost to retrieval. Overlap the windows so both sides remain searchable."
+            "testDescription": "Chunks stay small and overlap their neighbors.",
+            "feedback": "A sentence split across the boundary is lost to retrieval. Overlap the windows so both sides remain searchable.",
+            "followUpSkill": "ai.rag"
         },
         {
             "id": "retrieved-commands",
             "description": "Following instructions found inside a retrieved document.",
             "stepId": "apply",
+            "testDescription": "The prompt marks retrieved text as data and requires citations.",
             "feedback": "Retrieved text is data. State that rule in the prompt and never let a source change the task."
         },
         {
             "id": "cite-anything",
             "description": "Adding a citation even when no retrieved chunk supports the claim.",
             "stepId": "apply",
+            "testDescription": "An answer without a cited retrieved chunk is refused.",
             "feedback": "Citations must point to chunks the answer used. Refuse when nothing was retrieved or cited."
+        },
+        {
+            "id": "return-everything",
+            "description": "Sending every chunk so the model can decide.",
+            "stepId": "check",
+            "answer": "order",
+            "feedback": "Returning everything defeats retrieval, hides weak matches, and grows cost. Rank and keep a bounded top count."
         }
     ],
     "lesson": {
@@ -205,7 +216,18 @@
                     "includes": ["overlap >= size"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Split the document into windows that step by size minus overlap.",
+                "Embed and score every chunk, then sort descending.",
+                "Keep a fixed top count and label each chunk in the prompt.",
+                "Treat sources as data and refuse when the answer cites no retrieved id."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "explain",
@@ -245,7 +267,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Retrieval quality is fixed before the model speaks. Overlapping chunks keep boundaries searchable, similarity ranking chooses a small context, and the prompt treats sources as data. An answer with no cited chunk is a refusal, not a guess."
+            "explanation": "Retrieval quality is fixed before the model speaks. Overlapping chunks keep boundaries searchable, similarity ranking chooses a small context, and the prompt treats sources as data. An answer with no cited chunk is a refusal, not a guess.",
+            "hints": [
+                "Overlap keeps boundary text retrievable.",
+                "Ranking decides what the model sees.",
+                "Sources are untrusted input.",
+                "Select overlap, citations, and injection awareness; reject returning everything or guessing without a source."
+            ]
         }
     ],
     "evaluation": {
