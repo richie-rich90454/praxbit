@@ -5,23 +5,14 @@
     "courseId": "spring-boot",
     "title": "Authentication at the filter boundary",
     "summary": "Configure a SecurityFilterChain and prove with MockMvc that anonymous requests are rejected before MVC.",
-    "skills": [
-        "spring.security",
-        "spring.boot"
-    ],
-    "prerequisites": [
-        "spring.controllers",
-        "security.auth"
-    ],
+    "skills": ["spring.security", "spring.boot"],
+    "prerequisites": ["spring.controllers", "security.auth"],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-configure",
             "description": "Configure request authorization and an authentication mechanism.",
-            "stepIds": [
-                "configure"
-            ]
+            "stepIds": ["configure"]
         },
         {
             "id": "objective-test",
             "description": "Test anonymous and authenticated requests through MockMvc.",
-            "stepIds": [
-                "test"
-            ]
+            "stepIds": ["test"]
         },
         {
             "id": "objective-transfer",
             "description": "Reason about where a rejected request stops.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:api",
-        "icon:spring"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:spring"],
     "hints": [
         "The filter chain decides access before the controller is called.",
         "Permit only the health endpoint and authenticate every other request.",
@@ -220,22 +200,15 @@
                     "kind": "static",
                     "description": "HTTP Basic authenticates requests.",
                     "file": "SecurityConfig.java",
-                    "includes": [
-                        ".httpBasic(Customizer.withDefaults())"
-                    ],
+                    "includes": [".httpBasic(Customizer.withDefaults())"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The filter chain is exposed as a bean.",
                     "file": "SecurityConfig.java",
-                    "includes": [
-                        "@Bean",
-                        "SecurityFilterChain filterChain(HttpSecurity http)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["@Bean", "SecurityFilterChain filterChain(HttpSecurity http)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "language": "text"
@@ -276,30 +249,20 @@
                         "mockMvc.perform(get(\"/api/products/1\"))",
                         "status().isUnauthorized()"
                     ],
-                    "excludes": [
-                        "get(\"/api/products/1\")).andExpect(status().isOk())"
-                    ]
+                    "excludes": ["get(\"/api/products/1\")).andExpect(status().isOk())"]
                 },
                 {
                     "kind": "static",
                     "description": "An authenticated member can read the catalog.",
                     "file": "CatalogSecurityTest.java",
-                    "includes": [
-                        "with(user(\"ada\").roles(\"MEMBER\"))",
-                        "status().isOk()"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["with(user(\"ada\").roles(\"MEMBER\"))", "status().isOk()"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The test loads the real security configuration.",
                     "file": "CatalogSecurityTest.java",
-                    "includes": [
-                        "@SpringBootTest",
-                        "@AutoConfigureMockMvc"
-                    ],
+                    "includes": ["@SpringBootTest", "@AutoConfigureMockMvc"],
                     "excludes": []
                 }
             ],
@@ -359,8 +322,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
