@@ -1,6 +1,6 @@
 {
     "id": "campus.everything-is-misplaced",
-    "version": 1,
+    "version": 2,
     "sequence": 14,
     "courseId": "campus",
     "title": "Everything is misplaced",
@@ -49,13 +49,17 @@
             "id": "css-changes-content",
             "description": "Believing CSS rewrites the document's meaning.",
             "stepId": "css-check",
-            "feedback": "CSS changes presentation. The document structure and text remain HTML."
+            "diagnostic": "Claims CSS edits the HTML text or document meaning rather than its presentation.",
+            "feedback": "CSS changes presentation. The document structure and text remain HTML.",
+            "followUpSkill": "web.css"
         },
         {
             "id": "fixed-width",
             "description": "Using a fixed card width instead of a responsive layout.",
             "stepId": "repair-css",
-            "feedback": "A fixed width overflows small screens. Use a responsive grid and a media query that stacks cards."
+            "testDescription": "A narrow-screen media query stacks the cards.",
+            "feedback": "A fixed width overflows small screens. Use a responsive grid and a media query that stacks cards.",
+            "followUpSkill": "web.css"
         }
     ],
     "lesson": {
@@ -88,6 +92,12 @@
         {
             "kind": "code",
             "id": "repair-css",
+            "hints": [
+                "Style the catalog grid, cards, and call to action, then add the narrow-screen rule.",
+                "Use the existing tokens for spacing, radius, border, and accent, and change layout with a media query.",
+                "A two-card grid uses display: grid and gap; below a breakpoint, one column stacks them.",
+                "Set .catalog to grid with a 16px gap, style .card with the border and radius tokens, then add a max-width 700px media query with one column."
+            ],
             "title": "Repair the catalog layout",
             "prompt": "Edit styles.css. Keep the provided tokens. Make the catalog a 16px grid, give cards a 1px neutral border and 5px radius, style .cta with accent #B54131 and white text, and stack cards below 700px.",
             "evidence": "construction",
@@ -170,6 +180,12 @@
         {
             "kind": "explain",
             "id": "css-check",
+            "hints": [
+                "Select statements about what CSS controls and what it leaves to HTML.",
+                "CSS changes presentation and layout; document meaning stays in the markup.",
+                "Hiding a heading with CSS does not remove it from the document structure.",
+                "Three statements are accurate; reject the claim that shadows are required for hierarchy."
+            ],
             "title": "What CSS can change",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
