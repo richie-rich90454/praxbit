@@ -1,18 +1,29 @@
 {
     "id": "rust.ownership",
     "version": 1,
-    "sequence": 60,
+    "sequence": 96,
     "courseId": "rust",
     "title": "Traits and ownership in Rust",
     "summary": "Implement a trait for a struct, then diagnose a use-after-move error.",
-    "skills": ["rust.ownership", "rust.traits", "rust.async", "rust.cargo"],
-    "prerequisites": ["rust.syntax", "concept.testing"],
+    "skills": [
+        "rust.ownership",
+        "rust.traits",
+        "rust.async",
+        "rust.cargo"
+    ],
+    "prerequisites": [
+        "rust.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +35,31 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": ["diagnose"]
+            "stepIds": [
+                "diagnose"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:rust"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:rust"
+    ],
     "hints": [
         "Use impl Summary for Article.",
         "The method signature must match the trait.",
@@ -49,13 +71,25 @@
             "id": "move",
             "description": "Using a value after passing it by value.",
             "stepId": "apply",
-            "feedback": "A move transfers ownership. Borrow with & or clone deliberately."
+            "diagnostic": "The value is moved into consume and then reused after the move.",
+            "feedback": "A move transfers ownership. Borrow with & or clone deliberately.",
+            "followUpSkill": "rust.ownership"
         },
         {
             "id": "async",
             "description": "Treating an async call as already completed.",
-            "stepId": "apply",
-            "feedback": "Calling an async function returns a future. Await it inside an async context."
+            "stepId": "check",
+            "answer": "async",
+            "feedback": "Calling an async function returns a future. Await it inside an async context.",
+            "followUpSkill": "rust.ownership"
+        },
+        {
+            "id": "hide-use",
+            "description": "Removing the later use instead of borrowing the value.",
+            "stepId": "diagnose",
+            "answer": "ignore",
+            "feedback": "Deleting the print hides the ownership problem. Borrow with &name so the original stays usable.",
+            "followUpSkill": "rust.ownership"
         }
     ],
     "lesson": {
@@ -129,6 +163,12 @@
                     "content": "trait Summary {\n    fn summarize(&self) -> String;\n}\n\nstruct Article {\n    title: String,\n}\n\n// TODO: implement Summary for Article\n\nfn main() {\n    let article = Article { title: String::from(\"Campus power\") };\n    println!(\"{}\", article.summarize());\n}\n",
                     "editable": true,
                     "language": "rust"
+                },
+                {
+                    "path": "Cargo.toml",
+                    "language": "toml",
+                    "content": "[package]\nname = \"campus-check\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n",
+                    "editable": false
                 }
             ],
             "entry": "src/main.rs",
@@ -138,24 +178,47 @@
                     "kind": "static",
                     "description": "The Summary trait remains the shared contract.",
                     "file": "src/main.rs",
-                    "includes": ["trait Summary", "fn summarize(&self) -> String;"],
+                    "includes": [
+                        "trait Summary",
+                        "fn summarize(&self) -> String;"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Article implements the trait without taking ownership of self.",
                     "file": "src/main.rs",
-                    "includes": ["impl Summary for Article", "fn summarize(&self) -> String"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "impl Summary for Article",
+                        "fn summarize(&self) -> String"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "src/main.rs",
-                    "includes": ["trait Summary"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "trait Summary"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Implement the trait for Article.",
+                "Match the trait method signature exactly.",
+                "Borrow self so the article remains owned by main.",
+                "impl Summary for Article { fn summarize(&self) -> String { format!(\"{}\", self.title) } }"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile and test the crate with Cargo."
+            }
         },
         {
             "kind": "debug",
@@ -197,7 +260,13 @@
                 }
             ],
             "correctFixId": "borrow",
-            "explanation": "Passing name by value moves it. Borrowing with &name leaves the original owned by main."
+            "explanation": "Passing name by value moves it. Borrowing with &name leaves the original owned by main.",
+            "hints": [
+                "Passing a String by value moves ownership.",
+                "Using name after the move is rejected by the compiler.",
+                "Borrow with &name to keep ownership in main.",
+                "Change consume(name) to consume(&name)."
+            ]
         },
         {
             "kind": "explain",
@@ -227,7 +296,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Traits define shared contracts, and ownership rules make moves explicit. Async functions return futures that must be driven."
+            "explanation": "Traits define shared contracts, and ownership rules make moves explicit. Async functions return futures that must be driven.",
+            "hints": [
+                "Two statements are accurate.",
+                "Traits define shared behavior.",
+                "An async function returns a future; it does not run to completion when called.",
+                "Select trait and move."
+            ]
         }
     ],
     "evaluation": {
@@ -247,5 +322,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems"]
+    "tags": [
+        "systems"
+    ]
 }
