@@ -185,14 +185,16 @@ Transfer evidence asks the learner to apply a rule to a case that was not used i
 
 ## Placement
 
-Placement is a short diagnostic, currently eight multiple-choice questions covering variables, loops, HTML, HTTP, Git, boundary testing, idempotency, and one additional concept. Correct answers record the associated skill as skipped. The recommendation thresholds are:
+Placement is a short diagnostic with eleven multiple-choice questions covering variables, loops, HTML, HTTP, Git, boundary testing, idempotency, types, Java, Rust, and React. Correct answers record the associated skill as skipped. The recommendation thresholds are:
 
 | Correct | Recommended start                       |
 | ------- | --------------------------------------- |
-| 7+      | `campus.the-mysterious-exception`       |
-| 5+      | `campus.page-with-no-identity`          |
-| 3+      | `before-code.everything-is-information` |
-| 0+      | `before-code.make-it-respond`           |
+| 11      | `typescript.generics`                   |
+| 9       | `java.values`                           |
+| 7       | `campus.the-mysterious-exception`       |
+| 5       | `campus.page-with-no-identity`          |
+| 3       | `before-code.everything-is-information` |
+| 0       | `before-code.make-it-respond`           |
 
 Placement skips prerequisite checks for the skills it marks. It is advisory: the learner can still open any track. It is not a proctored exam and should not be described as one.
 
