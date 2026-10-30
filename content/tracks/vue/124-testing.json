@@ -1,0 +1,313 @@
+{
+    "id": "vue.testing",
+    "version": 1,
+    "sequence": 219,
+    "courseId": "vue",
+    "title": "Validate stored cart data",
+    "summary": "Parse untrusted saved cart data, then choose the component tests that catch empty, malformed, and unusable states.",
+    "skills": ["concept.testing", "vue.reactivity", "vue.components"],
+    "prerequisites": ["vue.reactivity", "concept.state"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "testing",
+        "briefing": "A saved cart from an older release contains a row with no SKU and a zero quantity. The cart page renders it and crashes when the total is formatted."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Validate untrusted cart data at the boundary.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-design",
+            "description": "Select meaningful component test cases.",
+            "stepIds": ["design"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:vue"],
+    "hints": [
+        "Return an empty array when the stored value is not an array.",
+        "Skip entries that are not objects before reading fields.",
+        "Require a non-empty string SKU and a positive integer quantity.",
+        "Return a new array that contains only the valid rows."
+    ],
+    "misconceptions": [
+        {
+            "id": "trust-json",
+            "description": "Casting parsed JSON without checking it.",
+            "stepId": "apply",
+            "testDescription": "Malformed entries are dropped.",
+            "feedback": "A cast disappears at runtime. The saved value can be an object, a string, or a row with missing fields; parse it with real checks.",
+            "followUpSkill": "vue.reactivity"
+        },
+        {
+            "id": "negative-quantity",
+            "description": "Accepting a zero or negative quantity.",
+            "stepId": "apply",
+            "testDescription": "Non-positive quantities are rejected.",
+            "feedback": "A cart line needs at least one unit. Treat zero and negative values as invalid rather than rendering a negative total.",
+            "followUpSkill": "vue.components"
+        },
+        {
+            "id": "snapshot-suite",
+            "description": "Relying on full-page HTML snapshots.",
+            "stepId": "design",
+            "answer": "snapshot",
+            "feedback": "A full-page snapshot fails on harmless markup changes and still misses malformed data. Test the states and the parser behavior directly.",
+            "followUpSkill": "concept.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Stored data is untrusted",
+                "body": "localStorage, an API, and a test fixture can all contain values that do not match the cart type. Parse the value at the boundary and return a safe result."
+            },
+            {
+                "title": "Drop invalid rows, not the page",
+                "body": "One malformed row should not crash the cart. Filter invalid entries, keep the valid ones, and let the UI show an empty state when nothing survives."
+            },
+            {
+                "title": "Test the parser before the component",
+                "body": "Pure parsing tests cover arrays, objects, missing fields, zero quantities, and negative values without mounting a component or mocking storage."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Boundary",
+                "definition": "The point where data enters the app from an external source."
+            },
+            {
+                "term": "Type guard",
+                "definition": "A runtime check that narrows an unknown value to a known shape."
+            },
+            {
+                "term": "Fixture",
+                "definition": "A controlled input used by a test."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Parsing and testing boundaries",
+            "prompt": "Read the explanation, then implement the parser.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Stored data is untrusted",
+                    "body": "localStorage, an API, and a test fixture can all contain values that do not match the cart type. Parse the value at the boundary and return a safe result."
+                },
+                {
+                    "title": "Drop invalid rows, not the page",
+                    "body": "One malformed row should not crash the cart. Filter invalid entries, keep the valid ones, and let the UI show an empty state when nothing survives."
+                },
+                {
+                    "title": "Test the parser before the component",
+                    "body": "Pure parsing tests cover arrays, objects, missing fields, zero quantities, and negative values without mounting a component or mocking storage."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Boundary",
+                    "definition": "The point where data enters the app from an external source."
+                },
+                {
+                    "term": "Type guard",
+                    "definition": "A runtime check that narrows an unknown value to a known shape."
+                },
+                {
+                    "term": "Fixture",
+                    "definition": "A controlled input used by a test."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Parse a saved cart safely",
+            "prompt": "Edit parseCart.ts. Return an empty array for non-arrays, drop malformed rows, reject non-positive quantities, and keep every valid line.",
+            "evidence": "construction",
+            "hints": [
+                "Start with Array.isArray and return [] for anything else.",
+                "Inside the loop, skip null and non-object entries.",
+                "Read sku and quantity from a Record<string, unknown> after the object check.",
+                "Push only rows with a non-empty string SKU and a positive integer quantity."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "parseCart.ts",
+                    "content": "type CartLine = { sku: string; quantity: number };\n\nfunction parseCart(raw: unknown): CartLine[] {\n  // TODO: validate the array and drop malformed or non-positive lines\n  return raw as CartLine[];\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "parseCart.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A non-array value becomes an empty cart.",
+                    "name": "parseCart",
+                    "args": [
+                        {
+                            "sku": "pen",
+                            "quantity": 1
+                        }
+                    ],
+                    "expected": []
+                },
+                {
+                    "kind": "function",
+                    "description": "Malformed entries are dropped.",
+                    "name": "parseCart",
+                    "args": [
+                        [
+                            {
+                                "sku": "pen",
+                                "quantity": 2
+                            },
+                            null,
+                            {
+                                "quantity": 1
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        {
+                            "sku": "pen",
+                            "quantity": 2
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Non-positive quantities are rejected.",
+                    "name": "parseCart",
+                    "args": [
+                        [
+                            {
+                                "sku": "pen",
+                                "quantity": 0
+                            },
+                            {
+                                "sku": "ink",
+                                "quantity": -1
+                            }
+                        ]
+                    ],
+                    "expected": []
+                },
+                {
+                    "kind": "function",
+                    "description": "Valid rows survive unchanged.",
+                    "name": "parseCart",
+                    "args": [
+                        [
+                            {
+                                "sku": "pen",
+                                "quantity": 3
+                            },
+                            {
+                                "sku": "ink",
+                                "quantity": 1
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        {
+                            "sku": "pen",
+                            "quantity": 3
+                        },
+                        {
+                            "sku": "ink",
+                            "quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty array stays empty.",
+                    "name": "parseCart",
+                    "args": [[]],
+                    "expected": []
+                }
+            ]
+        },
+        {
+            "kind": "test-design",
+            "id": "design",
+            "title": "Choose the cart component tests",
+            "prompt": "Select every test case the cart component needs. Leave out cases that assert the wrong thing.",
+            "evidence": "testing",
+            "hints": [
+                "Cover empty, valid, and partially invalid input.",
+                "Assert a user-visible total, not an internal variable.",
+                "Reject full-page snapshots and private state access.",
+                "Keep only observable behavior that can break for a user."
+            ],
+            "cases": [
+                {
+                    "id": "empty",
+                    "label": "Renders the empty-cart message when parsing returns no lines.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "valid",
+                    "label": "Renders one row for each valid parsed line.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "invalid",
+                    "label": "Drops malformed stored entries instead of throwing.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "total",
+                    "label": "Shows a total that matches the sum of price times quantity.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "snapshot",
+                    "label": "Asserts the full HTML string so formatting changes fail the test.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "internal",
+                    "label": "Reads private component state directly instead of rendered output.",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The component needs empty, valid, invalid, and total cases. Full-page snapshots are brittle, and reaching into private state tests the implementation instead of the behavior."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
