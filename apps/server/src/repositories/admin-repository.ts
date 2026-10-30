@@ -34,6 +34,8 @@ export interface ClubReport {
     readonly createdAt: string;
 }
 
+type MutableClubReport = { -readonly [Key in keyof ClubReport]: ClubReport[Key] };
+
 type ReportRow = {
     id: string;
     club_id: string;
@@ -111,12 +113,25 @@ export class AdminRepository {
                         ? row.created_at.toISOString()
                         : new Date(row.created_at).toISOString(),
             };
-            return {
-                ...report,
-                ...(row.details === null ? {} : { details: row.details }),
-                ...(row.target_handle === null ? {} : { targetHandle: row.target_handle }),
-                ...(row.target_event_id === null ? {} : { targetEventId: row.target_event_id }),
+            const complete: MutableClubReport = {
+                id: report.id,
+                clubId: report.clubId,
+                reporterId: report.reporterId,
+                reason: report.reason,
+                targetType: report.targetType,
+                status: report.status,
+                createdAt: report.createdAt,
             };
+            if (row.details !== null) {
+                complete.details = row.details;
+            }
+            if (row.target_handle !== null) {
+                complete.targetHandle = row.target_handle;
+            }
+            if (row.target_event_id !== null) {
+                complete.targetEventId = row.target_event_id;
+            }
+            return complete;
         });
     }
 
