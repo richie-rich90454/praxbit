@@ -1,13 +1,21 @@
 import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
-import { For, Show, createEffect, createSignal, onMount, type JSX } from "solid-js";
+import { For, Show, createEffect, createMemo, createSignal, onMount, type JSX } from "solid-js";
 import type { Interest, Mission, Misconception } from "@praxbit/contracts";
 import {
+    MissionStateMachine,
+    MissionTransitionError,
     evaluateMission,
     findMisconception,
+    practiceResult,
+    resolveMissionMode,
     type MissionEvaluation,
+    type MissionEvent,
+    type MissionMode,
+    type MissionSession,
     type StepEvaluation,
 } from "@praxbit/domain";
 import { ApiError } from "@praxbit/client";
+import { announce } from "../../app/AppShell.tsx";
 import { Pip } from "../../design/Pip.tsx";
 import { useLearning, type CompletionOutcome } from "../learning/learning-store.tsx";
 import { getMission, nextMission, skillName, trackForMission } from "../../content/index.ts";
@@ -58,6 +66,22 @@ const INTEREST_CHOICES: readonly { id: Interest; label: string; detail: string }
     { id: "everything", label: "Explore everything", detail: "Follow the whole map." },
 ];
 
+const MODE_LABELS: Readonly<Record<MissionMode, string>> = {
+    practice: "Quick practice",
+    incident: "Engineering incident",
+    project: "Project step",
+    campaign: "Campaign mission",
+    transfer: "Transfer challenge",
+};
+
+const MODE_BRIEFINGS: Readonly<Record<MissionMode, string>> = {
+    practice: "A short, focused session. Stop after a few minutes if that is enough.",
+    incident: "Investigate the system, make a change, and verify that the problem is gone.",
+    project: "Build part of an authentic project with working checks.",
+    campaign: "Continue the campus story and carry what you learned into the next problem.",
+    transfer: "Use what you already know on an unfamiliar problem without step-by-step help.",
+};
+
 function runtimeText(mission: Mission): string {
     switch (mission.runtime.kind) {
         case "browser-javascript":
@@ -93,9 +117,25 @@ export function MissionScreen(): JSX.Element {
     const mission = getMission(params.id);
     const practice = new URLSearchParams(location.search).get("practice") === "1";
     const alreadyCompleted = learning.completedMissionIds().has(params.id);
+    const machine = mission === undefined ? undefined : MissionStateMachine.create(mission.id);
+    const initialSession: MissionSession = machine?.session ?? {
+        missionId: params.id,
+        phase: "not-started",
+        attempts: 0,
+        hintsUsed: 0,
+        completionRecorded: false,
+    };
+    const mode = createMemo<MissionMode>(function missionMode(): MissionMode {
+        return mission === undefined ? "campaign" : resolveMissionMode(mission, { practice });
+    });
+    const practiceMode = createMemo<boolean>(function inPracticeMode(): boolean {
+        return practice || mode() === "practice";
+    });
 
     let headingRef: HTMLHeadingElement | undefined;
-    const [phase, setPhase] = createSignal<"briefing" | "steps" | "complete">("briefing");
+    let completionRef: HTMLHeadingElement | undefined;
+    const [session, setSession] = createSignal<MissionSession>(initialSession);
+    const [transitionNotice, setTransitionNotice] = createSignal("");
     const [stepIndex, setStepIndex] = createSignal(0);
     const [feedback, setFeedback] = createSignal<FeedbackState | undefined>(undefined);
     const [hintLevel, setHintLevel] = createSignal(0);
@@ -112,6 +152,82 @@ export function MissionScreen(): JSX.Element {
     const [aiAnswer, setAiAnswer] = createSignal("");
     const [aiError, setAiError] = createSignal("");
     const [aiBusy, setAiBusy] = createSignal(false);
+
+    const phase = createMemo<"briefing" | "steps" | "complete">(function currentPhase() {
+        if (completion() !== undefined) {
+            return "complete";
+        }
+        const current = session().phase;
+        if (current === "not-started") {
+            return "briefing";
+        }
+        if (current === "completed" || current === "review-scheduled") {
+            return "complete";
+        }
+        return "steps";
+    });
+
+    function transition(event: MissionEvent): boolean {
+        if (machine === undefined) {
+            return false;
+        }
+        try {
+            setSession(machine.transition(event));
+            setTransitionNotice("");
+            return true;
+        } catch (error) {
+            const message =
+                error instanceof MissionTransitionError
+                    ? error.message
+                    : error instanceof Error
+                      ? error.message
+                      : "That action is not available in the current mission phase.";
+            setTransitionNotice(message);
+            announce(message);
+            return false;
+        }
+    }
+
+    function phaseLabel(): string {
+        const current = session();
+        let label: string;
+        switch (current.phase) {
+            case "not-started":
+                label = "Briefing";
+                break;
+            case "introducing":
+                label = "Briefing";
+                break;
+            case "exploring":
+                label = "Investigating";
+                break;
+            case "attempting":
+                label = "Attempting";
+                break;
+            case "assistance":
+                label = "Assisted attempt";
+                break;
+            case "evaluating":
+                label = "Evaluating";
+                break;
+            case "feedback":
+                label = "Feedback";
+                break;
+            case "completed":
+                label = "Complete";
+                break;
+            case "review-scheduled":
+                label = "Review scheduled";
+                break;
+            default:
+                label = "In progress";
+                break;
+        }
+        if (current.hintsUsed === 0) {
+            return label;
+        }
+        return `${label} · ${current.hintsUsed} hint${current.hintsUsed === 1 ? "" : "s"} used`;
+    }
 
     const currentStep = function currentStep(): Mission["steps"][number] | undefined {
         return mission?.steps[stepIndex()];
@@ -152,7 +268,14 @@ export function MissionScreen(): JSX.Element {
 
     createEffect(function focusStep(): void {
         if (phase() === "steps") {
-            headingRef?.focus();
+            const index = stepIndex();
+            if (index >= 0) {
+                headingRef?.focus();
+            }
+            return;
+        }
+        if (phase() === "complete") {
+            completionRef?.focus();
         }
     });
 
@@ -179,7 +302,9 @@ export function MissionScreen(): JSX.Element {
         }
         setAttemptId(id);
         setStepIndex(savedStep());
-        setPhase("steps");
+        if (!transition("start") || !transition("explore") || !transition("attempt")) {
+            return;
+        }
         saveProgress();
     }
 
@@ -188,23 +313,43 @@ export function MissionScreen(): JSX.Element {
             return;
         }
         const step = currentStep();
-        if (step === undefined) {
+        if (step === undefined || session().phase === "evaluating") {
+            return;
+        }
+        if (session().phase === "feedback" && !transition("attempt")) {
+            return;
+        }
+        if (!transition("evaluate")) {
             return;
         }
         const misconception = evaluation.passed
             ? undefined
-            : findMisconception(mission, step.id, answerKey);
+            : findMisconception(mission, step.id, answerKey, {
+                  ...(evaluation.failedTests === undefined
+                      ? {}
+                      : { failedTests: evaluation.failedTests }),
+                  ...(evaluation.diagnostic === undefined
+                      ? {}
+                      : { diagnostic: evaluation.diagnostic }),
+              });
         setFeedback({ evaluation, ...(misconception === undefined ? {} : { misconception }) });
         setEvaluations(function update(current): Readonly<Record<string, StepEvaluation>> {
             return { ...current, [step.id]: evaluation };
         });
         if (step.kind === "lesson") {
+            if (!transition("respond")) {
+                return;
+            }
             saveProgress();
             await continueStep();
             return;
         }
         const hintsUsed = hints()[step.id] ?? hintLevel();
-        await learning.recordStepEvidence(mission, step, evaluation, hintsUsed);
+        try {
+            await learning.recordStepEvidence(mission, step, evaluation, hintsUsed);
+        } finally {
+            transition("respond");
+        }
         saveProgress();
     }
 
@@ -214,29 +359,42 @@ export function MissionScreen(): JSX.Element {
         }
         const stepResults = evaluations();
         const evaluation = evaluateMission(mission, stepResults);
+        const result = practiceResult(evaluation, hints());
         let outcome: CompletionOutcome;
         if (practice && alreadyCompleted) {
-            await learning.recordPracticeReview(mission);
+            await learning.recordPracticeReview(mission, evaluation, hints());
             outcome = {
                 alreadyCompleted: true,
                 experience: 0,
-                independent: true,
+                independent: result.independent,
                 newAchievements: [],
                 worldChanged: false,
             };
         } else {
-            outcome = await learning.completeMission(mission, attemptId(), hints());
+            outcome = await learning.completeMission(mission, attemptId(), hints(), evaluation);
         }
         if (mission !== undefined) {
             await db.meta.delete(`mission-progress:${mission.id}`);
         }
         setCompletion({ outcome, evaluation });
-        setPhase("complete");
+        const completed = transition("complete");
+        if (completed) {
+            transition("schedule-review");
+        }
+        announce(
+            practiceMode()
+                ? practice && alreadyCompleted
+                    ? result.independent
+                        ? "Practice complete. Independent review recorded."
+                        : "Practice complete. The review used assistance and did not advance the schedule."
+                    : `Practice complete. ${outcome.experience} experience points recorded.`
+                : `Mission complete. ${outcome.experience} experience points recorded.`,
+        );
     }
 
     async function continueStep(): Promise<void> {
         const state = feedback();
-        if (state === undefined || !state.evaluation.passed) {
+        if (state === undefined || !state.evaluation.passed || session().phase === "evaluating") {
             return;
         }
         if (mission === undefined) {
@@ -244,6 +402,9 @@ export function MissionScreen(): JSX.Element {
         }
         if (stepIndex() >= mission.steps.length - 1) {
             await finish();
+            return;
+        }
+        if (!transition("attempt")) {
             return;
         }
         setStepIndex(function next(current): number {
@@ -256,7 +417,13 @@ export function MissionScreen(): JSX.Element {
 
     function showHint(): void {
         const step = currentStep();
-        if (step === undefined) {
+        if (step === undefined || session().phase === "evaluating") {
+            return;
+        }
+        if (session().phase === "feedback" && !transition("attempt")) {
+            return;
+        }
+        if (!transition("request-help")) {
             return;
         }
         const nextLevel = Math.min(4, hintLevel() + 1);
@@ -350,29 +517,44 @@ export function MissionScreen(): JSX.Element {
     const follow = nextMission(mission.id);
 
     return (
-        <main class="page page--narrow">
+        <main
+            class="page page--narrow"
+            data-mission-phase={session().phase}
+            data-mission-mode={mode()}
+        >
             <div class="row row--between" style={{ "margin-bottom": "var(--space-5)" }}>
                 <A class="button button--ghost button--small" href="/learn">
                     Back to Learn
                 </A>
                 <span class="meta">
-                    {track?.title ?? "Campus"} · {mission.estimatedMinutes} min ·{" "}
-                    {mission.difficulty}
+                    {MODE_LABELS[mode()]} · {track?.title ?? "Campus"} · {mission.estimatedMinutes}{" "}
+                    min · {mission.difficulty}
                 </span>
             </div>
+
+            <Show when={transitionNotice().length > 0}>
+                <p class="notice notice--error" role="alert">
+                    {transitionNotice()}
+                </p>
+            </Show>
 
             <Show when={phase() === "briefing"}>
                 <div class="stack stack--wide">
                     <div class="stack stack--tight">
-                        <span class="meta">Mission {mission.sequence}</span>
+                        <span class="meta">
+                            {MODE_LABELS[mode()]} · Mission {mission.sequence}
+                        </span>
                         <h1>{mission.title}</h1>
                         <p class="lede">{mission.summary}</p>
+                        <p class="small muted">{MODE_BRIEFINGS[mode()]}</p>
                     </div>
                     <div class="surface stack">
                         <div class="row" style={{ "align-items": "flex-start" }}>
-                            <Pip pose="explaining" size={72} />
+                            <span aria-hidden="true">
+                                <Pip pose="explaining" size={72} />
+                            </span>
                             <div class="stack stack--tight">
-                                <h2>Briefing</h2>
+                                <h2>{practiceMode() ? "Practice briefing" : "Briefing"}</h2>
                                 <p>{mission.scenario.briefing}</p>
                             </div>
                         </div>
@@ -387,6 +569,22 @@ export function MissionScreen(): JSX.Element {
                                 </For>
                             </ul>
                         </div>
+                        <Show when={practiceMode()}>
+                            <div class="stack stack--tight">
+                                <h3>Practice plan</h3>
+                                <p class="meta">
+                                    About {mission.estimatedMinutes} min · {mission.steps.length}{" "}
+                                    {mission.steps.length === 1 ? "step" : "steps"}
+                                </p>
+                                <ol class="stack stack--tight">
+                                    <For each={mission.steps}>
+                                        {function plannedStep(step): JSX.Element {
+                                            return <li class="small">{step.title}</li>;
+                                        }}
+                                    </For>
+                                </ol>
+                            </div>
+                        </Show>
                         <div class="grid grid--two">
                             <div class="stack stack--tight">
                                 <h3>Skills</h3>
@@ -422,7 +620,9 @@ export function MissionScreen(): JSX.Element {
                             >
                                 {savedStep() > 0
                                     ? `Resume at step ${savedStep() + 1}`
-                                    : "Start mission"}
+                                    : practiceMode()
+                                      ? "Start practice"
+                                      : "Start mission"}
                             </button>
                             <A class="button button--secondary" href="/placement">
                                 I already know this
@@ -437,6 +637,9 @@ export function MissionScreen(): JSX.Element {
                     <div class="row row--between">
                         <span class="meta">
                             Step {stepIndex() + 1} of {mission.steps.length}
+                        </span>
+                        <span class="meta" data-testid="mission-phase">
+                            {phaseLabel()}
                         </span>
                         <span class="meta">{mission.title}</span>
                     </div>
@@ -481,7 +684,7 @@ export function MissionScreen(): JSX.Element {
                             <button
                                 type="button"
                                 class="button button--secondary button--small"
-                                disabled={hintLevel() >= 4}
+                                disabled={hintLevel() >= 4 || session().phase === "evaluating"}
                                 onClick={showHint}
                             >
                                 {hintLevel() === 0
@@ -505,7 +708,13 @@ export function MissionScreen(): JSX.Element {
                         </Show>
                     </div>
 
-                    <Show when={learning.preferences().aiTutor && learning.user() !== undefined}>
+                    <Show
+                        when={
+                            learning.aiTutorAvailable() &&
+                            learning.preferences().aiTutor &&
+                            learning.user() !== undefined
+                        }
+                    >
                         <div class="surface surface--quiet stack stack--tight">
                             <div class="row row--between">
                                 <h3>Live AI tutor</h3>
@@ -568,6 +777,7 @@ export function MissionScreen(): JSX.Element {
                                         <button
                                             type="button"
                                             class="button"
+                                            disabled={session().phase === "evaluating"}
                                             onClick={function next(): void {
                                                 void continueStep();
                                             }}
@@ -585,17 +795,26 @@ export function MissionScreen(): JSX.Element {
             <Show when={phase() === "complete" && completion() !== undefined}>
                 <div class="stack stack--wide">
                     <div class="row" style={{ "align-items": "flex-start" }}>
-                        <Pip pose="celebrating" size={104} />
+                        <span aria-hidden="true">
+                            <Pip pose="celebrating" size={104} />
+                        </span>
                         <div class="stack stack--tight">
-                            <h1>
-                                {practice && completion()?.outcome.alreadyCompleted === true
-                                    ? "Practice complete"
-                                    : "Mission complete"}
+                            <h1 ref={completionRef} tabindex="-1">
+                                {practiceMode() ? "Practice complete" : "Mission complete"}
                             </h1>
                             <p class="lede">
-                                {completion()?.outcome.alreadyCompleted === true
-                                    ? "The review is recorded. The schedule will bring this skill back when it is useful."
-                                    : `${mission.title} is complete.`}
+                                {practice &&
+                                alreadyCompleted &&
+                                completion()?.outcome.independent !== true
+                                    ? "The assisted attempt is recorded as a practice failure. The review will return sooner so the skill can be rebuilt."
+                                    : completion()?.outcome.alreadyCompleted === true
+                                      ? "The review is recorded. The schedule will bring this skill back when it is useful."
+                                      : practiceMode()
+                                        ? "The session is recorded. Practice evidence is separate from the first completion."
+                                        : `${mission.title} is complete.`}
+                            </p>
+                            <p class="meta" data-testid="mission-phase">
+                                {phaseLabel()}
                             </p>
                         </div>
                     </div>
@@ -606,16 +825,23 @@ export function MissionScreen(): JSX.Element {
                                 <h2>Result</h2>
                                 <p class="small">
                                     {completion()?.outcome.independent === true
-                                        ? "Independent success"
-                                        : "Completed with assistance"}
-                                </p>
-                                <p class="meta">
-                                    {completion()?.outcome.experience ?? 0} experience points.
-                                    Experience is separate from mastery.
+                                        ? practiceMode()
+                                            ? "Independent practice"
+                                            : "Independent success"
+                                        : practice && alreadyCompleted
+                                          ? "Practice with assistance"
+                                          : "Completed with assistance"}
                                 </p>
                                 <p class="meta">
                                     {practice && completion()?.outcome.alreadyCompleted === true
-                                        ? "Review interval updated."
+                                        ? "Practice does not award experience again."
+                                        : `${completion()?.outcome.experience ?? 0} experience points. Experience is separate from mastery.`}
+                                </p>
+                                <p class="meta">
+                                    {practice && completion()?.outcome.alreadyCompleted === true
+                                        ? completion()?.outcome.independent === true
+                                            ? "Review interval updated."
+                                            : "Review interval reset because the practice was assisted."
                                         : `Next review: ${nextReviewLabel()}`}
                                 </p>
                             </div>
