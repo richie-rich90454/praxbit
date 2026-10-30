@@ -6,6 +6,7 @@ import {
     type TerminalSnapshot,
 } from "@praxbit/execution/simulated";
 import type { TerminalStep } from "@praxbit/contracts";
+import { announce } from "../../../app/AppShell.tsx";
 import type { InteractionProps } from "./types.ts";
 
 export function TerminalView(
@@ -37,6 +38,7 @@ export function TerminalView(
         const current = state();
         const objectiveIds = terminalObjectiveIds(current, props.step.objectives);
         setCompleted(objectiveIds);
+        announce(`${objectiveIds.length} of ${props.step.objectives.length} objectives complete.`);
         props.onResult(
             evaluateStep(props.step, {
                 kind: "terminal",
@@ -77,7 +79,13 @@ export function TerminalView(
                     </For>
                 </ul>
             </div>
-            <div class="terminal" role="log" aria-live="polite" aria-label="Terminal output">
+            <div
+                class="terminal"
+                role="log"
+                aria-live="polite"
+                aria-label="Terminal output"
+                tabindex="0"
+            >
                 <For each={state().transcript}>
                     {function entry(item): JSX.Element {
                         return (
@@ -104,7 +112,7 @@ export function TerminalView(
                     runCommand();
                 }}
             >
-                <label class="visually-hidden" for={`terminal-${props.step.id}`}>
+                <label class="terminal__label" for={`terminal-${props.step.id}`}>
                     Terminal command
                 </label>
                 <span class="terminal__prompt" aria-hidden="true">
