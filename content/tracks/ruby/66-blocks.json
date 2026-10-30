@@ -1,18 +1,28 @@
 {
     "id": "ruby.blocks",
     "version": 1,
-    "sequence": 66,
+    "sequence": 111,
     "courseId": "ruby",
     "title": "Blocks and object boundaries",
     "summary": "Use reduce with a block, then review an error handler that swallows failures.",
-    "skills": ["ruby.blocks", "ruby.objects", "ruby.tooling"],
-    "prerequisites": ["ruby.syntax", "concept.testing"],
+    "skills": [
+        "ruby.blocks",
+        "ruby.objects",
+        "ruby.tooling"
+    ],
+    "prerequisites": [
+        "ruby.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:ruby"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:ruby"
+    ],
     "hints": [
         "Start with values.reduce(0).",
         "The block receives the accumulator and the current value.",
@@ -172,22 +191,33 @@
                     "kind": "static",
                     "description": "The method keeps the taught name and parameter.",
                     "file": "main.rb",
-                    "includes": ["def total(values)"],
+                    "includes": [
+                        "def total(values)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The collection is reduced with an explicit seed and block.",
                     "file": "main.rb",
-                    "includes": ["values.reduce(0)", "{ |sum, value| sum + value }"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "values.reduce(0)",
+                        "{ |sum, value| sum + value }"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.rb",
-                    "includes": ["def total(values)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "def total(values)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ]
         },
@@ -267,5 +297,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "web"]
+    "tags": [
+        "professional",
+        "web"
+    ]
 }
