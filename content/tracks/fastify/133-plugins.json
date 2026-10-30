@@ -5,24 +5,14 @@
     "courseId": "fastify",
     "title": "Encapsulated plugins and shared decorators",
     "summary": "Wrap a catalog plugin so its decorator reaches the root scope, then review a hook that silently fails to apply outside its plugin.",
-    "skills": [
-        "fastify.plugins",
-        "fastify.schemas"
-    ],
-    "prerequisites": [
-        "fastify.schemas",
-        "node.middleware"
-    ],
+    "skills": ["fastify.plugins", "fastify.schemas"],
+    "prerequisites": ["fastify.schemas", "node.middleware"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "execution",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "execution", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Register a plugin whose decorator reaches the parent scope.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review plugin scope and request typing risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:fastify"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
     "hints": [
         "Import fp from fastify-plugin.",
         "Decorate the plugin instance with the catalog data.",
@@ -306,8 +287,5 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
