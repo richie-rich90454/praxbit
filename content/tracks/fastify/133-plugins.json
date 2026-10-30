@@ -1,0 +1,291 @@
+{
+    "id": "fastify.plugins",
+    "version": 1,
+    "sequence": 228,
+    "courseId": "fastify",
+    "title": "Encapsulated plugins and shared decorators",
+    "summary": "Wrap a catalog plugin so its decorator reaches the root scope, then review a hook that silently fails to apply outside its plugin.",
+    "skills": ["fastify.plugins", "fastify.schemas"],
+    "prerequisites": ["fastify.schemas", "node.middleware"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "plugins",
+        "briefing": "The catalog decorator is defined inside a plugin but the root route cannot see it. Another hook added in the same plugin also never runs for root routes."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Register a plugin whose decorator reaches the parent scope.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review plugin scope and request typing risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
+    "hints": [
+        "Import fp from fastify-plugin.",
+        "Decorate the plugin instance with the catalog data.",
+        "Wrap the catalog function with fp before registering it.",
+        "Register only the wrapped plugin at the root."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-fp",
+            "description": "Registering a raw plugin and expecting its decorator at the root.",
+            "stepId": "apply",
+            "testDescription": "The plugin is wrapped so decorators escape its scope.",
+            "feedback": "Without the wrapper, the decorator stays in the child scope. The root route will not see it.",
+            "followUpSkill": "fastify.plugins"
+        },
+        {
+            "id": "global-everything",
+            "description": "Wrapping every feature plugin to make all hooks global.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Encapsulation is the default for a reason. Wrapping a feature plugin makes its hooks leak to every sibling route; scope shared infrastructure deliberately.",
+            "followUpSkill": "fastify.plugins"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Plugins create child scopes",
+                "body": "Hooks, decorators, and routes registered inside a plugin belong to that plugin's scope. A root route cannot see them unless the plugin is wrapped to break encapsulation."
+            },
+            {
+                "title": "fastify-plugin is the escape hatch",
+                "body": "Wrapping a plugin with fp makes its decorators and hooks visible to the parent scope. Use it deliberately for shared infrastructure, not for every feature route."
+            },
+            {
+                "title": "Register at the composition root",
+                "body": "A plugin does nothing until it is registered. Keep registration in the entry point so the visible scope is obvious when reading the server."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Encapsulation",
+                "definition": "The rule that a plugin's additions stay inside its own scope."
+            },
+            {
+                "term": "fastify-plugin",
+                "definition": "A wrapper that makes a plugin's changes visible to its parent."
+            },
+            {
+                "term": "Decorator",
+                "definition": "A value added to a Fastify instance and shared within its scope."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Plugin scope and decorators",
+            "prompt": "Read the explanation, then implement the plugin.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Plugins create child scopes",
+                    "body": "Hooks, decorators, and routes registered inside a plugin belong to that plugin's scope. A root route cannot see them unless the plugin is wrapped to break encapsulation."
+                },
+                {
+                    "title": "fastify-plugin is the escape hatch",
+                    "body": "Wrapping a plugin with fp makes its decorators and hooks visible to the parent scope. Use it deliberately for shared infrastructure, not for every feature route."
+                },
+                {
+                    "title": "Register at the composition root",
+                    "body": "A plugin does nothing until it is registered. Keep registration in the entry point so the visible scope is obvious when reading the server."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Encapsulation",
+                    "definition": "The rule that a plugin's additions stay inside its own scope."
+                },
+                {
+                    "term": "fastify-plugin",
+                    "definition": "A wrapper that makes a plugin's changes visible to its parent."
+                },
+                {
+                    "term": "Decorator",
+                    "definition": "A value added to a Fastify instance and shared within its scope."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Expose the catalog decorator",
+            "prompt": "Edit server.ts. Add the catalog decorator, wrap the plugin with fp, and register the wrapped plugin at the root.",
+            "evidence": "construction",
+            "hints": [
+                "Add an import of the default export from fastify-plugin.",
+                "Use fastify.decorate inside the plugin function.",
+                "Assign the wrapped function to catalogPlugin.",
+                "Register catalogPlugin, not the raw catalog function."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "server.ts",
+                    "content": "import Fastify, { type FastifyInstance } from \"fastify\";\n\nexport const app = Fastify({ logger: false });\n\nasync function catalog(fastify: FastifyInstance) {\n  // TODO: decorate the instance with the catalog data\n}\n\napp.register(catalog);\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "server.ts",
+            "preview": "none",
+            "verification": "ast",
+            "tests": [
+                {
+                    "kind": "ast",
+                    "description": "The server imports Fastify and fastify-plugin.",
+                    "file": "server.ts",
+                    "language": "typescript",
+                    "require": [
+                        {
+                            "node": "import",
+                            "name": "fastify"
+                        },
+                        {
+                            "node": "import",
+                            "name": "fastify-plugin"
+                        }
+                    ]
+                },
+                {
+                    "kind": "ast",
+                    "description": "The plugin is wrapped so decorators escape its scope.",
+                    "file": "server.ts",
+                    "language": "typescript",
+                    "require": [
+                        {
+                            "node": "function-call",
+                            "name": "fp"
+                        },
+                        {
+                            "node": "variable-declaration",
+                            "name": "catalogPlugin"
+                        }
+                    ]
+                },
+                {
+                    "kind": "ast",
+                    "description": "The plugin decorates its Fastify instance.",
+                    "file": "server.ts",
+                    "language": "typescript",
+                    "require": [
+                        {
+                            "node": "function-call",
+                            "name": "decorate"
+                        }
+                    ]
+                },
+                {
+                    "kind": "ast",
+                    "description": "The wrapped plugin is registered at the root.",
+                    "file": "server.ts",
+                    "language": "typescript",
+                    "require": [
+                        {
+                            "node": "function-call",
+                            "name": "register"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the catalog plugin",
+            "prompt": "Review catalog.ts and select every real scope or type problem.",
+            "evidence": "review",
+            "hints": [
+                "Check whether the hook is inside the child plugin scope.",
+                "Check whether request.user has a declared type.",
+                "Check whether the plugin is wrapped with fp.",
+                "Reject claims about global hooks and logger behavior."
+            ],
+            "artifact": {
+                "title": "catalog.ts",
+                "caption": "The plugin adds a request hook but is not wrapped, and it assigns request.user without a type augmentation.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import Fastify from \"fastify\";\n\nexport const app = Fastify({ logger: false });\n\nasync function catalog(fastify) {\n  fastify.addHook(\"onRequest\", async function authenticate(request) {\n    request.user = { role: \"admin\" };\n  });\n}\n\napp.register(catalog);\n\napp.get(\"/products\", async function list() {\n  return [{ id: \"notebook\", name: \"Notebook\", price: 4.5 }];\n});\n"
+            },
+            "findings": [
+                {
+                    "id": "scope",
+                    "label": "The onRequest hook is encapsulated in catalog, so it never runs for the root GET /products route.",
+                    "correct": true
+                },
+                {
+                    "id": "augmentation",
+                    "label": "Assigning request.user without a module augmentation makes the type lie and hides unauthenticated requests.",
+                    "correct": true
+                },
+                {
+                    "id": "no-fp",
+                    "label": "The plugin is not wrapped with fastify-plugin, so its hook cannot escape.",
+                    "correct": true
+                },
+                {
+                    "id": "global",
+                    "label": "The hook applies to every route because the plugin is registered first.",
+                    "correct": false
+                },
+                {
+                    "id": "logger",
+                    "label": "The logger option disables hooks for the root scope.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The hook and the untyped request.user assignment live inside an unwrapped plugin, so the root route never sees the hook and the type does not declare user. Registration order does not override encapsulation, and logger has no effect on hook scope."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
