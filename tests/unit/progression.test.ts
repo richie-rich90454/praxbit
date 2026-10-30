@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+    achievementProgress,
+    demonstratedLanguages,
     earnedAchievements,
     experienceThreshold,
     levelForExperience,
@@ -29,6 +31,7 @@ function context(overrides: Partial<AchievementContext> = {}): AchievementContex
         completedMissionIds: [],
         projectsCompleted: 0,
         clubEventsCompleted: 0,
+        cooperativeChallengeCompleted: false,
         worldRecovered: false,
         languagesDemonstrated: [],
         hiddenBoundaryFound: false,
@@ -123,6 +126,12 @@ describe("achievements", function achievements(): void {
                 achievement("team-event-participation", "helping-teammate"),
                 context({ clubEventsCompleted: 1 }),
             ),
+        ).toBe(false);
+        expect(
+            satisfiesAchievement(
+                achievement("team-event-participation", "helping-teammate"),
+                context({ cooperativeChallengeCompleted: true }),
+            ),
         ).toBe(true);
         expect(
             satisfiesAchievement(
@@ -150,6 +159,71 @@ describe("achievements", function achievements(): void {
                 context({ worldRecovered: true }),
             ),
         ).toBe(true);
+    });
+
+    it("reports numeric progress toward each achievement", function progressView(): void {
+        const boundary = achievement("three-boundary-tests", "hidden-boundary");
+        const partialEvidence = [1, 2].map(function make(index): ReturnType<typeof makeEvidence> {
+            return makeEvidence({
+                id: `evidence-boundary-${index}`,
+                category: "testing",
+                outcome: "success",
+            });
+        });
+        expect(achievementProgress(boundary, context({ evidence: partialEvidence }))).toEqual({
+            current: 2,
+            target: 3,
+            earned: false,
+        });
+        expect(achievementProgress(boundary, context({ hiddenBoundaryFound: true }))).toEqual({
+            current: 3,
+            target: 3,
+            earned: true,
+        });
+
+        const debugging = achievement("five-debugging-successes", "difficult-debugging");
+        expect(
+            achievementProgress(
+                debugging,
+                context({
+                    evidence: [1, 2, 3, 4].map(function make(index): ReturnType<
+                        typeof makeEvidence
+                    > {
+                        return makeEvidence({
+                            id: `evidence-debug-${index}`,
+                            category: "debugging",
+                            outcome: "success",
+                        });
+                    }),
+                }),
+            ),
+        ).toEqual({ current: 4, target: 5, earned: false });
+    });
+
+    it("does not report progress above the target", function capped(): void {
+        const languages = achievement("second-language", "new-language");
+        expect(
+            achievementProgress(
+                languages,
+                context({ languagesDemonstrated: ["javascript", "python", "rust"] }),
+            ),
+        ).toEqual({ current: 2, target: 2, earned: true });
+    });
+
+    it("derives demonstrated languages from successful evidence", function languages(): void {
+        expect(
+            demonstratedLanguages([
+                { ...makeEvidence({ outcome: "success" }), skills: ["js.conditions"] },
+                {
+                    ...makeEvidence({ id: "evidence-2", outcome: "success" }),
+                    skills: ["html.structure"],
+                },
+                {
+                    ...makeEvidence({ id: "evidence-3", outcome: "failure" }),
+                    skills: ["python.loops"],
+                },
+            ]),
+        ).toEqual(["js", "web"]);
     });
 
     it("does not award an achievement twice", function once(): void {
