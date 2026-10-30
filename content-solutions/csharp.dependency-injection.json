@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Program.cs": "using System;\nusing Microsoft.Extensions.DependencyInjection;\n\ninterface IClock\n{\n    DateTime Now { get; }\n}\n\nclass SystemClock : IClock\n{\n    public DateTime Now => DateTime.UtcNow;\n}\n\nclass OrderService\n{\n    private readonly IClock clock;\n\n    public OrderService(IClock clock)\n    {\n        this.clock = clock;\n    }\n\n    public DateTime CreatedAt => clock.Now;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        var services = new ServiceCollection();\n        services.AddSingleton<IClock, SystemClock>();\n        services.AddScoped<OrderService>();\n        var provider = services.BuildServiceProvider();\n        Console.WriteLine(provider.GetRequiredService<OrderService>().CreatedAt);\n    }\n}\n"
+            }
+        }
+    }
+}
