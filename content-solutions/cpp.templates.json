@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.cpp": "#include <iostream>\n\ntemplate <typename T>\nT clamp_value(T value, T low, T high) {\n    if (value < low) {\n        return low;\n    }\n    if (value > high) {\n        return high;\n    }\n    return value;\n}\n\nint main() {\n    std::cout << clamp_value(12, 0, 10) << \"\\n\";\n    std::cout << clamp_value(1.5, 0.0, 1.0) << \"\\n\";\n    return 0;\n}\n"
+            }
+        }
+    }
+}
