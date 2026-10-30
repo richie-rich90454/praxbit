@@ -44,18 +44,22 @@
             "id": "chmod-777",
             "description": "Opening the directory to every user.",
             "stepId": "apply",
-            "feedback": "World-writable paths let any local account replace the worker's files. Grant the service group write access instead."
+            "testDescription": "Access is fixed with the smallest change, not world access.",
+            "feedback": "World-writable paths let any local account replace the worker's files. Grant the service group write access instead.",
+            "followUpSkill": "devops.linux"
         },
         {
             "id": "restart-first",
             "description": "Restarting before reading the journal.",
             "stepId": "apply",
+            "testDescription": "The unit definition and recent journal are read.",
             "feedback": "A restart clears the failing state and can hide the error. Read the unit and recent logs first."
         },
         {
             "id": "chown-chmod",
             "description": "Treating chown and chmod as interchangeable.",
-            "stepId": "apply",
+            "stepId": "check",
+            "answer": "world",
             "feedback": "chown changes who owns a path; chmod changes what the owner, group, and others may do. The worker needed both."
         }
     ],
@@ -200,7 +204,18 @@
                     "includes": ["systemctl status ingest-worker --no-pager"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Find which user the unit runs as before changing permissions.",
+                "Read the unit file and the newest journal lines.",
+                "Compare the data path owner and mode with that user.",
+                "Use chown ingest:ingest and chmod 2770, then restart and verify active state plus fresh logs."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "explain",
@@ -235,7 +250,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "The worker's failure belongs to its user and the path it writes. Reading the unit and journal first identifies that user and path; ownership plus group write access fixes the failure without exposing the directory. The restart only counts once status and logs show new work."
+            "explanation": "The worker's failure belongs to its user and the path it writes. Reading the unit and journal first identifies that user and path; ownership plus group write access fixes the failure without exposing the directory. The restart only counts once status and logs show new work.",
+            "hints": [
+                "Permissions are evaluated for a specific user.",
+                "The journal is evidence about the failing operation.",
+                "World-writable paths widen the attack surface.",
+                "Select identity, inspection, and verification; reject chmod 777 and restart-first."
+            ]
         }
     ],
     "evaluation": {
