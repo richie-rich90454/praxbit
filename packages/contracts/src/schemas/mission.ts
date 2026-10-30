@@ -10,10 +10,19 @@ import {
     SkillIdSchema,
 } from "./common.ts";
 import type { EvaluatorKind, InteractionKind } from "./common.ts";
-import { CodeTestSchema } from "./code.ts";
+import { CodeTestSchema, CodeVerificationSchema } from "./code.ts";
 import { WorldActionIdSchema, WorldSystemIdSchema } from "./world.ts";
 
 export const StepIdSchema = z.string().regex(/^[a-z0-9-]+$/, "Step ids use lowercase words");
+
+export const MissionModeSchema = z.enum([
+    "practice",
+    "incident",
+    "project",
+    "campaign",
+    "transfer",
+]);
+export type MissionMode = z.infer<typeof MissionModeSchema>;
 
 const OptionSchema = z.strictObject({
     id: z.string().min(1).max(80),
@@ -304,6 +313,13 @@ const CodeStepSchema = z.strictObject({
         .max(6),
     entry: z.string().min(1).max(200),
     preview: z.enum(["html", "css", "console", "sql", "none"]),
+    verification: CodeVerificationSchema.optional(),
+    localVerification: z
+        .strictObject({
+            command: z.string().min(1).max(300),
+            description: z.string().min(1).max(500),
+        })
+        .optional(),
     tests: z.array(CodeTestSchema).min(1).max(12),
     database: z
         .strictObject({
@@ -509,6 +525,8 @@ export const MisconceptionSchema = z.strictObject({
     description: z.string().min(1).max(300),
     stepId: StepIdSchema,
     answer: z.string().max(200).optional(),
+    testDescription: z.string().min(1).max(300).optional(),
+    diagnostic: z.string().min(1).max(300).optional(),
     feedback: z.string().min(1).max(900),
     followUpSkill: SkillIdSchema.optional(),
 });
@@ -524,6 +542,7 @@ export const MissionSchema = z.strictObject({
     skills: z.array(SkillIdSchema).min(1).max(6),
     prerequisites: z.array(SkillIdSchema).max(8),
     difficulty: DifficultySchema,
+    mode: MissionModeSchema.optional(),
     estimatedMinutes: z.number().int().min(2).max(30),
     interaction: InteractionKindSchema,
     runtime: z.strictObject({
