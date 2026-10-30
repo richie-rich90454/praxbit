@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,10 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "games",
-        "systems"
-    ],
+    "tags": ["games", "systems"],
     "accessibility": {
         "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -40,45 +34,28 @@
     "sequence": 124,
     "title": "Metatables and sortable items",
     "summary": "Teach two tables how to compare and print through metamethods, then repair a sort that has no ordering rule.",
-    "skills": [
-        "lua.tables",
-        "lua.functions"
-    ],
-    "prerequisites": [
-        "lua.tables",
-        "concept.iteration"
-    ],
+    "skills": ["lua.tables", "lua.functions"],
+    "prerequisites": ["lua.tables", "concept.iteration"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Define ordering and display metamethods.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find a sort that has no comparison metamethod.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Reason about equal elements under table.sort.",
-            "stepIds": [
-                "equal"
-            ]
+            "stepIds": ["equal"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:lua"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:lua"],
     "hints": [
         "Metamethods are looked up on the metatable.",
         "Item.__index = Item shares methods with every instance.",
@@ -231,9 +208,7 @@
                         "left.name < right.name",
                         "left.count < right.count"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -249,10 +224,7 @@
                     "kind": "static",
                     "description": "The sort and display loop are intact.",
                     "file": "main.lua",
-                    "includes": [
-                        "table.sort(items)",
-                        "print(tostring(item))"
-                    ],
+                    "includes": ["table.sort(items)", "print(tostring(item))"],
                     "excludes": []
                 }
             ]
