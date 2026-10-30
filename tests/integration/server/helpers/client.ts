@@ -120,7 +120,9 @@ export class TestClient {
             headers["x-praxbit-client"] = "native";
         }
         const mutation = !SAFE_METHODS.has(method);
-        const requireCsrf = mutation && bearer === undefined && !native && options.csrf !== false;
+        const requireCsrf =
+            mutation &&
+            (options.csrf === true || (options.csrf !== false && bearer === undefined && !native));
         if (requireCsrf) {
             headers["x-csrf-token"] = await this.csrfToken();
         }
