@@ -1,18 +1,26 @@
 {
     "id": "java.values",
     "version": 1,
-    "sequence": 49,
+    "sequence": 70,
     "courseId": "java",
     "title": "Typed values in Java",
     "summary": "Declare typed values, branch on a condition, and count with a for-each loop.",
-    "skills": ["java.syntax"],
-    "prerequisites": ["concept.state", "concept.conditions"],
+    "skills": [
+        "java.syntax"
+    ],
+    "prerequisites": [
+        "concept.state",
+        "concept.conditions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:java"
+    ],
     "hints": [
         "The loop already visits every value. Only the body is wrong.",
         "Add an if statement before incrementing the count.",
@@ -43,14 +60,18 @@
         {
             "id": "reference-equality",
             "description": "Assuming == compares String text.",
-            "stepId": "apply",
-            "feedback": "Use .equals for text. == asks whether two references point to the same object."
+            "stepId": "check",
+            "answer": "reference",
+            "feedback": "Use .equals for text. == asks whether two references point to the same object.",
+            "followUpSkill": "java.syntax"
         },
         {
             "id": "count-placeholder",
             "description": "Leaving the placeholder increment in place.",
             "stepId": "apply",
-            "feedback": "The placeholder adds zero, so the method always returns zero. Increment only inside the positive branch."
+            "testDescription": "The loop counts only values greater than zero.",
+            "feedback": "The placeholder adds zero, so the method always returns zero. Increment only inside the positive branch.",
+            "followUpSkill": "java.syntax"
         }
     ],
     "lesson": {
@@ -133,24 +154,46 @@
                     "kind": "static",
                     "description": "The count method keeps the taught signature.",
                     "file": "Main.java",
-                    "includes": ["static int countPositive(int[] values)"],
+                    "includes": [
+                        "static int countPositive(int[] values)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The loop counts only values greater than zero.",
                     "file": "Main.java",
-                    "includes": ["if (value > 0)", "count += 1;"],
-                    "excludes": ["count += 0"]
+                    "includes": [
+                        "if (value > 0)",
+                        "count += 1;"
+                    ],
+                    "excludes": [
+                        "count += 0"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.java",
-                    "includes": ["static int countPositive(int[] values)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "static int countPositive(int[] values)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "The loop already visits every value.",
+                "Test value > 0 before incrementing.",
+                "Increment count inside the if block.",
+                "if (value > 0) { count += 1; }"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "javac Main.java && java Main",
+                "description": "Compile and run Main.java with the JDK."
+            }
         },
         {
             "kind": "explain",
@@ -180,7 +223,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Java checks types at compile time. == compares references, while .equals compares string content."
+            "explanation": "Java checks types at compile time. == compares references, while .equals compares string content.",
+            "hints": [
+                "Two statements are accurate.",
+                "== compares references for objects.",
+                "A for-each loop hides the index.",
+                "Select typed and foreach."
+            ]
         }
     ],
     "evaluation": {
@@ -200,5 +249,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional"]
+    "tags": [
+        "professional"
+    ]
 }
