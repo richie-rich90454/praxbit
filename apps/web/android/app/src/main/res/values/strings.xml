@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Praxbit</string>
+    <string name="title_activity_main">Praxbit</string>
+    <string name="package_name">dev.praxbit.app</string>
+    <string name="custom_url_scheme">dev.praxbit.app</string>
+</resources>
