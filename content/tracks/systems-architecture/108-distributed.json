@@ -1,18 +1,27 @@
 {
     "id": "systems-architecture.distributed",
     "version": 1,
-    "sequence": 108,
+    "sequence": 203,
     "courseId": "systems-architecture",
     "title": "Partial failure and consistency",
     "summary": "Retry a write safely with deadlines, idempotency keys, bounded backoff, quorum reads, and backpressure.",
-    "skills": ["architecture.distributed", "api.architecture"],
-    "prerequisites": ["concept.networks", "testing.integration"],
+    "skills": [
+        "architecture.distributed",
+        "api.architecture"
+    ],
+    "prerequisites": [
+        "concept.networks",
+        "testing.integration"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:systems"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:systems"
+    ],
     "hints": [
         "Give each attempt its own AbortController and clear the timer in finally.",
         "Retry only a timeout, a reset, 429, or 5xx; return 4xx to the caller.",
@@ -216,28 +234,40 @@
                         "for (let attempt = 0; attempt < 5; attempt += 1)",
                         "await sleep(2 ** attempt * 100 + Math.random() * 100)"
                     ],
-                    "excludes": ["for (let attempt = 0; attempt < 3; attempt += 1)"]
+                    "excludes": [
+                        "for (let attempt = 0; attempt < 3; attempt += 1)"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The policy explains read-your-writes and quorum overlap.",
                     "file": "distributed.md",
-                    "includes": ["R + W > N", "read-your-writes"],
+                    "includes": [
+                        "R + W > N",
+                        "read-your-writes"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The policy makes delivery and overload explicit.",
                     "file": "distributed.md",
-                    "includes": ["at-least-once delivery into one charge", "Retry-After"],
+                    "includes": [
+                        "at-least-once delivery into one charge",
+                        "Retry-After"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "distributed.md",
-                    "includes": ["const idempotencyKey = crypto.randomUUID();"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "const idempotencyKey = crypto.randomUUID();"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -333,5 +363,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
