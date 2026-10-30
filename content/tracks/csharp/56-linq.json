@@ -1,18 +1,28 @@
 {
     "id": "csharp.linq",
     "version": 1,
-    "sequence": 56,
+    "sequence": 86,
     "courseId": "csharp",
     "title": "LINQ and async boundaries",
     "summary": "Compose a LINQ query, then diagnose an async void handler that cannot be awaited.",
-    "skills": ["csharp.linq", "csharp.async", "csharp.dotnet"],
-    "prerequisites": ["csharp.syntax", "concept.testing"],
+    "skills": [
+        "csharp.linq",
+        "csharp.async",
+        "csharp.dotnet"
+    ],
+    "prerequisites": [
+        "csharp.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +34,31 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": ["diagnose"]
+            "stepIds": [
+                "diagnose"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:csharp"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:csharp"
+    ],
     "hints": [
         "Start from the values sequence.",
         "Use Where with a predicate.",
@@ -49,13 +70,25 @@
             "id": "deferred",
             "description": "Returning a deferred query as a list.",
             "stepId": "apply",
-            "feedback": "A deferred query may read data later. Materialize it with ToList when the method promises a list."
+            "testDescription": "The query filters positives and materializes the result.",
+            "feedback": "A deferred query may read data later. Materialize it with ToList when the method promises a list.",
+            "followUpSkill": "csharp.linq"
         },
         {
             "id": "asyncvoid",
             "description": "Using async void for ordinary methods.",
-            "stepId": "apply",
-            "feedback": "async void hides completion and exceptions. Use async Task so callers can await it."
+            "stepId": "diagnose",
+            "answer": "ignore",
+            "feedback": "A try/catch that swallows errors still leaves the caller unable to await completion. Use async Task.",
+            "followUpSkill": "csharp.linq"
+        },
+        {
+            "id": "linq-same-type",
+            "description": "Believing LINQ must return the same type as its source.",
+            "stepId": "check",
+            "answer": "linq",
+            "feedback": "LINQ operators can project, filter, group, and reshape into different types.",
+            "followUpSkill": "csharp.linq"
         }
     ],
     "lesson": {
@@ -129,6 +162,12 @@
                     "content": "using System;\nusing System.Collections.Generic;\nusing System.Linq;\n\nclass Program\n{\n    static List<int> Positives(IEnumerable<int> values)\n    {\n        // TODO: filter with LINQ\n        return new List<int>();\n    }\n\n    static void Main()\n    {\n        Console.WriteLine(string.Join(\",\", Positives(new[] { 3, -1, 2 })));\n    }\n}\n",
                     "editable": true,
                     "language": "csharp"
+                },
+                {
+                    "path": "Campus.csproj",
+                    "language": "xml",
+                    "content": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n</Project>\n",
+                    "editable": false
                 }
             ],
             "entry": "Program.cs",
@@ -138,24 +177,46 @@
                     "kind": "static",
                     "description": "The method keeps the sequence-to-list signature.",
                     "file": "Program.cs",
-                    "includes": ["static List<int> Positives(IEnumerable<int> values)"],
+                    "includes": [
+                        "static List<int> Positives(IEnumerable<int> values)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The query filters positives and materializes the result.",
                     "file": "Program.cs",
-                    "includes": [".Where(value => value > 0)", ".ToList()"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        ".Where(value => value > 0)",
+                        ".ToList()"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Program.cs",
-                    "includes": ["static List<int> Positives(IEnumerable<int> values)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "static List<int> Positives(IEnumerable<int> values)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Start from the values sequence.",
+                "Use Where with a predicate.",
+                "Materialize with ToList because the method returns List<int>.",
+                "return values.Where(value => value > 0).ToList();"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet build",
+                "description": "Build the project with the .NET SDK."
+            }
         },
         {
             "kind": "debug",
@@ -197,7 +258,13 @@
                 }
             ],
             "correctFixId": "task",
-            "explanation": "async Task is awaitable and propagates exceptions. async void is only appropriate for top-level event handlers."
+            "explanation": "async Task is awaitable and propagates exceptions. async void is only appropriate for top-level event handlers.",
+            "hints": [
+                "async void hides completion and exceptions.",
+                "The caller cannot await an async void method.",
+                "Use async Task for ordinary asynchronous methods.",
+                "Change the declaration to private async Task LoadTotal()."
+            ]
         },
         {
             "kind": "explain",
@@ -227,7 +294,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "LINQ composes a query; ToList fixes the result. async void cannot be awaited and should be limited to event handlers."
+            "explanation": "LINQ composes a query; ToList fixes the result. async void cannot be awaited and should be limited to event handlers.",
+            "hints": [
+                "Two statements are accurate.",
+                "ToList materializes a deferred query.",
+                "async void cannot be awaited.",
+                "Select deferred and tolist."
+            ]
         }
     ],
     "evaluation": {
@@ -247,5 +320,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "games"]
+    "tags": [
+        "professional",
+        "games"
+    ]
 }
