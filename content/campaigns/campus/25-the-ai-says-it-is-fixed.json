@@ -1,6 +1,6 @@
 {
     "id": "campus.the-ai-says-it-is-fixed",
-    "version": 1,
+    "version": 2,
     "sequence": 25,
     "courseId": "campus",
     "title": "The AI says it is fixed",
@@ -49,13 +49,25 @@
             "id": "confidence-proof",
             "description": "Treating a confident message as evidence.",
             "stepId": "ai-review",
-            "feedback": "Confidence is not evidence. The function still accepts zero and negative quantities."
+            "answer": "safe",
+            "feedback": "Confidence is not evidence. The function still accepts zero and negative quantities.",
+            "followUpSkill": "ai.review"
+        },
+        {
+            "id": "upper-bound-only",
+            "description": "Checking only the upper bound and ignoring invalid inputs.",
+            "stepId": "ai-repair",
+            "testDescription": "Zero quantity.",
+            "feedback": "quantity <= stock still accepts zero and negatives. Add a lower bound and integer checks before trusting the repair.",
+            "followUpSkill": "testing.boundaries"
         },
         {
             "id": "one-test",
             "description": "Accepting one passing example as complete verification.",
             "stepId": "ai-verification",
-            "feedback": "One example tests one path. Boundary and invalid cases are where this patch fails."
+            "diagnostic": "Treats the single canFulfill(5, 3) example as sufficient verification without boundary or invalid cases.",
+            "feedback": "One example tests one path. Boundary and invalid cases are where this patch fails.",
+            "followUpSkill": "ai.evaluation"
         }
     ],
     "lesson": {
@@ -88,6 +100,12 @@
         {
             "kind": "review",
             "id": "ai-review",
+            "hints": [
+                "Check the patch against the rule and the evidence in the message.",
+                "A review reads the change and tests boundaries, not the confidence of the summary.",
+                "quantity <= stock accepts 0 and -2, so the same bug remains.",
+                "Select the zero, negative, and thin-evidence findings, then reject until boundary tests pass."
+            ],
             "title": "Review the proposed patch",
             "prompt": "Select every supported finding and choose a verdict.",
             "evidence": "review",
@@ -145,6 +163,12 @@
         {
             "kind": "code",
             "id": "ai-repair",
+            "hints": [
+                "Implement the full rule: whole quantities from 1 through stock, with nonnegative integer stock.",
+                "Combine a lower bound, an upper bound, and integer checks for both inputs.",
+                "For stock 5, accept 1 and 5, reject 0, 6, 2.5, and \"3\".",
+                "Use Number.isInteger on stock and quantity, require stock >= 0 and quantity >= 1, then compare quantity <= stock."
+            ],
             "title": "Implement the verified repair",
             "prompt": "Edit stock.js. canFulfill(stock, quantity) must accept only whole quantities from 1 through stock, and only nonnegative integer stock. Run the tests.",
             "evidence": "debugging",
@@ -221,6 +245,12 @@
         {
             "kind": "explain",
             "id": "ai-verification",
+            "hints": [
+                "Select statements about what counts as evidence for a patch.",
+                "Independent evidence comes from reading the diff and running boundary and invalid cases.",
+                "A confident message about one passing example does not cover zero, negatives, or fractions.",
+                "Three statements are accurate; reject the claim that confident language improves correctness."
+            ],
             "title": "What counts as verification?",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
