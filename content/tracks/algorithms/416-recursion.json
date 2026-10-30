@@ -5,24 +5,14 @@
     "courseId": "algorithms",
     "title": "A function that calls itself",
     "summary": "Write a recursive traversal with a base case, trace the unwinding, and recognize repeated subproblems.",
-    "skills": [
-        "algorithms.recursion",
-        "algorithms.complexity"
-    ],
-    "prerequisites": [
-        "js.functions",
-        "algorithms.complexity"
-    ],
+    "skills": ["algorithms.recursion", "algorithms.complexity"],
+    "prerequisites": ["js.functions", "algorithms.complexity"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,38 +24,25 @@
         {
             "id": "implement",
             "description": "Implement a recursive nested sum with a base case.",
-            "stepIds": [
-                "sum-code"
-            ]
+            "stepIds": ["sum-code"]
         },
         {
             "id": "trace",
             "description": "Trace a recursive call to its final value.",
-            "stepIds": [
-                "recursion-trace"
-            ]
+            "stepIds": ["recursion-trace"]
         },
         {
             "id": "transfer",
             "description": "Recognize stack depth and repeated subproblems.",
-            "stepIds": [
-                "recursion-transfer"
-            ]
+            "stepIds": ["recursion-transfer"]
         },
         {
             "id": "cost",
             "description": "Recognize repeated work in a recursive call tree.",
-            "stepIds": [
-                "recursion-cost"
-            ]
+            "stepIds": ["recursion-cost"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:database",
-        "icon:function"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:function"],
     "hints": [
         "A number is already a sum; an empty list sums to zero.",
         "For a list, add the sum of each item.",
@@ -220,69 +197,35 @@
                     "kind": "function",
                     "description": "Sums one number.",
                     "name": "sumNested",
-                    "args": [
-                        5
-                    ],
+                    "args": [5],
                     "expected": 5
                 },
                 {
                     "kind": "function",
                     "description": "Sums an empty list.",
                     "name": "sumNested",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": 0
                 },
                 {
                     "kind": "function",
                     "description": "Sums nested lists.",
                     "name": "sumNested",
-                    "args": [
-                        [
-                            1,
-                            [
-                                2,
-                                3
-                            ],
-                            [
-                                [
-                                    4
-                                ]
-                            ]
-                        ]
-                    ],
+                    "args": [[1, [2, 3], [[4]]]],
                     "expected": 10
                 },
                 {
                     "kind": "function",
                     "description": "Handles negative values.",
                     "name": "sumNested",
-                    "args": [
-                        [
-                            -2,
-                            [
-                                5,
-                                -1
-                            ]
-                        ]
-                    ],
+                    "args": [[-2, [5, -1]]],
                     "expected": 2
                 },
                 {
                     "kind": "function",
                     "description": "Ignores values that are not numbers or arrays.",
                     "name": "sumNested",
-                    "args": [
-                        [
-                            1,
-                            "two",
-                            null,
-                            [
-                                3
-                            ]
-                        ]
-                    ],
+                    "args": [[1, "two", null, [3]]],
                     "expected": 4
                 },
                 {
@@ -478,8 +421,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems"
-    ]
+    "tags": ["professional", "systems"]
 }
