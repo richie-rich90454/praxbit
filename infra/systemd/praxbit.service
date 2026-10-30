@@ -1,0 +1,36 @@
+# Optional systemd unit for Praxbit.
+# Edit WorkingDirectory and ExecStart if the checkout is not /opt/praxbit/current.
+# The service intentionally has no dependency on systemd-only application code;
+# PM2 or pnpm start in a terminal or tmux works the same way.
+#
+# Install:
+#   sudo cp infra/systemd/praxbit.service /etc/systemd/system/praxbit.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now praxbit
+
+[Unit]
+Description=Praxbit web application
+After=network-online.target
+Wants=network-online.target
+# Uncomment when PostgreSQL runs on this host.
+# After=postgresql.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/praxbit/current
+Environment=NODE_ENV=production
+Environment=PRAXBIT_ENV_FILE=/opt/praxbit/current/.env
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env pnpm start
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=20
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
