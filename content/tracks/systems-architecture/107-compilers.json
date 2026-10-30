@@ -44,13 +44,16 @@
             "id": "parse-means-valid",
             "description": "Equating a successful parse with a valid program.",
             "stepId": "apply",
-            "feedback": "The parser checks only that tokens fit the grammar. Name resolution and type checking reject unknown identifiers, wrong arity, and mismatched types."
+            "testDescription": "The note separates a successful parse from a valid program.",
+            "feedback": "Parsing checks grammar. Name resolution, type checking, and other semantic passes decide validity.",
+            "followUpSkill": "compilers.basics"
         },
         {
             "id": "optimizer-freedom",
-            "description": "Letting an optimizer rewrite code without a behavior argument.",
+            "description": "Letting an optimizer change observable behavior.",
             "stepId": "review",
-            "feedback": "An optimization must preserve every observable effect, including calls with unknown bodies and volatile reads. Dead-store elimination cannot cross those barriers."
+            "answer": "ship:dead-store-global,call-barrier,behavior-change",
+            "feedback": "Optimizations must preserve observable behavior. A call can observe the store, so the transformation is invalid."
         }
     ],
     "lesson": {
@@ -238,7 +241,18 @@
                     ],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "List the stages from source text to executable.",
+                "Give every pass a clear input and output.",
+                "Separate a syntactically valid parse from a semantically valid program.",
+                "Keep optimizations behavior-preserving and diagnostics deterministically ordered."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -295,7 +309,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The pass proves only that a later assignment exists, not that the earlier value is unread. report() reads total between the two stores, so removing total = 1 changes execute from 1 to 0. Treat calls with unknown bodies and volatile accesses as barriers, or restrict the pass to local values with no intervening reads."
+            "explanation": "The pass proves only that a later assignment exists, not that the earlier value is unread. report() reads total between the two stores, so removing total = 1 changes execute from 1 to 0. Treat calls with unknown bodies and volatile accesses as barriers, or restrict the pass to local values with no intervening reads.",
+            "hints": [
+                "Check whether the optimization preserves observable behavior.",
+                "Look for barriers that make a store observable.",
+                "Ask whether the type change is valid in every path.",
+                "Block the change: the dead-store assumption crosses a call barrier and changes behavior."
+            ]
         }
     ],
     "evaluation": {
