@@ -71,32 +71,32 @@ If you are changing dependencies intentionally, use `pnpm install` and commit th
 
 ## Environment
 
-The deployment method is a direct clone of this repository with one `.env` file in the project root. Copy the example:
+The deployment method is a direct clone of this repository with one `.env` file in the project root. For a public deployment, copy the production template:
 
 ```bash
 # macOS or Linux
-cp .env.example .env
+cp .env.production.example .env
 ```
 
 ```powershell
 # Windows PowerShell
-Copy-Item .env.example .env
+Copy-Item .env.production.example .env
 ```
 
-Edit `.env` and set at least `DATABASE_URL`. The server reads this file automatically at startup, and `pnpm db:migrate` reads it through the same loader. Shell variables take precedence over `.env`.
+For direct local HTTP development, copy `.env.example` and set `COOKIE_SECURE=0`, `TRUST_PROXY=0`, and `PUBLIC_ORIGIN=http://localhost:8787`. Edit `.env` and set at least `DATABASE_URL`. The server reads this file automatically at startup, and `pnpm db:migrate` reads it through the same loader. Shell variables take precedence over `.env`.
 
 The server reads environment variables directly; it does not use a separate deployment directory. Required for the API:
 
 | Variable | Required | Meaning |
 | --- | --- | --- |
 | `DATABASE_URL` | yes | `postgres://` or `postgresql://` connection string |
-| `HOST` | no | Bind address, default `127.0.0.1`; use `0.0.0.0` for a reachable server |
+| `HOST` | no | Bind address, default `127.0.0.1`; use `0.0.0.0` only for direct access without a proxy |
 | `PORT` | no | HTTP port, default `8787` |
 | `NODE_ENV` | no | `development`, `test`, or `production` |
 | `DB_POOL_SIZE` | no | 2–4, default 3 |
 | `CONTENT_DIR` | no | Directory containing `skills.json`; otherwise resolved from the repository |
 | `WEB_DIST` | no | Built web directory; otherwise `apps/web/dist` |
-| `PUBLIC_ORIGIN` | production | Public site origin, for example `https://praxbit.example` |
+| `PUBLIC_ORIGIN` | production | Primary canonical origin for absolute links, for example `https://praxbit.bisz.dev`; it does not restrict incoming `Host` names |
 | `CORS_ORIGINS` | no | Comma-separated allowed origins; leave empty for same-origin deployment |
 | `ADMIN_HANDLES` | no | Comma-separated lowercase handles promoted to admin at startup |
 | `COOKIE_SECURE` | production | `1` behind HTTPS; `0` for direct HTTP development |
@@ -107,7 +107,7 @@ The server reads environment variables directly; it does not use a separate depl
 
 `PRAXBIT_ENV_FILE` can point at a different environment file when a process manager requires it. The default is `.env` in the project root.
 
-The full operational template is `.env.example`.
+The production template is `.env.production.example`. `.env.example` is the base template for local development.
 
 ## Database
 
@@ -236,8 +236,9 @@ The supported deployment is a direct clone of this repository, one project-root 
 ```bash
 git clone <repository-url> praxbit
 cd praxbit
-cp .env.example .env
-# Edit DATABASE_URL and, for a public host, PUBLIC_ORIGIN and COOKIE_SECURE.
+cp .env.production.example .env
+# Edit DATABASE_URL. Keep HOST=127.0.0.1, COOKIE_SECURE=1, and TRUST_PROXY=1
+# when Caddy or Nginx terminates TLS for both hostnames.
 corepack enable
 pnpm install --frozen-lockfile
 pnpm db:migrate
@@ -245,19 +246,32 @@ pnpm build
 pnpm start
 ```
 
-On Windows PowerShell, create the environment file with `Copy-Item .env.example .env`. Use `pnpm bootstrap` to run install, migration, and build in one step.
+On Windows PowerShell, create the environment file with `Copy-Item .env.production.example .env`. Use `pnpm bootstrap` to run install, migration, and build in one step.
 
-The server binds `HOST` and `PORT` from `.env` and serves the web build from `apps/web/dist`. Use `HOST=0.0.0.0` when the browser is on another machine. For direct HTTP access, set `COOKIE_SECURE=0`; for HTTPS behind a reverse proxy, set `COOKIE_SECURE=1` and `TRUST_PROXY=1`.
+Both `https://praxbit.biszweb.club` and `https://praxbit.bisz.dev` serve the same application behind Caddy or Nginx. `PUBLIC_ORIGIN=https://praxbit.bisz.dev` is the primary canonical origin for absolute links; it does not restrict incoming `Host` names. Cookies are host-only, so sessions do not cross the two hostnames. Do not describe them as shared sessions.
+
+The server binds `HOST` and `PORT` from `.env` and serves the web build from `apps/web/dist`. For direct HTTP development, use `HOST=0.0.0.0`, `COOKIE_SECURE=0`, and `TRUST_PROXY=0`. For public HTTPS, keep the process on `127.0.0.1:8787` and let the proxy handle TLS.
+
+Proxy, process-management, and backup files are provided for operators:
+
+- `infra/caddy/Caddyfile` and `infra/caddy/Caddyfile.example`
+- `infra/nginx/praxbit.conf` and `infra/nginx/praxbit.conf.example`
+- `infra/systemd/praxbit.service`
+- `infra/pm2/ecosystem.config.cjs`
+- `infra/backup/backup-postgres.sh` and `restore-postgres.sh`
+
+Validate a running deployment. The script starts nothing; it checks both hostnames, health and readiness, SPA routes with dotted IDs, Pyodide MIME types, API 404 separation, CSP and security headers, HSTS on HTTPS, the service worker, and third-party references:
+
+```bash
+pnpm verify:hosting -- --base http://127.0.0.1:8787
+pnpm verify:hosting -- --base https://praxbit.bisz.dev
+```
+
+See [docs/operations/deployment.md](docs/operations/deployment.md) for exact Caddy and Nginx validation commands, DNS `A`/`AAAA` expectations, TLS checks, firewall rules, systemd and PM2 operation, and rollback.
 
 All browser assets are served from the application origin. Fonts, Pyodide, sql.js, and Git runtimes are bundled into the build; the app makes no CDN requests. An optional AI tutor calls the provider configured in `.env` only when a signed-in learner enables it.
 
-Linux process-management, proxy, and backup examples are provided for operators who want them:
-
-- `infra/caddy/Caddyfile.example` or `infra/nginx/praxbit.conf.example`
-- `infra/backup/backup-postgres.sh` and `restore-postgres.sh`
-- [docs/operations](docs/operations/deployment.md)
-
-No deployment has been performed against a public production host from this working copy. Resource targets are budgets to measure, not measured guarantees.
+No live deployment has been performed against a public production host from this working copy. The configuration is ready for an operator to apply; DNS, certificates, firewall changes, and service restarts are not automated here. Resource targets are budgets to measure, not measured guarantees.
 
 ## Licensing
 
