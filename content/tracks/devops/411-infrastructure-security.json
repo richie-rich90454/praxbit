@@ -1,0 +1,353 @@
+{
+    "id": "devops.infrastructure-security",
+    "version": 1,
+    "sequence": 411,
+    "courseId": "devops",
+    "title": "Close the door the deploy left open",
+    "summary": "Review an exposed deployment, choose least-privilege network rules, and keep secrets and images under control.",
+    "skills": ["ops.permissions", "ops.deployment"],
+    "prerequisites": ["devops.containers", "ops.permissions"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["configuration-review", "no-execution"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "infrastructure-security",
+        "briefing": "A contractor deployed the orders stack from a laptop. The compose file publishes PostgreSQL on every interface, runs the API as root, commits an API key in an environment block, and exposes the admin path without TLS. Review the deployment and choose the firewall rule set that restores the intended boundary."
+    },
+    "objectives": [
+        {
+            "id": "review",
+            "description": "Identify exposed services, secrets, and excessive privileges.",
+            "stepIds": ["exposure-review"]
+        },
+        {
+            "id": "rules",
+            "description": "Choose least-privilege network rules.",
+            "stepIds": ["firewall-rule"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain private networking, secret custody, and image trust.",
+            "stepIds": ["infra-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:shield"],
+    "hints": [
+        "A published port is reachable from outside the container network.",
+        "The database should only accept traffic from the application.",
+        "Secrets belong in a secret manager, not in a committed file.",
+        "Public traffic terminates TLS at the edge; admin and database access stay private."
+    ],
+    "misconceptions": [
+        {
+            "id": "compose-is-private",
+            "description": "Assuming a compose network keeps published ports private.",
+            "stepId": "exposure-review",
+            "answer": "ship:db-public,root-user,committed-secret,admin-public",
+            "feedback": "A published port binds on the host and can be reachable from outside. Do not publish the database, and bind admin access to a private network.",
+            "followUpSkill": "ops.permissions"
+        },
+        {
+            "id": "vpc-trust",
+            "description": "Trusting every host inside the VPC.",
+            "stepId": "firewall-rule",
+            "answer": "vpc",
+            "feedback": "A flat VPC lets one compromised service reach the database. Scope the database rule to the application security group or subnet."
+        },
+        {
+            "id": "vpn-auth",
+            "description": "Treating VPN access as a replacement for authentication and authorization.",
+            "stepId": "infra-transfer",
+            "answer": "vpn",
+            "feedback": "A VPN narrows the network path but does not identify the user or limit what they may do. Keep authentication and least privilege inside the boundary."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Every exposed port is a decision",
+                "body": "Publishing a container port binds it on the host. A database published on 0.0.0.0 is reachable wherever the host is reachable. Keep data stores on a private network and let only the application connect."
+            },
+            {
+                "title": "Secrets have a lifecycle",
+                "body": "An API key in a compose file, image layer, or git history is exposed even after deletion. Put secrets in a manager, inject them at runtime, scope them to the service, and rotate on suspicion."
+            },
+            {
+                "title": "The image is part of the attack surface",
+                "body": "A root process, an unpinned base image, and a compiler left in the runtime image all widen the boundary. Use a non-root user, pin the base, scan the image, and keep build tools out of production."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Published port",
+                "definition": "A container port bound to a host interface, potentially beyond localhost."
+            },
+            {
+                "term": "Least privilege",
+                "definition": "Granting only the access a service needs for its job."
+            },
+            {
+                "term": "Secret manager",
+                "definition": "A service that stores and injects credentials with access control and audit."
+            },
+            {
+                "term": "Image scan",
+                "definition": "Checking an image's packages and layers for known vulnerabilities."
+            },
+            {
+                "term": "Security group",
+                "definition": "A network rule set attached to a resource that permits specific traffic."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "The deployment is a boundary",
+            "prompt": "Read the explanation, then review the compose file.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Every exposed port is a decision",
+                    "body": "Publishing a container port binds it on the host. A database published on 0.0.0.0 is reachable wherever the host is reachable. Keep data stores on a private network and let only the application connect."
+                },
+                {
+                    "title": "Secrets have a lifecycle",
+                    "body": "An API key in a compose file, image layer, or git history is exposed even after deletion. Put secrets in a manager, inject them at runtime, scope them to the service, and rotate on suspicion."
+                },
+                {
+                    "title": "The image is part of the attack surface",
+                    "body": "A root process, an unpinned base image, and a compiler left in the runtime image all widen the boundary. Use a non-root user, pin the base, scan the image, and keep build tools out of production."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Published port",
+                    "definition": "A container port bound to a host interface, potentially beyond localhost."
+                },
+                {
+                    "term": "Least privilege",
+                    "definition": "Granting only the access a service needs for its job."
+                },
+                {
+                    "term": "Secret manager",
+                    "definition": "A service that stores and injects credentials with access control and audit."
+                },
+                {
+                    "term": "Image scan",
+                    "definition": "Checking an image's packages and layers for known vulnerabilities."
+                },
+                {
+                    "term": "Security group",
+                    "definition": "A network rule set attached to a resource that permits specific traffic."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "exposure-review",
+            "title": "Review the deployment",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Read every published port and bind address.",
+                "Check the container user and the environment block.",
+                "Look at how the admin path is reached.",
+                "Block the deployment: the database is public, the API is root, and a secret is committed."
+            ],
+            "artifact": {
+                "title": "compose.yaml",
+                "caption": "Production stack submitted with the contractor handoff.",
+                "kind": "code",
+                "language": "yaml",
+                "content": "services:\n  db:\n    image: postgres:16\n    ports:\n      - \"0.0.0.0:5432:5432\"\n    environment:\n      POSTGRES_PASSWORD: campus-prod-2024\n  api:\n    image: campus/api:latest\n    user: root\n    ports:\n      - \"443:3000\"\n    environment:\n      STRIPE_KEY: sk_live_51H...\n  admin:\n    image: campus/admin:latest\n    ports:\n      - \"8080:8080\"\n    depends_on:\n      - db"
+            },
+            "findings": [
+                {
+                    "id": "db-public",
+                    "label": "PostgreSQL is published on every host interface.",
+                    "correct": true
+                },
+                {
+                    "id": "root-user",
+                    "label": "The API container runs as root.",
+                    "correct": true
+                },
+                {
+                    "id": "committed-secret",
+                    "label": "A live payment key is committed in the compose environment.",
+                    "correct": true
+                },
+                {
+                    "id": "admin-public",
+                    "label": "The admin service is published without a private network or TLS boundary.",
+                    "correct": true
+                },
+                {
+                    "id": "https-port",
+                    "label": "Binding port 443 proves TLS is terminated inside the API.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "ship",
+                    "label": "Ship the stack"
+                },
+                {
+                    "id": "block",
+                    "label": "Block until ports, user, secrets, and admin access are fixed"
+                },
+                {
+                    "id": "scan",
+                    "label": "Only scan the images"
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The database is publicly reachable, the API runs as root, a live secret is in the file, and the admin service has no private boundary."
+        },
+        {
+            "kind": "rule",
+            "id": "firewall-rule",
+            "title": "Choose the network boundary",
+            "prompt": "Select the rule set that matches the intended traffic.",
+            "evidence": "construction",
+            "hints": [
+                "Public web traffic needs 443.",
+                "The database only needs connections from the application.",
+                "Administrative shell access belongs on a private network.",
+                "Choose the rule set that allows 443 publicly, 5432 only from the app, and 22 only over VPN."
+            ],
+            "inputs": [
+                {
+                    "id": "web",
+                    "label": "Internet client to the public web endpoint on 443"
+                },
+                {
+                    "id": "db-internet",
+                    "label": "Internet client to PostgreSQL on 5432"
+                },
+                {
+                    "id": "db-app",
+                    "label": "Application subnet to PostgreSQL on 5432"
+                },
+                {
+                    "id": "ssh-vpn",
+                    "label": "Administrator over VPN to SSH on 22"
+                },
+                {
+                    "id": "ssh-internet",
+                    "label": "Internet client to SSH on 22"
+                }
+            ],
+            "rules": [
+                {
+                    "id": "scoped",
+                    "label": "Allow 443 from the internet, 5432 only from the app subnet, and 22 only from the VPN"
+                },
+                {
+                    "id": "vpc",
+                    "label": "Allow all traffic from the VPC and publish 5432 for remote support"
+                },
+                {
+                    "id": "ssh-anywhere",
+                    "label": "Allow SSH from the internet with password login"
+                },
+                {
+                    "id": "deny-all",
+                    "label": "Deny all traffic, including the public web endpoint"
+                }
+            ],
+            "expected": [
+                {
+                    "inputId": "web",
+                    "outcome": "allow"
+                },
+                {
+                    "inputId": "db-internet",
+                    "outcome": "reject"
+                },
+                {
+                    "inputId": "db-app",
+                    "outcome": "allow"
+                },
+                {
+                    "inputId": "ssh-vpn",
+                    "outcome": "allow"
+                },
+                {
+                    "inputId": "ssh-internet",
+                    "outcome": "reject"
+                }
+            ],
+            "correctRuleId": "scoped",
+            "explanation": "Only the public web endpoint accepts internet traffic. The database accepts its application, and administration stays on the VPN."
+        },
+        {
+            "kind": "explain",
+            "id": "infra-transfer",
+            "title": "Keep the boundary after the fix",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Network location is not identity.",
+                "A secret in git history remains exposed after deletion.",
+                "Build tools in production widen the attack surface.",
+                "Select private data paths, secret injection, image scanning, and re-authentication; reject VPN as authorization."
+            ],
+            "statements": [
+                {
+                    "id": "private-db",
+                    "label": "Data stores should accept traffic only from the services that need them.",
+                    "correct": true
+                },
+                {
+                    "id": "inject",
+                    "label": "Secrets should be injected at runtime from a manager and rotated after exposure.",
+                    "correct": true
+                },
+                {
+                    "id": "scan",
+                    "label": "Images should be pinned, scanned, and run as a non-root user.",
+                    "correct": true
+                },
+                {
+                    "id": "vpn",
+                    "label": "VPN access replaces per-user authentication and authorization.",
+                    "correct": false
+                },
+                {
+                    "id": "tls-port",
+                    "label": "Publishing port 443 guarantees the connection is encrypted end to end.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Private paths, scoped secrets, hardened images, and real authentication keep the boundary after deployment."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
