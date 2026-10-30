@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "backup-plan": {
+            "files": {
+                "backup.sh": "#!/usr/bin/env bash\nset -euo pipefail\n\nSTAMP=\"$(date -u +%Y%m%dT%H%M%SZ)\"\nDUMP=\"/var/backups/campus-${STAMP}.dump\"\nARCHIVE=\"${DUMP}.age\"\nBACKUP_RECIPIENT=\"${BACKUP_RECIPIENT:?load from the secret manager}\"\nBACKUP_IDENTITY=\"${BACKUP_IDENTITY:?load from the secret manager}\"\n\npg_dump --format=custom --file=\"$DUMP\" \"$DATABASE_URL\"\nage -r \"$BACKUP_RECIPIENT\" --output \"$ARCHIVE\" \"$DUMP\"\nsha256sum \"$ARCHIVE\" > \"${ARCHIVE}.sha256\"\n\naws s3 cp \"$ARCHIVE\" \"s3://campus-backups/postgres/${STAMP}.age\"\naws s3 cp \"${ARCHIVE}.sha256\" \"s3://campus-backups/postgres/${STAMP}.age.sha256\"\n\n# Keep 30 days of local copies; the offsite bucket has its own lifecycle rule.\nfind /var/backups -name \"campus-*.dump.age\" -mtime +30 -delete\n\n# Restore test: verify the checksum, decrypt, and read the archive in isolation.\nsha256sum --check \"${ARCHIVE}.sha256\"\nage --decrypt --identity \"$BACKUP_IDENTITY\" --output /tmp/restore-test.dump \"$ARCHIVE\"\npg_restore --list /tmp/restore-test.dump > /tmp/restore-test.list\npsql \"$RESTORE_DATABASE_URL\" --command \"CREATE SCHEMA IF NOT EXISTS restore-test;\"\npg_restore --dbname=\"$RESTORE_DATABASE_URL\" --schema=restore-test /tmp/restore-test.dump\npsql \"$RESTORE_DATABASE_URL\" --command \"DROP SCHEMA restore-test CASCADE;\"\nrm -f \"$DUMP\" /tmp/restore-test.dump\n"
+            }
+        }
+    }
+}
