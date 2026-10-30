@@ -1,6 +1,6 @@
 {
     "id": "campus.repeating-the-same-work",
-    "version": 1,
+    "version": 2,
     "sequence": 17,
     "courseId": "campus",
     "title": "Repeating the same work",
@@ -49,13 +49,32 @@
             "id": "ignores-reserved",
             "description": "Summing stock without subtracting reservations.",
             "stepId": "available-total",
-            "feedback": "Reserved units are already promised to other orders. Subtract them before counting availability."
+            "testDescription": "Reserved units are excluded.",
+            "feedback": "Reserved units are already promised to other orders. Subtract them before counting availability.",
+            "followUpSkill": "js.loops"
         },
         {
             "id": "negative-availability",
             "description": "Allowing reserved stock to produce a negative total.",
             "stepId": "available-total",
-            "feedback": "A reservation mistake should not create negative physical stock. Clamp each product's availability at zero."
+            "testDescription": "Over-reserved products clamp at zero.",
+            "feedback": "A reservation mistake should not create negative physical stock. Clamp each product's availability at zero.",
+            "followUpSkill": "js.arrays"
+        },
+        {
+            "id": "forgets-clamp",
+            "description": "Letting an over-reserved product subtract from the total.",
+            "stepId": "loop-values",
+            "answer": "{\"total\":\"0\"}",
+            "feedback": "The second product is over-reserved, so it contributes zero. Adding the negative difference would wrongly reduce the total.",
+            "followUpSkill": "js.arrays"
+        },
+        {
+            "id": "index-required",
+            "description": "Believing every loop needs a manual index variable.",
+            "stepId": "loop-claims",
+            "answer": "index",
+            "feedback": "for...of and other forms can visit items without an index. The requirement is visiting every contributing item, not the syntax."
         }
     ],
     "lesson": {
@@ -88,6 +107,12 @@
         {
             "kind": "code",
             "id": "available-total",
+            "hints": [
+                "Loop over every item and add its usable stock, never a negative amount.",
+                "Availability is stock minus reserved, clamped at zero.",
+                "An item with stock 2 and reserved 5 contributes 0, not -3.",
+                "Compute max(0, stock - reserved) for each item, add it to total, and return the total."
+            ],
             "title": "Compute available stock",
             "prompt": "Edit stock.js. sumAvailable(items) must loop over the array and return the total available, with each item clamped at zero.",
             "evidence": "construction",
@@ -183,6 +208,12 @@
         {
             "kind": "trace",
             "id": "loop-values",
+            "hints": [
+                "Trace both products and submit the final total.",
+                "Each line adds max(0, stock - reserved) to the running total.",
+                "The first product contributes 3. The second has 2 - 5, which clamps to 0.",
+                "After adding 3 and then 0, the total stays at 3."
+            ],
             "title": "Trace the loop",
             "prompt": "Advance through the loop for two products and enter the final total.",
             "evidence": "prediction",
@@ -242,6 +273,12 @@
         {
             "kind": "explain",
             "id": "loop-claims",
+            "hints": [
+                "Select statements that are true for loops over collections.",
+                "A correct total visits every contributing item and respects clamping.",
+                "Skipping the last array element gives a plausible but wrong total.",
+                "Three statements are accurate; reject the claim that a loop must use an index variable."
+            ],
             "title": "Loop correctness",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
