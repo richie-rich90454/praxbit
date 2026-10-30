@@ -122,8 +122,15 @@ function staticChecks(
             }
             outcomes.push({
                 description: test.description,
-                passed: pattern.test(content),
-                ...(pattern.test(content) ? {} : { error: "The pattern was not found." }),
+                passed: test.invert === true ? !pattern.test(content) : pattern.test(content),
+                ...((test.invert === true ? !pattern.test(content) : pattern.test(content))
+                    ? {}
+                    : {
+                          error:
+                              test.invert === true
+                                  ? "The forbidden pattern was found."
+                                  : "The pattern was not found.",
+                      }),
             });
         }
         if (test.kind === "json") {
