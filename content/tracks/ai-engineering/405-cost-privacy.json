@@ -1,0 +1,312 @@
+{
+    "id": "ai.cost-privacy",
+    "version": 1,
+    "sequence": 405,
+    "courseId": "ai-engineering",
+    "title": "The bill and the data you did not need",
+    "summary": "Cut token cost by sending less and caching deliberately, while keeping personal data out of prompts and logs.",
+    "skills": ["ai.evaluation", "ai.foundations"],
+    "prerequisites": ["ai.foundations", "ai.evaluation"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["configuration-review", "no-execution"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "cost-privacy",
+        "briefing": "A support assistant sends the full customer record, every past ticket, and the whole policy manual on each page load. It has no output cap, no cache, and logs the complete prompt. Finance noticed the bill; privacy noticed the logs."
+    },
+    "objectives": [
+        {
+            "id": "review",
+            "description": "Identify cost and privacy problems in the request path.",
+            "stepIds": ["budget-review"]
+        },
+        {
+            "id": "choose",
+            "description": "Choose the change that reduces cost per successful answer.",
+            "stepIds": ["cost-driver"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain minimization, caching, and retention trade-offs.",
+            "stepIds": ["privacy-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:coin"],
+    "hints": [
+        "Ask which data the model needs to answer this request.",
+        "Stable prompt prefixes can be cached; changing context cannot.",
+        "An output cap bounds the most expensive tokens.",
+        "Measure cost per successful answer, not cost per call."
+    ],
+    "misconceptions": [
+        {
+            "id": "send-everything",
+            "description": "Sending the whole record because it might be relevant.",
+            "stepId": "budget-review",
+            "answer": "approve:full-record,no-cache,no-cap,prompt-log",
+            "feedback": "Sending everything raises cost and exposes data the task does not need. Minimize fields and redact before the request leaves your boundary.",
+            "followUpSkill": "ai.foundations"
+        },
+        {
+            "id": "cheapest-model",
+            "description": "Assuming the cheapest model always lowers cost per task.",
+            "stepId": "cost-driver",
+            "answer": "cheapest",
+            "feedback": "A cheap model that fails and retries can cost more per successful answer. Measure quality and retries, not price per token alone."
+        },
+        {
+            "id": "hash-anonymous",
+            "description": "Treating a hash as automatic anonymization.",
+            "stepId": "privacy-transfer",
+            "answer": "hash",
+            "feedback": "Hashes of low-entropy values such as email addresses can be reversed by guessing. Remove or redact data instead of relying on a hash."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Cost is tokens times calls",
+                "body": "Input context is resent on every call. A large stable prefix can be cached, but dynamic history and documents multiply both latency and cost. Send the fields the task needs, cap the output, and measure cost per successful answer."
+            },
+            {
+                "title": "Data minimization is a privacy control",
+                "body": "The model does not need an address to answer a billing question. Remove or redact identifiers before the request, keep prompts out of general logs, and set a retention period for anything stored."
+            },
+            {
+                "title": "Caching has a correctness boundary",
+                "body": "Cache stable instructions and policy text, not per-user answers. A cache key must include the inputs that change the answer, and sensitive responses should not be reused across users."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Prompt cache",
+                "definition": "Reuse of a stable prompt prefix to avoid paying for it on every call."
+            },
+            {
+                "term": "Token budget",
+                "definition": "A cap on input and output tokens for a request or task."
+            },
+            {
+                "term": "Data minimization",
+                "definition": "Sending and retaining only the data the task requires."
+            },
+            {
+                "term": "Redaction",
+                "definition": "Removing or replacing sensitive values before use or storage."
+            },
+            {
+                "term": "Retention period",
+                "definition": "How long data is kept before deletion."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Spend less and expose less",
+            "prompt": "Read the explanation, then review the request path.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Cost is tokens times calls",
+                    "body": "Input context is resent on every call. A large stable prefix can be cached, but dynamic history and documents multiply both latency and cost. Send the fields the task needs, cap the output, and measure cost per successful answer."
+                },
+                {
+                    "title": "Data minimization is a privacy control",
+                    "body": "The model does not need an address to answer a billing question. Remove or redact identifiers before the request, keep prompts out of general logs, and set a retention period for anything stored."
+                },
+                {
+                    "title": "Caching has a correctness boundary",
+                    "body": "Cache stable instructions and policy text, not per-user answers. A cache key must include the inputs that change the answer, and sensitive responses should not be reused across users."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Prompt cache",
+                    "definition": "Reuse of a stable prompt prefix to avoid paying for it on every call."
+                },
+                {
+                    "term": "Token budget",
+                    "definition": "A cap on input and output tokens for a request or task."
+                },
+                {
+                    "term": "Data minimization",
+                    "definition": "Sending and retaining only the data the task requires."
+                },
+                {
+                    "term": "Redaction",
+                    "definition": "Removing or replacing sensitive values before use or storage."
+                },
+                {
+                    "term": "Retention period",
+                    "definition": "How long data is kept before deletion."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "budget-review",
+            "title": "Review the assistant request",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "List the fields sent and ask which ones the task needs.",
+                "Look for a maximum output length.",
+                "Check whether the prompt or response is logged.",
+                "Reject the path: it sends excess personal data, has no cap or cache, and logs the prompt."
+            ],
+            "artifact": {
+                "title": "Support assistant request",
+                "caption": "One page load triggers this call for the signed-in customer.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "const customer = await db.customer.findUnique({ where: { id: userId } });\nconst tickets = await db.ticket.findMany({ where: { customerId: userId } });\nconst policies = await loadAllPolicyDocuments();\n\nconst prompt = [systemInstructions, JSON.stringify(customer), JSON.stringify(tickets), policies]\n  .join(\"\\n\\n\");\n\nlogger.info({ prompt }, \"assistant request\");\nconst reply = await model.complete({ prompt });\nreturn reply;"
+            },
+            "findings": [
+                {
+                    "id": "full-record",
+                    "label": "The full customer record is sent even though the task may need only a few fields.",
+                    "correct": true
+                },
+                {
+                    "id": "no-cache",
+                    "label": "Stable instructions and policy text are resent without a cache.",
+                    "correct": true
+                },
+                {
+                    "id": "no-cap",
+                    "label": "The model call has no output token cap or timeout.",
+                    "correct": true
+                },
+                {
+                    "id": "prompt-log",
+                    "label": "The complete prompt, including personal data, is written to general logs.",
+                    "correct": true
+                },
+                {
+                    "id": "temperature-cost",
+                    "label": "Lowering the temperature is the main way to reduce token cost.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the request path"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until data is minimized, capped, cached, and logged safely"
+                },
+                {
+                    "id": "warm",
+                    "label": "Only raise the temperature"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The request sends unnecessary personal data, repeats stable text, has no output bound, and records the prompt. Each issue has a separate fix."
+        },
+        {
+            "kind": "quiz",
+            "id": "cost-driver",
+            "title": "Cut cost per successful answer",
+            "prompt": "Which change most directly lowers cost without hiding quality?",
+            "evidence": "prediction",
+            "hints": [
+                "Input tokens are paid on every call.",
+                "Stable prefixes can be cached.",
+                "Output tokens are usually the most expensive.",
+                "Send only needed fields, cache stable text, and cap output."
+            ],
+            "quiz": {
+                "prompt": "Choose the change with the clearest cost effect.",
+                "options": [
+                    {
+                        "id": "minimize",
+                        "label": "Send only the required fields, cache the stable policy prefix, and cap output"
+                    },
+                    {
+                        "id": "cheapest",
+                        "label": "Switch to the cheapest model and retry until it passes"
+                    },
+                    {
+                        "id": "temperature",
+                        "label": "Raise the temperature"
+                    },
+                    {
+                        "id": "history",
+                        "label": "Send the full ticket history for context"
+                    }
+                ],
+                "correctId": "minimize",
+                "explanation": "Minimizing input, caching stable text, and bounding output reduce tokens directly. A cheap model with retries can cost more per success."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "privacy-transfer",
+            "title": "Keep the boundary",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "A model vendor is another data boundary.",
+                "Retention applies to prompts and responses, not only databases.",
+                "Caches can leak across users if the key is wrong.",
+                "Select minimization, redaction, retention, and scoped cache keys; reject hash-based anonymization."
+            ],
+            "statements": [
+                {
+                    "id": "minimize",
+                    "label": "Send only the fields the task needs and redact the rest before the request.",
+                    "correct": true
+                },
+                {
+                    "id": "retention",
+                    "label": "Prompts and responses need a defined retention period and deletion path.",
+                    "correct": true
+                },
+                {
+                    "id": "vendor",
+                    "label": "A model provider is a separate data boundary that needs contractual and technical controls.",
+                    "correct": true
+                },
+                {
+                    "id": "cache-key",
+                    "label": "A response cache key must include every input that changes the answer and must not cross users.",
+                    "correct": true
+                },
+                {
+                    "id": "hash",
+                    "label": "Hashing an email address makes it safe to send because the hash cannot be reversed.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Privacy is about what leaves the boundary and how long it stays. Minimize, redact, scope caches, and define retention."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["ai", "professional"]
+}
