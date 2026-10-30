@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.java": "import java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\n\npublic class Main {\n    static Map<String, Integer> countByCategory(List<String> categories) {\n        Map<String, Integer> counts = new HashMap<>();\n        for (String category : categories) {\n            counts.merge(category, 1, Integer::sum);\n        }\n        return counts;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(countByCategory(List.of(\"book\", \"book\", \"lamp\")));\n    }\n}\n"
+            }
+        }
+    }
+}
