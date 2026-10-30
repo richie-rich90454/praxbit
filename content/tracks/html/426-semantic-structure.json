@@ -5,23 +5,14 @@
     "courseId": "html",
     "title": "Semantic landmarks and articles",
     "summary": "Replace generic containers with header, nav, main, and article elements.",
-    "skills": [
-        "web.html",
-        "web.accessibility"
-    ],
-    "prerequisites": [
-        "web.html"
-    ],
+    "skills": ["web.html", "web.accessibility"],
+    "prerequisites": ["web.html"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-html",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "dom-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "dom-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "landmarks",
             "description": "Use header, nav, main, and article landmarks.",
-            "stepIds": [
-                "repair-structure"
-            ]
+            "stepIds": ["repair-structure"]
         },
         {
             "id": "accessible-controls",
             "description": "Provide alt text and labeled actions.",
-            "stepIds": [
-                "repair-structure"
-            ]
+            "stepIds": ["repair-structure"]
         },
         {
             "id": "understanding",
             "description": "Explain semantic structure.",
-            "stepIds": [
-                "structure-claims"
-            ]
+            "stepIds": ["structure-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:page"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:page"],
     "hints": [
         "Start with header, nav, main, and article instead of div elements.",
         "Each product can be an article with class product. Add one h1 for the store name.",
@@ -277,7 +257,5 @@
         "screenReaderNotes": "The code editor announces its language and line numbers. Tests report pass or fail with the checked requirement."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
