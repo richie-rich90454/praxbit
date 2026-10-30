@@ -1,18 +1,27 @@
 {
     "id": "python.collections",
     "version": 1,
-    "sequence": 117,
-    "courseId": "python-practice",
+    "sequence": 34,
+    "courseId": "python-foundations",
     "title": "Shape data with collections",
     "summary": "Summarize a list of order dictionaries into a count and total.",
-    "skills": ["python.data"],
-    "prerequisites": ["python.control", "python.functions"],
+    "skills": [
+        "python.data"
+    ],
+    "prerequisites": [
+        "python.control",
+        "python.functions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-python",
-        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
+        "capabilities": [
+            "pyodide-wasm",
+            "source-editing",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:python"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:python"
+    ],
     "hints": [
         "Initialize count and total before the loop.",
         "Iterate over orders.",
@@ -44,24 +62,32 @@
             "id": "empty",
             "description": "Special-casing empty input as an error.",
             "stepId": "apply",
-            "feedback": "Empty input is ordinary. A summary of zero orders should return zero count and zero total."
+            "testDescription": "An empty list produces zeros.",
+            "feedback": "Empty input is ordinary. A summary of zero orders should return zero count and zero total.",
+            "followUpSkill": "python.data"
         },
         {
             "id": "mutation",
-            "description": "Assuming comprehension mutates the source.",
-            "stepId": "apply",
-            "feedback": "A comprehension builds a new collection. The original remains unchanged."
+            "description": "Assuming a comprehension mutates the source.",
+            "stepId": "check",
+            "answer": "mutate",
+            "feedback": "A comprehension builds a new collection. The original remains unchanged.",
+            "followUpSkill": "python.data"
         }
     ],
     "lesson": {
         "sections": [
             {
-                "title": "Python values and decisions",
-                "body": "Python names values without declarations: count = 3; total = 0.0; ready = True. int, float, str, bool, list, dict, and None are runtime values. A name can be rebound to a different type. if and for value in values select and repeat work. A for loop iterates over any iterable, including lists, dictionaries, and ranges."
+                "title": "Lists and dictionaries shape records",
+                "body": "A list keeps values in insertion order and allows duplicates. A dictionary maps unique keys to values, so a record such as an order is naturally a dictionary. A list of dictionaries is the shape most JSON APIs return, and a loop over that list processes one record at a time."
             },
             {
-                "title": "Python source files",
-                "body": "Python source is interpreted by CPython or, in Praxbit, by Pyodide compiled to WebAssembly."
+                "title": "Comprehensions build new collections",
+                "body": "A comprehension such as [order[\"total\"] for order in orders] creates a new list without mutating the source. Use a comprehension when the transformation is simple and a loop when several values must be accumulated at once. Both approaches preserve the input order."
+            },
+            {
+                "title": "Empty input is a valid input",
+                "body": "A loop over an empty list runs zero times. A summary of zero orders should return a count of zero and a total of zero, not an error. Treating empty input as exceptional adds a branch that callers must handle for an ordinary case."
             }
         ],
         "vocabulary": [
@@ -76,6 +102,10 @@
             {
                 "term": "Comprehension",
                 "definition": "A compact expression that builds a collection from an iterable."
+            },
+            {
+                "term": "Accumulator",
+                "definition": "A variable that collects a result across iterations."
             }
         ]
     },
@@ -83,17 +113,21 @@
         {
             "kind": "lesson",
             "id": "lesson",
-            "title": "Python values and decisions",
+            "title": "Lists and dictionaries shape records",
             "prompt": "Read the explanation, then apply it in the next step.",
             "evidence": "prediction",
             "sections": [
                 {
-                    "title": "Python values and decisions",
-                    "body": "Python names values without declarations: count = 3; total = 0.0; ready = True. int, float, str, bool, list, dict, and None are runtime values. A name can be rebound to a different type. if and for value in values select and repeat work. A for loop iterates over any iterable, including lists, dictionaries, and ranges."
+                    "title": "Lists and dictionaries shape records",
+                    "body": "A list keeps values in insertion order and allows duplicates. A dictionary maps unique keys to values, so a record such as an order is naturally a dictionary. A list of dictionaries is the shape most JSON APIs return, and a loop over that list processes one record at a time."
                 },
                 {
-                    "title": "Python source files",
-                    "body": "Python source is interpreted by CPython or, in Praxbit, by Pyodide compiled to WebAssembly."
+                    "title": "Comprehensions build new collections",
+                    "body": "A comprehension such as [order[\"total\"] for order in orders] creates a new list without mutating the source. Use a comprehension when the transformation is simple and a loop when several values must be accumulated at once. Both approaches preserve the input order."
+                },
+                {
+                    "title": "Empty input is a valid input",
+                    "body": "A loop over an empty list runs zero times. A summary of zero orders should return a count of zero and a total of zero, not an error. Treating empty input as exceptional adds a branch that callers must handle for an ordinary case."
                 }
             ],
             "vocabulary": [
@@ -108,6 +142,10 @@
                 {
                     "term": "Comprehension",
                     "definition": "A compact expression that builds a collection from an iterable."
+                },
+                {
+                    "term": "Accumulator",
+                    "definition": "A variable that collects a result across iterations."
                 }
             ]
         },
@@ -152,12 +190,20 @@
                     "kind": "function",
                     "description": "An empty list produces zeros.",
                     "name": "summarize",
-                    "args": [[]],
+                    "args": [
+                        []
+                    ],
                     "expected": {
                         "count": 0,
                         "total": 0
                     }
                 }
+            ],
+            "hints": [
+                "Start count and total before iterating.",
+                "Each order contributes one to count and order[\"total\"] to total.",
+                "Return a dictionary with both accumulated values.",
+                "count += 1; total += order[\"total\"]; return {\"count\": count, \"total\": total}"
             ]
         },
         {
@@ -188,7 +234,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Lists and dictionaries are runtime objects with clear behavior. Iterating an empty collection is safe and should produce a meaningful empty result."
+            "explanation": "Lists and dictionaries are runtime objects with clear behavior. Iterating an empty collection is safe and should produce a meaningful empty result.",
+            "hints": [
+                "Two statements are accurate.",
+                "Iterating an empty list is safe; it simply yields nothing.",
+                "A comprehension builds a new list instead of mutating the source.",
+                "Select list and dict."
+            ]
         }
     ],
     "evaluation": {
@@ -203,10 +255,13 @@
         "kind": "none"
     },
     "accessibility": {
-        "summary": "The Python workspace is keyboard accessible. Checks verify source structure; they do not compile or run Python.",
-        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
-        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+        "summary": "The Python editor and tests are keyboard accessible. Pyodide runs the function tests locally in the browser.",
+        "keyboardNotes": "Ctrl+Enter runs tests. The runtime loading state is announced.",
+        "screenReaderNotes": "Each test announces its arguments, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
