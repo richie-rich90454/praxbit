@@ -11,9 +11,31 @@ const LANGUAGE_BY_RUNTIME: Readonly<Record<string, string>> = {
     "browser-typescript": "typescript",
     "browser-python": "python",
     "browser-sql": "sql",
-    "browser-html": "html",
-    "browser-css": "css",
+    "browser-html": "web",
+    "browser-css": "web",
     "browser-git": "git",
+};
+
+const LANGUAGE_BY_SKILL_PREFIX: Readonly<Record<string, string>> = {
+    js: "javascript",
+    ts: "typescript",
+    web: "web",
+    html: "web",
+    css: "web",
+    python: "python",
+    sql: "sql",
+    java: "java",
+    c: "c",
+    cpp: "cpp",
+    csharp: "csharp",
+    go: "go",
+    rust: "rust",
+    kotlin: "kotlin",
+    swift: "swift",
+    ruby: "ruby",
+    zig: "zig",
+    lua: "lua",
+    react: "react",
 };
 
 export class AchievementService {
@@ -52,6 +74,10 @@ export class AchievementService {
             userId,
         );
         const clubEventsCompleted = await this.clubs.countCompletedEventsForUser(executor, userId);
+        const cooperativeChallengeCompleted = await this.clubs.hasCooperativeChallenge(
+            executor,
+            userId,
+        );
         const world = await this.worlds.ensureWorld(executor, userId);
 
         const completedMissionIds = [
@@ -67,23 +93,45 @@ export class AchievementService {
             if (mission === undefined) {
                 continue;
             }
-            const language = LANGUAGE_BY_RUNTIME[mission.runtime.kind];
-            if (language !== undefined) {
-                languages.add(language);
+            const runtimeLanguage = LANGUAGE_BY_RUNTIME[mission.runtime.kind];
+            if (runtimeLanguage !== undefined) {
+                languages.add(runtimeLanguage);
+            }
+            for (const skillId of mission.skills) {
+                const prefix = skillId.split(".")[0] ?? skillId;
+                const skillLanguage = LANGUAGE_BY_SKILL_PREFIX[prefix];
+                if (skillLanguage !== undefined) {
+                    languages.add(skillLanguage);
+                }
+            }
+        }
+
+        const completedProjectIds = new Set<string>();
+        for (const record of evidence) {
+            if (
+                record.category === "construction" &&
+                record.outcome === "success" &&
+                this.content.getProject(record.missionId) !== undefined
+            ) {
+                completedProjectIds.add(record.missionId);
             }
         }
 
         const context: AchievementContext = {
             evidence,
             completedMissionIds,
-            // shortcut: the current sync contract has no verified project-completion signal, so this stays unearned.
-            projectsCompleted: 0,
+            projectsCompleted: completedProjectIds.size,
             clubEventsCompleted,
+            cooperativeChallengeCompleted,
             worldRecovered: isWorldRecovered(world),
             languagesDemonstrated: [...languages],
-            hiddenBoundaryFound: false,
-            difficultDebuggingRecovered: false,
-            teammateHelped: false,
+            hiddenBoundaryFound: evidence.some(function boundary(record): boolean {
+                return record.category === "testing" && record.outcome === "success";
+            }),
+            difficultDebuggingRecovered: evidence.some(function debugging(record): boolean {
+                return record.category === "debugging" && record.outcome === "success";
+            }),
+            teammateHelped: clubEventsCompleted >= 1,
         };
 
         const newlyEarned = earnedAchievements(
