@@ -1,18 +1,28 @@
 {
     "id": "native.notifications",
     "version": 1,
-    "sequence": 424,
+    "sequence": 210,
     "courseId": "native",
     "title": "Notify without leaking",
     "summary": "Review a push design, build a bounded payload, and handle permission, tokens, and deep links safely.",
-    "skills": ["web.browser-apis", "api.validation"],
-    "prerequisites": ["web.browser-apis", "api.validation"],
+    "skills": [
+        "web.browser-apis",
+        "api.validation"
+    ],
+    "prerequisites": [
+        "web.browser-apis",
+        "api.validation"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +34,31 @@
         {
             "id": "review",
             "description": "Identify permission, token, payload, and deep-link risks.",
-            "stepIds": ["notification-review"]
+            "stepIds": [
+                "notification-review"
+            ]
         },
         {
             "id": "payload",
             "description": "Build a bounded payload with an allowlisted route.",
-            "stepIds": ["payload-code"]
+            "stepIds": [
+                "payload-code"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain permission timing, token lifecycle, and payload privacy.",
-            "stepIds": ["notification-transfer"]
+            "stepIds": [
+                "notification-transfer"
+            ]
         }
     ],
-    "assets": ["pip:observing", "scene:campus", "system:delivery", "icon:bell"],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:delivery",
+        "icon:bell"
+    ],
     "hints": [
         "Ask for notification permission in context, not on first launch.",
         "A push payload is visible to the push service and the device.",
@@ -241,7 +262,10 @@
                     "kind": "function",
                     "description": "Builds a valid order payload.",
                     "name": "buildPushPayload",
-                    "args": ["Order shipped", "campus://orders/17"],
+                    "args": [
+                        "Order shipped",
+                        "campus://orders/17"
+                    ],
                     "expected": {
                         "title": "Campus",
                         "body": "Order shipped",
@@ -270,7 +294,10 @@
                     "kind": "function",
                     "description": "Rejects a foreign scheme.",
                     "name": "buildPushPayload",
-                    "args": ["Order shipped", "https://evil.test/orders/17"],
+                    "args": [
+                        "Order shipped",
+                        "https://evil.test/orders/17"
+                    ],
                     "expected": {
                         "title": "Campus",
                         "body": "Order shipped",
@@ -283,7 +310,10 @@
                     "kind": "function",
                     "description": "Rejects an unknown route.",
                     "name": "buildPushPayload",
-                    "args": ["Order shipped", "campus://admin"],
+                    "args": [
+                        "Order shipped",
+                        "campus://admin"
+                    ],
                     "expected": {
                         "title": "Campus",
                         "body": "Order shipped",
@@ -296,7 +326,10 @@
                     "kind": "function",
                     "description": "Handles a missing link.",
                     "name": "buildPushPayload",
-                    "args": ["Order shipped", null],
+                    "args": [
+                        "Order shipped",
+                        null
+                    ],
                     "expected": {
                         "title": "Campus",
                         "body": "Order shipped",
@@ -366,5 +399,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
