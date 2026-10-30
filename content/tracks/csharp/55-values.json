@@ -1,18 +1,26 @@
 {
     "id": "csharp.values",
     "version": 1,
-    "sequence": 55,
+    "sequence": 85,
     "courseId": "csharp",
     "title": "Typed values in C#",
     "summary": "Use a typed list and a foreach loop to count positive values.",
-    "skills": ["csharp.syntax"],
-    "prerequisites": ["concept.state", "concept.conditions"],
+    "skills": [
+        "csharp.syntax"
+    ],
+    "prerequisites": [
+        "concept.state",
+        "concept.conditions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:csharp"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:csharp"
+    ],
     "hints": [
         "The loop already visits each value.",
         "Test whether the value is greater than zero.",
@@ -44,13 +61,17 @@
             "id": "zero",
             "description": "Leaving the placeholder increment.",
             "stepId": "apply",
-            "feedback": "count += 0 never changes the count. Increment in the positive branch."
+            "testDescription": "The foreach loop counts only positive values.",
+            "feedback": "count += 0 never changes the count. Increment in the positive branch.",
+            "followUpSkill": "csharp.syntax"
         },
         {
             "id": "nullable",
             "description": "Assuming nullable annotations enforce runtime checks.",
-            "stepId": "apply",
-            "feedback": "Annotations describe intent to the compiler. Runtime JSON and database values still need validation."
+            "stepId": "check",
+            "answer": "nullable",
+            "feedback": "Annotations describe intent to the compiler. Runtime JSON and database values still need validation.",
+            "followUpSkill": "csharp.syntax"
         }
     ],
     "lesson": {
@@ -124,6 +145,12 @@
                     "content": "using System;\nusing System.Collections.Generic;\n\nclass Program\n{\n    static int CountPositive(List<int> values)\n    {\n        int count = 0;\n        foreach (int value in values)\n        {\n            count += 0; // TODO: count positive values\n        }\n        return count;\n    }\n\n    static void Main()\n    {\n        Console.WriteLine(CountPositive(new List<int> { 3, -1, 2 }));\n    }\n}\n",
                     "editable": true,
                     "language": "csharp"
+                },
+                {
+                    "path": "Campus.csproj",
+                    "language": "xml",
+                    "content": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n</Project>\n",
+                    "editable": false
                 }
             ],
             "entry": "Program.cs",
@@ -133,24 +160,46 @@
                     "kind": "static",
                     "description": "The count method keeps the typed list parameter.",
                     "file": "Program.cs",
-                    "includes": ["static int CountPositive(List<int> values)"],
+                    "includes": [
+                        "static int CountPositive(List<int> values)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The foreach loop counts only positive values.",
                     "file": "Program.cs",
-                    "includes": ["if (value > 0)", "count += 1;"],
-                    "excludes": ["count += 0"]
+                    "includes": [
+                        "if (value > 0)",
+                        "count += 1;"
+                    ],
+                    "excludes": [
+                        "count += 0"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Program.cs",
-                    "includes": ["static int CountPositive(List<int> values)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "static int CountPositive(List<int> values)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "The foreach loop visits each value.",
+                "Test value > 0 before incrementing.",
+                "Increment count inside the branch.",
+                "if (value > 0) { count += 1; }"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet build",
+                "description": "Build the project with the .NET SDK."
+            }
         },
         {
             "kind": "explain",
@@ -180,7 +229,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "C# generics and nullable annotations move many mistakes to compile time, but runtime data still needs validation."
+            "explanation": "C# generics and nullable annotations move many mistakes to compile time, but runtime data still needs validation.",
+            "hints": [
+                "Two statements are accurate.",
+                "Value types store data directly.",
+                "Nullable annotations do not enforce runtime null checks.",
+                "Select list and value."
+            ]
         }
     ],
     "evaluation": {
@@ -200,5 +255,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "games"]
+    "tags": [
+        "professional",
+        "games"
+    ]
 }
