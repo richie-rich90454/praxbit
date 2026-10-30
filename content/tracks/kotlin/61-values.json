@@ -5,22 +5,14 @@
     "courseId": "kotlin",
     "title": "Null-safe values in Kotlin",
     "summary": "Use immutable and mutable values, a nullable type, and a loop to count positives.",
-    "skills": [
-        "kotlin.syntax"
-    ],
-    "prerequisites": [
-        "concept.state",
-        "concept.conditions"
-    ],
+    "skills": ["kotlin.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         },
         {
             "id": "objective-transfer",
             "description": "Count positives in a new list with a standard operator.",
-            "stepIds": [
-                "count"
-            ]
+            "stepIds": ["count"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:kotlin"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:kotlin"],
     "hints": [
         "The loop already visits each value.",
         "Add a condition before incrementing.",
@@ -186,33 +167,22 @@
                     "kind": "static",
                     "description": "The function keeps the typed list parameter.",
                     "file": "Main.kt",
-                    "includes": [
-                        "fun countPositive(values: List<Int>): Int"
-                    ],
+                    "includes": ["fun countPositive(values: List<Int>): Int"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The loop counts only positive values.",
                     "file": "Main.kt",
-                    "includes": [
-                        "if (value > 0)",
-                        "count += 1"
-                    ],
-                    "excludes": [
-                        "count += 0"
-                    ]
+                    "includes": ["if (value > 0)", "count += 1"],
+                    "excludes": ["count += 0"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.kt",
-                    "includes": [
-                        "fun countPositive(values: List<Int>): Int"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["fun countPositive(values: List<Int>): Int"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -306,7 +276,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
