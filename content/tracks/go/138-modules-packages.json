@@ -5,21 +5,14 @@
     "courseId": "go",
     "title": "Split a module into packages",
     "summary": "Fix a module path and import an internal package from the main program.",
-    "skills": [
-        "go.modules"
-    ],
-    "prerequisites": [
-        "go.interfaces"
-    ],
+    "skills": ["go.modules"],
+    "prerequisites": ["go.interfaces"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,31 +24,20 @@
         {
             "id": "fix-module",
             "description": "Set the module path and import the internal package.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-boundary",
             "description": "Choose who may import an internal package.",
-            "stepIds": [
-                "module-transfer"
-            ]
+            "stepIds": ["module-transfer"]
         },
         {
             "id": "explain-modules",
             "description": "Explain module paths, checksums, and internal packages accurately.",
-            "stepIds": [
-                "module-check"
-            ]
+            "stepIds": ["module-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:go"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:go"],
     "hints": [
         "The module path is the prefix of every internal import.",
         "Choose campus.example/service as the module path.",
@@ -201,33 +183,21 @@
                     "kind": "static",
                     "description": "The module path matches the import path.",
                     "file": "go.mod",
-                    "includes": [
-                        "module campus.example/service"
-                    ],
-                    "excludes": [
-                        "module example"
-                    ]
+                    "includes": ["module campus.example/service"],
+                    "excludes": ["module example"]
                 },
                 {
                     "kind": "static",
                     "description": "The service imports the internal pricing package.",
                     "file": "main.go",
-                    "includes": [
-                        "\"campus.example/service/internal/pricing\"",
-                        "pricing.Total("
-                    ],
-                    "excludes": [
-                        "\"example/internal/pricing\""
-                    ]
+                    "includes": ["\"campus.example/service/internal/pricing\"", "pricing.Total("],
+                    "excludes": ["\"example/internal/pricing\""]
                 },
                 {
                     "kind": "static",
                     "description": "The pricing package exposes Total.",
                     "file": "internal/pricing/pricing.go",
-                    "includes": [
-                        "package pricing",
-                        "func Total("
-                    ],
+                    "includes": ["package pricing", "func Total("],
                     "excludes": []
                 }
             ],
@@ -317,9 +287,7 @@
     },
     "rewards": {
         "experience": 150,
-        "unlocks": [
-            "go.http-service"
-        ]
+        "unlocks": ["go.http-service"]
     },
     "persistence": {
         "kind": "none"
@@ -330,8 +298,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
