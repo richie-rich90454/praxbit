@@ -5,22 +5,14 @@
     "courseId": "angular",
     "title": "Standalone components with explicit inputs",
     "summary": "Build a standalone product card that receives one typed product through an input.",
-    "skills": [
-        "angular.components"
-    ],
-    "prerequisites": [
-        "ts.types",
-        "web.html"
-    ],
+    "skills": ["angular.components"],
+    "prerequisites": ["ts.types", "web.html"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:angular"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
     "hints": [
         "Keep the @Component decorator and add standalone: true next to the selector.",
         "Declare the input with @Input({ required: true }) and the Product type.",
@@ -180,9 +163,7 @@
                     "kind": "static",
                     "description": "The product input is required and typed.",
                     "file": "product-card.component.ts",
-                    "includes": [
-                        "@Input({ required: true }) product!: Product"
-                    ],
+                    "includes": ["@Input({ required: true }) product!: Product"],
                     "excludes": []
                 },
                 {
@@ -194,20 +175,14 @@
                         "{{ product.price.toFixed(2) }}",
                         "class=\"product-card\""
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "product-card.component.ts",
-                    "includes": [
-                        "@Component({"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["@Component({"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -276,8 +251,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
