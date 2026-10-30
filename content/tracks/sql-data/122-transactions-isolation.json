@@ -5,23 +5,14 @@
     "courseId": "sql-data",
     "title": "Move money atomically",
     "summary": "Wrap a transfer in a transaction, then reason about isolation and recovery.",
-    "skills": [
-        "sql.transactions"
-    ],
-    "prerequisites": [
-        "sql.queries",
-        "sql.modeling"
-    ],
+    "skills": ["sql.transactions"],
+    "prerequisites": ["sql.queries", "sql.modeling"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": [
-            "sqlite-wasm",
-            "deterministic-tests",
-            "learning-runtime"
-        ]
+        "capabilities": ["sqlite-wasm", "deterministic-tests", "learning-runtime"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "atomic-transfer",
             "description": "Apply both balance changes inside one transaction.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         },
         {
             "id": "identify-anomaly",
             "description": "Identify a read anomaly from its observed behavior.",
-            "stepIds": [
-                "isolation-quiz"
-            ]
+            "stepIds": ["isolation-quiz"]
         },
         {
             "id": "explain-atomicity",
             "description": "Explain transactions, isolation, and recovery accurately.",
-            "stepIds": [
-                "tx-check"
-            ]
+            "stepIds": ["tx-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:database",
-        "icon:transaction"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:transaction"],
     "hints": [
         "Both updates must be inside one unit of work.",
         "Start with BEGIN IMMEDIATE and finish with COMMIT.",
@@ -195,14 +175,8 @@
                     "description": "Both balances change together.",
                     "verify": "SELECT id, balance_cents FROM accounts ORDER BY id;",
                     "expectedRows": [
-                        [
-                            "a1",
-                            7500
-                        ],
-                        [
-                            "a2",
-                            12500
-                        ]
+                        ["a1", 7500],
+                        ["a2", 12500]
                     ]
                 }
             ],
@@ -307,7 +281,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
