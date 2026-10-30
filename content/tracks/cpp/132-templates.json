@@ -1,0 +1,326 @@
+{
+    "id": "cpp.templates",
+    "version": 1,
+    "sequence": 83,
+    "courseId": "cpp",
+    "title": "Write a constrained template",
+    "summary": "Turn an int-only clamp into a template and explain instantiation errors.",
+    "skills": [
+        "cpp.templates"
+    ],
+    "prerequisites": [
+        "cpp.syntax",
+        "cpp.stl"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "cpp-templates",
+        "briefing": "A clamp helper works only for int, so telemetry code duplicates it for doubles. Generalize it with a type parameter and keep both bounds correct."
+    },
+    "objectives": [
+        {
+            "id": "write-template",
+            "description": "Write a function template that handles both bounds.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "explain-instantiation",
+            "description": "Explain where template errors appear and why.",
+            "stepIds": [
+                "template-transfer"
+            ]
+        },
+        {
+            "id": "explain-templates",
+            "description": "Explain instantiation, concepts, and header definitions accurately.",
+            "stepIds": [
+                "template-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:cpp"
+    ],
+    "hints": [
+        "Replace every int in the signature with the type parameter.",
+        "Declare template <typename T> before the function.",
+        "Check the low bound first and the high bound second.",
+        "Return low when value is below low, high when above high, otherwise value."
+    ],
+    "misconceptions": [
+        {
+            "id": "int-only",
+            "description": "Leaving the helper typed as int.",
+            "stepId": "apply",
+            "testDescription": "The template is declared with a type parameter.",
+            "feedback": "A single int signature forces callers to convert or duplicate. Use template <typename T> and T for the value and bounds.",
+            "followUpSkill": "cpp.templates"
+        },
+        {
+            "id": "runtime-generic",
+            "description": "Believing templates dispatch at runtime.",
+            "stepId": "template-transfer",
+            "answer": "runtime",
+            "feedback": "Templates are instantiated at compile time. The compiler generates a concrete function for each used type.",
+            "followUpSkill": "cpp.templates"
+        },
+        {
+            "id": "cpp-files",
+            "description": "Putting a template definition in a .cpp file.",
+            "stepId": "template-check",
+            "answer": "cpp-files",
+            "feedback": "Other translation units cannot see the body, so instantiation fails at link time. Keep template definitions in headers.",
+            "followUpSkill": "cpp.templates"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A template is a compile-time pattern",
+                "body": "A function template declares a type parameter, and the compiler generates a concrete function for each type used at a call site. The generated code is checked when it is instantiated, which is why a template error often points at the caller rather than the template definition."
+            },
+            {
+                "title": "Constraints express requirements",
+                "body": "A template that uses comparison operators requires a type that supports those operators. C++20 concepts such as std::totally_ordered state the requirement in the signature. Constraints improve error messages and prevent accidental instantiations."
+            },
+            {
+                "title": "Definitions belong in headers",
+                "body": "The compiler needs the template body at the point of instantiation. Putting a template definition in a .cpp file usually produces a link error because other translation units cannot see it. Keep templates in headers or explicitly instantiate them."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Template",
+                "definition": "A compile-time pattern parameterized by types or values."
+            },
+            {
+                "term": "Instantiation",
+                "definition": "The concrete function or class the compiler generates for specific arguments."
+            },
+            {
+                "term": "Concept",
+                "definition": "A named compile-time requirement on template parameters."
+            },
+            {
+                "term": "Translation unit",
+                "definition": "One source file after preprocessing, compiled as a unit."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A template is a compile-time pattern",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A template is a compile-time pattern",
+                    "body": "A function template declares a type parameter, and the compiler generates a concrete function for each type used at a call site. The generated code is checked when it is instantiated, which is why a template error often points at the caller rather than the template definition."
+                },
+                {
+                    "title": "Constraints express requirements",
+                    "body": "A template that uses comparison operators requires a type that supports those operators. C++20 concepts such as std::totally_ordered state the requirement in the signature. Constraints improve error messages and prevent accidental instantiations."
+                },
+                {
+                    "title": "Definitions belong in headers",
+                    "body": "The compiler needs the template body at the point of instantiation. Putting a template definition in a .cpp file usually produces a link error because other translation units cannot see it. Keep templates in headers or explicitly instantiate them."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Template",
+                    "definition": "A compile-time pattern parameterized by types or values."
+                },
+                {
+                    "term": "Instantiation",
+                    "definition": "The concrete function or class the compiler generates for specific arguments."
+                },
+                {
+                    "term": "Concept",
+                    "definition": "A named compile-time requirement on template parameters."
+                },
+                {
+                    "term": "Translation unit",
+                    "definition": "One source file after preprocessing, compiled as a unit."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Generalize clamp",
+            "prompt": "Edit main.cpp. clamp_value is a function template that returns low when value is below low, high when value is above high, and value otherwise.",
+            "evidence": "construction",
+            "language": "cpp",
+            "files": [
+                {
+                    "path": "main.cpp",
+                    "content": "#include <iostream>\n\nint clamp_value(int value, int low, int high) {\n    if (value < low) {\n        return low;\n    }\n    if (value > high) {\n        return high;\n    }\n    return value; // TODO: make the helper generic\n}\n\nint main() {\n    std::cout << clamp_value(12, 0, 10) << \"\\n\";\n    return 0;\n}\n",
+                    "editable": true,
+                    "language": "cpp"
+                }
+            ],
+            "entry": "main.cpp",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "c++ -std=c++20 -Wall -Wextra main.cpp -o main",
+                "description": "Compile main.cpp with the C++20 standard."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The template is declared with a type parameter.",
+                    "file": "main.cpp",
+                    "includes": [
+                        "template <typename T>",
+                        "T clamp_value(T value, T low, T high)"
+                    ],
+                    "excludes": [
+                        "int clamp_value(int value"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The function handles both bounds.",
+                    "file": "main.cpp",
+                    "includes": [
+                        "if (value < low)",
+                        "if (value > high)",
+                        "return high;"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The helper remains usable with doubles.",
+                    "file": "main.cpp",
+                    "includes": [
+                        "clamp_value(1.5, 0.0, 1.0)"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "hints": [
+                "The signature repeats int three times.",
+                "Add a template parameter before the return type.",
+                "Use T for value, low, and high.",
+                "Add a double call in main to prove the second instantiation."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "template-transfer",
+            "title": "Where does the error appear?",
+            "prompt": "A template uses operator< but is called with a type that does not define it. Where does the compiler usually report the problem?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the location.",
+                "options": [
+                    {
+                        "id": "instantiation",
+                        "label": "At the call site that instantiates the template"
+                    },
+                    {
+                        "id": "runtime",
+                        "label": "At runtime, when the operator is executed"
+                    },
+                    {
+                        "id": "linker",
+                        "label": "Only in the linker, after every translation unit compiles"
+                    },
+                    {
+                        "id": "preprocessor",
+                        "label": "In the preprocessor, before parsing"
+                    }
+                ],
+                "correctId": "instantiation",
+                "explanation": "The template body is checked when the compiler instantiates it for a concrete type. The diagnostic often points into the template but is triggered by the call."
+            },
+            "hints": [
+                "The body is not fully checked until a type is supplied.",
+                "The call supplies the concrete type.",
+                "This is a compile-time instantiation step.",
+                "Choose the call site."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "template-check",
+            "title": "Templates and instantiation",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "per-type",
+                    "label": "A function template is instantiated separately for each used type.",
+                    "correct": true
+                },
+                {
+                    "id": "concept",
+                    "label": "A C++20 concept can state a requirement on a template parameter.",
+                    "correct": true
+                },
+                {
+                    "id": "cpp-files",
+                    "label": "Template definitions must live in .cpp files.",
+                    "correct": false
+                },
+                {
+                    "id": "compile-time",
+                    "label": "Template instantiation happens at compile time.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Templates generate code per instantiation and are checked at compile time. Concepts document requirements, and definitions usually belong in headers.",
+            "hints": [
+                "Three statements are accurate.",
+                "The compiler needs the body where it instantiates.",
+                "Concepts are compile-time requirements.",
+                "Select per-type, concept, and compile-time."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 145,
+        "unlocks": [
+            "cpp.threads-cmake"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
