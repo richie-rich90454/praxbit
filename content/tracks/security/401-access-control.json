@@ -1,18 +1,28 @@
 {
     "id": "security.access-control",
     "version": 1,
-    "sequence": 401,
+    "sequence": 48,
     "courseId": "security",
     "title": "The record that was not yours",
     "summary": "Find an object-level authorization gap, design tests for ownership boundaries, and enforce access in code.",
-    "skills": ["security.auth", "concept.security"],
-    "prerequisites": ["http.basics", "concept.security"],
+    "skills": [
+        "security.auth",
+        "concept.security"
+    ],
+    "prerequisites": [
+        "http.basics",
+        "concept.security"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,25 +34,38 @@
         {
             "id": "find-gap",
             "description": "Identify the missing object-level authorization check.",
-            "stepIds": ["ownership-review"]
+            "stepIds": [
+                "ownership-review"
+            ]
         },
         {
             "id": "design-tests",
             "description": "Choose tests that exercise ownership boundaries.",
-            "stepIds": ["access-tests"]
+            "stepIds": [
+                "access-tests"
+            ]
         },
         {
             "id": "enforce",
             "description": "Enforce owner-or-scoped-admin access in code.",
-            "stepIds": ["guard-code"]
+            "stepIds": [
+                "guard-code"
+            ]
         },
         {
             "id": "transfer",
             "description": "Apply the same boundary to a new endpoint.",
-            "stepIds": ["access-transfer"]
+            "stepIds": [
+                "access-transfer"
+            ]
         }
     ],
-    "assets": ["pip:alert", "scene:campus", "system:api", "icon:shield"],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:shield"
+    ],
     "hints": [
         "Authentication answers who you are; authorization answers what this record allows.",
         "The invoice id comes from the client, so the server must compare it with the session user.",
@@ -334,7 +357,9 @@
                         {
                             "id": "a1",
                             "role": "admin",
-                            "permissions": ["billing:read"]
+                            "permissions": [
+                                "billing:read"
+                            ]
                         },
                         {
                             "id": "i1",
@@ -351,7 +376,9 @@
                         {
                             "id": "a2",
                             "role": "admin",
-                            "permissions": ["users:read"]
+                            "permissions": [
+                                "users:read"
+                            ]
                         },
                         {
                             "id": "i1",
@@ -451,5 +478,9 @@
         "screenReaderNotes": "Findings and cases announce their selected state and result. Code tests announce the expected and actual values."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional", "web"]
+    "tags": [
+        "systems",
+        "professional",
+        "web"
+    ]
 }
