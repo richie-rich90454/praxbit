@@ -5,24 +5,14 @@
     "courseId": "csharp",
     "title": "LINQ and async boundaries",
     "summary": "Compose a LINQ query, then diagnose an async void handler that cannot be awaited.",
-    "skills": [
-        "csharp.linq",
-        "csharp.async",
-        "csharp.dotnet"
-    ],
-    "prerequisites": [
-        "csharp.syntax",
-        "concept.testing"
-    ],
+    "skills": ["csharp.linq", "csharp.async", "csharp.dotnet"],
+    "prerequisites": ["csharp.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:csharp"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:csharp"],
     "hints": [
         "Start from the values sequence.",
         "Use Where with a predicate.",
@@ -177,33 +156,22 @@
                     "kind": "static",
                     "description": "The method keeps the sequence-to-list signature.",
                     "file": "Program.cs",
-                    "includes": [
-                        "static List<int> Positives(IEnumerable<int> values)"
-                    ],
+                    "includes": ["static List<int> Positives(IEnumerable<int> values)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The query filters positives and materializes the result.",
                     "file": "Program.cs",
-                    "includes": [
-                        ".Where(value => value > 0)",
-                        ".ToList()"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": [".Where(value => value > 0)", ".ToList()"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Program.cs",
-                    "includes": [
-                        "static List<int> Positives(IEnumerable<int> values)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["static List<int> Positives(IEnumerable<int> values)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -320,8 +288,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "games"
-    ]
+    "tags": ["professional", "games"]
 }
