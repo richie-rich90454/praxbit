@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "coins-code": {
+            "files": {
+                "coins.js": "function fewestCoins(coins, amount) {\n  const best = new Array(amount + 1).fill(Infinity);\n  best[0] = 0;\n  for (let value = 1; value <= amount; value += 1) {\n    for (const coin of coins) {\n      if (coin <= 0 || coin > value) continue;\n      const candidate = best[value - coin] + 1;\n      if (candidate < best[value]) best[value] = candidate;\n    }\n  }\n  return best[amount] === Infinity ? -1 : best[amount];\n}\n"
+            }
+        }
+    }
+}
