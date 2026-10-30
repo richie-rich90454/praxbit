@@ -44,13 +44,24 @@
             "id": "mutate-prop",
             "description": "Mutating props inside the child.",
             "stepId": "apply",
-            "feedback": "Props belong to the parent. Emit an event or call a callback instead of writing to them."
+            "feedback": "Props belong to the parent. Emit an event or call a callback instead of writing to them.",
+            "diagnostic": "Assigning to props leaves the parent's state unchanged and React warns about the read-only value.",
+            "followUpSkill": "react.components"
         },
         {
             "id": "format-price",
             "description": "Rendering a raw float as the price.",
             "stepId": "apply",
-            "feedback": "Prices need a fixed display format. Format at the render boundary with toFixed(2)."
+            "feedback": "Prices need a fixed display format. Format at the render boundary with toFixed(2).",
+            "testDescription": "The component renders the name and a two-decimal price."
+        },
+        {
+            "id": "props-are-writable",
+            "description": "Believing a child may write to a prop to update the parent.",
+            "stepId": "check",
+            "answer": "mutate",
+            "feedback": "Props are read-only inputs. A child requests a change through an event or callback; it never assigns to the prop.",
+            "followUpSkill": "web.component-architecture"
         }
     ],
     "lesson": {
@@ -161,7 +172,18 @@
                     "includes": ["type ProductProps"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Start from the existing ProductProps type and keep the component exported.",
+                "Destructure name and price in the parameter list so the signature matches the contract.",
+                "Return a single article element containing a heading and a paragraph.",
+                "Render {name} in the heading and {price.toFixed(2)} in the paragraph."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the React Testing Library suite with Vitest."
+            }
         },
         {
             "kind": "explain",
@@ -196,7 +218,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Props carry data into a component and remain owned by the parent. A typed signature makes the contract explicit, and a pure render keeps the output predictable."
+            "explanation": "Props carry data into a component and remain owned by the parent. A typed signature makes the contract explicit, and a pure render keeps the output predictable.",
+            "hints": [
+                "Read each statement against the props contract, not against a component you might build later.",
+                "Eliminate statements that let a child write to props.",
+                "Keep statements about pure renders and explicit data contracts.",
+                "Select exactly the statements that remain true after those checks."
+            ]
         }
     ],
     "evaluation": {
