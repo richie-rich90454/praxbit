@@ -1,0 +1,345 @@
+{
+    "version": 1,
+    "courseId": "lua",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "score-summary",
+        "briefing": "A game studio's score feed may include nil gaps. Summarize every argument without silently truncating the list."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "games",
+        "systems"
+    ],
+    "accessibility": {
+        "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "lua.functions",
+    "sequence": 213,
+    "title": "Varargs and multiple returns",
+    "summary": "Count and sum variadic arguments, then repair a summary that loses values after the first nil.",
+    "skills": [
+        "lua.functions",
+        "lua.syntax"
+    ],
+    "prerequisites": [
+        "lua.syntax",
+        "concept.iteration"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Use select to count and read variadic arguments.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find a table pack that drops values after nil.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Select one variadic argument by position.",
+            "stepIds": [
+                "position"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:lua"
+    ],
+    "hints": [
+        "select(\"#\", ...) counts every variadic argument.",
+        "select(index, ...) returns the values starting at that position.",
+        "Parentheses keep one value from a multiple return.",
+        "Return both the count and the total."
+    ],
+    "misconceptions": [
+        {
+            "id": "hash-count",
+            "description": "Using the length of a packed table to count varargs.",
+            "stepId": "position",
+            "answer": "hash",
+            "feedback": "The # operator counts a sequence until its first nil. select(\"#\", ...) counts every argument, including nil holes.",
+            "followUpSkill": "lua.functions"
+        },
+        {
+            "id": "table-truncates",
+            "description": "Packing varargs into a table and losing values after nil.",
+            "stepId": "diagnose",
+            "answer": "pairs-fix",
+            "feedback": "A table constructor stops at the first nil hole, and ipairs stops there too. Iterate by index up to select(\"#\", ...) instead.",
+            "followUpSkill": "lua.functions"
+        },
+        {
+            "id": "single-return",
+            "description": "Returning only the total and dropping the count.",
+            "stepId": "apply",
+            "testDescription": "The function counts and sums every argument.",
+            "feedback": "Multiple returns are part of the contract. Return count, total so callers can read either value."
+        },
+        {
+            "id": "nil-sum",
+            "description": "Adding a nil argument directly.",
+            "stepId": "apply",
+            "diagnostic": "Adding select(index, ...) to total without a nil fallback, so one gap raises an arithmetic error.",
+            "feedback": "A nil gap is still an argument. Default it to zero before adding, or define the policy for missing scores explicitly."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Functions can return several values",
+                "body": "A Lua function returns a list: return count, total. A caller can capture both, ignore the second, or keep only the first. An extra value is discarded, and a missing value becomes nil. When a call is not the last expression in a list, only its first result is used."
+            },
+            {
+                "title": "Varargs are a list, not a table",
+                "body": "A function declared as function stats(...) receives every extra argument. select(\"#\", ...) returns how many there are. select(index, ...) returns all values from index onward; wrapped in parentheses, it yields just that one value. A table constructor such as { ... } stops at the first nil, so it is not a reliable pack for sparse arguments."
+            },
+            {
+                "title": "Choose one representation",
+                "body": "Multiple returns are convenient for a count and a total. A table is better when the caller must store the values or pass them on later. When a nil is meaningful, build the table by index with select and keep an explicit length. Document which representation the function promises."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Vararg",
+                "definition": "The ... parameter that collects every extra argument to a function."
+            },
+            {
+                "term": "select",
+                "definition": "A standard function that counts or slices variadic arguments."
+            },
+            {
+                "term": "Multiple returns",
+                "definition": "A Lua function result that carries more than one value."
+            },
+            {
+                "term": "Nil hole",
+                "definition": "A nil in the middle of a sequence, which ends length and ipairs traversal."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Varargs and results",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Functions can return several values",
+                    "body": "A Lua function returns a list: return count, total. A caller can capture both, ignore the second, or keep only the first. An extra value is discarded, and a missing value becomes nil. When a call is not the last expression in a list, only its first result is used."
+                },
+                {
+                    "title": "Varargs are a list, not a table",
+                    "body": "A function declared as function stats(...) receives every extra argument. select(\"#\", ...) returns how many there are. select(index, ...) returns all values from index onward; wrapped in parentheses, it yields just that one value. A table constructor such as { ... } stops at the first nil, so it is not a reliable pack for sparse arguments."
+                },
+                {
+                    "title": "Choose one representation",
+                    "body": "Multiple returns are convenient for a count and a total. A table is better when the caller must store the values or pass them on later. When a nil is meaningful, build the table by index with select and keep an explicit length. Document which representation the function promises."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Vararg",
+                    "definition": "The ... parameter that collects every extra argument to a function."
+                },
+                {
+                    "term": "select",
+                    "definition": "A standard function that counts or slices variadic arguments."
+                },
+                {
+                    "term": "Multiple returns",
+                    "definition": "A Lua function result that carries more than one value."
+                },
+                {
+                    "term": "Nil hole",
+                    "definition": "A nil in the middle of a sequence, which ends length and ipairs traversal."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count and sum the score feed",
+            "prompt": "Edit main.lua. stats returns how many arguments it received and their sum, treating nil as zero.",
+            "evidence": "construction",
+            "hints": [
+                "Use select(\"#\", ...) for the count.",
+                "Loop from 1 through the count.",
+                "Read each argument with select(index, ...).",
+                "Default a nil gap to zero before adding."
+            ],
+            "language": "lua",
+            "files": [
+                {
+                    "path": "main.lua",
+                    "content": "local function stats(...)\n  local count = 0\n  local total = 0\n  for _, value in ipairs({ ... }) do\n    total = total + value\n  end\n  return count, total\nend\n\nlocal count, total = stats(3, nil, 2)\nprint(count, total)\n",
+                    "editable": true,
+                    "language": "lua"
+                }
+            ],
+            "entry": "main.lua",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "lua main.lua",
+                "description": "Runs the file with the Lua interpreter and prints the count and total."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function returns both a count and a total.",
+                    "file": "main.lua",
+                    "includes": [
+                        "local function stats(...)",
+                        "return count, total"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The function counts and sums every argument.",
+                    "file": "main.lua",
+                    "includes": [
+                        "select(\"#\", ...)",
+                        "select(index, ...)",
+                        "or 0"
+                    ],
+                    "excludes": [
+                        "ipairs({ ... })",
+                        "local count = 0"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.lua",
+                    "includes": [
+                        "local function stats"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The summary stops at the gap",
+            "prompt": "A score feed with a nil gap reports only the values before the gap. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The values arrive as varargs, not as a ready sequence.",
+                "A table constructor stops at the first nil.",
+                "ipairs also stops at the first nil.",
+                "Use select(\"#\", ...) and an index loop."
+            ],
+            "instructions": [
+                {
+                    "id": "pack",
+                    "label": "local values = { ... }"
+                },
+                {
+                    "id": "loop",
+                    "label": "for _, value in ipairs(values) do"
+                },
+                {
+                    "id": "add",
+                    "label": "  total = total + value"
+                },
+                {
+                    "id": "end",
+                    "label": "end"
+                }
+            ],
+            "buggyId": "pack",
+            "fixes": [
+                {
+                    "id": "select",
+                    "label": "Use select(\"#\", ...) and iterate indexes with select(index, ...)."
+                },
+                {
+                    "id": "pairs-fix",
+                    "label": "Change ipairs to pairs."
+                },
+                {
+                    "id": "hash",
+                    "label": "Use #values to recover the missing length."
+                }
+            ],
+            "correctFixId": "select",
+            "explanation": "The table constructor and ipairs both stop at the nil, so later values never reach the loop. select(\"#\", ...) preserves the true count, and select(index, ...) reads each position."
+        },
+        {
+            "kind": "quiz",
+            "id": "position",
+            "title": "Read one vararg",
+            "prompt": "Inside a variadic function, which expression returns only the third argument?",
+            "evidence": "transfer",
+            "hints": [
+                "select(\"#\", ...) returns a count.",
+                "select(n, ...) returns values starting at n.",
+                "The parentheses matter when one value is needed.",
+                "Wrap select(3, ...) in parentheses."
+            ],
+            "quiz": {
+                "prompt": "Inside a variadic function, which expression returns only the third argument?",
+                "options": [
+                    {
+                        "id": "third",
+                        "label": "(select(3, ...))"
+                    },
+                    {
+                        "id": "count",
+                        "label": "select(\"#\", ...)"
+                    },
+                    {
+                        "id": "hash",
+                        "label": "#(...)"
+                    },
+                    {
+                        "id": "arg",
+                        "label": "arg[3]"
+                    }
+                ],
+                "correctId": "third",
+                "explanation": "select(3, ...) starts at the third argument, and the parentheses keep a single value. The # operator needs a table, and arg is not an implicit vararg table."
+            }
+        }
+    ]
+}
