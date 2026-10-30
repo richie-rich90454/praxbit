@@ -1,18 +1,29 @@
 {
     "id": "java.objects",
     "version": 1,
-    "sequence": 50,
+    "sequence": 71,
     "courseId": "java",
     "title": "Objects and failure in Java",
     "summary": "Handle a parse failure explicitly and reason about collections and checked exceptions.",
-    "skills": ["java.oop", "java.collections", "java.concurrency", "java.build"],
-    "prerequisites": ["java.syntax", "concept.testing"],
+    "skills": [
+        "java.oop",
+        "java.collections",
+        "java.concurrency",
+        "java.build"
+    ],
+    "prerequisites": [
+        "java.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +35,31 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": ["diagnose"]
+            "stepIds": [
+                "diagnose"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:java"
+    ],
     "hints": [
         "The parsing call can throw NumberFormatException.",
         "Wrap the parse in a try block.",
@@ -49,13 +71,33 @@
             "id": "catch-all",
             "description": "Catching Exception hides unrelated failures.",
             "stepId": "apply",
-            "feedback": "Catch NumberFormatException so programming errors are not silently converted into -1."
+            "testDescription": "Invalid text is handled by the specific parse exception.",
+            "feedback": "Catch NumberFormatException so programming errors are not silently converted into -1.",
+            "followUpSkill": "java.oop"
         },
         {
             "id": "int-return",
             "description": "Assuming parseInt returns -1 on bad input.",
-            "stepId": "apply",
-            "feedback": "parseInt throws. The -1 value exists only because the catch block chooses it."
+            "stepId": "check",
+            "answer": "parse",
+            "feedback": "parseInt throws. The -1 value exists only because the catch block chooses it.",
+            "followUpSkill": "java.oop"
+        },
+        {
+            "id": "off-by-one",
+            "description": "Allowing the loop index to reach the array length.",
+            "stepId": "diagnose",
+            "answer": "start-one",
+            "feedback": "Starting at 1 skips the first element. Fix the upper bound instead: index < values.length.",
+            "followUpSkill": "java.oop"
+        },
+        {
+            "id": "catch-all-claim",
+            "description": "Believing a broad catch is always better.",
+            "stepId": "check",
+            "answer": "catch-all",
+            "feedback": "Catch the narrowest exception you can handle. Broad catches hide unrelated bugs.",
+            "followUpSkill": "java.oop"
         }
     ],
     "lesson": {
@@ -138,24 +180,47 @@
                     "kind": "static",
                     "description": "The parser keeps the taught signature.",
                     "file": "Main.java",
-                    "includes": ["static int parseCount(String text)"],
+                    "includes": [
+                        "static int parseCount(String text)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Invalid text is handled by the specific parse exception.",
                     "file": "Main.java",
-                    "includes": ["try {", "catch (NumberFormatException error)", "return -1;"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "try {",
+                        "catch (NumberFormatException error)",
+                        "return -1;"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.java",
-                    "includes": ["static int parseCount(String text)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "static int parseCount(String text)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Integer.parseInt throws on invalid text.",
+                "Wrap the parse in try/catch.",
+                "Catch NumberFormatException specifically.",
+                "Return -1 from the catch block."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "javac Main.java && java Main",
+                "description": "Compile and run Main.java with the JDK."
+            }
         },
         {
             "kind": "debug",
@@ -197,7 +262,13 @@
                 }
             ],
             "correctFixId": "strict",
-            "explanation": "Valid array indexes run from 0 through length - 1. The <= condition reads index length, which is outside the array."
+            "explanation": "Valid array indexes run from 0 through length - 1. The <= condition reads index length, which is outside the array.",
+            "hints": [
+                "Valid indexes run from 0 through length - 1.",
+                "The loop condition uses <=.",
+                "When index equals length, values[index] is out of bounds.",
+                "Change the condition to index < values.length."
+            ]
         },
         {
             "kind": "explain",
@@ -227,7 +298,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Generics preserve element types, and checked exceptions force an explicit recovery decision. Catch the narrowest exception that you can handle."
+            "explanation": "Generics preserve element types, and checked exceptions force an explicit recovery decision. Catch the narrowest exception that you can handle.",
+            "hints": [
+                "Two statements are accurate.",
+                "Generics reject wrong element types at compile time.",
+                "parseInt throws rather than returning a sentinel.",
+                "Select generic and checked."
+            ]
         }
     ],
     "evaluation": {
@@ -247,5 +324,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional"]
+    "tags": [
+        "professional"
+    ]
 }
