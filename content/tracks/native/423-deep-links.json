@@ -1,18 +1,27 @@
 {
     "id": "native.deep-links",
     "version": 1,
-    "sequence": 423,
+    "sequence": 209,
     "courseId": "native",
     "title": "A link is an untrusted input",
     "summary": "Review an open deep link, choose tests for host and route boundaries, and map links to authenticated routes.",
-    "skills": ["web.browser-apis", "api.validation"],
-    "prerequisites": ["web.browser-apis", "api.validation"],
+    "skills": [
+        "web.browser-apis",
+        "api.validation"
+    ],
+    "prerequisites": [
+        "web.browser-apis",
+        "api.validation"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["configuration-review", "no-execution"]
+        "capabilities": [
+            "configuration-review",
+            "no-execution"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +33,31 @@
         {
             "id": "review",
             "description": "Identify open-host, open-redirect, and unauthenticated link risks.",
-            "stepIds": ["deeplink-review"]
+            "stepIds": [
+                "deeplink-review"
+            ]
         },
         {
             "id": "tests",
             "description": "Choose tests for host, route, and session boundaries.",
-            "stepIds": ["deeplink-tests"]
+            "stepIds": [
+                "deeplink-tests"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain verified links, allowlists, and route mapping.",
-            "stepIds": ["deeplink-transfer"]
+            "stepIds": [
+                "deeplink-transfer"
+            ]
         }
     ],
-    "assets": ["pip:alert", "scene:campus", "system:website", "icon:link"],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:website",
+        "icon:link"
+    ],
     "hints": [
         "A custom scheme can be registered by any app.",
         "The host and path both need validation.",
@@ -323,5 +343,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
