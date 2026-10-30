@@ -5,22 +5,14 @@
     "courseId": "csharp",
     "title": "Await work and honor cancellation",
     "summary": "Convert a blocking count into an async method that observes a cancellation token.",
-    "skills": [
-        "csharp.async"
-    ],
-    "prerequisites": [
-        "csharp.linq",
-        "concept.iteration"
-    ],
+    "skills": ["csharp.async"],
+    "prerequisites": ["csharp.linq", "concept.iteration"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "await-count",
             "description": "Await asynchronous work instead of blocking.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-signature",
             "description": "Choose a cancellation-aware API signature.",
-            "stepIds": [
-                "async-transfer"
-            ]
+            "stepIds": ["async-transfer"]
         },
         {
             "id": "explain-async",
             "description": "Explain tasks, cancellation, and async void accurately.",
-            "stepIds": [
-                "async-check"
-            ]
+            "stepIds": ["async-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:csharp"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:csharp"],
     "hints": [
         "An async method returns Task<int>, not int.",
         "Await each unit of work instead of reading .Result.",
@@ -196,33 +177,22 @@
                     "kind": "static",
                     "description": "The method awaits instead of blocking.",
                     "file": "Program.cs",
-                    "includes": [
-                        "async Task<int>",
-                        "await Task.Delay(1, token)"
-                    ],
-                    "excludes": [
-                        ".Result"
-                    ]
+                    "includes": ["async Task<int>", "await Task.Delay(1, token)"],
+                    "excludes": [".Result"]
                 },
                 {
                     "kind": "static",
                     "description": "Cancellation is checked before and during the scan.",
                     "file": "Program.cs",
-                    "includes": [
-                        "token.ThrowIfCancellationRequested();"
-                    ],
+                    "includes": ["token.ThrowIfCancellationRequested();"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter TODO is gone.",
                     "file": "Program.cs",
-                    "includes": [
-                        "static async Task Main()"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["static async Task Main()"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -311,9 +281,7 @@
     },
     "rewards": {
         "experience": 145,
-        "unlocks": [
-            "csharp.dependency-injection"
-        ]
+        "unlocks": ["csharp.dependency-injection"]
     },
     "persistence": {
         "kind": "none"
@@ -324,8 +292,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
