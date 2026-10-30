@@ -392,7 +392,7 @@ A backup is not verified until it has been restored into a disposable database. 
 
 These are budgets, not measured guarantees. Record the actual numbers.
 
-Local baseline on the development host (Windows, Node 24, local PostgreSQL, 20 concurrent learners for 10 seconds against `/healthz`): 760 requests, 75.8 requests/second, p50 5.0 ms, p95 11.7 ms, p99 44.5 ms, 0 errors, and about 67 MB resident. Re-run `node scripts/load-test.mjs` on the target host and record the result before setting capacity expectations.
+Local baseline on the development host (Windows, Node 24, local PostgreSQL, real endpoint mix): the load test passed at 20 concurrent learners (about 123 MB resident, scenario p95 11–59 ms, zero errors) and at 40 concurrent learners (about 160 MB resident, scenario p95 15–70 ms, zero errors). Re-run `node scripts/load-test.mjs` on the target host and record the result before setting capacity expectations.
 
 ## Logs
 
