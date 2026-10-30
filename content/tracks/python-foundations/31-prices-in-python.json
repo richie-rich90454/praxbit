@@ -5,14 +5,22 @@
     "courseId": "python-foundations",
     "title": "Prices in Python",
     "summary": "Use integers, division, and formatted strings to print exact prices.",
-    "skills": ["python.basics"],
-    "prerequisites": ["concept.state"],
+    "skills": [
+        "python.basics"
+    ],
+    "prerequisites": [
+        "concept.state"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-python",
-        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
+        "capabilities": [
+            "pyodide-wasm",
+            "source-editing",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "format-price",
             "description": "Render integer cents as an exact price string.",
-            "stepIds": ["format-price"]
+            "stepIds": [
+                "format-price"
+            ]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": ["python-values-check"]
+            "stepIds": [
+                "python-values-check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:python"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:python"
+    ],
     "hints": [
         "Integer division // gives whole dollars. Remainder % gives cents.",
         "Cents need two digits, including a leading zero.",
@@ -44,13 +61,25 @@
             "id": "true-division",
             "description": "Using true division and losing the two-digit cents format.",
             "stepId": "format-price",
-            "feedback": "True division produces a float. Work with integer dollars and integer cents so formatting stays exact."
+            "testDescription": "A normal price uses two decimals.",
+            "feedback": "True division produces a float. Work with integer dollars and integer cents so formatting stays exact.",
+            "followUpSkill": "python.basics"
         },
         {
             "id": "no-padding",
             "description": "Formatting cents without a leading zero for values under ten.",
             "stepId": "format-price",
-            "feedback": "Five cents must render as 05 in the cents position. The :02d format specifier supplies the leading zero."
+            "testDescription": "Five cents keeps the leading zero.",
+            "feedback": "Five cents must render as 05 in the cents position. The :02d format specifier supplies the leading zero.",
+            "followUpSkill": "python.basics"
+        },
+        {
+            "id": "float-exact",
+            "description": "Assuming every decimal price is exactly representable as a float.",
+            "stepId": "python-values-check",
+            "answer": "float",
+            "feedback": "Many decimal fractions cannot be represented exactly in binary floating point. Format integer cents instead.",
+            "followUpSkill": "python.basics"
         }
     ],
     "lesson": {
@@ -102,30 +131,44 @@
                     "kind": "function",
                     "description": "A normal price uses two decimals.",
                     "name": "format_price",
-                    "args": [1250],
+                    "args": [
+                        1250
+                    ],
                     "expected": "$12.50"
                 },
                 {
                     "kind": "function",
                     "description": "Five cents keeps the leading zero.",
                     "name": "format_price",
-                    "args": [5],
+                    "args": [
+                        5
+                    ],
                     "expected": "$0.05"
                 },
                 {
                     "kind": "function",
                     "description": "Zero is formatted exactly.",
                     "name": "format_price",
-                    "args": [0],
+                    "args": [
+                        0
+                    ],
                     "expected": "$0.00"
                 },
                 {
                     "kind": "function",
                     "description": "Whole hundreds format correctly.",
                     "name": "format_price",
-                    "args": [100000],
+                    "args": [
+                        100000
+                    ],
                     "expected": "$1000.00"
                 }
+            ],
+            "hints": [
+                "Integer division // gives whole dollars; % gives cents.",
+                "Cents below ten need a leading zero.",
+                "Use an f-string format specifier :02d for the cents.",
+                "return f\"${cents // 100}.{cents % 100:02d}\""
             ]
         },
         {
@@ -156,7 +199,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Integer arithmetic and formatting keep money display predictable. Floats are not exact for every decimal."
+            "explanation": "Integer arithmetic and formatting keep money display predictable. Floats are not exact for every decimal.",
+            "hints": [
+                "Compare each statement with Python's integer and float behavior.",
+                "Three statements are accurate.",
+                "A float cannot represent every decimal exactly.",
+                "Select intdiv, mod, and format."
+            ]
         }
     ],
     "evaluation": {
@@ -165,7 +214,9 @@
     },
     "rewards": {
         "experience": 90,
-        "unlocks": ["python.decisions"]
+        "unlocks": [
+            "python.decisions"
+        ]
     },
     "persistence": {
         "kind": "none"
@@ -176,5 +227,8 @@
         "screenReaderNotes": "Each test announces its name, arguments, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "ai"]
+    "tags": [
+        "professional",
+        "ai"
+    ]
 }
