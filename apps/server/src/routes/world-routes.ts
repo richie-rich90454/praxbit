@@ -22,13 +22,17 @@ export function createWorldRoutes(services: ApplicationServices): Hono<AppEnviro
     routes.post("/campus/actions", async function applyAction(context): Promise<Response> {
         const session = requireSession(context);
         const body = await parseRequestBody(context, WorldActionRequestSchema);
-        const world = await services.world.applyAction({
+        const outcome = await services.world.applyAction({
             userId: session.user.id,
             expectedVersion: body.expectedVersion,
             action: body.action,
             now: new Date(),
         });
-        return context.json({ world });
+        return context.json({
+            world: outcome.world,
+            changed: outcome.changed,
+            message: outcome.message,
+        });
     });
 
     return routes;
