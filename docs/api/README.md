@@ -42,7 +42,7 @@ Cookie-authenticated mutations require a double-submit token:
 2. Send `x-csrf-token: <token>` on every `POST`, `PUT`, `PATCH`, or `DELETE`.
 3. The server compares the header and cookie in constant time.
 
-A missing or mismatched token returns `403 csrf_invalid`. Safe methods (`GET`, `HEAD`, `OPTIONS`) do not require CSRF. Bearer-authenticated requests do not use the cookie and bypass the double-submit check. Registration and login also require CSRF because they are mutations under `/api/*`; the client obtains the token first.
+A missing or mismatched token returns `403 csrf_invalid`. Safe methods (`GET`, `HEAD`, `OPTIONS`) do not require CSRF. Bearer-authenticated requests do not use the cookie and bypass the double-submit check. The `x-praxbit-client: native` header does not bypass CSRF for a cookie-authenticated session. Registration and login also require CSRF because they are mutations under `/api/*`; the client obtains the token first.
 
 ## Common headers
 
