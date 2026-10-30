@@ -1,0 +1,348 @@
+{
+    "id": "devops-practice.services",
+    "version": 1,
+    "sequence": 412,
+    "courseId": "devops-practice",
+    "title": "Restart is not a diagnosis",
+    "summary": "Use a deterministic Linux shell to read a failed unit, fix permissions, clear a port conflict, and verify recovery.",
+    "skills": ["devops.linux", "ops.processes"],
+    "prerequisites": ["ops.permissions", "concept.filesystems"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "terminal",
+    "runtime": {
+        "kind": "simulated-linux",
+        "capabilities": ["simulated-shell", "service-state", "deterministic-checks"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "service-recovery",
+        "briefing": "The orders API stopped after a configuration deploy. The unit is failed, the database service is stopped, and an old process still holds port 8080. Work in the simulated shell: read the evidence, fix only what is broken, and bring the stack up in the right order."
+    },
+    "objectives": [
+        {
+            "id": "inspect",
+            "description": "Find the permission failure in the service log.",
+            "stepIds": ["recover"]
+        },
+        {
+            "id": "permissions",
+            "description": "Give the config file the smallest readable mode.",
+            "stepIds": ["recover"]
+        },
+        {
+            "id": "conflict",
+            "description": "Clear the stale process holding the port.",
+            "stepIds": ["recover"]
+        },
+        {
+            "id": "database",
+            "description": "Start the database dependency.",
+            "stepIds": ["recover"]
+        },
+        {
+            "id": "service",
+            "description": "Restart the API and confirm it is running.",
+            "stepIds": ["recover"]
+        },
+        {
+            "id": "transfer",
+            "description": "Apply the diagnosis discipline to a new incident.",
+            "stepIds": ["services-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:terminal"],
+    "hints": [
+        "Start with journalctl -u orders-api.",
+        "Read the file mode before changing it.",
+        "Check ps for the process holding port 8080.",
+        "Fix the mode, kill the stale process, start inventory-db, then restart orders-api."
+    ],
+    "misconceptions": [
+        {
+            "id": "restart-first",
+            "description": "Restarting before reading the failure.",
+            "stepId": "recover",
+            "diagnostic": "EACCES: permission denied",
+            "feedback": "A restart repeats the same failure and can push the original error out of view. Read the journal first.",
+            "followUpSkill": "devops.linux"
+        },
+        {
+            "id": "chmod-777-service",
+            "description": "Making the config world-readable and world-writable.",
+            "stepId": "recover",
+            "diagnostic": "chmod 777",
+            "feedback": "The service only needs to read its config. Use a mode such as 640 and keep ownership with the service account."
+        },
+        {
+            "id": "start-before-db",
+            "description": "Starting the API before its database dependency.",
+            "stepId": "recover",
+            "diagnostic": "ECONNREFUSED inventory-db:5432",
+            "feedback": "Start dependencies first. The API cannot become ready while the database is down."
+        },
+        {
+            "id": "restart-solves",
+            "description": "Believing a restart is itself a diagnostic step.",
+            "stepId": "services-transfer",
+            "answer": "restart",
+            "feedback": "A restart changes state and can hide the failure. Read the journal, then fix the cause and verify recovery."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Read the failure before changing state",
+                "body": "systemctl status shows the unit state; journalctl -u shows what the process actually reported. A restart destroys the failing state and may hide the cause. Read first, then change one thing."
+            },
+            {
+                "title": "Permissions belong to the service identity",
+                "body": "Compare the file owner and mode with the user the unit runs as. Grant read access, not world write. A broad mode such as 777 makes the symptom disappear while widening access for every local account."
+            },
+            {
+                "title": "Dependencies have an order",
+                "body": "The API needs its database. A port conflict is a separate failure: find the stale process with ps, terminate it, then start the dependency and restart the service. Verify with status and a health request."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Unit",
+                "definition": "A systemd definition of a service, including its command and user."
+            },
+            {
+                "term": "Journal",
+                "definition": "The systemd log of unit output and service events."
+            },
+            {
+                "term": "Port conflict",
+                "definition": "Two processes trying to listen on the same address and port."
+            },
+            {
+                "term": "Readiness",
+                "definition": "Whether a service can actually serve requests, including its dependencies."
+            },
+            {
+                "term": "Least privilege",
+                "definition": "Granting only the access the service needs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Diagnose, then change one thing",
+            "prompt": "Read the explanation, then recover the service in the terminal.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Read the failure before changing state",
+                    "body": "systemctl status shows the unit state; journalctl -u shows what the process actually reported. A restart destroys the failing state and may hide the cause. Read first, then change one thing."
+                },
+                {
+                    "title": "Permissions belong to the service identity",
+                    "body": "Compare the file owner and mode with the user the unit runs as. Grant read access, not world write. A broad mode such as 777 makes the symptom disappear while widening access for every local account."
+                },
+                {
+                    "title": "Dependencies have an order",
+                    "body": "The API needs its database. A port conflict is a separate failure: find the stale process with ps, terminate it, then start the dependency and restart the service. Verify with status and a health request."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Unit",
+                    "definition": "A systemd definition of a service, including its command and user."
+                },
+                {
+                    "term": "Journal",
+                    "definition": "The systemd log of unit output and service events."
+                },
+                {
+                    "term": "Port conflict",
+                    "definition": "Two processes trying to listen on the same address and port."
+                },
+                {
+                    "term": "Readiness",
+                    "definition": "Whether a service can actually serve requests, including its dependencies."
+                },
+                {
+                    "term": "Least privilege",
+                    "definition": "Granting only the access the service needs."
+                }
+            ]
+        },
+        {
+            "kind": "terminal",
+            "id": "recover",
+            "title": "Recover the orders API",
+            "prompt": "Use the simulated shell. The unit is failed, a stale process holds port 8080, and the database service is stopped. Read the evidence, fix the config mode, clear the conflict, start the dependency, and restart the API.",
+            "evidence": "debugging",
+            "hints": [
+                "Run journalctl -u orders-api and read the last lines.",
+                "The config file is /srv/campus/app/config.json; inspect it with ls -l.",
+                "Run ps to find the process holding port 8080, then kill it by pid.",
+                "Use chmod 640 config.json, systemctl start inventory-db, then systemctl restart orders-api."
+            ],
+            "initial": {
+                "cwd": "/srv/campus/app",
+                "files": [
+                    {
+                        "path": "/srv/campus/app/config.json",
+                        "content": "{\"database\":\"inventory-db\",\"port\":8080}",
+                        "mode": "000"
+                    },
+                    {
+                        "path": "/srv/campus/app/server.js",
+                        "content": "require(\"http\").createServer((request, response) => response.end(\"ok\")).listen(8080);",
+                        "mode": "644"
+                    },
+                    {
+                        "path": "/etc/systemd/system/orders-api.service",
+                        "content": "[Unit]\nDescription=Orders API\nAfter=network.target inventory-db.service\n\n[Service]\nUser=campus\nWorkingDirectory=/srv/campus/app\nExecStart=/usr/bin/node server.js\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target",
+                        "mode": "644"
+                    }
+                ],
+                "services": [
+                    {
+                        "id": "orders-api",
+                        "name": "orders-api",
+                        "status": "failed",
+                        "logs": [
+                            "[info] starting orders-api",
+                            "[error] EACCES: permission denied, open '/srv/campus/app/config.json'"
+                        ]
+                    },
+                    {
+                        "id": "inventory-db",
+                        "name": "inventory-db",
+                        "status": "failed",
+                        "logs": ["[info] database stopped during maintenance"]
+                    },
+                    {
+                        "id": "cache",
+                        "name": "cache",
+                        "status": "running",
+                        "logs": ["[info] cache listening on 6379"]
+                    }
+                ],
+                "symlinks": [],
+                "processes": [
+                    {
+                        "pid": 4242,
+                        "command": "node server.js --port 8080"
+                    },
+                    {
+                        "pid": 5151,
+                        "command": "node worker.js"
+                    }
+                ]
+            },
+            "objectives": [
+                {
+                    "id": "inspect",
+                    "description": "Read the permission failure in the orders-api journal.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "permission denied"
+                    }
+                },
+                {
+                    "id": "permissions",
+                    "description": "Set /srv/campus/app/config.json to mode 640.",
+                    "check": {
+                        "kind": "file-mode",
+                        "path": "/srv/campus/app/config.json",
+                        "mode": "640"
+                    }
+                },
+                {
+                    "id": "conflict",
+                    "description": "Terminate the stale process holding port 8080.",
+                    "check": {
+                        "kind": "command-output",
+                        "contains": "Process 4242 terminated."
+                    }
+                },
+                {
+                    "id": "database",
+                    "description": "Start the inventory-db service.",
+                    "check": {
+                        "kind": "service",
+                        "serviceId": "inventory-db",
+                        "status": "running"
+                    }
+                },
+                {
+                    "id": "service",
+                    "description": "Restart orders-api and leave it running.",
+                    "check": {
+                        "kind": "service",
+                        "serviceId": "orders-api",
+                        "status": "running"
+                    }
+                }
+            ],
+            "explanation": "The journal showed a permission failure, the config mode was too narrow, a stale process held the port, and the database was down. Each fix addressed one cause, and the restart was verified by state."
+        },
+        {
+            "kind": "explain",
+            "id": "services-transfer",
+            "title": "Diagnosis that transfers",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Read the failure before changing state.",
+                "A service is ready only when its dependencies are ready.",
+                "A port conflict is separate from a permission error.",
+                "Select evidence-first diagnosis, least privilege, dependency order, and verification; reject restart-first."
+            ],
+            "statements": [
+                {
+                    "id": "evidence",
+                    "label": "The journal and unit definition are evidence about why the service failed.",
+                    "correct": true
+                },
+                {
+                    "id": "least",
+                    "label": "Grant the service only the file access it needs.",
+                    "correct": true
+                },
+                {
+                    "id": "deps",
+                    "label": "Start and verify dependencies before the service that needs them.",
+                    "correct": true
+                },
+                {
+                    "id": "verify",
+                    "label": "A restart is complete only after the unit is running and a health check passes.",
+                    "correct": true
+                },
+                {
+                    "id": "restart",
+                    "label": "Restarting repeatedly is a reliable way to find the root cause.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Diagnosis reads evidence, changes one cause at a time with least privilege, respects dependency order, and verifies recovery."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
