@@ -5,22 +5,14 @@
     "courseId": "java",
     "title": "Typed values in Java",
     "summary": "Declare typed values, branch on a condition, and count with a for-each loop.",
-    "skills": [
-        "java.syntax"
-    ],
-    "prerequisites": [
-        "concept.state",
-        "concept.conditions"
-    ],
+    "skills": ["java.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:java"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
     "hints": [
         "The loop already visits every value. Only the body is wrong.",
         "Add an if statement before incrementing the count.",
@@ -154,33 +137,22 @@
                     "kind": "static",
                     "description": "The count method keeps the taught signature.",
                     "file": "Main.java",
-                    "includes": [
-                        "static int countPositive(int[] values)"
-                    ],
+                    "includes": ["static int countPositive(int[] values)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The loop counts only values greater than zero.",
                     "file": "Main.java",
-                    "includes": [
-                        "if (value > 0)",
-                        "count += 1;"
-                    ],
-                    "excludes": [
-                        "count += 0"
-                    ]
+                    "includes": ["if (value > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.java",
-                    "includes": [
-                        "static int countPositive(int[] values)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["static int countPositive(int[] values)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -249,7 +221,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
