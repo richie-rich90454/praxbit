@@ -1,0 +1,328 @@
+{
+    "id": "cpp.stl-algorithms",
+    "version": 1,
+    "sequence": 82,
+    "courseId": "cpp",
+    "title": "Sort and fold with the STL",
+    "summary": "Replace an index loop with accumulate and choose the right algorithm for a search.",
+    "skills": [
+        "cpp.stl"
+    ],
+    "prerequisites": [
+        "cpp.raii"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "cpp-stl",
+        "briefing": "A sensor report sums even readings with a hand-written index loop. Replace the loop with a standard algorithm and choose an STL algorithm for the next question."
+    },
+    "objectives": [
+        {
+            "id": "use-accumulate",
+            "description": "Use std::accumulate with a predicate-like lambda.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-algorithm",
+            "description": "Choose an algorithm for an existence check.",
+            "stepIds": [
+                "stl-transfer"
+            ]
+        },
+        {
+            "id": "explain-stl",
+            "description": "Explain algorithm cost and iterator behavior accurately.",
+            "stepIds": [
+                "stl-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:cpp"
+    ],
+    "hints": [
+        "Include <numeric> for std::accumulate.",
+        "The initial value is 0.",
+        "The lambda receives the running total and the current value.",
+        "Add the value only when value % 2 == 0."
+    ],
+    "misconceptions": [
+        {
+            "id": "manual-loop",
+            "description": "Keeping the index loop instead of using an algorithm.",
+            "stepId": "apply",
+            "testDescription": "The total uses std::accumulate.",
+            "feedback": "The standard algorithm states the fold directly. Pass the begin and end iterators, an initial value, and a lambda.",
+            "followUpSkill": "cpp.stl"
+        },
+        {
+            "id": "find-existence",
+            "description": "Using std::find when only existence matters.",
+            "stepId": "stl-transfer",
+            "answer": "count",
+            "feedback": "std::any_of stops at the first match and states the question directly. std::count scans the whole range to produce a number.",
+            "followUpSkill": "cpp.stl"
+        },
+        {
+            "id": "sort-linear",
+            "description": "Believing std::sort runs in linear time.",
+            "stepId": "stl-check",
+            "answer": "sort-linear",
+            "feedback": "Comparison sorting is O(n log n) on average. Linear algorithms cannot order arbitrary values by comparison alone.",
+            "followUpSkill": "cpp.stl"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Algorithms replace hand-written loops",
+                "body": "The standard library provides algorithms such as std::accumulate, std::sort, std::any_of, and std::count. They state the intent directly and are easier to review than an index loop. Most accept iterators and a callable, so the same algorithm works across containers."
+            },
+            {
+                "title": "Lambdas describe a local operation",
+                "body": "A lambda captures the state it needs and can be passed to an algorithm. Prefer an explicit capture list over a broad capture unless the lambda genuinely needs the whole scope. A predicate should be small and free of side effects."
+            },
+            {
+                "title": "Know the cost",
+                "body": "std::sort is O(n log n) comparisons on average. std::accumulate is linear. std::find is linear because it scans. Choosing an algorithm is also choosing a complexity, so match the operation to the data size and access pattern."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Iterator",
+                "definition": "A general handle for moving through a sequence."
+            },
+            {
+                "term": "Lambda",
+                "definition": "An unnamed function object that can capture surrounding values."
+            },
+            {
+                "term": "Predicate",
+                "definition": "A callable that returns true or false for an element."
+            },
+            {
+                "term": "Accumulate",
+                "definition": "A fold that combines every element into one result."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Algorithms replace hand-written loops",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Algorithms replace hand-written loops",
+                    "body": "The standard library provides algorithms such as std::accumulate, std::sort, std::any_of, and std::count. They state the intent directly and are easier to review than an index loop. Most accept iterators and a callable, so the same algorithm works across containers."
+                },
+                {
+                    "title": "Lambdas describe a local operation",
+                    "body": "A lambda captures the state it needs and can be passed to an algorithm. Prefer an explicit capture list over a broad capture unless the lambda genuinely needs the whole scope. A predicate should be small and free of side effects."
+                },
+                {
+                    "title": "Know the cost",
+                    "body": "std::sort is O(n log n) comparisons on average. std::accumulate is linear. std::find is linear because it scans. Choosing an algorithm is also choosing a complexity, so match the operation to the data size and access pattern."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Iterator",
+                    "definition": "A general handle for moving through a sequence."
+                },
+                {
+                    "term": "Lambda",
+                    "definition": "An unnamed function object that can capture surrounding values."
+                },
+                {
+                    "term": "Predicate",
+                    "definition": "A callable that returns true or false for an element."
+                },
+                {
+                    "term": "Accumulate",
+                    "definition": "A fold that combines every element into one result."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Sum even values with accumulate",
+            "prompt": "Edit main.cpp. sum_even returns the total of even values using std::accumulate and a lambda.",
+            "evidence": "construction",
+            "language": "cpp",
+            "files": [
+                {
+                    "path": "main.cpp",
+                    "content": "#include <iostream>\n#include <vector>\n\nint sum_even(const std::vector<int>& values) {\n    int total = 0;\n    for (std::size_t index = 0; index < values.size(); index += 1) {\n        if (values[index] % 2 == 0) {\n            total += values[index];\n        }\n    }\n    return total; // TODO: use std::accumulate\n}\n\nint main() {\n    const std::vector<int> values = { 3, 4, 6, 7 };\n    std::cout << sum_even(values) << \"\\n\";\n    return 0;\n}\n",
+                    "editable": true,
+                    "language": "cpp"
+                }
+            ],
+            "entry": "main.cpp",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "c++ -std=c++20 -Wall -Wextra main.cpp -o main",
+                "description": "Compile main.cpp with the C++20 standard."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The total uses std::accumulate.",
+                    "file": "main.cpp",
+                    "includes": [
+                        "#include <numeric>",
+                        "std::accumulate(",
+                        "value % 2 == 0"
+                    ],
+                    "excludes": [
+                        "for (std::size_t index = 0"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The function accepts a const vector reference.",
+                    "file": "main.cpp",
+                    "includes": [
+                        "int sum_even(const std::vector<int>& values)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter manual loop is gone.",
+                    "file": "main.cpp",
+                    "includes": [
+                        "values.begin()",
+                        "values.end()"
+                    ],
+                    "excludes": [
+                        "int total = 0;\n    for"
+                    ]
+                }
+            ],
+            "hints": [
+                "Start with the accumulator at zero.",
+                "The lambda returns the new total.",
+                "Only even values are added.",
+                "return std::accumulate(values.begin(), values.end(), 0, lambda);"
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "stl-transfer",
+            "title": "Choose the existence check",
+            "prompt": "A report needs to know whether any reading is negative. Which algorithm states that question directly?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the algorithm.",
+                "options": [
+                    {
+                        "id": "any-of",
+                        "label": "std::any_of"
+                    },
+                    {
+                        "id": "count",
+                        "label": "std::count"
+                    },
+                    {
+                        "id": "find",
+                        "label": "std::find"
+                    },
+                    {
+                        "id": "sort",
+                        "label": "std::sort"
+                    }
+                ],
+                "correctId": "any-of",
+                "explanation": "std::any_of stops at the first matching element. std::find also works but returns an iterator rather than a yes-or-no result; std::count scans the whole range."
+            },
+            "hints": [
+                "The question is yes or no, not a position.",
+                "Look for an algorithm whose name means any.",
+                "It should stop as soon as one match is found.",
+                "Choose std::any_of."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "stl-check",
+            "title": "Algorithms and complexity",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "sort",
+                    "label": "std::sort is O(n log n) on average for comparison sorting.",
+                    "correct": true
+                },
+                {
+                    "id": "init",
+                    "label": "std::accumulate starts from the initial value supplied by the caller.",
+                    "correct": true
+                },
+                {
+                    "id": "capture",
+                    "label": "A lambda can capture local state needed by the operation.",
+                    "correct": true
+                },
+                {
+                    "id": "sort-linear",
+                    "label": "std::sort runs in linear time.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Algorithms carry complexity and intent. The initial value shapes a fold, and a lambda supplies local behavior without a separate function.",
+            "hints": [
+                "Three statements are accurate.",
+                "Comparison sorting cannot be linear in the general case.",
+                "The initial value seeds the fold.",
+                "Select sort, init, and capture."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": [
+            "cpp.templates"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "games"
+    ]
+}
