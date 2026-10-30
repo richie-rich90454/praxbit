@@ -1,0 +1,254 @@
+{
+    "id": "css.cascade-layers",
+    "version": 1,
+    "sequence": 216,
+    "courseId": "css",
+    "title": "Cascade, specificity, and inheritance",
+    "summary": "Write selectors that win for the right reason and avoid !important.",
+    "skills": [
+        "web.css"
+    ],
+    "prerequisites": [
+        "web.html"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-css",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "computed-style-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "specificity-tangle",
+        "briefing": "The call-to-action button is blue even though the design system says accent red. A broad selector and an !important rule are fighting. Rewrite the CSS so the button uses the accent color through normal specificity."
+    },
+    "objectives": [
+        {
+            "id": "specificity",
+            "description": "Use a selector with appropriate specificity.",
+            "stepIds": [
+                "fix-cascade"
+            ]
+        },
+        {
+            "id": "no-important",
+            "description": "Remove !important from the button rule.",
+            "stepIds": [
+                "fix-cascade"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain cascade and specificity.",
+            "stepIds": [
+                "cascade-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:layout"
+    ],
+    "hints": [
+        "Target the button with .card .cta rather than a bare element selector.",
+        "Remove !important and let specificity decide.",
+        "The accent color is #B54131.",
+        "Use .card .cta { background-color: #B54131; color: #fff; } and delete the !important rule."
+    ],
+    "misconceptions": [
+        {
+            "id": "important-first",
+            "description": "Reaching for !important to win a specificity fight.",
+            "stepId": "fix-cascade",
+            "testDescription": "No rule uses !important.",
+            "feedback": "!important breaks the cascade and makes future overrides harder. Fix specificity instead.",
+            "followUpSkill": "web.css"
+        },
+        {
+            "id": "universal-wins",
+            "description": "Believing the universal selector beats class selectors.",
+            "stepId": "cascade-claims",
+            "answer": "universal",
+            "feedback": "The universal selector has zero specificity. Class selectors always beat it.",
+            "followUpSkill": "web.css"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The cascade",
+                "body": "When multiple rules match, the browser weighs origin, specificity, and source order. Later rules win only when specificity is equal."
+            },
+            {
+                "title": "Specificity",
+                "body": "Inline styles beat IDs, IDs beat classes, classes beat elements. !important overrides all of them but creates maintenance debt."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Specificity",
+                "definition": "The weight the browser assigns to a selector."
+            },
+            {
+                "term": "Cascade",
+                "definition": "The algorithm that resolves conflicting CSS rules."
+            },
+            {
+                "term": "Inheritance",
+                "definition": "Passing computed values from parent to child."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Cascade and specificity",
+            "prompt": "Read the explanation, then fix the CSS.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The cascade",
+                    "body": "When multiple rules match, the browser weighs origin, specificity, and source order. Later rules win only when specificity is equal."
+                },
+                {
+                    "title": "Specificity",
+                    "body": "Inline styles beat IDs, IDs beat classes, classes beat elements. !important overrides all of them but creates maintenance debt."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Specificity",
+                    "definition": "The weight the browser assigns to a selector."
+                },
+                {
+                    "term": "Cascade",
+                    "definition": "The algorithm that resolves conflicting CSS rules."
+                },
+                {
+                    "term": "Inheritance",
+                    "definition": "Passing computed values from parent to child."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-cascade",
+            "title": "Fix the cascade",
+            "prompt": "Edit styles.css. Make .card .cta use the accent background without !important.",
+            "evidence": "construction",
+            "language": "css",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Store</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <article class=\"card\"><button class=\"cta\">Add to cart</button></article>\n</body>\n</html>\n",
+                    "editable": false,
+                    "language": "html"
+                },
+                {
+                    "path": "styles.css",
+                    "content": "button { background-color: #1a73e8; color: #fff; }\n.card .cta { background-color: #B54131 !important; color: #fff; }\n",
+                    "editable": true,
+                    "language": "css"
+                }
+            ],
+            "entry": "styles.css",
+            "preview": "css",
+            "tests": [
+                {
+                    "kind": "css",
+                    "description": "The button uses the accent background.",
+                    "selector": ".cta",
+                    "property": "background-color",
+                    "expected": "rgb(181, 65, 49)"
+                },
+                {
+                    "kind": "css",
+                    "description": "The button text is white.",
+                    "selector": ".cta",
+                    "property": "color",
+                    "expected": "rgb(255, 255, 255)"
+                },
+                {
+                    "kind": "regex",
+                    "description": "No rule uses !important.",
+                    "file": "styles.css",
+                    "pattern": "!important",
+                    "flags": "i",
+                    "invert": true
+                }
+            ],
+            "hints": [
+                "Keep .card .cta and remove !important.",
+                "Delete the blue button rule or raise the accent rule's specificity.",
+                "The accent color is #B54131.",
+                "Use .card .cta { background-color: #B54131; color: #fff; } and remove the button rule."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "cascade-claims",
+            "title": "Cascade claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Compare specificity levels.",
+                "Source order only breaks ties.",
+                "!important is an escape hatch, not a plan.",
+                "Select class beats element and tie-breaking; reject universal wins."
+            ],
+            "statements": [
+                {
+                    "id": "class-beats-element",
+                    "label": "A class selector beats an element selector.",
+                    "correct": true
+                },
+                {
+                    "id": "source-order",
+                    "label": "Source order breaks ties between equal specificity.",
+                    "correct": true
+                },
+                {
+                    "id": "universal",
+                    "label": "The universal selector beats class selectors.",
+                    "correct": false
+                },
+                {
+                    "id": "important",
+                    "label": "!important should be a last resort.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Specificity and source order resolve conflicts. !important overrides them but creates maintenance problems."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and computed-style tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
