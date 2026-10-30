@@ -1,18 +1,27 @@
 {
     "id": "native.secure-storage",
     "version": 1,
-    "sequence": 422,
+    "sequence": 208,
     "courseId": "native",
     "title": "Secrets belong in the keychain",
     "summary": "Move credentials out of web storage, gate access with the platform keystore, and review a native token design.",
-    "skills": ["web.browser-apis", "concept.security"],
-    "prerequisites": ["web.browser-apis", "concept.security"],
+    "skills": [
+        "web.browser-apis",
+        "concept.security"
+    ],
+    "prerequisites": [
+        "web.browser-apis",
+        "concept.security"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +33,31 @@
         {
             "id": "review",
             "description": "Identify credentials in web storage, logs, and plain preferences.",
-            "stepIds": ["storage-review"]
+            "stepIds": [
+                "storage-review"
+            ]
         },
         {
             "id": "write",
             "description": "Write a keystore-backed token adapter.",
-            "stepIds": ["storage-code"]
+            "stepIds": [
+                "storage-code"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain keychain access control and credential lifecycle.",
-            "stepIds": ["storage-transfer"]
+            "stepIds": [
+                "storage-transfer"
+            ]
         }
     ],
-    "assets": ["pip:alert", "scene:campus", "system:website", "icon:lock"],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:website",
+        "icon:lock"
+    ],
     "hints": [
         "localStorage and Preferences are readable by the app and its scripts.",
         "Use Keychain on iOS and Keystore on Android through a secure storage plugin.",
@@ -246,29 +266,50 @@
                     "kind": "static",
                     "description": "Uses the platform secure storage plugin.",
                     "file": "storage.ts",
-                    "includes": ["SecureStorage", "set(", "get(", "remove("],
-                    "excludes": ["localStorage", "Preferences"]
+                    "includes": [
+                        "SecureStorage",
+                        "set(",
+                        "get(",
+                        "remove("
+                    ],
+                    "excludes": [
+                        "localStorage",
+                        "Preferences"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "Requires device authentication for reads.",
                     "file": "storage.ts",
-                    "includes": ["accessControl", "biometric"],
+                    "includes": [
+                        "accessControl",
+                        "biometric"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Never logs the token.",
                     "file": "storage.ts",
-                    "includes": ["clearToken"],
-                    "excludes": ["console.log(token", "console.error(token", "log(\"saved token\""]
+                    "includes": [
+                        "clearToken"
+                    ],
+                    "excludes": [
+                        "console.log(token",
+                        "console.error(token",
+                        "log(\"saved token\""
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "storage.ts",
-                    "includes": ["SecureStorage"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "SecureStorage"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ]
         },
@@ -331,5 +372,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
