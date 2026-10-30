@@ -5,21 +5,14 @@
     "courseId": "cpp",
     "title": "Sort and fold with the STL",
     "summary": "Replace an index loop with accumulate and choose the right algorithm for a search.",
-    "skills": [
-        "cpp.stl"
-    ],
-    "prerequisites": [
-        "cpp.raii"
-    ],
+    "skills": ["cpp.stl"],
+    "prerequisites": ["cpp.raii"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,31 +24,20 @@
         {
             "id": "use-accumulate",
             "description": "Use std::accumulate with a predicate-like lambda.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-algorithm",
             "description": "Choose an algorithm for an existence check.",
-            "stepIds": [
-                "stl-transfer"
-            ]
+            "stepIds": ["stl-transfer"]
         },
         {
             "id": "explain-stl",
             "description": "Explain algorithm cost and iterator behavior accurately.",
-            "stepIds": [
-                "stl-check"
-            ]
+            "stepIds": ["stl-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:cpp"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:cpp"],
     "hints": [
         "Include <numeric> for std::accumulate.",
         "The initial value is 0.",
@@ -189,37 +171,22 @@
                     "kind": "static",
                     "description": "The total uses std::accumulate.",
                     "file": "main.cpp",
-                    "includes": [
-                        "#include <numeric>",
-                        "std::accumulate(",
-                        "value % 2 == 0"
-                    ],
-                    "excludes": [
-                        "for (std::size_t index = 0"
-                    ]
+                    "includes": ["#include <numeric>", "std::accumulate(", "value % 2 == 0"],
+                    "excludes": ["for (std::size_t index = 0"]
                 },
                 {
                     "kind": "static",
                     "description": "The function accepts a const vector reference.",
                     "file": "main.cpp",
-                    "includes": [
-                        "int sum_even(const std::vector<int>& values)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["int sum_even(const std::vector<int>& values)"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter manual loop is gone.",
                     "file": "main.cpp",
-                    "includes": [
-                        "values.begin()",
-                        "values.end()"
-                    ],
-                    "excludes": [
-                        "int total = 0;\n    for"
-                    ]
+                    "includes": ["values.begin()", "values.end()"],
+                    "excludes": ["int total = 0;\n    for"]
                 }
             ],
             "hints": [
@@ -308,9 +275,7 @@
     },
     "rewards": {
         "experience": 140,
-        "unlocks": [
-            "cpp.templates"
-        ]
+        "unlocks": ["cpp.templates"]
     },
     "persistence": {
         "kind": "none"
@@ -321,8 +286,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "games"
-    ]
+    "tags": ["systems", "games"]
 }
