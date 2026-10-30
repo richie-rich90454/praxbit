@@ -47,15 +47,35 @@
     "misconceptions": [
         {
             "id": "force",
-            "description": "Force unwrapping a lookup that may fail.",
+            "description": "Force unwrapping the first element of the input.",
             "stepId": "apply",
-            "feedback": "first returns an optional. Handle nil explicitly instead of forcing it."
+            "testDescription": "The loop returns the first positive value and nil otherwise.",
+            "feedback": "values.first! traps on an empty array and ignores positivity. Iterate and return nil when nothing matches.",
+            "followUpSkill": "swift.optionals"
         },
         {
-            "id": "async",
-            "description": "Blocking a thread to wait for async work.",
+            "id": "filter-force",
+            "description": "Filtering and then force unwrapping the result.",
             "stepId": "apply",
-            "feedback": "Use await. Blocking defeats the concurrency model and can deadlock."
+            "diagnostic": "Writing values.filter { $0 > 0 }.first! so an empty match traps.",
+            "feedback": "filter followed by first! still traps when no value matches. first without the bang returns an optional the caller can handle.",
+            "followUpSkill": "swift.optionals"
+        },
+        {
+            "id": "ignore",
+            "description": "Catching the trap later instead of preventing it.",
+            "stepId": "diagnose",
+            "answer": "ignore",
+            "feedback": "Force unwrapping an optional is not catchable. Handle nil with guard let or the nil-coalescing operator before multiplying.",
+            "followUpSkill": "swift.optionals"
+        },
+        {
+            "id": "force-explain",
+            "description": "Treating force unwrap as a safety check.",
+            "stepId": "check",
+            "answer": "force",
+            "feedback": "The ! operator asserts that a value exists and traps otherwise. It does not check or provide a default.",
+            "followUpSkill": "swift.optionals"
         }
     ],
     "lesson": {
@@ -122,6 +142,12 @@
             "title": "Find the first positive reading",
             "prompt": "Edit main.swift. firstPositive returns the first value greater than zero, or nil when none exists.",
             "evidence": "construction",
+            "hints": [
+                "Keep the Int? return type.",
+                "Iterate over the values.",
+                "Filter with where value > 0.",
+                "Return nil after the loop."
+            ],
             "language": "swift",
             "files": [
                 {
@@ -133,6 +159,11 @@
             ],
             "entry": "main.swift",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "swiftc main.swift -o main && ./main",
+                "description": "Compiles the file with swiftc and runs the executable, including the empty-input path."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -167,6 +198,12 @@
             "title": "The missing dictionary key",
             "prompt": "This code traps when the key is absent. Select the faulty instruction and the correct repair.",
             "evidence": "debugging",
+            "hints": [
+                "A dictionary lookup returns an optional.",
+                "The crash is at the forced unwrap, not the print.",
+                "Catching a trap after the fact is not possible.",
+                "Use nil-coalescing or guard let before multiplying."
+            ],
             "instructions": [
                 {
                     "id": "lookup",
@@ -209,6 +246,12 @@
             "title": "Optionals and async Swift",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
+            "hints": [
+                "An optional return type documents absence.",
+                "guard let exits the current scope on nil.",
+                "Force unwrap traps instead of supplying a default.",
+                "await suspends without blocking the thread."
+            ],
             "statements": [
                 {
                     "id": "optional",
