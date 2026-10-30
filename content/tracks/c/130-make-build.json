@@ -1,0 +1,328 @@
+{
+    "id": "c.make-build",
+    "version": 1,
+    "sequence": 79,
+    "courseId": "c",
+    "title": "Build with Make",
+    "summary": "Write a Makefile with warnings, a clean target, and correct dependencies.",
+    "skills": [
+        "c.toolchain"
+    ],
+    "prerequisites": [
+        "c.syntax"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "c-make",
+        "briefing": "A C utility builds by hand on one laptop and silently ignores warnings. Turn the build into a Makefile that recompiles changed inputs, fails on warnings, and cleans its output."
+    },
+    "objectives": [
+        {
+            "id": "write-makefile",
+            "description": "Write a Makefile with warnings and a phony clean target.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "predict-rebuild",
+            "description": "Predict what make rebuilds after one file changes.",
+            "stepIds": [
+                "make-transfer"
+            ]
+        },
+        {
+            "id": "explain-make",
+            "description": "Explain Make dependencies and flags accurately.",
+            "stepIds": [
+                "make-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:c"
+    ],
+    "hints": [
+        "Declare the compiler and flags as variables.",
+        "Add -Wall -Wextra -Werror to CFLAGS.",
+        "Declare .PHONY: clean so clean always runs.",
+        "The app target depends on main.c and compiles it with $(CC) $(CFLAGS)."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-warnings",
+            "description": "Compiling without warning flags.",
+            "stepId": "apply",
+            "testDescription": "Warnings are part of every compile.",
+            "feedback": "A build that ignores warnings hides real defects. Put the warning flags in CFLAGS so every compile uses them.",
+            "followUpSkill": "c.toolchain"
+        },
+        {
+            "id": "rebuild-everything",
+            "description": "Believing make rebuilds every target after any change.",
+            "stepId": "make-transfer",
+            "answer": "everything",
+            "feedback": "make compares timestamps. Changing main.c rebuilds app, but clean is not part of that dependency chain.",
+            "followUpSkill": "c.toolchain"
+        },
+        {
+            "id": "warnings-tests",
+            "description": "Believing compiler warnings replace tests.",
+            "stepId": "make-check",
+            "answer": "warnings-tests",
+            "feedback": "Warnings catch some defects at compile time. They do not prove behavior; tests still exercise the program.",
+            "followUpSkill": "c.toolchain"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A Makefile is a dependency graph",
+                "body": "Each target lists prerequisites and a recipe. make rebuilds a target when a prerequisite is newer than the target. That timestamp rule is why incremental builds are fast and why a missing prerequisite produces stale binaries."
+            },
+            {
+                "title": "Warnings belong in the build",
+                "body": "Flags such as -Wall, -Wextra, and -Werror turn compiler diagnostics into build failures. A warning that never fails the build is easy to ignore until it becomes a production bug. Keep the flags in CFLAGS so every compile uses them."
+            },
+            {
+                "title": "Phony targets are commands, not files",
+                "body": "A target such as clean does not produce a file named clean. Declaring it .PHONY prevents make from skipping the recipe when a file with that name exists. The same rule applies to test, format, and other command targets."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Target",
+                "definition": "A build output or command name in a Makefile."
+            },
+            {
+                "term": "Prerequisite",
+                "definition": "A file or target that must be up to date before a target runs."
+            },
+            {
+                "term": "Phony target",
+                "definition": "A target that always runs because it does not represent a file."
+            },
+            {
+                "term": "Incremental build",
+                "definition": "Rebuilding only the outputs whose inputs changed."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A Makefile is a dependency graph",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A Makefile is a dependency graph",
+                    "body": "Each target lists prerequisites and a recipe. make rebuilds a target when a prerequisite is newer than the target. That timestamp rule is why incremental builds are fast and why a missing prerequisite produces stale binaries."
+                },
+                {
+                    "title": "Warnings belong in the build",
+                    "body": "Flags such as -Wall, -Wextra, and -Werror turn compiler diagnostics into build failures. A warning that never fails the build is easy to ignore until it becomes a production bug. Keep the flags in CFLAGS so every compile uses them."
+                },
+                {
+                    "title": "Phony targets are commands, not files",
+                    "body": "A target such as clean does not produce a file named clean. Declaring it .PHONY prevents make from skipping the recipe when a file with that name exists. The same rule applies to test, format, and other command targets."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Target",
+                    "definition": "A build output or command name in a Makefile."
+                },
+                {
+                    "term": "Prerequisite",
+                    "definition": "A file or target that must be up to date before a target runs."
+                },
+                {
+                    "term": "Phony target",
+                    "definition": "A target that always runs because it does not represent a file."
+                },
+                {
+                    "term": "Incremental build",
+                    "definition": "Rebuilding only the outputs whose inputs changed."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Write the Makefile",
+            "prompt": "Edit Makefile. Build app from main.c with cc, -std=c17 -Wall -Wextra -Werror, and a phony clean target that removes app.",
+            "evidence": "construction",
+            "language": "c",
+            "files": [
+                {
+                    "path": "Makefile",
+                    "content": "CC = cc\nCFLAGS = -std=c17\nTARGET = app\n\n# TODO: enable warnings and mark clean phony\napp: main.c\n\t$(CC) $(CFLAGS) main.c -o $(TARGET)\n\nclean:\n\trm -f $(TARGET)\n",
+                    "editable": true,
+                    "language": "makefile"
+                },
+                {
+                    "path": "main.c",
+                    "content": "#include <stdio.h>\n\nint main(void) {\n    printf(\"campus build\\n\");\n    return 0;\n}\n",
+                    "editable": false,
+                    "language": "c"
+                }
+            ],
+            "entry": "main.c",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "make clean && make",
+                "description": "Clean and build the app with Make."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Warnings are part of every compile.",
+                    "file": "Makefile",
+                    "includes": [
+                        "CFLAGS = -std=c17 -Wall -Wextra -Werror"
+                    ],
+                    "excludes": [
+                        "CFLAGS = -std=c17\n"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The clean target is declared phony.",
+                    "file": "Makefile",
+                    "includes": [
+                        ".PHONY: clean"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The app target builds from main.c.",
+                    "file": "Makefile",
+                    "includes": [
+                        "app: main.c",
+                        "$(CC) $(CFLAGS) main.c -o $(TARGET)"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "hints": [
+                "The CFLAGS variable currently contains only the standard.",
+                "Add the three warning flags on the same line.",
+                "A phony declaration goes before the clean target.",
+                "Keep the compile recipe under app."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "make-transfer",
+            "title": "Predict the rebuild",
+            "prompt": "You run make after editing only main.c. What does make rebuild?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the rebuild behavior.",
+                "options": [
+                    {
+                        "id": "app-only",
+                        "label": "app, because main.c is newer than app"
+                    },
+                    {
+                        "id": "everything",
+                        "label": "Every target, including clean"
+                    },
+                    {
+                        "id": "nothing",
+                        "label": "Nothing, because the Makefile did not change"
+                    },
+                    {
+                        "id": "clean-only",
+                        "label": "Only the clean target"
+                    }
+                ],
+                "correctId": "app-only",
+                "explanation": "make rebuilds app because its prerequisite main.c changed. clean is not a prerequisite of app and does not run unless requested."
+            },
+            "hints": [
+                "make compares modification times.",
+                "Only targets that depend on the changed file are rebuilt.",
+                "clean is not in app's dependency chain.",
+                "Choose app only."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "make-check",
+            "title": "Targets, flags, and dependencies",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "phony",
+                    "label": "A phony target always runs its recipe.",
+                    "correct": true
+                },
+                {
+                    "id": "timestamps",
+                    "label": "make uses file timestamps to decide what is out of date.",
+                    "correct": true
+                },
+                {
+                    "id": "warnings-tests",
+                    "label": "Compiler warnings replace the need for tests.",
+                    "correct": false
+                },
+                {
+                    "id": "clean",
+                    "label": "The clean target should remove generated build outputs.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Make is driven by dependencies and timestamps. Phony targets such as clean are commands, and warning flags complement tests rather than replacing them.",
+            "hints": [
+                "Three statements are accurate.",
+                "Warnings cannot prove runtime behavior.",
+                "clean should leave no generated binary behind.",
+                "Select phony, timestamps, and clean."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 135,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
