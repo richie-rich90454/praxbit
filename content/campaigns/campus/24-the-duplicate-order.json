@@ -1,6 +1,6 @@
 {
     "id": "campus.the-duplicate-order",
-    "version": 1,
+    "version": 2,
     "sequence": 24,
     "courseId": "campus",
     "title": "The duplicate order",
@@ -49,13 +49,24 @@
             "id": "dedupe-after-charge",
             "description": "Recording the id after the side effect.",
             "stepId": "dedupe-review",
-            "feedback": "If the process dies after charging but before recording the id, the retry charges again. Record or reserve the id before the irreversible side effect."
+            "answer": "ship",
+            "feedback": "If the process dies after charging but before recording the id, the retry charges again. Record or reserve the id before the irreversible side effect.",
+            "followUpSkill": "api.validation"
         },
         {
             "id": "duplicate-is-fine",
             "description": "Treating a retry as a harmless second order.",
             "stepId": "dedupe-state",
-            "feedback": "A retry represents the same intent. Processing it twice charges twice. Idempotency makes the repeated request safe."
+            "diagnostic": "Processes the A1 retry as a new order, so accepted reaches 3 after B2 instead of 2.",
+            "feedback": "A retry represents the same intent. Processing it twice charges twice. Idempotency makes the repeated request safe.",
+            "followUpSkill": "api.validation"
+        },
+        {
+            "id": "retry-is-harmless",
+            "description": "Believing processing a retry twice is always harmless.",
+            "stepId": "idempotency-check",
+            "answer": "duplicate",
+            "feedback": "A duplicate charge or stock decrement changes the world twice. The retry must be recognized and answered from the stored result."
         }
     ],
     "lesson": {
@@ -88,6 +99,12 @@
         {
             "kind": "state",
             "id": "dedupe-state",
+            "hints": [
+                "Process A1 once, ignore its retry, then process B2.",
+                "The processed set records ids; a repeated id changes nothing.",
+                "If A1 is already listed, applying A1 again must leave both cells unchanged.",
+                "Apply A1, then the A1 retry, then B2; only the first and last operations should move the counters."
+            ],
             "title": "Simulate the retry cache",
             "prompt": "Apply operations so A1 is processed once, its retry is ignored, and B2 is processed. The accepted count must reach 2.",
             "evidence": "construction",
@@ -146,6 +163,12 @@
         {
             "kind": "review",
             "id": "dedupe-review",
+            "hints": [
+                "Review the handler for races, crash windows, and atomicity, then choose a verdict.",
+                "A lookup before a separate charge and save does not make the operation idempotent.",
+                "Two requests can both see no record and both charge; a crash after charging can also lose the record.",
+                "Select the race, crash, and atomicity findings, and reject until the id record is reserved before charging."
+            ],
             "title": "Review the retry patch",
             "prompt": "Inspect the proposed order handler. Select every supported finding, then choose a verdict.",
             "evidence": "review",
@@ -203,6 +226,12 @@
         {
             "kind": "explain",
             "id": "idempotency-check",
+            "hints": [
+                "Select statements about safe retries.",
+                "Idempotency ties a key to a stored result so a repeat returns the same outcome.",
+                "A retried payment must not charge twice; the record and side effect must be coordinated.",
+                "Three statements are accurate; reject the claim that duplicate processing is always harmless."
+            ],
             "title": "Retry safety",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
