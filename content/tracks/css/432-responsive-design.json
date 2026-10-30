@@ -1,0 +1,261 @@
+{
+    "id": "css.responsive-design",
+    "version": 1,
+    "sequence": 218,
+    "courseId": "css",
+    "title": "Responsive design and media queries",
+    "summary": "Adapt layout with fluid grids and a mobile-first media query.",
+    "skills": [
+        "web.css"
+    ],
+    "prerequisites": [
+        "web.html",
+        "web.css"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-css",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "computed-style-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "fixed-layout",
+        "briefing": "The catalog uses a fixed three-column layout that overflows phones. Convert it to a fluid grid that stacks on small screens."
+    },
+    "objectives": [
+        {
+            "id": "fluid-grid",
+            "description": "Use a responsive grid.",
+            "stepIds": [
+                "fix-responsive"
+            ]
+        },
+        {
+            "id": "media-query",
+            "description": "Add a max-width media query.",
+            "stepIds": [
+                "fix-responsive"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain responsive design.",
+            "stepIds": [
+                "responsive-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:layout"
+    ],
+    "hints": [
+        "Use display: grid with auto-fit and minmax.",
+        "Add a media query for narrow screens.",
+        "Stack cards in one column below 600px.",
+        "Use .catalog { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } and @media (max-width: 600px) { .catalog { grid-template-columns: 1fr; } }."
+    ],
+    "misconceptions": [
+        {
+            "id": "fixed-width",
+            "description": "Using a fixed pixel width for the whole layout.",
+            "stepId": "fix-responsive",
+            "testDescription": "A narrow-screen media query stacks the cards.",
+            "feedback": "Fixed widths overflow small screens. Use fluid grids and media queries.",
+            "followUpSkill": "web.css"
+        },
+        {
+            "id": "desktop-first",
+            "description": "Believing responsive design means only shrinking a desktop layout.",
+            "stepId": "responsive-claims",
+            "answer": "desktop-only",
+            "feedback": "Responsive design adapts content and layout to the device, not just scaling down.",
+            "followUpSkill": "web.css"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Fluid layouts",
+                "body": "Use relative units and grid tracks that adapt. auto-fit with minmax creates columns that wrap automatically."
+            },
+            {
+                "title": "Media queries",
+                "body": "A media query applies rules under conditions such as max-width. Mobile-first designs start with the small-screen layout and enhance upward."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Fluid grid",
+                "definition": "A layout that adapts to available space."
+            },
+            {
+                "term": "Media query",
+                "definition": "A CSS rule that applies only under specified conditions."
+            },
+            {
+                "term": "Mobile-first",
+                "definition": "Designing the small-screen layout first, then enhancing."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Responsive design",
+            "prompt": "Read the explanation, then fix the CSS.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Fluid layouts",
+                    "body": "Use relative units and grid tracks that adapt. auto-fit with minmax creates columns that wrap automatically."
+                },
+                {
+                    "title": "Media queries",
+                    "body": "A media query applies rules under conditions such as max-width. Mobile-first designs start with the small-screen layout and enhance upward."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Fluid grid",
+                    "definition": "A layout that adapts to available space."
+                },
+                {
+                    "term": "Media query",
+                    "definition": "A CSS rule that applies only under specified conditions."
+                },
+                {
+                    "term": "Mobile-first",
+                    "definition": "Designing the small-screen layout first, then enhancing."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-responsive",
+            "title": "Make the catalog responsive",
+            "prompt": "Edit styles.css. Convert the fixed grid to a fluid grid and stack on small screens.",
+            "evidence": "construction",
+            "language": "css",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Catalog</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <section class=\"catalog\">\n    <article class=\"card\">A</article>\n    <article class=\"card\">B</article>\n    <article class=\"card\">C</article>\n  </section>\n</body>\n</html>\n",
+                    "editable": false,
+                    "language": "html"
+                },
+                {
+                    "path": "styles.css",
+                    "content": ".catalog { display: grid; grid-template-columns: 300px 300px 300px; gap: 16px; }\n.card { padding: 16px; border: 1px solid #D6D6D6; }\n",
+                    "editable": true,
+                    "language": "css"
+                }
+            ],
+            "entry": "styles.css",
+            "preview": "css",
+            "tests": [
+                {
+                    "kind": "css",
+                    "description": "The catalog uses a grid layout.",
+                    "selector": ".catalog",
+                    "property": "display",
+                    "expected": "grid"
+                },
+                {
+                    "kind": "css",
+                    "description": "Catalog items are separated by 16px.",
+                    "selector": ".catalog",
+                    "property": "gap",
+                    "expected": "16px"
+                },
+                {
+                    "kind": "regex",
+                    "description": "A narrow-screen media query stacks the cards.",
+                    "file": "styles.css",
+                    "pattern": "@media[^{]*max-width",
+                    "flags": "i"
+                },
+                {
+                    "kind": "regex",
+                    "description": "The grid uses minmax for fluid columns.",
+                    "file": "styles.css",
+                    "pattern": "minmax\\(",
+                    "flags": "i"
+                }
+            ],
+            "hints": [
+                "Replace the fixed columns with auto-fit and minmax.",
+                "Keep the 16px gap.",
+                "Add a max-width media query.",
+                "Use grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); and @media (max-width: 600px) { .catalog { grid-template-columns: 1fr; } }."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "responsive-claims",
+            "title": "Responsive claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Check claims about responsive design.",
+                "Fluid grids adapt to space.",
+                "Media queries change rules by condition.",
+                "Select fluid grid and media query; reject desktop-only."
+            ],
+            "statements": [
+                {
+                    "id": "fluid",
+                    "label": "Fluid grids adapt to the available width.",
+                    "correct": true
+                },
+                {
+                    "id": "media",
+                    "label": "Media queries apply rules under conditions like max-width.",
+                    "correct": true
+                },
+                {
+                    "id": "desktop-only",
+                    "label": "Responsive design means shrinking a desktop layout.",
+                    "correct": false
+                },
+                {
+                    "id": "mobile-first",
+                    "label": "Mobile-first starts with the small-screen layout.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Responsive design adapts layout to the device through fluid grids and media queries."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and computed-style tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
