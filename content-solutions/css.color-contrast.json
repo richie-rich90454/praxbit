@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-color": {
+            "files": {
+                "styles.css": ":root { --text: #000; --paper: #fff; --accent: #B54131; }\n.card { color: var(--text); background: var(--paper); padding: 16px; }\n.cta { background: var(--accent); color: var(--paper); }\n"
+            }
+        }
+    }
+}
