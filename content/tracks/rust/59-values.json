@@ -5,22 +5,14 @@
     "courseId": "rust",
     "title": "Values and borrowing in Rust",
     "summary": "Use a borrowed slice, a loop, and a condition to count positive values.",
-    "skills": [
-        "rust.syntax"
-    ],
-    "prerequisites": [
-        "concept.state",
-        "concept.conditions"
-    ],
+    "skills": ["rust.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:rust"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:rust"],
     "hints": [
         "The loop yields a reference to each value.",
         "Dereference the reference before comparing.",
@@ -168,33 +151,22 @@
                     "kind": "static",
                     "description": "The function borrows a slice and returns a count.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "fn count_positive(values: &[i32]) -> usize"
-                    ],
+                    "includes": ["fn count_positive(values: &[i32]) -> usize"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The loop counts only positive values.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "if *value > 0",
-                        "count += 1"
-                    ],
-                    "excludes": [
-                        "count += 0"
-                    ]
+                    "includes": ["if *value > 0", "count += 1"],
+                    "excludes": ["count += 0"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "fn count_positive(values: &[i32]) -> usize"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["fn count_positive(values: &[i32]) -> usize"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -263,7 +235,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
