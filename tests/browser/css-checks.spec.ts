@@ -51,6 +51,34 @@ test.describe("browser-validated CSS checks", function cssChecksSuite(): void {
         await expect(page.getByText("That works")).toBeVisible();
     });
 
+    const cssMissions = [
+        ["css.cascade-layers", "fix-cascade"],
+        ["css.box-model", "fix-box"],
+        ["css.responsive-design", "fix-responsive"],
+        ["css.color-contrast", "fix-color"],
+        ["css.transitions-reduced-motion", "fix-motion"],
+    ] as const;
+
+    for (const [missionId, stepId] of cssMissions) {
+        test(`${missionId} passes every computed-style check`, async function cssMission({
+            page,
+        }: {
+            page: Page;
+        }): Promise<void> {
+            const solution = readSolution(`${missionId}.json`);
+            const files = solution.steps?.[stepId]?.files;
+            if (files?.["styles.css"] === undefined) {
+                throw new Error(`The ${missionId} CSS solution is missing.`);
+            }
+            await openMissionCodeStep(page, missionId);
+            await replaceEditor(page, files["styles.css"]);
+            await page.getByRole("button", { name: /run tests/i }).click();
+            await expect(page.getByRole("heading", { name: "Test results" })).toBeVisible();
+            await expect(page.locator("table").getByText("Fail")).toHaveCount(0);
+            await expect(page.getByText("That works")).toBeVisible();
+        });
+    }
+
     test("the status board layout stage passes every computed-style check", async function projectCss({
         page,
     }: {
