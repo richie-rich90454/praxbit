@@ -1,0 +1,371 @@
+{
+    "id": "database-engineering.query-performance",
+    "version": 1,
+    "sequence": 419,
+    "courseId": "database-engineering",
+    "title": "Make the query do less",
+    "summary": "Write a filtered aggregate, read a plan, and connect long-lived snapshots to query performance.",
+    "skills": ["sql.indexes", "sql.postgresql"],
+    "prerequisites": ["sql.queries", "sql.modeling"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-sql",
+        "capabilities": ["source-editing", "sql-execution", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "query-performance",
+        "briefing": "The revenue report scans every order, includes cancelled and refunded rows, and ignores the year filter. It also runs inside one long transaction that holds a snapshot for an hour. Fix the query first, then read the plan and the snapshot cost."
+    },
+    "objectives": [
+        {
+            "id": "query",
+            "description": "Write the filtered revenue query.",
+            "stepIds": ["revenue-query"]
+        },
+        {
+            "id": "plan",
+            "description": "Identify scan, function, and projection problems in a plan.",
+            "stepIds": ["plan-review"]
+        },
+        {
+            "id": "isolation",
+            "description": "Connect long snapshots to bloat and vacuum.",
+            "stepIds": ["isolation-check"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain measurement and pagination trade-offs.",
+            "stepIds": ["perf-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:database"],
+    "hints": [
+        "Filter status and the date range before grouping.",
+        "Join customers only for the name you return.",
+        "Aggregate paid revenue and order count per customer.",
+        "Order by revenue descending and keep five rows."
+    ],
+    "misconceptions": [
+        {
+            "id": "count-all-orders",
+            "description": "Counting cancelled and refunded orders as revenue.",
+            "stepId": "revenue-query",
+            "testDescription": "Excludes cancelled, refunded, and out-of-range orders.",
+            "feedback": "Revenue needs paid orders in the reporting period. Counting every row inflates both the count and the total.",
+            "followUpSkill": "sql.indexes"
+        },
+        {
+            "id": "select-star",
+            "description": "Selecting every column so no index can cover the query.",
+            "stepId": "plan-review",
+            "answer": "revise:seq-scan,function-filter,select-star",
+            "feedback": "Select only the columns the report needs. A narrow projection can use a covering index and reduces transfer."
+        },
+        {
+            "id": "snapshot-free",
+            "description": "Believing a long read transaction has no cost.",
+            "stepId": "isolation-check",
+            "answer": "blocked",
+            "feedback": "Readers do not block writers under MVCC, but a long snapshot keeps old row versions alive and delays vacuum, growing bloat."
+        },
+        {
+            "id": "more-indexes",
+            "description": "Adding an index for every column to fix a slow query.",
+            "stepId": "perf-transfer",
+            "answer": "every-column",
+            "feedback": "Indexes cost writes and storage. Measure the plan and index the filters and ordering the query actually uses."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Filter and aggregate close to the data",
+                "body": "A revenue query should discard cancelled, refunded, and out-of-period rows before grouping. The fewer rows that reach the sort and aggregate, the less work and memory the query needs."
+            },
+            {
+                "title": "Read the plan, not the stopwatch",
+                "body": "EXPLAIN (ANALYZE, BUFFERS) shows actual rows, loops, time, and buffer reads. A sequential scan is not automatically wrong, but a function on an indexed column or a wide projection can prevent the index you expected."
+            },
+            {
+                "title": "Snapshots have a maintenance cost",
+                "body": "PostgreSQL readers do not block writers, but a long repeatable-read transaction holds an old snapshot. Old row versions cannot be vacuumed, so bloat and index size grow. Keep reporting transactions short or use a replica."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Query plan",
+                "definition": "The access path and join order the database chooses for a query."
+            },
+            {
+                "term": "Sequential scan",
+                "definition": "Reading every row of a table because no index answers the query."
+            },
+            {
+                "term": "Projection",
+                "definition": "The columns a query returns."
+            },
+            {
+                "term": "Snapshot",
+                "definition": "The consistent view of data a transaction uses for reads."
+            },
+            {
+                "term": "Bloat",
+                "definition": "Space held by dead row versions that vacuum has not reclaimed."
+            },
+            {
+                "term": "Covering index",
+                "definition": "An index that contains every column a query needs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Fewer rows, narrower columns",
+            "prompt": "Read the explanation, then write the report query.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Filter and aggregate close to the data",
+                    "body": "A revenue query should discard cancelled, refunded, and out-of-period rows before grouping. The fewer rows that reach the sort and aggregate, the less work and memory the query needs."
+                },
+                {
+                    "title": "Read the plan, not the stopwatch",
+                    "body": "EXPLAIN (ANALYZE, BUFFERS) shows actual rows, loops, time, and buffer reads. A sequential scan is not automatically wrong, but a function on an indexed column or a wide projection can prevent the index you expected."
+                },
+                {
+                    "title": "Snapshots have a maintenance cost",
+                    "body": "PostgreSQL readers do not block writers, but a long repeatable-read transaction holds an old snapshot. Old row versions cannot be vacuumed, so bloat and index size grow. Keep reporting transactions short or use a replica."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Query plan",
+                    "definition": "The access path and join order the database chooses for a query."
+                },
+                {
+                    "term": "Sequential scan",
+                    "definition": "Reading every row of a table because no index answers the query."
+                },
+                {
+                    "term": "Projection",
+                    "definition": "The columns a query returns."
+                },
+                {
+                    "term": "Snapshot",
+                    "definition": "The consistent view of data a transaction uses for reads."
+                },
+                {
+                    "term": "Bloat",
+                    "definition": "Space held by dead row versions that vacuum has not reclaimed."
+                },
+                {
+                    "term": "Covering index",
+                    "definition": "An index that contains every column a query needs."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "revenue-query",
+            "title": "Write the revenue report",
+            "prompt": "Edit revenue.sql. Return name, order_count, and revenue_cents for paid orders placed in 2025, grouped by customer, highest revenue first, limited to five rows.",
+            "evidence": "construction",
+            "hints": [
+                "Filter status = 'paid' and the 2025 date range in the WHERE clause.",
+                "Join customers to orders to get the name.",
+                "Group by the customer and aggregate count plus total cents.",
+                "Order by the revenue alias descending and apply LIMIT 5."
+            ],
+            "language": "sql",
+            "files": [
+                {
+                    "path": "revenue.sql",
+                    "content": "SELECT c.name,\n       COUNT(*) AS order_count,\n       SUM(o.total_cents) AS revenue_cents\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nGROUP BY c.name\nORDER BY revenue_cents DESC;\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "revenue.sql",
+            "preview": "sql",
+            "database": {
+                "schemaSql": "CREATE TABLE customers (id TEXT PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE orders (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, status TEXT NOT NULL, total_cents INTEGER NOT NULL, placed_at TEXT NOT NULL);",
+                "seedSql": "INSERT INTO customers (id, name) VALUES ('c1', 'Ada'), ('c2', 'Bo'), ('c3', 'Cy');\nINSERT INTO orders (id, customer_id, status, total_cents, placed_at) VALUES\n('o1', 'c1', 'paid', 1000, '2025-01-10'),\n('o2', 'c1', 'paid', 2000, '2025-02-10'),\n('o3', 'c2', 'paid', 5000, '2025-03-10'),\n('o4', 'c2', 'cancelled', 9000, '2025-04-10'),\n('o5', 'c3', 'paid', 3000, '2026-01-10'),\n('o6', 'c1', 'refunded', 500, '2025-05-10'),\n('o7', 'c3', 'paid', 1000, '2025-06-10'),\n('o8', 'c2', 'paid', 500, '2024-12-31');"
+            },
+            "tests": [
+                {
+                    "kind": "sql",
+                    "description": "Excludes cancelled, refunded, and out-of-range orders.",
+                    "expectedRows": [
+                        ["Bo", 1, 5000],
+                        ["Ada", 2, 3000],
+                        ["Cy", 1, 1000]
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "plan-review",
+            "title": "Read the plan",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Find the scan on the large table.",
+                "Look for a function wrapped around an indexed column.",
+                "Check whether the query returns columns it does not use.",
+                "Revise the query: reduce the projection and remove the function from the filter."
+            ],
+            "artifact": {
+                "title": "EXPLAIN output",
+                "caption": "The customer lookup joins orders and filters on lower(email).",
+                "kind": "code",
+                "language": "text",
+                "content": "Seq Scan on orders  (cost=0.00..18420.00 rows=12 width=212) (actual time=0.031..182.440 rows=12 loops=1)\n  Filter: (lower((customer_email)::text) = 'ada@example.edu'::text)\n  Rows Removed by Filter: 499988\n  Buffers: shared hit=14200 read=4220\nPlanning Time: 0.210 ms\nExecution Time: 182.810 ms\n\nQuery: SELECT * FROM orders WHERE lower(customer_email) = 'ada@example.edu';"
+            },
+            "findings": [
+                {
+                    "id": "seq-scan",
+                    "label": "The query scans the whole orders table.",
+                    "correct": true
+                },
+                {
+                    "id": "function-filter",
+                    "label": "Wrapping customer_email in lower() prevents a plain index on the column from being used.",
+                    "correct": true
+                },
+                {
+                    "id": "select-star",
+                    "label": "SELECT * forces a wide projection that cannot be covered by a narrow index.",
+                    "correct": true
+                },
+                {
+                    "id": "limit-sort",
+                    "label": "Adding LIMIT without ORDER BY does not make the result deterministic.",
+                    "correct": true
+                },
+                {
+                    "id": "index-always",
+                    "label": "Adding an index always improves a query.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "ship",
+                    "label": "Ship the query"
+                },
+                {
+                    "id": "revise",
+                    "label": "Revise the filter and projection, then measure again"
+                },
+                {
+                    "id": "cache",
+                    "label": "Only cache the result"
+                }
+            ],
+            "correctVerdict": "revise",
+            "explanation": "The function on the column and the wide projection defeat useful indexes. Fix the query shape first, then add a matching index if the plan needs one."
+        },
+        {
+            "kind": "quiz",
+            "id": "isolation-check",
+            "title": "What does a long snapshot cost?",
+            "prompt": "A report holds a repeatable-read transaction open for an hour while writers continue. What is the main cost?",
+            "evidence": "prediction",
+            "hints": [
+                "PostgreSQL uses multi-version concurrency control.",
+                "Readers do not block writers in MVCC.",
+                "Old row versions must remain visible to the snapshot.",
+                "Vacuum cannot reclaim those versions, so bloat grows."
+            ],
+            "quiz": {
+                "prompt": "Choose the main operational risk.",
+                "options": [
+                    {
+                        "id": "bloat",
+                        "label": "Old row versions stay visible to the snapshot, so vacuum cannot reclaim them and bloat grows"
+                    },
+                    {
+                        "id": "blocked",
+                        "label": "Writers are blocked for the whole hour"
+                    },
+                    {
+                        "id": "dirty",
+                        "label": "The report sees uncommitted rows"
+                    },
+                    {
+                        "id": "none",
+                        "label": "There is no cost because reads never affect writes"
+                    }
+                ],
+                "correctId": "bloat",
+                "explanation": "MVCC lets readers and writers proceed, but a long snapshot keeps dead versions alive. Keep reporting transactions short or run them on a replica."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "perf-transfer",
+            "title": "Measure, then change one thing",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Plans and buffers are evidence; stopwatches are noisy.",
+                "Indexes have write and storage costs.",
+                "Pagination needs a stable order.",
+                "Select measurement, narrow projections, matching indexes, and keyset pagination; reject indexing every column."
+            ],
+            "statements": [
+                {
+                    "id": "measure",
+                    "label": "EXPLAIN (ANALYZE, BUFFERS) shows actual rows, time, and buffer use.",
+                    "correct": true
+                },
+                {
+                    "id": "narrow",
+                    "label": "Selecting only the needed columns can enable a covering index.",
+                    "correct": true
+                },
+                {
+                    "id": "cost",
+                    "label": "Every index adds write and storage cost, so add only those a query shape needs.",
+                    "correct": true
+                },
+                {
+                    "id": "keyset",
+                    "label": "Keyset pagination avoids the growing offset cost of OFFSET pagination.",
+                    "correct": true
+                },
+                {
+                    "id": "every-column",
+                    "label": "Indexing every column is the safest way to speed up reads.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Query performance comes from measuring the plan, narrowing the data, and adding the smallest index that serves the access pattern."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems", "web"]
+}
