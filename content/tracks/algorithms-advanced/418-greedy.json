@@ -1,0 +1,328 @@
+{
+    "id": "algorithms-advanced.greedy",
+    "version": 1,
+    "sequence": 418,
+    "courseId": "algorithms-advanced",
+    "title": "Prove the greedy choice",
+    "summary": "Schedule the most non-overlapping meetings with an exchange argument, and find where greedy stops working.",
+    "skills": ["algorithms.dp", "algorithms.complexity"],
+    "prerequisites": ["algorithms.recursion", "algorithms.complexity"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "delivery",
+        "initialState": "greedy",
+        "briefing": "The delivery desk has one meeting room and a list of requested time ranges. The current scheduler takes the earliest start, which can block two shorter meetings. Choose the greedy rule that maximizes the number of meetings, and be ready to justify it."
+    },
+    "objectives": [
+        {
+            "id": "schedule",
+            "description": "Implement the earliest-finish interval schedule.",
+            "stepIds": ["meetings-code"]
+        },
+        {
+            "id": "justify",
+            "description": "Choose the argument that justifies the greedy rule.",
+            "stepIds": ["greedy-proof"]
+        },
+        {
+            "id": "transfer",
+            "description": "Distinguish problems where greedy is safe from where it is not.",
+            "stepIds": ["greedy-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:delivery", "icon:calendar"],
+    "hints": [
+        "Sorting by start can choose a long meeting that blocks several shorter ones.",
+        "The earliest finishing meeting leaves the most room for the rest.",
+        "An exchange argument replaces the first choice in an optimal schedule without reducing its count.",
+        "Sort by end time, take the first that starts after the last end, and count."
+    ],
+    "misconceptions": [
+        {
+            "id": "earliest-start",
+            "description": "Choosing the earliest start instead of the earliest finish.",
+            "stepId": "meetings-code",
+            "testDescription": "Handles a long interval that blocks two shorter ones.",
+            "feedback": "An early start can be a long meeting. Choosing the earliest finish leaves the largest remaining window.",
+            "followUpSkill": "algorithms.complexity"
+        },
+        {
+            "id": "shortest-first",
+            "description": "Choosing the shortest meeting first.",
+            "stepId": "meetings-code",
+            "testDescription": "Maximizes the count for overlapping ranges.",
+            "feedback": "Shortest-first can still block two meetings that fit around another. Earliest finish is the exchange-proven rule."
+        },
+        {
+            "id": "looks-optimal",
+            "description": "Trusting a greedy rule because it seems locally sensible.",
+            "stepId": "greedy-proof",
+            "answer": "looks",
+            "feedback": "A local choice needs a proof or a counterexample search. Coin change is a classic case where greedy looks right and fails."
+        },
+        {
+            "id": "greedy-always-dp",
+            "description": "Believing every optimization problem needs a full DP table.",
+            "stepId": "greedy-transfer",
+            "answer": "always-dp",
+            "feedback": "When the greedy choice property and optimal substructure hold, the greedy algorithm is simpler and faster. The proof is what matters."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The choice rule decides the result",
+                "body": "For interval scheduling, sorting by earliest finish and taking each compatible meeting maximizes the count. Sorting by start or duration can fail because a long or early meeting blocks several better ones."
+            },
+            {
+                "title": "An exchange argument",
+                "body": "Take an optimal schedule. Its first meeting finishes no earlier than the earliest-finishing meeting. Replace that first meeting with the earliest-finishing one; the rest still fit, so the count does not drop. Repeating the exchange proves the greedy rule."
+            },
+            {
+                "title": "Greedy is a proof obligation",
+                "body": "A greedy algorithm is correct only when its local choice can be exchanged into an optimal solution. Coin change with denominations 1, 3, and 4 is a counterexample to largest-first. Test small cases and look for a proof before trusting a rule."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Greedy algorithm",
+                "definition": "An algorithm that commits to the locally best choice at each step."
+            },
+            {
+                "term": "Exchange argument",
+                "definition": "A proof that replaces part of an optimal solution with the greedy choice without making it worse."
+            },
+            {
+                "term": "Interval scheduling",
+                "definition": "Selecting the largest set of non-overlapping time ranges."
+            },
+            {
+                "term": "Counterexample",
+                "definition": "An input where a proposed rule produces a suboptimal result."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A local rule needs a global proof",
+            "prompt": "Read the explanation, then implement the schedule.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The choice rule decides the result",
+                    "body": "For interval scheduling, sorting by earliest finish and taking each compatible meeting maximizes the count. Sorting by start or duration can fail because a long or early meeting blocks several better ones."
+                },
+                {
+                    "title": "An exchange argument",
+                    "body": "Take an optimal schedule. Its first meeting finishes no earlier than the earliest-finishing meeting. Replace that first meeting with the earliest-finishing one; the rest still fit, so the count does not drop. Repeating the exchange proves the greedy rule."
+                },
+                {
+                    "title": "Greedy is a proof obligation",
+                    "body": "A greedy algorithm is correct only when its local choice can be exchanged into an optimal solution. Coin change with denominations 1, 3, and 4 is a counterexample to largest-first. Test small cases and look for a proof before trusting a rule."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Greedy algorithm",
+                    "definition": "An algorithm that commits to the locally best choice at each step."
+                },
+                {
+                    "term": "Exchange argument",
+                    "definition": "A proof that replaces part of an optimal solution with the greedy choice without making it worse."
+                },
+                {
+                    "term": "Interval scheduling",
+                    "definition": "Selecting the largest set of non-overlapping time ranges."
+                },
+                {
+                    "term": "Counterexample",
+                    "definition": "An input where a proposed rule produces a suboptimal result."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "meetings-code",
+            "title": "Schedule the most meetings",
+            "prompt": "Edit meetings.js. maxMeetings(intervals) returns the largest number of non-overlapping [start, end] intervals. A meeting may start when the previous one ends. Use the earliest-finish greedy rule.",
+            "evidence": "construction",
+            "hints": [
+                "Sort the intervals before choosing.",
+                "The first chosen meeting should be the one that ends earliest.",
+                "Skip every interval that starts before the last chosen end.",
+                "Count each accepted interval and update the last end."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "meetings.js",
+                    "content": "function maxMeetings(intervals) {\n  if (intervals.length === 0) return 0;\n  const sorted = [...intervals].sort(function byStart(left, right) {\n    return left[0] - right[0];\n  });\n  let count = 1;\n  let end = sorted[0][1];\n  for (let index = 1; index < sorted.length; index += 1) {\n    if (sorted[index][0] >= end) {\n      count += 1;\n      end = sorted[index][1];\n    }\n  }\n  return count;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "meetings.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Handles a long interval that blocks two shorter ones.",
+                    "name": "maxMeetings",
+                    "args": [
+                        [
+                            [1, 5],
+                            [2, 3],
+                            [3, 4],
+                            [4, 6]
+                        ]
+                    ],
+                    "expected": 3
+                },
+                {
+                    "kind": "function",
+                    "description": "Maximizes the count for overlapping ranges.",
+                    "name": "maxMeetings",
+                    "args": [
+                        [
+                            [1, 3],
+                            [2, 4],
+                            [3, 5]
+                        ]
+                    ],
+                    "expected": 2
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles an empty schedule.",
+                    "name": "maxMeetings",
+                    "args": [[]],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles one meeting.",
+                    "name": "maxMeetings",
+                    "args": [[[1, 2]]],
+                    "expected": 1
+                },
+                {
+                    "kind": "function",
+                    "description": "Allows a meeting that starts when another ends.",
+                    "name": "maxMeetings",
+                    "args": [
+                        [
+                            [1, 2],
+                            [2, 3],
+                            [3, 4]
+                        ]
+                    ],
+                    "expected": 3
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "greedy-proof",
+            "title": "Justify earliest finish",
+            "prompt": "Which argument supports the earliest-finish rule?",
+            "evidence": "prediction",
+            "hints": [
+                "Compare the greedy first choice with the first choice of an optimal schedule.",
+                "Replacing the first meeting must not reduce the remaining space.",
+                "This style of proof exchanges one choice for another.",
+                "Choose the exchange argument."
+            ],
+            "quiz": {
+                "prompt": "Choose the strongest justification.",
+                "options": [
+                    {
+                        "id": "exchange",
+                        "label": "An exchange argument replaces an optimal schedule's first meeting with the earliest-finishing one without reducing the count"
+                    },
+                    {
+                        "id": "looks",
+                        "label": "It looks optimal on the examples we tried"
+                    },
+                    {
+                        "id": "popular",
+                        "label": "It is the most common answer online"
+                    },
+                    {
+                        "id": "fast",
+                        "label": "It runs in O(n log n)"
+                    }
+                ],
+                "correctId": "exchange",
+                "explanation": "Running time does not prove correctness. The exchange argument shows the greedy choice can always be part of an optimal schedule."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "greedy-transfer",
+            "title": "Know when greedy is safe",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "A proof or a counterexample is the evidence.",
+                "Greedy can be simpler than a full table.",
+                "A local rule can fail on a small input.",
+                "Select exchange proofs, counterexamples, and simpler greedy when proven; reject greedy by intuition."
+            ],
+            "statements": [
+                {
+                    "id": "exchange",
+                    "label": "An exchange argument can prove that a greedy choice belongs to some optimal solution.",
+                    "correct": true
+                },
+                {
+                    "id": "counter",
+                    "label": "A single counterexample is enough to reject a greedy rule.",
+                    "correct": true
+                },
+                {
+                    "id": "simpler",
+                    "label": "A proven greedy algorithm can be simpler and faster than dynamic programming.",
+                    "correct": true
+                },
+                {
+                    "id": "local",
+                    "label": "Local optimality alone does not guarantee global optimality.",
+                    "correct": true
+                },
+                {
+                    "id": "always-dp",
+                    "label": "Every optimization problem requires a full dynamic-programming table.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Greedy is safe when proven. A counterexample is decisive, and local optimality by itself proves nothing."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems"]
+}
