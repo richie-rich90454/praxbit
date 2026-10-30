@@ -1,6 +1,6 @@
 {
     "id": "before-code.do-it-again",
-    "version": 1,
+    "version": 2,
     "sequence": 5,
     "courseId": "before-code",
     "title": "Do it again",
@@ -49,13 +49,32 @@
             "id": "off-by-one",
             "description": "One repetition short because counting starts at zero.",
             "stepId": "packing-loop",
-            "feedback": "There are five parcels. The loop must run five times. Starting an index at zero does not reduce the number of parcels."
+            "answer": "4:label,seal,scan",
+            "feedback": "There are five parcels. The loop must run five times. Starting an index at zero does not reduce the number of parcels.",
+            "followUpSkill": "concept.iteration"
         },
         {
             "id": "seal-before-label",
             "description": "Sealing before attaching the label.",
             "stepId": "packing-loop",
+            "answer": "5:seal,label,scan",
             "feedback": "The scanner reads the label, so the label must be attached before sealing and scanning. Order matters inside the loop body."
+        },
+        {
+            "id": "stops-after-one-pass",
+            "description": "Treating one loop iteration as the whole repetition.",
+            "stepId": "loop-trace",
+            "answer": "{\"packed\":\"1\",\"boxesLeft\":\"4\"}",
+            "feedback": "The loop body runs twice. After one pass the values are 1 and 4, but the second pass still has to run.",
+            "followUpSkill": "concept.iteration"
+        },
+        {
+            "id": "swaps-count-and-amount",
+            "description": "Swapping how often to repeat with how much to add each time.",
+            "stepId": "loop-transfer",
+            "answer": "five",
+            "feedback": "The minutes set the repeat count and the liters per minute set the amount. Five repetitions of six liters describes a different process.",
+            "followUpSkill": "concept.iteration"
         }
     ],
     "lesson": {
@@ -88,6 +107,12 @@
         {
             "kind": "loop",
             "id": "packing-loop",
+            "hints": [
+                "Choose how many times the block must run and put the three actions in a workable order.",
+                "One pass handles one parcel, so the repeat count must match the number of parcels.",
+                "Three parcels with two actions each would need three passes, each doing both actions.",
+                "The repeat count matches the number of parcels. Inside a pass, the label must exist before the scanner reads it, so place seal and scan accordingly."
+            ],
             "title": "Program the packing cycle",
             "prompt": "Choose the repetition count and arrange the block. The robot runs the block once per pass.",
             "evidence": "construction",
@@ -113,6 +138,12 @@
         {
             "kind": "trace",
             "id": "loop-trace",
+            "hints": [
+                "Follow the loop body twice and track both watched values.",
+                "Each pass increments packed and decrements boxesLeft by one.",
+                "After one pass packed is 1 and boxesLeft is 4. Apply the same pair of changes again.",
+                "Start at 0 and 5, add one and subtract one per pass, then submit the state after the second pass."
+            ],
             "title": "Trace two passes",
             "prompt": "Follow the loop for two iterations. Then enter the final values of packed and boxesLeft.",
             "evidence": "prediction",
@@ -214,10 +245,10 @@
                 "explanation": "Six minutes at five liters per minute means six repetitions of add five liters. A single addition could produce the same total but no longer describes the timed process."
             },
             "hints": [
-                "How many minutes pass?",
-                "How much is added per minute?",
-                "Repeat once per minute.",
-                "Six repetitions, each adding 5 liters."
+                "Match the number of minutes to the number of repetitions.",
+                "The loop repeats an action once per minute; the amount added per repetition stays 5 liters.",
+                "Two minutes at 5 liters per minute means two repetitions of add 5, not one addition of 10.",
+                "Six minutes means six passes; keep the per-pass amount at 5 and reject the forever option."
             ]
         }
     ],
