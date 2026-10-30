@@ -1,18 +1,27 @@
 {
     "id": "spring-boot.controllers",
     "version": 1,
-    "sequence": 87,
+    "sequence": 157,
     "courseId": "spring-boot",
     "title": "Controllers that answer with a status",
     "summary": "Map a GET route, validate the path id, and choose the response status explicitly.",
-    "skills": ["spring.boot", "spring.controllers"],
-    "prerequisites": ["java.oop", "http.basics"],
+    "skills": [
+        "spring.boot",
+        "spring.controllers"
+    ],
+    "prerequisites": [
+        "java.oop",
+        "http.basics"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:spring"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:spring"
+    ],
     "hints": [
         "The controller already injects ProductService, so keep that constructor.",
         "Add @Validated on the class and @Positive on the path variable.",
@@ -44,19 +62,24 @@
             "id": "null-404",
             "description": "Thinking a null return becomes 404.",
             "stepId": "apply",
-            "feedback": "A null body still produces 200. Return ResponseEntity.notFound().build() when the optional is empty."
+            "testDescription": "A found product returns 200 and a missing product returns 404.",
+            "feedback": "A null body still produces 200. Return ResponseEntity.notFound().build() when the optional is empty.",
+            "followUpSkill": "spring.controllers"
         },
         {
             "id": "validation-scope",
             "description": "Adding @Positive without enabling method validation.",
-            "stepId": "check",
-            "feedback": "Annotate the controller with @Validated so Spring validates the method arguments before the body runs."
+            "stepId": "apply",
+            "testDescription": "The GET route binds a validated positive id.",
+            "feedback": "Annotate the controller with @Validated so Spring validates method arguments before the body runs."
         },
         {
             "id": "entity-shape",
             "description": "Returning the persistence entity as the API contract.",
-            "stepId": "apply",
-            "feedback": "The entity follows the table. A response model keeps the API stable and hides internal columns."
+            "stepId": "check",
+            "diagnostic": "Choosing the statement that the entity keeps the API stable.",
+            "feedback": "The entity follows the table. A response model keeps the API stable and hides internal columns.",
+            "followUpSkill": "spring.data"
         }
     ],
     "lesson": {
@@ -155,7 +178,11 @@
                     "kind": "static",
                     "description": "The class stays a validated REST controller.",
                     "file": "ProductController.java",
-                    "includes": ["@RestController", "@Validated", "class ProductController"],
+                    "includes": [
+                        "@RestController",
+                        "@Validated",
+                        "class ProductController"
+                    ],
                     "excludes": []
                 },
                 {
@@ -178,16 +205,33 @@
                         "ResponseEntity::ok",
                         "ResponseEntity.notFound().build()"
                     ],
-                    "excludes": ["orElse(null)"]
+                    "excludes": [
+                        "orElse(null)"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductController.java",
-                    "includes": ["@RestController"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "@RestController"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Keep the existing constructor and the ProductService field.",
+                "Add @Validated to the controller so method constraints are checked.",
+                "Annotate the path variable with @Positive and change the return type to ResponseEntity<Product>.",
+                "Map the Optional with ResponseEntity::ok and call ResponseEntity.notFound().build() when it is empty."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "mvn test",
+                "description": "Compile the project and run the Spring Boot test suite."
+            }
         },
         {
             "kind": "explain",
@@ -222,7 +266,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Annotations bind the method to a route, ResponseEntity makes the status explicit, and @Validated lets the constraint reject an invalid id before the lookup. A null body still produces 200 unless the handler returns a status."
+            "explanation": "Annotations bind the method to a route, ResponseEntity makes the status explicit, and @Validated lets the constraint reject an invalid id before the lookup. A null body still produces 200 unless the handler returns a status.",
+            "hints": [
+                "Compare each statement with the controller you just wrote.",
+                "A null body is written with the current status; it does not select 404.",
+                "Constraints on method arguments run only when method validation is enabled.",
+                "The entity mirrors the table; the API contract is a separate type."
+            ]
         }
     ],
     "evaluation": {
@@ -242,5 +292,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional"]
+    "tags": [
+        "professional"
+    ]
 }
