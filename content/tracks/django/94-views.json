@@ -5,23 +5,14 @@
     "courseId": "django",
     "title": "JSON views without N+1 queries",
     "summary": "Return explicit fields with JsonResponse, handle missing rows, and load relations in one query.",
-    "skills": [
-        "django.views",
-        "django.testing"
-    ],
-    "prerequisites": [
-        "django.models",
-        "http.basics"
-    ],
+    "skills": ["django.views", "django.testing"],
+    "prerequisites": ["django.models", "http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:django"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:django"],
     "hints": [
         "The URLconf is already correct; focus on the two views.",
         "Add select_related(\"category\") before .all() in the list view.",
@@ -186,9 +168,7 @@
                     "kind": "static",
                     "description": "The list view loads each category with its item.",
                     "file": "views.py",
-                    "includes": [
-                        "Item.objects.select_related(\"category\").all()"
-                    ],
+                    "includes": ["Item.objects.select_related(\"category\").all()"],
                     "excludes": []
                 },
                 {
@@ -212,9 +192,7 @@
                         "get_object_or_404(",
                         "pk=item_id"
                     ],
-                    "excludes": [
-                        "Item.objects.get(pk=item_id)"
-                    ]
+                    "excludes": ["Item.objects.get(pk=item_id)"]
                 },
                 {
                     "kind": "static",
@@ -230,12 +208,8 @@
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "views.py",
-                    "includes": [
-                        "Item.objects.select_related(\"category\").all()"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["Item.objects.select_related(\"category\").all()"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -326,8 +300,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
