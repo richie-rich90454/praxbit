@@ -430,16 +430,19 @@ export class ApiClient {
         }
         // Native identity is only asserted for the bearer flow: token establishment
         // and token-authenticated calls. Cookie sessions keep the web defaults.
-        if (this.native && (bearer || NATIVE_AUTH_PATHS.has(path))) {
+        const nativeAuth = this.native && NATIVE_AUTH_PATHS.has(path);
+        if (this.native && (bearer || nativeAuth)) {
             headers[NATIVE_CLIENT_HEADER] = "native";
         }
-        if (!bearer && mutation) {
+        // Native token establishment is header-authenticated, so it neither
+        // needs a CSRF cookie nor sends one from the WebView.
+        if (!bearer && mutation && !nativeAuth) {
             headers["x-csrf-token"] = await this.ensureCsrf();
         }
 
         const response = await fetch(`${this.baseUrl}${path}`, {
             method,
-            credentials: bearer ? "omit" : "include",
+            credentials: bearer || nativeAuth ? "omit" : "include",
             headers,
             ...(body === undefined ? {} : { body: JSON.stringify(body) }),
         });
