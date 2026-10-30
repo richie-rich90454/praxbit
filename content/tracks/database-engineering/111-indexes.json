@@ -5,23 +5,14 @@
     "courseId": "database-engineering",
     "title": "Read the query before the index",
     "summary": "Design one composite index from a real query and verify it with EXPLAIN.",
-    "skills": [
-        "sql.postgresql",
-        "sql.indexes"
-    ],
-    "prerequisites": [
-        "sql.queries",
-        "sql.modeling"
-    ],
+    "skills": ["sql.postgresql", "sql.indexes"],
+    "prerequisites": ["sql.queries", "sql.modeling"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:database",
-        "icon:database"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
     "hints": [
         "The query filters customer_id and status with equality, then sorts by placed_at.",
         "Order the index columns: equality filters first, the sort column last.",
@@ -206,26 +188,20 @@
                         "CREATE INDEX orders_customer_status_placed_idx",
                         "ON orders (customer_id, status, placed_at DESC)"
                     ],
-                    "excludes": [
-                        "ON orders (status, placed_at DESC)"
-                    ]
+                    "excludes": ["ON orders (status, placed_at DESC)"]
                 },
                 {
                     "kind": "static",
                     "description": "The index covers the selected columns.",
                     "file": "indexes.sql",
-                    "includes": [
-                        "INCLUDE (id, total_cents)"
-                    ],
+                    "includes": ["INCLUDE (id, total_cents)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The plan is measured with real timing and buffer counts.",
                     "file": "indexes.sql",
-                    "includes": [
-                        "EXPLAIN (ANALYZE, BUFFERS)"
-                    ],
+                    "includes": ["EXPLAIN (ANALYZE, BUFFERS)"],
                     "excludes": []
                 },
                 {
@@ -244,12 +220,8 @@
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "indexes.sql",
-                    "includes": [
-                        "DROP INDEX orders_status_idx;"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["DROP INDEX orders_status_idx;"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -323,9 +295,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems",
-        "web"
-    ]
+    "tags": ["professional", "systems", "web"]
 }
