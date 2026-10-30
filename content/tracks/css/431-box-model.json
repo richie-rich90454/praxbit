@@ -1,0 +1,262 @@
+{
+    "id": "css.box-model",
+    "version": 1,
+    "sequence": 217,
+    "courseId": "css",
+    "title": "Box model and spacing",
+    "summary": "Control margin, border, padding, and content width with box-sizing.",
+    "skills": [
+        "web.css"
+    ],
+    "prerequisites": [
+        "web.html"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-css",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "computed-style-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "overflowing-card",
+        "briefing": "A card with 100% width plus padding overflows its container. Fix the box model so width includes padding and set consistent spacing."
+    },
+    "objectives": [
+        {
+            "id": "box-sizing",
+            "description": "Use border-box sizing.",
+            "stepIds": [
+                "fix-box"
+            ]
+        },
+        {
+            "id": "spacing",
+            "description": "Set padding and margin consistently.",
+            "stepIds": [
+                "fix-box"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain the box model.",
+            "stepIds": [
+                "box-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:layout"
+    ],
+    "hints": [
+        "Set box-sizing: border-box on the card.",
+        "Use padding for inner space and margin for outer space.",
+        "Width 100% with border-box includes padding.",
+        "Apply * { box-sizing: border-box; }, .card { width: 100%; padding: 16px; margin-bottom: 16px; }."
+    ],
+    "misconceptions": [
+        {
+            "id": "content-box-overflow",
+            "description": "Expecting width: 100% to include padding by default.",
+            "stepId": "fix-box",
+            "testDescription": "The card uses border-box sizing.",
+            "feedback": "The default content-box adds padding outside the declared width. Use border-box so padding is included.",
+            "followUpSkill": "web.css"
+        },
+        {
+            "id": "margin-padding-confusion",
+            "description": "Using margin for inner spacing.",
+            "stepId": "box-claims",
+            "answer": "margin-inner",
+            "feedback": "Padding is inside the border and affects background; margin is outside and creates space between elements.",
+            "followUpSkill": "web.css"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The box model",
+                "body": "Every element is a box with content, padding, border, and margin. Padding is inside the border; margin is outside it."
+            },
+            {
+                "title": "box-sizing",
+                "body": "content-box adds padding and border to the declared width. border-box includes them, preventing overflow."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Padding",
+                "definition": "Space between content and border."
+            },
+            {
+                "term": "Margin",
+                "definition": "Space outside the border between elements."
+            },
+            {
+                "term": "border-box",
+                "definition": "A sizing mode where width includes padding and border."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Box model and spacing",
+            "prompt": "Read the explanation, then fix the CSS.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The box model",
+                    "body": "Every element is a box with content, padding, border, and margin. Padding is inside the border; margin is outside it."
+                },
+                {
+                    "title": "box-sizing",
+                    "body": "content-box adds padding and border to the declared width. border-box includes them, preventing overflow."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Padding",
+                    "definition": "Space between content and border."
+                },
+                {
+                    "term": "Margin",
+                    "definition": "Space outside the border between elements."
+                },
+                {
+                    "term": "border-box",
+                    "definition": "A sizing mode where width includes padding and border."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-box",
+            "title": "Fix the box model",
+            "prompt": "Edit styles.css. Use border-box and set consistent padding and margin.",
+            "evidence": "construction",
+            "language": "css",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Card</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <div class=\"card\">Content</div>\n</body>\n</html>\n",
+                    "editable": false,
+                    "language": "html"
+                },
+                {
+                    "path": "styles.css",
+                    "content": ".card { width: 100%; padding: 16px; background: #fff; border: 1px solid #D6D6D6; }\n",
+                    "editable": true,
+                    "language": "css"
+                }
+            ],
+            "entry": "styles.css",
+            "preview": "css",
+            "tests": [
+                {
+                    "kind": "css",
+                    "description": "The card uses border-box sizing.",
+                    "selector": ".card",
+                    "property": "box-sizing",
+                    "expected": "border-box"
+                },
+                {
+                    "kind": "css",
+                    "description": "The card has 16px padding.",
+                    "selector": ".card",
+                    "property": "padding-top",
+                    "expected": "16px"
+                },
+                {
+                    "kind": "css",
+                    "description": "The card has a 1px border.",
+                    "selector": ".card",
+                    "property": "border-top-width",
+                    "expected": "1px"
+                },
+                {
+                    "kind": "static",
+                    "description": "border-box is applied globally or to the card.",
+                    "file": "styles.css",
+                    "includes": [
+                        "border-box"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "hints": [
+                "Add box-sizing: border-box.",
+                "Apply it to * or .card.",
+                "Keep padding at 16px.",
+                "Use * { box-sizing: border-box; } and .card { width: 100%; padding: 16px; margin-bottom: 16px; }."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "box-claims",
+            "title": "Box model claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Distinguish inner and outer space.",
+                "border-box includes padding and border.",
+                "Margin collapses in some cases.",
+                "Select padding inner, margin outer, border-box; reject margin-inner."
+            ],
+            "statements": [
+                {
+                    "id": "padding-inner",
+                    "label": "Padding is inside the border.",
+                    "correct": true
+                },
+                {
+                    "id": "margin-outer",
+                    "label": "Margin is outside the border.",
+                    "correct": true
+                },
+                {
+                    "id": "margin-inner",
+                    "label": "Margin is the right tool for inner spacing.",
+                    "correct": false
+                },
+                {
+                    "id": "border-box",
+                    "label": "border-box includes padding and border in the width.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Padding is inner space, margin is outer space, and border-box keeps widths predictable."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and computed-style tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
