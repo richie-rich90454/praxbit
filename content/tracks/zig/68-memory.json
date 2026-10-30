@@ -5,24 +5,14 @@
     "courseId": "zig",
     "title": "Allocations and cleanup",
     "summary": "Allocate a struct with an allocator, propagate errors with try, and release it with defer.",
-    "skills": [
-        "zig.memory",
-        "zig.build",
-        "zig.testing"
-    ],
-    "prerequisites": [
-        "zig.syntax",
-        "concept.testing"
-    ],
+    "skills": ["zig.memory", "zig.build", "zig.testing"],
+    "prerequisites": ["zig.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:zig"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:zig"],
     "hints": [
         "makePoint returns a pointer, so the allocation result has type *Point.",
         "allocator.create(Point) returns an error union; bind it with try.",
@@ -200,22 +181,15 @@
                     "kind": "static",
                     "description": "The allocation is propagated with try and assigned to a pointer.",
                     "file": "main.zig",
-                    "includes": [
-                        "const point = try allocator.create(Point);"
-                    ],
+                    "includes": ["const point = try allocator.create(Point);"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "main releases the allocation with defer.",
                     "file": "main.zig",
-                    "includes": [
-                        "defer allocator.destroy(point);"
-                    ],
-                    "excludes": [
-                        "TODO",
-                        "error.NotImplemented"
-                    ]
+                    "includes": ["defer allocator.destroy(point);"],
+                    "excludes": ["TODO", "error.NotImplemented"]
                 },
                 {
                     "kind": "static",
@@ -224,9 +198,7 @@
                     "includes": [
                         "fn makePoint(allocator: std.mem.Allocator, x: i32, y: i32) !*Point"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -306,7 +278,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
