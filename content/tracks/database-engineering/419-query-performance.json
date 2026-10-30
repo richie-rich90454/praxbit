@@ -1,18 +1,28 @@
 {
     "id": "database-engineering.query-performance",
     "version": 1,
-    "sequence": 419,
+    "sequence": 185,
     "courseId": "database-engineering",
     "title": "Make the query do less",
     "summary": "Write a filtered aggregate, read a plan, and connect long-lived snapshots to query performance.",
-    "skills": ["sql.indexes", "sql.postgresql"],
-    "prerequisites": ["sql.queries", "sql.modeling"],
+    "skills": [
+        "sql.indexes",
+        "sql.postgresql"
+    ],
+    "prerequisites": [
+        "sql.queries",
+        "sql.modeling"
+    ],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": ["source-editing", "sql-execution", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "sql-execution",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,25 +34,38 @@
         {
             "id": "query",
             "description": "Write the filtered revenue query.",
-            "stepIds": ["revenue-query"]
+            "stepIds": [
+                "revenue-query"
+            ]
         },
         {
             "id": "plan",
             "description": "Identify scan, function, and projection problems in a plan.",
-            "stepIds": ["plan-review"]
+            "stepIds": [
+                "plan-review"
+            ]
         },
         {
             "id": "isolation",
             "description": "Connect long snapshots to bloat and vacuum.",
-            "stepIds": ["isolation-check"]
+            "stepIds": [
+                "isolation-check"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain measurement and pagination trade-offs.",
-            "stepIds": ["perf-transfer"]
+            "stepIds": [
+                "perf-transfer"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:database"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:database",
+        "icon:database"
+    ],
     "hints": [
         "Filter status and the date range before grouping.",
         "Join customers only for the name you return.",
@@ -202,9 +225,21 @@
                     "kind": "sql",
                     "description": "Excludes cancelled, refunded, and out-of-range orders.",
                     "expectedRows": [
-                        ["Bo", 1, 5000],
-                        ["Ada", 2, 3000],
-                        ["Cy", 1, 1000]
+                        [
+                            "Bo",
+                            1,
+                            5000
+                        ],
+                        [
+                            "Ada",
+                            2,
+                            3000
+                        ],
+                        [
+                            "Cy",
+                            1,
+                            1000
+                        ]
                     ]
                 }
             ]
@@ -367,5 +402,9 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "systems", "web"]
+    "tags": [
+        "professional",
+        "systems",
+        "web"
+    ]
 }
