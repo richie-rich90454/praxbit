@@ -1,0 +1,350 @@
+{
+    "id": "aspnet-core.auth",
+    "version": 1,
+    "sequence": 164,
+    "courseId": "aspnet-core",
+    "title": "JWT authentication in the middleware pipeline",
+    "summary": "Register JWT bearer authentication, order the pipeline, and protect an action with a role requirement.",
+    "skills": [
+        "aspnet.middleware",
+        "aspnet.di"
+    ],
+    "prerequisites": [
+        "aspnet.di",
+        "security.auth"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 10,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "authentication",
+        "briefing": "The catalog action is open to anonymous callers because the application never registers an authentication scheme and never runs the authentication middleware. Add JWT bearer authentication and protect the action."
+    },
+    "objectives": [
+        {
+            "id": "objective-register",
+            "description": "Register JWT bearer authentication and authorization services.",
+            "stepIds": [
+                "configure"
+            ]
+        },
+        {
+            "id": "objective-protect",
+            "description": "Require an authenticated member on a controller action.",
+            "stepIds": [
+                "protect"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Distinguish a missing identity from a missing role.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:dotnet"
+    ],
+    "hints": [
+        "AddAuthentication selects the default scheme; AddJwtBearer configures it.",
+        "Read the authority and audience from configuration.",
+        "Call UseAuthentication before UseAuthorization.",
+        "Put [Authorize(Roles = \"Member\")] on the action that reads the catalog."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-middleware",
+            "description": "Registering authentication without adding it to the pipeline.",
+            "stepId": "configure",
+            "testDescription": "Authentication runs before authorization and endpoint mapping.",
+            "feedback": "The service registration creates the handler. UseAuthentication must run so the handler populates HttpContext.User.",
+            "followUpSkill": "aspnet.middleware"
+        },
+        {
+            "id": "authorization-order",
+            "description": "Running authorization before authentication.",
+            "stepId": "configure",
+            "testDescription": "Authentication runs before authorization and endpoint mapping.",
+            "feedback": "Authorization reads the identity established by authentication. Reverse the order and every caller looks anonymous."
+        },
+        {
+            "id": "anonymous-attribute",
+            "description": "Relying on the controller route to imply authentication.",
+            "stepId": "protect",
+            "testDescription": "The catalog action requires an authenticated member.",
+            "feedback": "A route is only a path. Add [Authorize] with the role requirement; otherwise the action is anonymous.",
+            "followUpSkill": "aspnet.middleware"
+        },
+        {
+            "id": "role-401",
+            "description": "Returning 401 for an authenticated caller without the role.",
+            "stepId": "transfer",
+            "answer": "unauthorized",
+            "feedback": "The identity is known, so the correct response is 403. A 401 challenges a caller who has not authenticated.",
+            "followUpSkill": "aspnet.middleware"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Authentication fills the identity",
+                "body": "AddAuthentication registers the default scheme and AddJwtBearer configures token validation against an authority and audience. UseAuthentication runs the handler and sets HttpContext.User. Without the middleware, the identity stays empty even though the service is registered."
+            },
+            {
+                "title": "Authorization consumes the identity",
+                "body": "UseAuthorization evaluates policies and attributes such as [Authorize(Roles = \"Member\")]. It must run after authentication because it reads the user that authentication produced. MapControllers adds the endpoints that the pipeline protects."
+            },
+            {
+                "title": "401 and 403 are different answers",
+                "body": "401 means the caller has not authenticated. 403 means the caller is authenticated but lacks permission. A role requirement turns an authenticated non-member into 403, not 401."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Authentication scheme",
+                "definition": "A named handler that validates credentials and creates an identity."
+            },
+            {
+                "term": "JWT bearer",
+                "definition": "An authorization header scheme that carries a signed token."
+            },
+            {
+                "term": "Authorization policy",
+                "definition": "A rule that decides whether an identity may use a resource."
+            },
+            {
+                "term": "Middleware order",
+                "definition": "The registration order that determines which components process a request."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Schemes, identity, and ordered middleware",
+            "prompt": "Read the explanation, then configure the pipeline and protect the action.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Authentication fills the identity",
+                    "body": "AddAuthentication registers the default scheme and AddJwtBearer configures token validation against an authority and audience. UseAuthentication runs the handler and sets HttpContext.User. Without the middleware, the identity stays empty even though the service is registered."
+                },
+                {
+                    "title": "Authorization consumes the identity",
+                    "body": "UseAuthorization evaluates policies and attributes such as [Authorize(Roles = \"Member\")]. It must run after authentication because it reads the user that authentication produced. MapControllers adds the endpoints that the pipeline protects."
+                },
+                {
+                    "title": "401 and 403 are different answers",
+                    "body": "401 means the caller has not authenticated. 403 means the caller is authenticated but lacks permission. A role requirement turns an authenticated non-member into 403, not 401."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Authentication scheme",
+                    "definition": "A named handler that validates credentials and creates an identity."
+                },
+                {
+                    "term": "JWT bearer",
+                    "definition": "An authorization header scheme that carries a signed token."
+                },
+                {
+                    "term": "Authorization policy",
+                    "definition": "A rule that decides whether an identity may use a resource."
+                },
+                {
+                    "term": "Middleware order",
+                    "definition": "The registration order that determines which components process a request."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "configure",
+            "title": "Register the authentication pipeline",
+            "prompt": "Edit Program.cs. Register JWT bearer authentication with the authority and audience from configuration, add authorization, and place the middleware in a safe order.",
+            "evidence": "construction",
+            "hints": [
+                "AddAuthentication takes the default scheme.",
+                "AddJwtBearer receives an options callback for Authority and Audience.",
+                "AddAuthorization registers the authorization services.",
+                "UseAuthentication must come before UseAuthorization and MapControllers."
+            ],
+            "files": [
+                {
+                    "path": "Program.cs",
+                    "content": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.Extensions.DependencyInjection;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddControllers();\n// TODO: register JWT bearer authentication and authorization\n\nvar app = builder.Build();\n\napp.MapControllers();\n\napp.Run();\n",
+                    "editable": true,
+                    "language": "csharp"
+                }
+            ],
+            "entry": "Program.cs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet test",
+                "description": "Build the host and run the authentication pipeline tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "JWT bearer authentication uses configuration for its authority and audience.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "AddAuthentication(JwtBearerDefaults.AuthenticationScheme)",
+                        ".AddJwtBearer(options =>",
+                        "options.Authority = builder.Configuration[\"Auth:Authority\"]",
+                        "options.Audience = builder.Configuration[\"Auth:Audience\"]"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Authorization services are registered.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "builder.Services.AddAuthorization();"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Authentication runs before authorization and endpoint mapping.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "app.UseAuthentication();\napp.UseAuthorization();\n\napp.MapControllers();"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "code",
+            "id": "protect",
+            "title": "Protect the catalog action",
+            "prompt": "Edit CatalogController.cs. Require an authenticated member for the list action while keeping the API controller and route.",
+            "evidence": "construction",
+            "hints": [
+                "Import Microsoft.AspNetCore.Authorization.",
+                "Place [Authorize] on the action that reads the catalog.",
+                "Add Roles = \"Member\" so a bare authenticated user is not enough.",
+                "Keep [ApiController] and the route unchanged."
+            ],
+            "files": [
+                {
+                    "path": "CatalogController.cs",
+                    "content": "using Microsoft.AspNetCore.Mvc;\n\nnamespace Praxbit.Catalog.Controllers;\n\n[ApiController]\n[Route(\"api/[controller]\")]\npublic class CatalogController : ControllerBase\n{\n    [HttpGet]\n    public IActionResult List()\n    {\n        // TODO: require an authenticated member\n        return Ok(new[] { \"microscope\" });\n    }\n}\n",
+                    "editable": true,
+                    "language": "csharp"
+                }
+            ],
+            "entry": "CatalogController.cs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet test",
+                "description": "Run the controller authorization tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The catalog action requires an authenticated member.",
+                    "file": "CatalogController.cs",
+                    "includes": [
+                        "using Microsoft.AspNetCore.Authorization;",
+                        "[Authorize(Roles = \"Member\")]"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The controller remains an API controller with its route.",
+                    "file": "CatalogController.cs",
+                    "includes": [
+                        "[ApiController]",
+                        "[Route(\"api/[controller]\")]"
+                    ],
+                    "excludes": [
+                        "AllowAnonymous"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to an authenticated non-member",
+            "prompt": "A user authenticates successfully but has no Member role. The list action requires [Authorize(Roles = \"Member\")]. Which response is correct?",
+            "evidence": "transfer",
+            "hints": [
+                "The caller is authenticated; the token was accepted.",
+                "Authorization checks the role after authentication.",
+                "401 is for a missing or invalid identity.",
+                "403 is for a known identity without permission."
+            ],
+            "quiz": {
+                "prompt": "A user authenticates successfully but has no Member role. The list action requires [Authorize(Roles = \"Member\")]. Which response is correct?",
+                "options": [
+                    {
+                        "id": "forbidden",
+                        "label": "403 because the identity is known but lacks the required role."
+                    },
+                    {
+                        "id": "unauthorized",
+                        "label": "401 because the caller lacks the Member role."
+                    },
+                    {
+                        "id": "success",
+                        "label": "200 because any authenticated user may read the catalog."
+                    },
+                    {
+                        "id": "redirect",
+                        "label": "302 to the login page because the role is missing."
+                    }
+                ],
+                "correctId": "forbidden",
+                "explanation": "Authentication succeeded, so the server knows the caller. Authorization then rejects the missing role with 403. A 401 would incorrectly suggest that the caller never authenticated."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 170,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
