@@ -2,7 +2,7 @@ import { render } from "solid-js/web";
 import { registerSW } from "virtual:pwa-register";
 import { App } from "./app/App.tsx";
 import { installDeepLinkHandler, navigateToPath } from "./platform/deep-link-handler.ts";
-import { restoreNativeToken, resumeSavedReminders } from "./platform/services.ts";
+import { restoreNativeToken, resumeSavedReminders, platformCapabilities } from "./platform/services.ts";
 import "./styles/global.css";
 
 async function start(): Promise<void> {
@@ -10,7 +10,9 @@ async function start(): Promise<void> {
     if (root === null) {
         throw new Error("Praxbit could not find its root element.");
     }
-    registerSW({ immediate: true });
+    if (!platformCapabilities.native) {
+        registerSW({ immediate: true });
+    }
     await restoreNativeToken();
     render(function renderApp() {
         return <App />;
