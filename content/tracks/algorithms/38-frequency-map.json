@@ -49,13 +49,30 @@
             "id": "object-keys",
             "description": "Using a plain object for arbitrary key values.",
             "stepId": "mode-code",
+            "testDescription": "Counts across repeated groups.",
             "feedback": "A Map handles any key type without prototype collisions and preserves clear counting semantics."
         },
         {
             "id": "nondeterministic-tie",
             "description": "Returning whichever value happens to be seen first on a tie.",
             "stepId": "mode-code",
-            "feedback": "Input order should not silently decide a tie. Use the documented lexical rule."
+            "testDescription": "Tie between three values picks the smallest.",
+            "feedback": "Input order should not silently decide a tie. Use the documented lexical rule.",
+            "followUpSkill": "algorithms.hashing"
+        },
+        {
+            "id": "wrong-growth",
+            "description": "Believing a frequency map makes pairwise comparison linear.",
+            "stepId": "complexity-check",
+            "answer": "one",
+            "feedback": "One map lookup is constant, but comparing every pair still needs n times n comparisons."
+        },
+        {
+            "id": "sorted-keys",
+            "description": "Believing a Map guarantees sorted iteration.",
+            "stepId": "map-check",
+            "answer": "order",
+            "feedback": "A Map preserves insertion order for iteration in JavaScript, not sorted key order."
         }
     ],
     "lesson": {
@@ -138,6 +155,12 @@
                     "args": [["a", "b", "b", "a", "a", "c"]],
                     "expected": "a"
                 }
+            ],
+            "hints": [
+                "Count each distinct value before choosing a winner.",
+                "Store counts in a Map so arbitrary strings are safe keys.",
+                "Track the best count and compare values when counts tie.",
+                "Return the value with the highest count; on a tie choose the lexicographically smaller value."
             ]
         },
         {
@@ -170,8 +193,8 @@
                 "explanation": "Comparing each element with every other is quadratic. A frequency map avoids the repeated scan."
             },
             "hints": [
-                "Nested loops multiply work.",
-                "Each of n elements compares with up to n others.",
+                "Nested loops multiply the work.",
+                "Each of n elements can compare with up to n others.",
                 "The growth is n times n.",
                 "O(n²)."
             ]
@@ -204,7 +227,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Hash maps trade memory for fast lookup. They do not provide sorted iteration."
+            "explanation": "Hash maps trade memory for fast lookup. They do not provide sorted iteration.",
+            "hints": [
+                "A hash map trades memory for lookup speed.",
+                "Keys are not stored in sorted order.",
+                "Tie-breaking is a correctness rule, not an implementation detail.",
+                "Select expected constant lookup, extra memory, and explicit ties; reject sorted key order."
+            ]
         }
     ],
     "evaluation": {
