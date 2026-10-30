@@ -36,7 +36,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "swift.packages",
-    "sequence": 206,
+    "sequence": 109,
     "title": "Package an async command-line tool",
     "summary": "Turn a library manifest into an executable package, protect shared counts with an actor, and repair a missing package dependency.",
     "skills": [
