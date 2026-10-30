@@ -5,22 +5,14 @@
     "courseId": "typescript",
     "title": "Handle every union member",
     "summary": "Use a discriminated union and an exhaustive switch so a missing event cannot ship.",
-    "skills": [
-        "ts.types"
-    ],
-    "prerequisites": [
-        "ts.generics"
-    ],
+    "skills": ["ts.types"],
+    "prerequisites": ["ts.generics"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "syntax-diagnostics",
-            "transpiled-tests"
-        ]
+        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "handle-visit",
             "description": "Handle every member of the event union.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "explain-exhaustive",
             "description": "Explain discriminated unions and exhaustive checks.",
-            "stepIds": [
-                "union-check"
-            ]
+            "stepIds": ["union-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:typescript"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:typescript"],
     "hints": [
         "The union already declares a visit member with a count field.",
         "Add a case for event.kind equal to visit.",
@@ -264,8 +247,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
