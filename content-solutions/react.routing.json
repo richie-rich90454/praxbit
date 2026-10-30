@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "access.ts": "type User = { role: \"member\" | \"admin\" } | null;\ntype RouteMeta = { requiresAuth: boolean; adminOnly?: boolean };\n\nfunction canAccessRoute(route: RouteMeta, user: User): boolean {\n  if (!route.requiresAuth) {\n    return true;\n  }\n  if (user === null) {\n    return false;\n  }\n  if (route.adminOnly === true) {\n    return user.role === \"admin\";\n  }\n  return true;\n}\n\nfunction routeRedirect(route: RouteMeta, user: User): string | null {\n  if (canAccessRoute(route, user)) {\n    return null;\n  }\n  return user === null ? \"/login\" : \"/catalog\";\n}\n"
+            }
+        }
+    }
+}
