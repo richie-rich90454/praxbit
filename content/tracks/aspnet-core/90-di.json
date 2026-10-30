@@ -5,23 +5,14 @@
     "courseId": "aspnet-core",
     "title": "Service lifetimes and middleware order",
     "summary": "Register the DbContext and service in the request scope and order the middleware safely.",
-    "skills": [
-        "aspnet.di",
-        "aspnet.middleware"
-    ],
-    "prerequisites": [
-        "aspnet.controllers",
-        "architecture.modularity"
-    ],
+    "skills": ["aspnet.di", "aspnet.middleware"],
+    "prerequisites": ["aspnet.controllers", "architecture.modularity"],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:dotnet"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:dotnet"],
     "hints": [
         "Read the lifetimes: AddDbContext registers the context as scoped by default.",
         "A singleton is created once and keeps its dependencies for the life of the application.",
@@ -196,12 +178,8 @@
                     "kind": "static",
                     "description": "The product service uses the request scope.",
                     "file": "Program.cs",
-                    "includes": [
-                        "builder.Services.AddScoped<IProductService, ProductService>()"
-                    ],
-                    "excludes": [
-                        "AddSingleton<IProductService, ProductService>"
-                    ]
+                    "includes": ["builder.Services.AddScoped<IProductService, ProductService>()"],
+                    "excludes": ["AddSingleton<IProductService, ProductService>"]
                 },
                 {
                     "kind": "static",
@@ -216,21 +194,15 @@
                     "kind": "static",
                     "description": "Controllers are mapped as endpoints.",
                     "file": "Program.cs",
-                    "includes": [
-                        "app.MapControllers();"
-                    ],
+                    "includes": ["app.MapControllers();"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Program.cs",
-                    "includes": [
-                        "builder.Services.AddDbContext<CatalogDbContext>(options =>"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["builder.Services.AddDbContext<CatalogDbContext>(options =>"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -321,8 +293,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
