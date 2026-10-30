@@ -1,0 +1,317 @@
+{
+    "id": "devops-practice.tls",
+    "version": 1,
+    "sequence": 413,
+    "courseId": "devops-practice",
+    "title": "Trust the certificate, not the padlock",
+    "summary": "Review an expired certificate and a disabled verification path, then explain chain, hostname, and transport rules.",
+    "skills": ["devops.networking", "concept.security"],
+    "prerequisites": ["devops.networking", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["configuration-review", "no-execution"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "tls",
+        "briefing": "The status page started showing certificate warnings. The last deploy added curl -k to the health probe, redirected HTTP to HTTPS but skipped HSTS, and replaced the certificate with one issued for the wrong hostname. Review the change before it spreads to the API."
+    },
+    "objectives": [
+        {
+            "id": "review",
+            "description": "Identify expired, mismatched, and unverified TLS configuration.",
+            "stepIds": ["tls-review"]
+        },
+        {
+            "id": "check",
+            "description": "Choose the check a client performs against a certificate.",
+            "stepIds": ["cert-check"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain trust chains, hostnames, and HSTS.",
+            "stepIds": ["tls-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:lock"],
+    "hints": [
+        "A padlock means the connection is encrypted, not that the site is honest.",
+        "The client checks the chain, the dates, and the hostname.",
+        "curl -k disables the check you are trying to test.",
+        "Fix the certificate and hostname, remove -k, and add HSTS after HTTPS works."
+    ],
+    "misconceptions": [
+        {
+            "id": "padlock-trust",
+            "description": "Treating the padlock as proof the site is trustworthy.",
+            "stepId": "tls-review",
+            "answer": "approve:expired,curl-k,hostname,hsts",
+            "feedback": "A padlock only says the connection is encrypted. It does not prove the operator is honest or the certificate matches the hostname.",
+            "followUpSkill": "devops.networking"
+        },
+        {
+            "id": "any-valid-cert",
+            "description": "Believing any valid certificate works for any hostname.",
+            "stepId": "cert-check",
+            "answer": "any",
+            "feedback": "The client checks that the certificate's subject alternative names cover the hostname it requested. A valid certificate for another host still fails."
+        },
+        {
+            "id": "hsts-first",
+            "description": "Adding HSTS before the HTTPS path is correct.",
+            "stepId": "tls-transfer",
+            "answer": "hsts-first",
+            "feedback": "HSTS tells browsers to refuse HTTP for a period. Enable it only after every subdomain and redirect works over HTTPS, or you lock users out."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "What the client verifies",
+                "body": "The client builds a chain to a trusted root, checks the validity dates, and checks that the certificate names the host it requested. A certificate can be valid and still be wrong for this site."
+            },
+            {
+                "title": "Do not disable the check",
+                "body": "curl -k skips certificate verification. A health probe that uses it will report success while users see a warning. Test the path users take, with verification enabled."
+            },
+            {
+                "title": "HSTS is a commitment",
+                "body": "HTTP Strict Transport Security tells browsers to use HTTPS for a period, including subdomains if configured. Turn it on after HTTPS and redirects are correct, and start with a short max-age while testing."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Certificate chain",
+                "definition": "The path from a server certificate through intermediates to a trusted root."
+            },
+            {
+                "term": "Subject alternative name",
+                "definition": "The hostnames a certificate is valid for."
+            },
+            {
+                "term": "HSTS",
+                "definition": "A header that tells browsers to use HTTPS for future requests."
+            },
+            {
+                "term": "SNI",
+                "definition": "The hostname a client sends during the TLS handshake to select a certificate."
+            },
+            {
+                "term": "Certificate verification",
+                "definition": "Checking the chain, dates, and hostname before trusting a connection."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Encryption is not identity",
+            "prompt": "Read the explanation, then review the TLS change.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "What the client verifies",
+                    "body": "The client builds a chain to a trusted root, checks the validity dates, and checks that the certificate names the host it requested. A certificate can be valid and still be wrong for this site."
+                },
+                {
+                    "title": "Do not disable the check",
+                    "body": "curl -k skips certificate verification. A health probe that uses it will report success while users see a warning. Test the path users take, with verification enabled."
+                },
+                {
+                    "title": "HSTS is a commitment",
+                    "body": "HTTP Strict Transport Security tells browsers to use HTTPS for a period, including subdomains if configured. Turn it on after HTTPS and redirects are correct, and start with a short max-age while testing."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Certificate chain",
+                    "definition": "The path from a server certificate through intermediates to a trusted root."
+                },
+                {
+                    "term": "Subject alternative name",
+                    "definition": "The hostnames a certificate is valid for."
+                },
+                {
+                    "term": "HSTS",
+                    "definition": "A header that tells browsers to use HTTPS for future requests."
+                },
+                {
+                    "term": "SNI",
+                    "definition": "The hostname a client sends during the TLS handshake to select a certificate."
+                },
+                {
+                    "term": "Certificate verification",
+                    "definition": "Checking the chain, dates, and hostname before trusting a connection."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "tls-review",
+            "title": "Review the status-page change",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Check the certificate dates and names.",
+                "Look at the health probe command.",
+                "Check whether the redirect is complete and enforced.",
+                "Block the change: the certificate expired, the probe disables verification, and HSTS is missing."
+            ],
+            "artifact": {
+                "title": "TLS and probe change",
+                "caption": "Deploy notes for status.campus.test.",
+                "kind": "diff",
+                "language": "diff",
+                "content": "- server_name status.campus.test;\n- ssl_certificate /etc/tls/status.campus.test.pem;\n+ server_name status.campus.test;\n+ ssl_certificate /etc/tls/api.campus.test.pem;\n\n health check:\n- curl --fail https://status.campus.test/health\n+ curl -k --fail https://status.campus.test/health\n\n redirect:\n+ return 301 https://$host$request_uri;\n\n certificate: expired 12 days ago (renewal job failed silently)"
+            },
+            "findings": [
+                {
+                    "id": "expired",
+                    "label": "The certificate is expired.",
+                    "correct": true
+                },
+                {
+                    "id": "curl-k",
+                    "label": "The health probe disables certificate verification.",
+                    "correct": true
+                },
+                {
+                    "id": "hostname",
+                    "label": "The certificate was issued for api.campus.test, not the status hostname.",
+                    "correct": true
+                },
+                {
+                    "id": "hsts",
+                    "label": "The HTTPS redirect exists but HSTS is not set.",
+                    "correct": true
+                },
+                {
+                    "id": "padlock",
+                    "label": "A padlock in the browser proves the operator is trustworthy.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the change"
+                },
+                {
+                    "id": "block",
+                    "label": "Block until the certificate, probe, and HSTS policy are correct"
+                },
+                {
+                    "id": "renew",
+                    "label": "Only renew the certificate"
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Renewal alone leaves the hostname mismatch, the verification-disabled probe, and the missing HSTS policy."
+        },
+        {
+            "kind": "quiz",
+            "id": "cert-check",
+            "title": "What does the client check?",
+            "prompt": "A certificate is unexpired and chains to a trusted root. What else must match?",
+            "evidence": "prediction",
+            "hints": [
+                "The certificate lists names it is valid for.",
+                "The browser sends the hostname during the handshake.",
+                "A valid certificate for another site is still wrong.",
+                "The certificate must cover the requested hostname."
+            ],
+            "quiz": {
+                "prompt": "Which check decides whether this certificate is valid for status.campus.test?",
+                "options": [
+                    {
+                        "id": "hostname",
+                        "label": "The certificate's subject alternative names cover status.campus.test"
+                    },
+                    {
+                        "id": "any",
+                        "label": "Any unexpired certificate from a trusted root is accepted"
+                    },
+                    {
+                        "id": "ip",
+                        "label": "The server IP address appears in the certificate"
+                    },
+                    {
+                        "id": "padlock",
+                        "label": "The browser shows a padlock"
+                    }
+                ],
+                "correctId": "hostname",
+                "explanation": "Chain and dates are necessary but not sufficient. The certificate must name the host the client requested."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "tls-transfer",
+            "title": "Keep transport trust honest",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Separate encryption from identity.",
+                "A verification-disabled probe cannot detect the user's failure.",
+                "HSTS is enforced by the browser after it sees the header.",
+                "Select chain, hostname, verified probes, and HSTS after HTTPS; reject padlock trust and -k."
+            ],
+            "statements": [
+                {
+                    "id": "chain",
+                    "label": "A client checks the certificate chain and validity dates before trusting a connection.",
+                    "correct": true
+                },
+                {
+                    "id": "hostname",
+                    "label": "The certificate must cover the hostname the client requested.",
+                    "correct": true
+                },
+                {
+                    "id": "probe",
+                    "label": "Health probes should verify certificates the same way users do.",
+                    "correct": true
+                },
+                {
+                    "id": "hsts",
+                    "label": "HSTS should be enabled after HTTPS and redirects are correct.",
+                    "correct": true
+                },
+                {
+                    "id": "insecure",
+                    "label": "curl -k is acceptable in production because the connection is still encrypted.",
+                    "correct": false
+                },
+                {
+                    "id": "hsts-first",
+                    "label": "HSTS can safely be enabled before the HTTPS path works.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Trust depends on chain, dates, hostname, and verified probes. HSTS reinforces HTTPS only after the HTTPS path is correct."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional", "web"]
+}
