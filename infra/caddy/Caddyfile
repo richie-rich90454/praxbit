@@ -1,0 +1,61 @@
+# Praxbit behind Caddy.
+# Both hostnames serve the same Node process. Caddy obtains and renews the
+# certificate automatically once DNS points at this host and ports 80/443 are
+# reachable. Copy this file to /etc/caddy/Caddyfile, or append the site block
+# to an existing Caddyfile. Do not add a static file_server block: the Hono
+# process serves the web build, its CSP, and its security headers.
+{
+	servers {
+		timeouts {
+			read_header 10s
+			write 5m
+			idle 2m
+		}
+	}
+}
+
+praxbit.biszweb.club, praxbit.bisz.dev {
+	encode zstd gzip
+
+	request_body {
+		max_size 1MB
+	}
+
+	reverse_proxy 127.0.0.1:8787 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 120s
+			keepalive 30s
+		}
+	}
+
+	header {
+		defer
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Permitted-Cross-Domain-Policies "none"
+		X-DNS-Prefetch-Control "off"
+		-Server
+	}
+
+	log {
+		output file /var/log/caddy/praxbit-access.log {
+			roll_size 20mb
+			roll_keep 5
+			roll_keep_for 720h
+		}
+		format filter {
+			wrap json
+			fields {
+				# Keep cookies, authorization, and CSRF tokens out of the log.
+				request>headers delete
+				resp_headers delete
+			}
+		}
+	}
+}
