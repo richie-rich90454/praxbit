@@ -30,16 +30,21 @@ import {
     buildPracticePlan,
     completionReward,
     createInitialWorld,
+    demonstratedLanguages,
     earnedAchievements,
     expandEvidenceSkills,
     isWorldRecovered,
     levelForExperience,
+    practiceResult,
     recordPractice,
     recommendMission,
+    type MissionEvaluation,
     type PracticePlan,
+    type RecommendationContext,
     type SessionLength,
     type StepEvaluation,
     type StreakRecord,
+    type WorldActionResult,
 } from "@praxbit/domain";
 import {
     DEFAULT_PREFERENCES,
@@ -88,6 +93,7 @@ export interface LearningContextValue {
     readonly preferences: Accessor<Preferences>;
     readonly progress: Accessor<LocalProgress>;
     readonly mastery: Accessor<Readonly<Record<string, SkillMastery>>>;
+    readonly evidence: Accessor<readonly EvidenceRecord[]>;
     readonly reviews: Accessor<readonly ReviewItem[]>;
     readonly dueReviews: Accessor<readonly ReviewItem[]>;
     readonly world: Accessor<WorldState>;
@@ -101,7 +107,9 @@ export interface LearningContextValue {
     readonly syncStatus: Accessor<SyncStatus>;
     readonly syncMessage: Accessor<string | undefined>;
     readonly outboxCount: Accessor<number>;
+    readonly conflictCount: Accessor<number>;
     readonly online: Accessor<boolean>;
+    readonly aiTutorAvailable: Accessor<boolean>;
     readonly recordStepEvidence: (
         mission: Mission,
         step: MissionStep,
@@ -112,8 +120,13 @@ export interface LearningContextValue {
         mission: Mission,
         attemptId: string,
         hintsByStep: Readonly<Record<string, number>>,
+        evaluation?: MissionEvaluation,
     ) => Promise<CompletionOutcome>;
-    readonly recordPracticeReview: (mission: Mission) => Promise<void>;
+    readonly recordPracticeReview: (
+        mission: Mission,
+        evaluation: MissionEvaluation,
+        hintsByStep: Readonly<Record<string, number>>,
+    ) => Promise<void>;
     readonly recordProjectCompletion: (
         project: ProjectDefinition,
         passedStages: number,
@@ -122,8 +135,10 @@ export interface LearningContextValue {
     readonly applyPlacement: (state: PlacementState) => Promise<void>;
     readonly setOnboarded: (value: boolean) => Promise<void>;
     readonly practicePlan: (length: SessionLength) => PracticePlan;
-    readonly performWorldAction: (action: WorldAction) => Promise<WorldState>;
+    readonly performWorldAction: (action: WorldAction) => Promise<WorldActionResult>;
     readonly syncNow: () => Promise<void>;
+    readonly retryConflicts: () => Promise<void>;
+    readonly discardConflicts: () => Promise<void>;
     readonly login: (handle: string, password: string) => Promise<void>;
     readonly register: (handle: string, password: string) => Promise<void>;
     readonly logout: () => Promise<void>;
@@ -133,10 +148,18 @@ export interface LearningContextValue {
     readonly saveProjectDraft: (
         projectId: string,
         files: Readonly<Record<string, string>>,
+        revision?: number,
     ) => Promise<void>;
     readonly loadProjectDraft: (
         projectId: string,
     ) => Promise<Readonly<Record<string, string>> | undefined>;
+    readonly loadProjectRevision: (projectId: string) => Promise<number | undefined>;
+    readonly queueProjectRevision: (
+        projectId: string,
+        files: Readonly<Record<string, string>>,
+        baseRevision: number,
+        message: string,
+    ) => Promise<void>;
 }
 
 const LearningContext = createContext<LearningContextValue>();
@@ -150,47 +173,6 @@ function todayKey(): string {
 
 function completionRowId(missionId: string, version: number): string {
     return `${missionId}@${version}`;
-}
-
-function skillPrefix(skillId: string): string {
-    return skillId.split(".")[0] ?? skillId;
-}
-
-function languagePrefixes(evidence: readonly EvidenceRecord[]): readonly string[] {
-    const prefixes = new Set<string>();
-    const languageKeys = new Set([
-        "js",
-        "ts",
-        "web",
-        "html",
-        "css",
-        "python",
-        "sql",
-        "java",
-        "c",
-        "cpp",
-        "csharp",
-        "go",
-        "rust",
-        "kotlin",
-        "swift",
-        "ruby",
-        "zig",
-        "lua",
-        "react",
-    ]);
-    for (const record of evidence) {
-        if (record.outcome !== "success") {
-            continue;
-        }
-        for (const skillId of record.skills) {
-            const prefix = skillPrefix(skillId);
-            if (languageKeys.has(prefix)) {
-                prefixes.add(prefix === "html" || prefix === "css" ? "web" : prefix);
-            }
-        }
-    }
-    return [...prefixes];
 }
 
 function evidenceWeight(record: EvidenceRecord, skillId: string): number {
@@ -220,9 +202,11 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
     const [syncStatus, setSyncStatus] = createSignal<SyncStatus>("idle");
     const [syncMessage, setSyncMessage] = createSignal<string | undefined>(undefined);
     const [outboxCount, setOutboxCount] = createSignal(0);
+    const [conflictCount, setConflictCount] = createSignal(0);
     const [online, setOnline] = createSignal(
         typeof navigator === "undefined" ? true : navigator.onLine,
     );
+    const [aiTutorAvailable, setAiTutorAvailable] = createSignal(false);
 
     const completedMissionIds = createMemo(function completedSet(): ReadonlySet<string> {
         return new Set(
@@ -236,63 +220,76 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         return scheduler.due(reviews(), new Date());
     });
 
+    const recommendationContext = createMemo(
+        function buildRecommendationContext(): RecommendationContext {
+            const completedSequences: Record<string, number> = {};
+            for (const completion of completions()) {
+                const mission = getMission(completion.missionId);
+                if (mission !== undefined) {
+                    completedSequences[mission.courseId] = Math.max(
+                        completedSequences[mission.courseId] ?? 0,
+                        mission.sequence,
+                    );
+                }
+            }
+            const misconceptionSkills = new Set<string>();
+            const failureSkills = new Set<string>();
+            for (const record of evidence()) {
+                if (record.outcome !== "failure") {
+                    continue;
+                }
+                const mission = getMission(record.missionId);
+                if (mission === undefined) {
+                    continue;
+                }
+                for (const skillId of mission.skills) {
+                    failureSkills.add(skillId);
+                }
+                for (const misconception of mission.misconceptions) {
+                    if (misconception.stepId !== record.stepId) {
+                        continue;
+                    }
+                    if (misconception.followUpSkill !== undefined) {
+                        misconceptionSkills.add(misconception.followUpSkill);
+                    } else {
+                        for (const skillId of mission.skills) {
+                            misconceptionSkills.add(skillId);
+                        }
+                    }
+                }
+            }
+            const masteryScores: Record<string, number> = {};
+            for (const [skillId, snapshot] of Object.entries(mastery())) {
+                masteryScores[skillId] = snapshot.score;
+            }
+            return {
+                graph: skillGraph,
+                missions,
+                mastery: masteryScores,
+                reviews: reviews(),
+                interests: preferences().interests,
+                challenge: preferences().challenge,
+                completedMissionIds: [...completedMissionIds()],
+                completedMissionSkills: [...completedMissionIds()].flatMap(
+                    function skillsOf(missionId): readonly string[] {
+                        return getMission(missionId)?.skills ?? [];
+                    },
+                ),
+                completedSequences,
+                misconceptionSkills: [...misconceptionSkills],
+                recentFailureSkills: [...failureSkills],
+                skippedSkills: progress().placementSkippedSkills,
+                now: new Date(),
+                variationSeed: Math.floor(Date.now() / 86_400_000),
+            };
+        },
+    );
+
     const recommendation = createMemo(function recommend(): {
         id: string;
         reasons: readonly string[];
     } {
-        const completedSequences: Record<string, number> = {};
-        for (const completion of completions()) {
-            const mission = getMission(completion.missionId);
-            if (mission !== undefined) {
-                completedSequences[mission.courseId] = Math.max(
-                    completedSequences[mission.courseId] ?? 0,
-                    mission.sequence,
-                );
-            }
-        }
-        const failedMissionIds = new Set(
-            evidence()
-                .filter(function failed(record: EvidenceRecord): boolean {
-                    return record.outcome === "failure";
-                })
-                .map(function idOf(record: EvidenceRecord): string {
-                    return record.missionId;
-                }),
-        );
-        const misconceptionSkills: string[] = [];
-        const failureSkills: string[] = [];
-        for (const missionId of failedMissionIds) {
-            const mission = getMission(missionId);
-            if (mission === undefined) {
-                continue;
-            }
-            misconceptionSkills.push(...mission.skills);
-            failureSkills.push(...mission.skills);
-        }
-        const masteryScores: Record<string, number> = {};
-        for (const [skillId, snapshot] of Object.entries(mastery())) {
-            masteryScores[skillId] = snapshot.score;
-        }
-        const recommendationResult = recommendMission({
-            graph: skillGraph,
-            missions,
-            mastery: masteryScores,
-            reviews: reviews(),
-            interests: preferences().interests,
-            challenge: preferences().challenge,
-            completedMissionIds: [...completedMissionIds()],
-            completedMissionSkills: [...completedMissionIds()].flatMap(
-                function skillsOf(missionId): readonly string[] {
-                    return getMission(missionId)?.skills ?? [];
-                },
-            ),
-            completedSequences,
-            misconceptionSkills,
-            recentFailureSkills: failureSkills,
-            skippedSkills: progress().placementSkippedSkills,
-            now: new Date(),
-            variationSeed: Math.floor(Date.now() / 86_400_000),
-        });
+        const recommendationResult = recommendMission(recommendationContext());
         if (recommendationResult === undefined) {
             const first = missions[0];
             return { id: first?.id ?? "", reasons: ["Start with the first mission."] };
@@ -307,7 +304,12 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         const root = document.documentElement;
         root.dataset["textScale"] =
             next.textScale >= 1.2 ? "large" : next.textScale <= 0.95 ? "small" : "normal";
-        root.dataset["motion"] = next.motion === "reduce" ? "reduce" : "system";
+        root.dataset["motion"] = next.motion;
+    }
+
+    async function refreshConflictState(): Promise<void> {
+        const conflicts = await syncManager.listConflicts();
+        setConflictCount(conflicts.length);
     }
 
     async function reloadLocalState(): Promise<void> {
@@ -376,6 +378,7 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             }
         }
         setOutboxCount(await db.outbox.count());
+        await refreshConflictState();
     }
 
     async function hydrateAuthenticated(): Promise<void> {
@@ -406,6 +409,13 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             const snapshot = await api.sync({ operations: [] });
             await applySyncSnapshot(db, snapshot);
             await reloadLocalState();
+            if (conflictCount() > 0) {
+                setSyncStatus("conflict");
+                setSyncMessage(
+                    `${String(conflictCount())} local change${conflictCount() === 1 ? "" : "s"} could not be applied to the account. The local change is kept on this device for review.`,
+                );
+                return;
+            }
             setSyncStatus("synced");
         } catch (error) {
             if (error instanceof ApiError && error.status === 401) {
@@ -448,8 +458,18 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         }
     }
 
+    async function loadCapabilities(): Promise<void> {
+        try {
+            const capabilities = await api.requestCapabilities();
+            setAiTutorAvailable(capabilities.aiTutor);
+        } catch {
+            setAiTutorAvailable(false);
+        }
+    }
+
     onMount(function mount(): void {
         void initialize();
+        void loadCapabilities();
         const goOnline = function goOnline(): void {
             setOnline(true);
             void syncNow();
@@ -587,7 +607,7 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             projectsCompleted: completedProjectIds().length,
             clubEventsCompleted: 0,
             worldRecovered: isWorldRecovered(world()) || world().flags["incidentResolved"] === true,
-            languagesDemonstrated: languagePrefixes(evidence()),
+            languagesDemonstrated: demonstratedLanguages(evidence()),
             hiddenBoundaryFound: evidence().some(function boundary(
                 record: EvidenceRecord,
             ): boolean {
@@ -598,6 +618,7 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             ): boolean {
                 return record.category === "debugging" && record.outcome === "success";
             }),
+            cooperativeChallengeCompleted: false,
             teammateHelped: false,
         };
         const newAchievements = earnedAchievements(
@@ -620,14 +641,37 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             };
             setProgress(next);
             await saveProgress(db, next);
+            if (user() !== undefined) {
+                await queueProgressSnapshot();
+            }
         }
         return newAchievements;
+    }
+
+    async function queueProgressSnapshot(): Promise<void> {
+        const current = progress();
+        await queueOperation(db, {
+            kind: "progress",
+            operationId: `progress:${crypto.randomUUID()}`,
+            experience: current.experience,
+            streakDays: current.streakDays,
+            longestStreak: current.longestStreak,
+            ...(current.lastPracticeOn === undefined
+                ? {}
+                : { lastPracticeOn: current.lastPracticeOn }),
+            placementSkippedSkills: [...current.placementSkippedSkills],
+            achievements: current.achievements.map(function idOf(record): string {
+                return record.achievementId;
+            }),
+        });
+        setOutboxCount(await db.outbox.count());
     }
 
     async function completeMission(
         mission: Mission,
         attemptId: string,
         hintsByStep: Readonly<Record<string, number>>,
+        evaluation?: MissionEvaluation,
     ): Promise<CompletionOutcome> {
         const id = completionRowId(mission.id, mission.version);
         const existing = await db.completions.get(id);
@@ -642,9 +686,11 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         }
 
         const hints = Object.values(hintsByStep);
-        const independent = hints.every(function noHelp(value: number): boolean {
-            return value === 0;
-        });
+        const independent =
+            hints.every(function noHelp(value: number): boolean {
+                return value === 0;
+            }) &&
+            (evaluation?.completed ?? true);
         const reward = completionReward(mission, independent);
         const now = new Date();
         const today = todayKey();
@@ -673,10 +719,11 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             const existingSchedule = reviews().find(function match(item: ReviewItem): boolean {
                 return item.skillId === skillId;
             });
+            const reviewOutcome = independent ? "success" : "failure";
             const nextSchedule =
                 existingSchedule === undefined
-                    ? scheduler.create(skillId, now, "success")
-                    : scheduler.update(existingSchedule, "success", now);
+                    ? scheduler.create(skillId, now, reviewOutcome)
+                    : scheduler.update(existingSchedule, reviewOutcome, now);
             await db.reviews.put(nextSchedule);
         }
         const refreshedReviews = await db.reviews.toArray();
@@ -747,22 +794,35 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         };
     }
 
-    async function recordPracticeReview(mission: Mission): Promise<void> {
+    async function recordPracticeReview(
+        mission: Mission,
+        evaluation: MissionEvaluation,
+        hintsByStep: Readonly<Record<string, number>>,
+    ): Promise<void> {
         const firstStep = mission.steps[0];
         if (firstStep === undefined) {
             return;
         }
+        const hintValues = Object.values(hintsByStep);
+        const hintsUsed = hintValues.length === 0 ? 0 : Math.max(...hintValues);
+        const result = practiceResult(evaluation, hintsByStep);
+        const independent = result.independent;
+        const outcome = result.outcome;
         const reviewDraft = buildEvidenceDraft({
             id: crypto.randomUUID(),
             mission,
             step: firstStep,
             evaluation: {
                 stepId: firstStep.id,
-                passed: true,
-                score: 1,
-                detail: "Independent practice review completed.",
+                passed: independent,
+                score: independent ? evaluation.score : 0,
+                detail: independent
+                    ? "Practice review completed without assistance."
+                    : evaluation.completed
+                      ? "Practice review used hints, so the schedule did not advance."
+                      : `${String(evaluation.failedStepIds.length)} step${evaluation.failedStepIds.length === 1 ? "" : "s"} did not pass, so this review did not advance.`,
             },
-            hintsUsed: 0,
+            hintsUsed,
             now: new Date(),
             category: "review",
             detail: "Spaced practice revisit.",
@@ -777,8 +837,8 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             });
             const nextSchedule =
                 existingSchedule === undefined
-                    ? scheduler.create(skillId, now, "success")
-                    : scheduler.update(existingSchedule, "success", now);
+                    ? scheduler.create(skillId, now, outcome)
+                    : scheduler.update(existingSchedule, outcome, now);
             await db.reviews.put(nextSchedule);
         }
         const refreshedReviews = await db.reviews.toArray();
@@ -864,6 +924,10 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         await saveProgress(db, next);
         setPlacement(state);
         await db.meta.put({ key: "placement", value: JSON.stringify(state) });
+        if (user() !== undefined) {
+            await queueProgressSnapshot();
+            await syncNow();
+        }
     }
 
     async function setOnboarded(value: boolean): Promise<void> {
@@ -872,36 +936,10 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
     }
 
     function practicePlan(length: SessionLength): PracticePlan {
-        const masteryScores: Record<string, number> = {};
-        for (const [skillId, snapshot] of Object.entries(mastery())) {
-            masteryScores[skillId] = snapshot.score;
-        }
-        return buildPracticePlan(
-            {
-                graph: skillGraph,
-                missions,
-                mastery: masteryScores,
-                reviews: reviews(),
-                interests: preferences().interests,
-                challenge: preferences().challenge,
-                completedMissionIds: [...completedMissionIds()],
-                completedMissionSkills: [...completedMissionIds()].flatMap(
-                    function skillsOf(missionId): readonly string[] {
-                        return getMission(missionId)?.skills ?? [];
-                    },
-                ),
-                completedSequences: {},
-                misconceptionSkills: [],
-                recentFailureSkills: [],
-                skippedSkills: progress().placementSkippedSkills,
-                now: new Date(),
-                variationSeed: Math.floor(Date.now() / 86_400_000),
-            },
-            length,
-        );
+        return buildPracticePlan(recommendationContext(), length);
     }
 
-    async function performWorldAction(action: WorldAction): Promise<WorldState> {
+    async function performWorldAction(action: WorldAction): Promise<WorldActionResult> {
         const current = world();
         const expectedVersion = current.version;
         const result = applyWorldAction(current, action);
@@ -917,7 +955,7 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         if (user() !== undefined) {
             await syncNow();
         }
-        return result.state;
+        return result;
     }
 
     async function syncNow(): Promise<void> {
@@ -936,10 +974,17 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
             return;
         }
         await reloadLocalState();
+        if (conflictCount() > 0) {
+            setSyncStatus("conflict");
+            setSyncMessage(
+                `${String(conflictCount())} local change${conflictCount() === 1 ? "" : "s"} could not be applied to the account. The local change is kept on this device. Retry after merging, or discard it deliberately.`,
+            );
+            return;
+        }
         if (result.status === "partial") {
             setSyncStatus("conflict");
             setSyncMessage(
-                "This device and your account changed the same state. The account version is now shown. Your queued change was not applied.",
+                `${String(conflictCount())} local change${conflictCount() === 1 ? "" : "s"} could not be applied to the account. The local change is kept on this device. Retry after merging, or discard it deliberately.`,
             );
             return;
         }
@@ -952,12 +997,25 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         setSyncMessage(undefined);
     }
 
+    async function retryConflicts(): Promise<void> {
+        await syncManager.retryConflicts();
+        await syncNow();
+        await refreshConflictState();
+    }
+
+    async function discardConflicts(): Promise<void> {
+        await syncManager.discardConflicts();
+        await refreshConflictState();
+        setSyncStatus(conflictCount() > 0 ? "conflict" : "synced");
+        setSyncMessage(undefined);
+    }
+
     async function login(handle: string, password: string): Promise<void> {
         const response = await api.login({ handle, password });
         setUser(response.user);
         setPreferences(response.preferences);
         applyPresentation(response.preferences);
-        await syncNow();
+        await syncManager.migrateGuestProgress();
         await hydrateAuthenticated();
     }
 
@@ -966,7 +1024,7 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         setUser(response.user);
         setPreferences(response.preferences);
         applyPresentation(response.preferences);
-        await syncNow();
+        await syncManager.migrateGuestProgress();
         await hydrateAuthenticated();
     }
 
@@ -1057,12 +1115,13 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
     async function saveProjectDraft(
         projectId: string,
         files: Readonly<Record<string, string>>,
+        revision?: number,
     ): Promise<void> {
         const existing = await db.projects.get(projectId);
         await db.projects.put({
             id: projectId,
             files,
-            revision: existing?.revision ?? 0,
+            revision: revision ?? existing?.revision ?? 0,
             updatedAt: new Date().toISOString(),
         });
     }
@@ -1074,12 +1133,32 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         return row?.files;
     }
 
+    async function loadProjectRevision(projectId: string): Promise<number | undefined> {
+        const row = await db.projects.get(projectId);
+        return row?.revision;
+    }
+
+    async function queueProjectRevision(
+        projectId: string,
+        files: Readonly<Record<string, string>>,
+        baseRevision: number,
+        message: string,
+    ): Promise<void> {
+        await saveProjectDraft(projectId, files, baseRevision);
+        await syncManager.queueProjectRevision({ projectId, files, baseRevision, message });
+        setOutboxCount(await db.outbox.count());
+        if (user() !== undefined) {
+            await syncNow();
+        }
+    }
+
     const value: LearningContextValue = {
         ready,
         user,
         preferences,
         progress,
         mastery,
+        evidence,
         reviews,
         dueReviews,
         world,
@@ -1098,7 +1177,9 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         syncStatus,
         syncMessage,
         outboxCount,
+        conflictCount,
         online,
+        aiTutorAvailable,
         recordStepEvidence,
         completeMission,
         recordPracticeReview,
@@ -1109,6 +1190,8 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         practicePlan,
         performWorldAction,
         syncNow,
+        retryConflicts,
+        discardConflicts,
         login,
         register,
         logout,
@@ -1117,6 +1200,8 @@ export function LearningProvider(props: { readonly children: JSX.Element }): JSX
         refreshWorld,
         saveProjectDraft,
         loadProjectDraft,
+        loadProjectRevision,
+        queueProjectRevision,
     };
 
     return <LearningContext.Provider value={value}>{props.children}</LearningContext.Provider>;
