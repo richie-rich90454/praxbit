@@ -1,18 +1,27 @@
 {
     "id": "cargo.packages",
     "version": 1,
-    "sequence": 97,
+    "sequence": 177,
     "courseId": "cargo",
     "title": "Package metadata, dependencies, and features",
     "summary": "Declare a Rust package with a pinned edition, versioned dependencies, and an optional feature.",
-    "skills": ["cargo.packages", "rust.cargo"],
-    "prerequisites": ["rust.cargo", "rust.syntax"],
+    "skills": [
+        "cargo.packages",
+        "rust.cargo"
+    ],
+    "prerequisites": [
+        "rust.cargo",
+        "rust.syntax"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cargo"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:cargo"
+    ],
     "hints": [
         "The [package] table needs name, version, and edition.",
         "Write serde as a table with version and features.",
@@ -44,13 +62,24 @@
             "id": "wildcard-version",
             "description": "Using \"*\" for every dependency.",
             "stepId": "apply",
-            "feedback": "A wildcard accepts any published version, so a fresh resolve can pick an incompatible major release. State a real version requirement and let Cargo.lock pin it."
+            "testDescription": "Dependencies use concrete version requirements and declared features.",
+            "feedback": "A wildcard accepts any published version, so a fresh resolve can pick an incompatible major release. State a real version requirement and let Cargo.lock pin it.",
+            "followUpSkill": "cargo.packages"
         },
         {
             "id": "feature-default",
             "description": "Enabling an optional dependency in the default feature when most users do not need it.",
             "stepId": "apply",
+            "testDescription": "clap sits behind an explicit feature and the tests run with all features.",
             "feedback": "Default features are built by everyone. Keep optional capabilities opt-in so the common build stays small and fast."
+        },
+        {
+            "id": "lockfile-confidence",
+            "description": "Thinking a lockfile makes a wildcard requirement reproducible across machines.",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that a wildcard keeps builds reproducible.",
+            "feedback": "Cargo.lock pins one resolution, but a regenerated lockfile can move a wildcard to any published release. State a real requirement.",
+            "followUpSkill": "cargo.packages"
         }
     ],
     "lesson": {
@@ -133,8 +162,14 @@
                     "kind": "static",
                     "description": "The package declares its name and the 2021 edition.",
                     "file": "Cargo.toml",
-                    "includes": ["[package]", "name = \"campus-cli\"", "edition = \"2021\""],
-                    "excludes": ["serde = \"*\""]
+                    "includes": [
+                        "[package]",
+                        "name = \"campus-cli\"",
+                        "edition = \"2021\""
+                    ],
+                    "excludes": [
+                        "serde = \"*\""
+                    ]
                 },
                 {
                     "kind": "static",
@@ -144,23 +179,46 @@
                         "serde = { version = \"1.0.203\", features = [\"derive\"] }",
                         "clap = { version = \"4.5.4\", features = [\"derive\"], optional = true }"
                     ],
-                    "excludes": ["version = \"*\""]
+                    "excludes": [
+                        "version = \"*\""
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "clap sits behind an explicit feature and the tests run with all features.",
                     "file": "Cargo.toml",
-                    "includes": ["[features]", "cli = [\"dep:clap\"]", "cargo test --all-features"],
-                    "excludes": ["clap = \"*\""]
+                    "includes": [
+                        "[features]",
+                        "cli = [\"dep:clap\"]",
+                        "cargo test --all-features"
+                    ],
+                    "excludes": [
+                        "clap = \"*\""
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Cargo.toml",
-                    "includes": ["[package]"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "[package]"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Set the edition in [package].",
+                "Replace wildcards with real version requirements.",
+                "Make clap optional and enable it through dep:clap in a feature.",
+                "Leave assert_cmd under dev-dependencies."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile and run the Rust unit and integration tests."
+            }
         },
         {
             "kind": "explain",
@@ -200,7 +258,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Cargo.toml declares identity, edition, dependencies, and features. Version requirements bound which releases Cargo may resolve, and Cargo.lock pins the result for binaries. Optional dependencies sit behind features so default builds stay small."
+            "explanation": "Cargo.toml declares identity, edition, dependencies, and features. Version requirements bound which releases Cargo may resolve, and Cargo.lock pins the result for binaries. Optional dependencies sit behind features so default builds stay small.",
+            "hints": [
+                "Use the manifest rules from the lesson.",
+                "A wildcard accepts any published version.",
+                "Cargo.lock pins resolved versions for a binary.",
+                "Dev-dependencies are not compiled into the released binary."
+            ]
         }
     ],
     "evaluation": {
@@ -220,5 +284,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems"]
+    "tags": [
+        "systems"
+    ]
 }
