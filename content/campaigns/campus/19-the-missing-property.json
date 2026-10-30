@@ -1,6 +1,6 @@
 {
     "id": "campus.the-missing-property",
-    "version": 1,
+    "version": 2,
     "sequence": 19,
     "courseId": "campus",
     "title": "The missing property",
@@ -54,13 +54,24 @@
             "id": "counts-lines",
             "description": "Counting item rows instead of quantities.",
             "stepId": "repair-types",
-            "feedback": "An item row can have quantity 3. The total must sum quantities, not count rows."
+            "testDescription": "Quantities across items are summed.",
+            "feedback": "An item row can have quantity 3. The total must sum quantities, not count rows.",
+            "followUpSkill": "ts.types"
         },
         {
             "id": "types-runtime",
             "description": "Expecting a TypeScript interface to validate runtime JSON.",
             "stepId": "types-check",
-            "feedback": "Interfaces are erased at runtime. They describe code to the compiler; external JSON still needs runtime validation."
+            "answer": "throws",
+            "feedback": "Interfaces are erased at runtime. They describe code to the compiler; external JSON still needs runtime validation.",
+            "followUpSkill": "ts.runtime-validation"
+        },
+        {
+            "id": "compiled-means-safe",
+            "description": "Believing a compiled TypeScript program cannot have runtime errors.",
+            "stepId": "types-claims",
+            "answer": "guarantee",
+            "feedback": "The compiler cannot see values that arrive later from the network. Runtime failures remain possible."
         }
     ],
     "lesson": {
@@ -93,6 +104,12 @@
         {
             "kind": "code",
             "id": "repair-types",
+            "hints": [
+                "Add the missing item shape to Order and make itemCount sum quantities.",
+                "A type describes the data's shape; the function must still read each item's quantity.",
+                "An order with quantities 2 and 3 has two rows but five units in total.",
+                "Declare items as an array of objects with name and quantity: number, then add item.quantity inside the loop."
+            ],
             "title": "Repair the order model",
             "prompt": "Edit order.ts. Extend Order with items, define an item type, and make itemCount return the summed quantity. Run the tests.",
             "evidence": "debugging",
@@ -207,15 +224,21 @@
                 "explanation": "Interfaces are erased. Runtime validation of external data must be implemented with a schema or explicit checks."
             },
             "hints": [
-                "Think about what remains after TypeScript compiles.",
-                "Interfaces are not present in the JavaScript output.",
-                "Nothing automatically checks the JSON shape.",
-                "The program runs and the bad data can cause a runtime failure."
+                "Decide whether the interface still exists after TypeScript compiles.",
+                "Interfaces are erased at runtime; they do not inspect incoming JSON.",
+                "A typed function can still receive a string where an array was promised by the API.",
+                "No automatic runtime check occurs, so the bad value can break the loop."
             ]
         },
         {
             "kind": "explain",
             "id": "types-claims",
+            "hints": [
+                "Select statements about what static types do and do not guarantee.",
+                "Types catch some mistakes before running; external data still needs validation.",
+                "A JSON response can violate the interface even when the code compiles.",
+                "Three statements are accurate; reject the claim that compiled TypeScript cannot fail at runtime."
+            ],
             "title": "Types and trust boundaries",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
