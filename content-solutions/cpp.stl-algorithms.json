@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.cpp": "#include <iostream>\n#include <numeric>\n#include <vector>\n\nint sum_even(const std::vector<int>& values) {\n    return std::accumulate(values.begin(), values.end(), 0, [](int total, int value) {\n        return value % 2 == 0 ? total + value : total;\n    });\n}\n\nint main() {\n    const std::vector<int> values = { 3, 4, 6, 7 };\n    std::cout << sum_even(values) << \"\\n\";\n    return 0;\n}\n"
+            }
+        }
+    }
+}
