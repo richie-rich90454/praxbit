@@ -5,23 +5,14 @@
     "courseId": "cmake",
     "title": "Targets carry their own requirements",
     "summary": "Declare an executable and attach its language standard and include path to the target.",
-    "skills": [
-        "cmake.targets",
-        "cpp.build"
-    ],
-    "prerequisites": [
-        "cpp.build",
-        "cpp.templates"
-    ],
+    "skills": ["cmake.targets", "cpp.build"],
+    "prerequisites": ["cpp.build", "cpp.templates"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:cmake"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cmake"],
     "hints": [
         "Call project() once, right after cmake_minimum_required.",
         "add_executable already names the target inventory.",
@@ -166,17 +148,13 @@
                         "cmake_minimum_required(VERSION 3.24)",
                         "project(campus_inventory LANGUAGES CXX)"
                     ],
-                    "excludes": [
-                        "include_directories(include)"
-                    ]
+                    "excludes": ["include_directories(include)"]
                 },
                 {
                     "kind": "static",
                     "description": "The executable target is created once with its source.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "add_executable(inventory src/main.cpp)"
-                    ],
+                    "includes": ["add_executable(inventory src/main.cpp)"],
                     "excludes": []
                 },
                 {
@@ -187,20 +165,14 @@
                         "target_compile_features(inventory PRIVATE cxx_std_20)",
                         "target_include_directories(inventory PRIVATE include)"
                     ],
-                    "excludes": [
-                        "CMAKE_CXX_STANDARD"
-                    ]
+                    "excludes": ["CMAKE_CXX_STANDARD"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "cmake_minimum_required(VERSION 3.24)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["cmake_minimum_required(VERSION 3.24)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -279,7 +251,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
