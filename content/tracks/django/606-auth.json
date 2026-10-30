@@ -5,23 +5,14 @@
     "courseId": "django",
     "title": "Authentication at the view boundary",
     "summary": "Require an authenticated member in one decorator and test the 401 and 200 paths with Django's test client.",
-    "skills": [
-        "django.views",
-        "django.testing"
-    ],
-    "prerequisites": [
-        "django.views",
-        "security.auth"
-    ],
+    "skills": ["django.views", "django.testing"],
+    "prerequisites": ["django.views", "security.auth"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-guard",
             "description": "Protect a view with a reusable authentication check.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-test",
             "description": "Test the anonymous and authenticated paths.",
-            "stepIds": [
-                "test"
-            ]
+            "stepIds": ["test"]
         },
         {
             "id": "objective-transfer",
             "description": "Distinguish authentication from permission.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:api",
-        "icon:django"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:django"],
     "hints": [
         "AuthenticationMiddleware fills request.user from the session.",
         "Wrap the view so the check runs before the query.",
@@ -225,21 +205,14 @@
                     "includes": [
                         "JsonResponse({\"error\": \"authentication_required\"}, status=401)"
                     ],
-                    "excludes": [
-                        "redirect_to_login"
-                    ]
+                    "excludes": ["redirect_to_login"]
                 },
                 {
                     "kind": "static",
                     "description": "The inventory view is protected.",
                     "file": "views.py",
-                    "includes": [
-                        "@require_member",
-                        "def item_list(request)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["@require_member", "def item_list(request)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "language": "text"
@@ -280,9 +253,7 @@
                         "response = self.client.get(reverse(\"item-list\"))",
                         "self.assertEqual(response.status_code, 401)"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -352,8 +323,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
