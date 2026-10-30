@@ -1,0 +1,332 @@
+{
+    "id": "go.interfaces-contracts",
+    "version": 1,
+    "sequence": 92,
+    "courseId": "go",
+    "title": "Depend on a small interface",
+    "summary": "Replace a concrete notifier with a consumer-defined interface and propagate errors.",
+    "skills": [
+        "go.interfaces"
+    ],
+    "prerequisites": [
+        "go.syntax"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "go-interfaces",
+        "briefing": "SendAll accepts only *EmailNotifier, so tests cannot substitute a fake and notification errors disappear. Define the behavior SendAll needs and propagate failures."
+    },
+    "objectives": [
+        {
+            "id": "define-interface",
+            "description": "Define and accept a small notifier interface.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "place-interface",
+            "description": "Choose where a Go interface belongs.",
+            "stepIds": [
+                "interface-transfer"
+            ]
+        },
+        {
+            "id": "explain-interfaces",
+            "description": "Explain implicit satisfaction and error propagation accurately.",
+            "stepIds": [
+                "interface-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:go"
+    ],
+    "hints": [
+        "SendAll only calls Notify.",
+        "Declare an interface with that one method.",
+        "Accept the interface in the function signature.",
+        "Return the error from Notify instead of ignoring it."
+    ],
+    "misconceptions": [
+        {
+            "id": "concrete-param",
+            "description": "Accepting a concrete notifier instead of the behavior.",
+            "stepId": "apply",
+            "testDescription": "SendAll accepts the interface, not a concrete notifier.",
+            "feedback": "A concrete parameter forces every caller to use that type. Accept the small interface SendAll actually needs.",
+            "followUpSkill": "go.interfaces"
+        },
+        {
+            "id": "producer-interface",
+            "description": "Declaring the interface in the implementing package by habit.",
+            "stepId": "interface-transfer",
+            "answer": "producer",
+            "feedback": "Go interfaces are usually declared by the consumer. That keeps the contract small and avoids import cycles.",
+            "followUpSkill": "go.interfaces"
+        },
+        {
+            "id": "nil-interface",
+            "description": "Believing an interface holding a typed nil is itself nil.",
+            "stepId": "interface-check",
+            "answer": "nil-interface",
+            "feedback": "An interface value is nil only when both its type and value are nil. A typed nil pointer inside an interface is not nil.",
+            "followUpSkill": "go.interfaces"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Interfaces are satisfied implicitly",
+                "body": "A Go type implements an interface by defining its methods. There is no implements clause. This keeps the contract at the consumer: a package can declare the small interface it needs and accept any type that already provides those methods."
+            },
+            {
+                "title": "Small interfaces travel well",
+                "body": "The standard library's io.Reader and io.Writer are small for a reason. A one- or two-method interface is easy to implement and easy to fake in a test. Large interfaces couple the caller to details it does not use."
+            },
+            {
+                "title": "Return errors, do not hide them",
+                "body": "A method that can fail returns an error. The caller checks it and decides whether to stop, retry, or wrap it. An interface method that returns error gives every implementation a uniform way to report failure."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Interface",
+                "definition": "A set of method signatures that a type satisfies implicitly."
+            },
+            {
+                "term": "Consumer-defined interface",
+                "definition": "An interface declared by the package that uses it, not the package that implements it."
+            },
+            {
+                "term": "error",
+                "definition": "Go's built-in interface for representing failure."
+            },
+            {
+                "term": "Nil interface",
+                "definition": "An interface value with no dynamic type or value."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Interfaces are satisfied implicitly",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Interfaces are satisfied implicitly",
+                    "body": "A Go type implements an interface by defining its methods. There is no implements clause. This keeps the contract at the consumer: a package can declare the small interface it needs and accept any type that already provides those methods."
+                },
+                {
+                    "title": "Small interfaces travel well",
+                    "body": "The standard library's io.Reader and io.Writer are small for a reason. A one- or two-method interface is easy to implement and easy to fake in a test. Large interfaces couple the caller to details it does not use."
+                },
+                {
+                    "title": "Return errors, do not hide them",
+                    "body": "A method that can fail returns an error. The caller checks it and decides whether to stop, retry, or wrap it. An interface method that returns error gives every implementation a uniform way to report failure."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Interface",
+                    "definition": "A set of method signatures that a type satisfies implicitly."
+                },
+                {
+                    "term": "Consumer-defined interface",
+                    "definition": "An interface declared by the package that uses it, not the package that implements it."
+                },
+                {
+                    "term": "error",
+                    "definition": "Go's built-in interface for representing failure."
+                },
+                {
+                    "term": "Nil interface",
+                    "definition": "An interface value with no dynamic type or value."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Accept the notifier interface",
+            "prompt": "Edit main.go. SendAll accepts a Notifier, calls Notify for each message, and returns the first error.",
+            "evidence": "construction",
+            "language": "go",
+            "files": [
+                {
+                    "path": "main.go",
+                    "content": "package main\n\nimport \"fmt\"\n\ntype EmailNotifier struct{}\n\nfunc (EmailNotifier) Notify(message string) error {\n    fmt.Println(message)\n    return nil\n}\n\nfunc SendAll(notifier *EmailNotifier, messages []string) error {\n    for _, message := range messages {\n        notifier.Notify(message) // TODO: propagate the error\n    }\n    return nil\n}\n\nfunc main() {\n    SendAll(&EmailNotifier{}, []string{\"hello\"})\n}\n",
+                    "editable": true,
+                    "language": "go"
+                },
+                {
+                    "path": "go.mod",
+                    "content": "module campus/check\n\ngo 1.23\n",
+                    "editable": false,
+                    "language": "go"
+                }
+            ],
+            "entry": "main.go",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "go test ./...",
+                "description": "Compile and test the module with the Go toolchain."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "SendAll accepts the interface, not a concrete notifier.",
+                    "file": "main.go",
+                    "includes": [
+                        "type Notifier interface",
+                        "Notify(message string) error",
+                        "func SendAll(notifier Notifier"
+                    ],
+                    "excludes": [
+                        "*EmailNotifier"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Notification errors stop the loop.",
+                    "file": "main.go",
+                    "includes": [
+                        "if err := notifier.Notify(message); err != nil",
+                        "return err"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter TODO is gone.",
+                    "file": "main.go",
+                    "includes": [
+                        "func SendAll(notifier Notifier"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The loop already calls Notify.",
+                "The interface needs only the Notify method.",
+                "Check the returned error immediately.",
+                "Return the error from SendAll instead of dropping it."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "interface-transfer",
+            "title": "Place the interface",
+            "prompt": "A service package needs to read records from a store. Where should the small interface be declared?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the package.",
+                "options": [
+                    {
+                        "id": "consumer",
+                        "label": "In the service package that consumes the behavior"
+                    },
+                    {
+                        "id": "producer",
+                        "label": "In the store package that implements it"
+                    },
+                    {
+                        "id": "main",
+                        "label": "In package main, next to the entry point"
+                    },
+                    {
+                        "id": "vendor",
+                        "label": "In a vendor directory"
+                    }
+                ],
+                "correctId": "consumer",
+                "explanation": "The consumer knows which methods it needs. Declaring the interface there keeps it small and avoids a dependency on the producer's full API."
+            },
+            "hints": [
+                "The caller knows which operations it uses.",
+                "Small interfaces reduce coupling.",
+                "Go does not require an implements declaration.",
+                "Choose the consuming service package."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "interface-check",
+            "title": "Interfaces and errors",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "implicit",
+                    "label": "A type satisfies an interface by implementing its methods, without an explicit declaration.",
+                    "correct": true
+                },
+                {
+                    "id": "small",
+                    "label": "Small interfaces are easier to implement and fake in tests.",
+                    "correct": true
+                },
+                {
+                    "id": "nil-interface",
+                    "label": "An interface holding a typed nil pointer is itself nil.",
+                    "correct": false
+                },
+                {
+                    "id": "errors",
+                    "label": "An interface method can return error so callers can handle failure.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Go interfaces are implicit and benefit from being small. A typed nil inside an interface still carries a type, and errors are ordinary return values.",
+            "hints": [
+                "Three statements are accurate.",
+                "A nil pointer stored in an interface has a dynamic type.",
+                "Go has no implements keyword.",
+                "Select implicit, small, and errors."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 145,
+        "unlocks": [
+            "go.modules-packages"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
