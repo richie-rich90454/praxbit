@@ -1,6 +1,6 @@
 {
     "id": "campus.the-mysterious-exception",
-    "version": 1,
+    "version": 2,
     "sequence": 20,
     "courseId": "campus",
     "title": "The mysterious exception",
@@ -49,13 +49,24 @@
             "id": "blames-network",
             "description": "Assuming a network fault because the data is remote.",
             "stepId": "find-exception",
-            "feedback": "The stack trace points to a local property access. The network delivered data without a customer, but the crash happens in this function."
+            "diagnostic": "Blames the remote data source instead of the local order.customer access that threw.",
+            "feedback": "The stack trace points to a local property access. The network delivered data without a customer, but the crash happens in this function.",
+            "followUpSkill": "js.debugging"
         },
         {
             "id": "hides-all-errors",
             "description": "Swallowing every error to stop the crash.",
             "stepId": "repair-label",
-            "feedback": "Blanket suppression hides real faults. Handle the specific missing-value case and keep other failures visible."
+            "testDescription": "A named customer is preserved.",
+            "feedback": "Blanket suppression hides real faults and can replace a real name with Guest. Handle the specific missing-value case and keep other failures visible.",
+            "followUpSkill": "js.debugging"
+        },
+        {
+            "id": "broad-catch-safest",
+            "description": "Believing a broad catch block is always the safest repair.",
+            "stepId": "debug-claims",
+            "answer": "catch",
+            "feedback": "A broad catch treats unrelated faults as the known missing-value case. Prefer specific handling and let unexpected errors surface."
         }
     ],
     "lesson": {
@@ -88,6 +99,12 @@
         {
             "kind": "debug",
             "id": "find-exception",
+            "hints": [
+                "Use the stack trace to choose the instruction that actually threw, then the smallest repair.",
+                "A property access on undefined throws; the fix should handle that specific missing value.",
+                "If user.profile is missing, user.profile.name throws, while user.profile?.name ?? \"Guest\" is safe.",
+                "The failing instruction reads order.customer.name; choose the optional-chain fix rather than a catch-all."
+            ],
             "title": "Find the failing line",
             "prompt": "Given the stack trace and function, choose the faulty instruction and the smallest repair.",
             "evidence": "debugging",
@@ -130,6 +147,12 @@
         {
             "kind": "code",
             "id": "repair-label",
+            "hints": [
+                "Return the customer's name when present and Guest for every missing case.",
+                "Optional chaining plus nullish coalescing handles a missing customer or name.",
+                "For {customer: null}, customer?.name is undefined, and ?? \"Guest\" supplies the fallback.",
+                "Use optional chaining on customer and a nullish fallback, so a real name survives and a missing customer or name becomes Guest."
+            ],
             "title": "Repair customerLabel",
             "prompt": "Edit labels.js. Return the customer name when it exists, otherwise Guest. Run the tests.",
             "evidence": "debugging",
@@ -192,6 +215,12 @@
         {
             "kind": "explain",
             "id": "debug-claims",
+            "hints": [
+                "Select statements about tracing and handling exceptions.",
+                "A stack trace narrows the path; specific handling preserves evidence of unrelated faults.",
+                "Catching every error in a function can hide a typo that should fail loudly.",
+                "Three statements are accurate; reject the claim that a broad catch is always safest."
+            ],
             "title": "Handle the case, not everything",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
