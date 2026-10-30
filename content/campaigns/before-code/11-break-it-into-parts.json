@@ -1,6 +1,6 @@
 {
     "id": "before-code.break-it-into-parts",
-    "version": 1,
+    "version": 2,
     "sequence": 11,
     "courseId": "before-code",
     "title": "Break it into parts",
@@ -50,7 +50,8 @@
             "description": "Styling before the content structure exists.",
             "stepId": "project-plan",
             "answer": "style,structure,behavior,verify,purpose",
-            "feedback": "Styling can start only when there is structure to style. Decide purpose, then build structure."
+            "feedback": "Styling can start only when there is structure to style. Decide purpose, then build structure.",
+            "followUpSkill": "concept.decomposition"
         },
         {
             "id": "one-big-file",
@@ -58,6 +59,14 @@
             "stepId": "boundary-check",
             "answer": "single",
             "feedback": "Decomposition separates responsibilities. A single file can be fine for a tiny page, but the parts should still be recognizably distinct."
+        },
+        {
+            "id": "more-parts-always-better",
+            "description": "Believing more parts always make a system easier to understand.",
+            "stepId": "decomposition-claims",
+            "answer": "more",
+            "feedback": "Splitting without a responsibility adds coordination cost. A good boundary reduces what a reader must hold in mind at once.",
+            "followUpSkill": "concept.decomposition"
         }
     ],
     "lesson": {
@@ -90,6 +99,12 @@
         {
             "kind": "order",
             "id": "project-plan",
+            "hints": [
+                "Order the phases from deciding the goal to checking the finished page.",
+                "Purpose guides structure; structure must exist before styling and behavior can attach to it.",
+                "You cannot style a navigation bar before deciding the page needs navigation and creating it.",
+                "Purpose comes first, structure before styling, behavior after real controls exist, and verification last."
+            ],
             "title": "Arrange the plan",
             "prompt": "Put the project phases in a sensible order.",
             "evidence": "construction",
@@ -148,15 +163,21 @@
                 "explanation": "Concern-based parts can be built, changed, and tested independently. Arbitrary splits create coordination without reducing complexity."
             },
             "hints": [
-                "Which split groups things that change for the same reason?",
-                "Think about structure, appearance, and behavior.",
-                "Separating concerns makes each part easier to verify.",
-                "Content structure, presentation, behavior, and tests form useful boundaries."
+                "Choose the split that lets parts be built, changed, and tested independently.",
+                "A useful boundary follows a responsibility, not a line count or file name.",
+                "A storefront naturally separates content, presentation, order behavior, and tests.",
+                "Pick the concern-based option; reject the single blob and arbitrary splits."
             ]
         },
         {
             "kind": "explain",
             "id": "decomposition-claims",
+            "hints": [
+                "Select statements that describe useful decomposition.",
+                "Good parts have a clear responsibility and a checkable expectation.",
+                "A receipt printer and a tax calculator can be tested separately because each has one job.",
+                "Two statements are accurate; reject the claims that more parts are always better and that decomposition removes the need for tests."
+            ],
             "title": "What makes a good part?",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
