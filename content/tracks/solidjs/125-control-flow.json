@@ -1,0 +1,397 @@
+{
+    "id": "solidjs.control-flow",
+    "version": 1,
+    "sequence": 220,
+    "courseId": "solidjs",
+    "title": "Keyed lists that keep row identity",
+    "summary": "Reconcile a product list by id, then review a component that renders with map and loses row identity.",
+    "skills": ["solid.control-flow", "web.component-architecture"],
+    "prerequisites": ["solid.signals", "web.html"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "control-flow",
+        "briefing": "The product list keeps input state on the wrong row after a filter change. The team suspects the list is matched by position instead of product id."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Reconcile rows by stable id.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review a list for identity and prop-binding risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "hints": [
+        "Build a map from the current rows keyed by id.",
+        "Walk the next rows and look each id up in that map.",
+        "Reuse the existing object when the id matches and count it.",
+        "Return the new array plus the reuse count."
+    ],
+    "misconceptions": [
+        {
+            "id": "index-identity",
+            "description": "Matching rows by array position.",
+            "stepId": "apply",
+            "testDescription": "Rows are matched by id when the order changes.",
+            "feedback": "Position is not identity. When the array is reordered, an index match moves the old state onto a different product.",
+            "followUpSkill": "solid.control-flow"
+        },
+        {
+            "id": "rebuild-all",
+            "description": "Rebuilding every row on each update.",
+            "stepId": "apply",
+            "testDescription": "Rows with the same id are reused.",
+            "feedback": "Rebuilding discards row-local state and defeats fine-grained updates. Reuse the object when the id is unchanged.",
+            "followUpSkill": "web.component-architecture"
+        },
+        {
+            "id": "ship-map-list",
+            "description": "Treating map rendering as an acceptable keyed list.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Map plus an index key recreates rows and loses identity. Block the change until the list renders from a stable key.",
+            "followUpSkill": "solid.control-flow"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Identity is not position",
+                "body": "A list row is the same row when its id is the same, even if it moved. Reconciling by id preserves the row's DOM and state; reconciling by index swaps content between nodes."
+            },
+            {
+                "title": "For tracks keyed rows",
+                "body": "Solid's For component reconciles a list by item identity. Mapping the array yourself rebuilds every row on each change and discards local state."
+            },
+            {
+                "title": "Reuse is observable",
+                "body": "A reconciler can report how many rows it reused. That number exposes whether the implementation matched by id or simply rebuilt the array."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Reconciliation",
+                "definition": "Matching the next list against the current list by identity."
+            },
+            {
+                "term": "Key",
+                "definition": "The stable value that identifies a row across renders."
+            },
+            {
+                "term": "For",
+                "definition": "Solid's control-flow component for keyed lists."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Identity and keyed lists",
+            "prompt": "Read the explanation, then implement the reconciler.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Identity is not position",
+                    "body": "A list row is the same row when its id is the same, even if it moved. Reconciling by id preserves the row's DOM and state; reconciling by index swaps content between nodes."
+                },
+                {
+                    "title": "For tracks keyed rows",
+                    "body": "Solid's For component reconciles a list by item identity. Mapping the array yourself rebuilds every row on each change and discards local state."
+                },
+                {
+                    "title": "Reuse is observable",
+                    "body": "A reconciler can report how many rows it reused. That number exposes whether the implementation matched by id or simply rebuilt the array."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Reconciliation",
+                    "definition": "Matching the next list against the current list by identity."
+                },
+                {
+                    "term": "Key",
+                    "definition": "The stable value that identifies a row across renders."
+                },
+                {
+                    "term": "For",
+                    "definition": "Solid's control-flow component for keyed lists."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Reconcile rows by id",
+            "prompt": "Edit rows.ts. Match next rows against current rows by id, reuse the existing object when possible, and return the new list with the reuse count.",
+            "evidence": "construction",
+            "hints": [
+                "Create a Map from current rows before walking next.",
+                "Use row.id as the map key.",
+                "When a match exists, merge the previous row with the next fields.",
+                "Increment reused only for matches and return both values."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "rows.ts",
+                    "content": "type Row = { id: string; label: string };\ntype ReconcileResult = { rows: Row[]; reused: number };\n\nfunction reconcileRows(current: Row[], next: Row[]): ReconcileResult {\n  // TODO: match rows by id, reuse existing objects, and report how many were reused\n  return { rows: next, reused: 0 };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "rows.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Rows are matched by id when the order changes.",
+                    "name": "reconcileRows",
+                    "args": [
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            },
+                            {
+                                "id": "b",
+                                "label": "B"
+                            }
+                        ],
+                        [
+                            {
+                                "id": "b",
+                                "label": "B"
+                            },
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "rows": [
+                            {
+                                "id": "b",
+                                "label": "B"
+                            },
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ],
+                        "reused": 2
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Rows with the same id are reused.",
+                    "name": "reconcileRows",
+                    "args": [
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ],
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "rows": [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ],
+                        "reused": 1
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A removed row is not reused.",
+                    "name": "reconcileRows",
+                    "args": [
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            },
+                            {
+                                "id": "b",
+                                "label": "B"
+                            }
+                        ],
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "rows": [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ],
+                        "reused": 1
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A new row is added without a match.",
+                    "name": "reconcileRows",
+                    "args": [
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ],
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            },
+                            {
+                                "id": "c",
+                                "label": "C"
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "rows": [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            },
+                            {
+                                "id": "c",
+                                "label": "C"
+                            }
+                        ],
+                        "reused": 1
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty next list reuses nothing.",
+                    "name": "reconcileRows",
+                    "args": [
+                        [
+                            {
+                                "id": "a",
+                                "label": "A"
+                            }
+                        ],
+                        []
+                    ],
+                    "expected": {
+                        "rows": [],
+                        "reused": 0
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the product list",
+            "prompt": "Review ProductList.tsx and select every real identity or reactivity problem.",
+            "evidence": "review",
+            "hints": [
+                "Check whether the list uses For or a plain map.",
+                "Look at the value used as the row key.",
+                "Check whether products is read through the live props object.",
+                "Reject findings that describe code the artifact does not contain."
+            ],
+            "artifact": {
+                "title": "ProductList.tsx",
+                "caption": "The component destructures props, renders with map, and uses the array index as the row key.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { createSignal } from \"solid-js\";\n\ntype Product = { id: string; name: string };\n\nexport function ProductList(props: { products: Product[] }) {\n  const { products } = props;\n  const [query, setQuery] = createSignal(\"\");\n\n  return (\n    <section>\n      <input value={query()} onInput={(event) => setQuery(event.currentTarget.value)} />\n      <ul>\n        {products\n          .filter((product) => product.name.includes(query()))\n          .map((product, index) => (\n            <li key={index}>{product.name}</li>\n          ))}\n      </ul>\n    </section>\n  );\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "map",
+                    "label": "The list renders with map instead of For, so rows are rebuilt rather than reconciled by id.",
+                    "correct": true
+                },
+                {
+                    "id": "index",
+                    "label": "The map callback uses the array index as row identity.",
+                    "correct": true
+                },
+                {
+                    "id": "destructure",
+                    "label": "The props object is destructured, so later parent updates never reach this component.",
+                    "correct": true
+                },
+                {
+                    "id": "for",
+                    "label": "The list already uses For to reconcile rows by id.",
+                    "correct": false
+                },
+                {
+                    "id": "memo",
+                    "label": "The filter expression is wrapped in createMemo, so query changes do not rerun it.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The list uses map with an index key, so reordering moves rows to new identities. Destructuring props also snapshots the initial array, so parent updates never arrive. There is no For and no createMemo in the artifact."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
