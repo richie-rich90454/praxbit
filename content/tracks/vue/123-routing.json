@@ -1,18 +1,29 @@
 {
     "id": "vue.routing",
     "version": 1,
-    "sequence": 218,
+    "sequence": 131,
     "courseId": "vue",
     "title": "Route guards and accessible checkout",
     "summary": "Implement an explicit checkout decision, then review a Vue Router setup that allows empty carts and never moves focus after navigation.",
-    "skills": ["vue.routing", "web.accessibility", "web.state-management"],
-    "prerequisites": ["vue.reactivity", "web.routing"],
+    "skills": [
+        "vue.routing",
+        "web.accessibility",
+        "web.state-management"
+    ],
+    "prerequisites": [
+        "vue.reactivity",
+        "web.routing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-apply",
             "description": "Implement a guard decision with distinct redirects.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review routing for access and accessibility risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:vue"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:vue"
+    ],
     "hints": [
         "Check the session before the cart so sign-in wins for anonymous users.",
         "Return catalog when a signed-in user has no items.",
@@ -160,14 +180,20 @@
                     "kind": "function",
                     "description": "Anonymous visitors are sent to login.",
                     "name": "canEnterCheckout",
-                    "args": [null, 2],
+                    "args": [
+                        null,
+                        2
+                    ],
                     "expected": "login"
                 },
                 {
                     "kind": "function",
                     "description": "Anonymous visitors are sent to login even with an empty cart.",
                     "name": "canEnterCheckout",
-                    "args": [null, 0],
+                    "args": [
+                        null,
+                        0
+                    ],
                     "expected": "login"
                 },
                 {
@@ -289,5 +315,7 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
