@@ -44,18 +44,22 @@
             "id": "status-first",
             "description": "Leading the index with the low-cardinality status column.",
             "stepId": "apply",
-            "feedback": "Status filters little on its own. Lead with customer_id, which matches far fewer rows, then order the remaining columns by the query."
+            "testDescription": "The mismatched index is dropped and replaced with one built for the query.",
+            "feedback": "Status filters little on its own. Lead with customer_id, then place the sort column after the equality columns.",
+            "followUpSkill": "sql.indexes"
         },
         {
             "id": "estimate-only",
             "description": "Trusting EXPLAIN without ANALYZE.",
             "stepId": "check",
+            "answer": "explain-estimate",
             "feedback": "A plain EXPLAIN shows estimates. EXPLAIN (ANALYZE, BUFFERS) runs the query and shows actual time and buffer usage."
         },
         {
             "id": "index-everything",
             "description": "Adding an index for every column.",
             "stepId": "apply",
+            "testDescription": "The plan is measured with real timing and buffer counts.",
             "feedback": "Each index costs storage and slows writes. Add indexes for real query shapes and verify them with a plan."
         }
     ],
@@ -219,7 +223,18 @@
                     "includes": ["DROP INDEX orders_status_idx;"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Read the filters, sort, and selected columns before writing the index.",
+                "Put the equality columns first, then the sort column.",
+                "Include the selected columns only if the query can stay in the index.",
+                "Create (customer_id, status, placed_at DESC) INCLUDE (id, total_cents) and verify with EXPLAIN ANALYZE."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "explain",
@@ -254,7 +269,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "The index follows the query: equality columns first, the sort column next, and the selected columns in INCLUDE. EXPLAIN (ANALYZE, BUFFERS) proves the plan with real time and buffer counts."
+            "explanation": "The index follows the query: equality columns first, the sort column next, and the selected columns in INCLUDE. EXPLAIN (ANALYZE, BUFFERS) proves the plan with real time and buffer counts.",
+            "hints": [
+                "Selectivity decides which equality column leads.",
+                "Composite order must match filter and sort usage.",
+                "A covering index avoids heap fetches for selected columns.",
+                "Select selectivity, composite order, and covering; reject status-first and estimates without execution."
+            ]
         }
     ],
     "evaluation": {
