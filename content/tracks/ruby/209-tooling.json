@@ -37,7 +37,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "ruby.tooling",
-    "sequence": 209,
+    "sequence": 114,
     "title": "Make the test task reproducible",
     "summary": "Declare the test gem, wire a Rake test task, and diagnose a local command that bypasses Bundler.",
     "skills": [
