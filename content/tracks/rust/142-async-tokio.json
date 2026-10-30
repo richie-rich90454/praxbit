@@ -1,0 +1,329 @@
+{
+    "id": "rust.async-tokio",
+    "version": 1,
+    "sequence": 99,
+    "courseId": "rust",
+    "title": "Run async work with Tokio",
+    "summary": "Await a future and join spawned tasks on a Tokio runtime.",
+    "skills": [
+        "rust.async"
+    ],
+    "prerequisites": [
+        "rust.traits",
+        "concept.iteration"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "rust-async",
+        "briefing": "A telemetry aggregator calls async total functions but never awaits them, so it prints a future instead of a number. Run the work on Tokio, spawn the independent totals, and join their results."
+    },
+    "objectives": [
+        {
+            "id": "await-future",
+            "description": "Await an async function and join spawned tasks.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "explain-lazy",
+            "description": "Explain why calling an async function does not run it.",
+            "stepIds": [
+                "async-transfer"
+            ]
+        },
+        {
+            "id": "explain-tokio",
+            "description": "Explain futures, spawning, and blocking accurately.",
+            "stepIds": [
+                "async-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:rust"
+    ],
+    "hints": [
+        "An async function returns a future until it is awaited.",
+        "Annotate main with #[tokio::main] and make it async.",
+        "Use tokio::spawn for the independent totals.",
+        "Join the handles with tokio::join! and await the local total."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-await",
+            "description": "Printing a future without awaiting it.",
+            "stepId": "apply",
+            "testDescription": "The async work is awaited before use.",
+            "feedback": "Calling an async function only creates a future. Await it or join its handle to obtain the value.",
+            "followUpSkill": "rust.async"
+        },
+        {
+            "id": "starts-thread",
+            "description": "Believing calling an async function starts a thread.",
+            "stepId": "async-transfer",
+            "answer": "thread",
+            "feedback": "An async call creates a lazy future. The executor schedules it when the future is polled.",
+            "followUpSkill": "rust.async"
+        },
+        {
+            "id": "block-in-async",
+            "description": "Blocking a runtime worker with synchronous work.",
+            "stepId": "async-check",
+            "answer": "block-in-async",
+            "feedback": "Blocking calls prevent the executor from running other tasks on that worker. Use async I/O or move blocking work off the runtime.",
+            "followUpSkill": "rust.async"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Futures are lazy",
+                "body": "Calling an async function returns a future. The future does not run until an executor polls it. await drives one future to completion, and tokio::join! drives several concurrently. A future that is never awaited does no work."
+            },
+            {
+                "title": "The runtime drives tasks",
+                "body": "Tokio provides the executor and the reactor for I/O. #[tokio::main] turns an async main into a runtime entry point. tokio::spawn schedules a task on the runtime and returns a JoinHandle that must be awaited to observe its result."
+            },
+            {
+                "title": "Keep async work non-blocking",
+                "body": "Blocking a runtime worker prevents other tasks from making progress. Use async I/O and async synchronization primitives. Values held across an await must be Send when the task is spawned, so avoid holding non-Send guards across suspension points."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Future",
+                "definition": "A value representing work that completes later."
+            },
+            {
+                "term": "Executor",
+                "definition": "The runtime component that polls futures and schedules tasks."
+            },
+            {
+                "term": "tokio::spawn",
+                "definition": "A function that schedules an async task on the runtime."
+            },
+            {
+                "term": "JoinHandle",
+                "definition": "A handle to a spawned task's result."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Futures are lazy",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Futures are lazy",
+                    "body": "Calling an async function returns a future. The future does not run until an executor polls it. await drives one future to completion, and tokio::join! drives several concurrently. A future that is never awaited does no work."
+                },
+                {
+                    "title": "The runtime drives tasks",
+                    "body": "Tokio provides the executor and the reactor for I/O. #[tokio::main] turns an async main into a runtime entry point. tokio::spawn schedules a task on the runtime and returns a JoinHandle that must be awaited to observe its result."
+                },
+                {
+                    "title": "Keep async work non-blocking",
+                    "body": "Blocking a runtime worker prevents other tasks from making progress. Use async I/O and async synchronization primitives. Values held across an await must be Send when the task is spawned, so avoid holding non-Send guards across suspension points."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Future",
+                    "definition": "A value representing work that completes later."
+                },
+                {
+                    "term": "Executor",
+                    "definition": "The runtime component that polls futures and schedules tasks."
+                },
+                {
+                    "term": "tokio::spawn",
+                    "definition": "A function that schedules an async task on the runtime."
+                },
+                {
+                    "term": "JoinHandle",
+                    "definition": "A handle to a spawned task's result."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Await and join the totals",
+            "prompt": "Edit src/main.rs. Add a Tokio main, await a local total, spawn two independent totals, and join their handles.",
+            "evidence": "construction",
+            "language": "rust",
+            "files": [
+                {
+                    "path": "src/main.rs",
+                    "content": "async fn total(id: &str) -> i32 {\n    match id {\n        \"o1\" => 2500,\n        \"o2\" => 7500,\n        _ => 0,\n    }\n}\n\nfn main() {\n    // TODO: await the async work\n    let value = total(\"o1\");\n    println!(\"{:?}\", value);\n}\n",
+                    "editable": true,
+                    "language": "rust"
+                },
+                {
+                    "path": "Cargo.toml",
+                    "content": "[package]\nname = \"campus-check\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\ntokio = { version = \"1\", features = [\"macros\", \"rt-multi-thread\"] }\n",
+                    "editable": false,
+                    "language": "toml"
+                }
+            ],
+            "entry": "src/main.rs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile and test the crate with Cargo."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The program uses the Tokio runtime.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "#[tokio::main]",
+                        "async fn main()"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The async work is awaited before use.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        ".await"
+                    ],
+                    "excludes": [
+                        "let value = total(\"o1\");"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Concurrent tasks are spawned and joined.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "tokio::spawn",
+                        "tokio::join!"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The current main is synchronous and prints a future.",
+                "Add the Tokio main attribute and make main async.",
+                "Spawn the independent totals so they run concurrently.",
+                "Await one local total and join the two handles."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "async-transfer",
+            "title": "Why nothing happens",
+            "prompt": "An async function is called but its future is never awaited. Why does no work happen?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the reason.",
+                "options": [
+                    {
+                        "id": "lazy",
+                        "label": "The future is lazy and must be polled by an executor."
+                    },
+                    {
+                        "id": "thread",
+                        "label": "Calling an async function starts a thread that exits immediately."
+                    },
+                    {
+                        "id": "panic",
+                        "label": "The call panics unless it is inside main."
+                    },
+                    {
+                        "id": "unsafe",
+                        "label": "The call requires an unsafe block."
+                    }
+                ],
+                "correctId": "lazy",
+                "explanation": "An async function returns a future. Work starts when an executor polls it, which await or a runtime operation such as join! triggers."
+            },
+            "hints": [
+                "An async call returns a value representing future work.",
+                "That value must be driven.",
+                "await and join! poll futures.",
+                "Choose the lazy-future explanation."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "async-check",
+            "title": "Futures and runtime",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "lazy",
+                    "label": "Calling an async function returns a future without running the body.",
+                    "correct": true
+                },
+                {
+                    "id": "spawn",
+                    "label": "tokio::spawn schedules a future on the runtime and returns a JoinHandle.",
+                    "correct": true
+                },
+                {
+                    "id": "block-in-async",
+                    "label": "Blocking calls inside async tasks are harmless to the runtime.",
+                    "correct": false
+                },
+                {
+                    "id": "send",
+                    "label": "A spawned task must hold Send values across await points.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Futures are lazy, spawn schedules them, and blocking or non-Send state can break a runtime task.",
+            "hints": [
+                "Three statements are accurate.",
+                "A runtime worker is a shared resource.",
+                "Spawned tasks may move between workers.",
+                "Select lazy, spawn, and send."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
