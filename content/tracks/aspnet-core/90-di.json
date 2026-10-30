@@ -1,18 +1,27 @@
 {
     "id": "aspnet-core.di",
     "version": 1,
-    "sequence": 90,
+    "sequence": 162,
     "courseId": "aspnet-core",
     "title": "Service lifetimes and middleware order",
     "summary": "Register the DbContext and service in the request scope and order the middleware safely.",
-    "skills": ["aspnet.di", "aspnet.middleware"],
-    "prerequisites": ["aspnet.controllers", "architecture.modularity"],
+    "skills": [
+        "aspnet.di",
+        "aspnet.middleware"
+    ],
+    "prerequisites": [
+        "aspnet.controllers",
+        "architecture.modularity"
+    ],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:dotnet"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:dotnet"
+    ],
     "hints": [
         "Read the lifetimes: AddDbContext registers the context as scoped by default.",
         "A singleton is created once and keeps its dependencies for the life of the application.",
@@ -43,20 +61,25 @@
         {
             "id": "singleton-scoped",
             "description": "Registering a scoped service as a singleton.",
-            "stepId": "review",
-            "feedback": "The singleton outlives the request and captures the first scoped DbContext. Match the lifetimes."
+            "stepId": "apply",
+            "testDescription": "The product service uses the request scope.",
+            "feedback": "The singleton outlives the request and captures the first scoped DbContext. Match the lifetimes.",
+            "followUpSkill": "aspnet.di"
         },
         {
             "id": "middleware-order",
             "description": "Assuming middleware registration order does not matter.",
             "stepId": "apply",
+            "testDescription": "Exception handling runs before HTTPS redirection and authorization.",
             "feedback": "Middleware runs in registration order. A component only sees requests that reach it."
         },
         {
             "id": "service-locator",
             "description": "Resolving services from app.Services inside a handler.",
             "stepId": "review",
-            "feedback": "That hides dependencies and bypasses scope validation. Inject through the constructor instead."
+            "diagnostic": "Approving a handler that pulls services from app.Services instead of its constructor.",
+            "feedback": "That hides dependencies and bypasses scope validation. Inject through the constructor instead.",
+            "followUpSkill": "aspnet.di"
         }
     ],
     "lesson": {
@@ -173,8 +196,12 @@
                     "kind": "static",
                     "description": "The product service uses the request scope.",
                     "file": "Program.cs",
-                    "includes": ["builder.Services.AddScoped<IProductService, ProductService>()"],
-                    "excludes": ["AddSingleton<IProductService, ProductService>"]
+                    "includes": [
+                        "builder.Services.AddScoped<IProductService, ProductService>()"
+                    ],
+                    "excludes": [
+                        "AddSingleton<IProductService, ProductService>"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -189,17 +216,34 @@
                     "kind": "static",
                     "description": "Controllers are mapped as endpoints.",
                     "file": "Program.cs",
-                    "includes": ["app.MapControllers();"],
+                    "includes": [
+                        "app.MapControllers();"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Program.cs",
-                    "includes": ["builder.Services.AddDbContext<CatalogDbContext>(options =>"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "builder.Services.AddDbContext<CatalogDbContext>(options =>"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "AddDbContext registers CatalogDbContext as scoped.",
+                "Read the connection string from builder.Configuration.",
+                "Register IProductService with AddScoped to match the context lifetime.",
+                "Put UseExceptionHandler before UseHttpsRedirection and UseAuthorization."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet test",
+                "description": "Restore, build, and run the ASP.NET Core test project."
+            }
         },
         {
             "kind": "review",
@@ -251,7 +295,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The singleton is created once, so it keeps the first request's scoped DbContext and every later request reuses it. The exception handler also sits after authorization, so authorization failures cannot be handled by it. Register the service as scoped and move the exception handler to the top of the pipeline."
+            "explanation": "The singleton is created once, so it keeps the first request's scoped DbContext and every later request reuses it. The exception handler also sits after authorization, so authorization failures cannot be handled by it. Register the service as scoped and move the exception handler to the top of the pipeline.",
+            "hints": [
+                "Compare each finding with the registration and pipeline order shown.",
+                "A singleton is built once and keeps its first scoped dependency.",
+                "Middleware only sees requests that reach its position in the pipeline.",
+                "A wrong lifetime and a late exception handler are both real defects."
+            ]
         }
     ],
     "evaluation": {
@@ -271,5 +321,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "web"]
+    "tags": [
+        "professional",
+        "web"
+    ]
 }
