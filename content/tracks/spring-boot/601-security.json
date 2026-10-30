@@ -1,0 +1,366 @@
+{
+    "id": "spring-boot.security",
+    "version": 1,
+    "sequence": 160,
+    "courseId": "spring-boot",
+    "title": "Authentication at the filter boundary",
+    "summary": "Configure a SecurityFilterChain and prove with MockMvc that anonymous requests are rejected before MVC.",
+    "skills": [
+        "spring.security",
+        "spring.boot"
+    ],
+    "prerequisites": [
+        "spring.controllers",
+        "security.auth"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 10,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "security",
+        "briefing": "The catalog endpoints are open to anyone because the application has no security filter chain. Add authentication at the boundary and a test that proves anonymous requests never reach a controller."
+    },
+    "objectives": [
+        {
+            "id": "objective-configure",
+            "description": "Configure request authorization and an authentication mechanism.",
+            "stepIds": [
+                "configure"
+            ]
+        },
+        {
+            "id": "objective-test",
+            "description": "Test anonymous and authenticated requests through MockMvc.",
+            "stepIds": [
+                "test"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Reason about where a rejected request stops.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:spring"
+    ],
+    "hints": [
+        "The filter chain decides access before the controller is called.",
+        "Permit only the health endpoint and authenticate every other request.",
+        "Use Customizer.withDefaults() for HTTP Basic.",
+        "Test both the 401 path and an authenticated member path."
+    ],
+    "misconceptions": [
+        {
+            "id": "permit-all",
+            "description": "Leaving anyRequest().permitAll() and expecting protection.",
+            "stepId": "configure",
+            "testDescription": "Health stays public and the catalog requires authentication.",
+            "feedback": "permitAll disables the authorization check. Use anyRequest().authenticated() after the public matchers.",
+            "followUpSkill": "spring.security"
+        },
+        {
+            "id": "controller-security",
+            "description": "Putting authentication checks in controller methods.",
+            "stepId": "test",
+            "testDescription": "The test loads the real security configuration.",
+            "feedback": "A controller check runs after MVC dispatch and is easy to forget on a new route. The filter chain covers every request."
+        },
+        {
+            "id": "test-without-context",
+            "description": "Testing security with a standalone controller and no filters.",
+            "stepId": "test",
+            "testDescription": "Anonymous access to the catalog is rejected.",
+            "feedback": "A standalone MockMvc setup bypasses the filter chain. Load the context with @SpringBootTest and @AutoConfigureMockMvc.",
+            "followUpSkill": "spring.security"
+        },
+        {
+            "id": "wrong-status",
+            "description": "Returning 403 for a caller with no credentials.",
+            "stepId": "transfer",
+            "answer": "filter-403",
+            "feedback": "The caller is anonymous, so the response is 401. 403 is for an authenticated caller who lacks a permission."
+        },
+        {
+            "id": "controller-status",
+            "description": "Thinking the controller chooses the security status.",
+            "stepId": "transfer",
+            "answer": "controller-401",
+            "feedback": "Security filters reject the request before MVC. A controller cannot repair a request that the chain already refused.",
+            "followUpSkill": "spring.security"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The filter chain runs before MVC",
+                "body": "Spring Security wraps the request in a chain of servlet filters before the DispatcherServlet runs. A SecurityFilterChain bean decides which requests are public, which require authentication, and which authentication mechanism to accept. The controller never sees a request that the chain rejects."
+            },
+            {
+                "title": "Authentication is not authorization",
+                "body": "Authentication establishes who the caller is. Authorization decides whether that identity may perform the action. An anonymous caller is challenged with 401 Unauthorized. An authenticated caller without the required role is refused with 403 Forbidden."
+            },
+            {
+                "title": "Test the boundary, not the annotation",
+                "body": "A MockMvc test that loads the real security configuration proves that anonymous access is rejected and an authenticated member reaches the controller. Testing only a controller method with security disabled cannot catch a missing filter chain."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "SecurityFilterChain",
+                "definition": "The ordered security filters that process each request before MVC."
+            },
+            {
+                "term": "Authentication",
+                "definition": "The process that establishes the caller's identity."
+            },
+            {
+                "term": "Authorization",
+                "definition": "The rule that decides whether an identity may perform an action."
+            },
+            {
+                "term": "MockMvc",
+                "definition": "A test harness that sends requests through the configured web layer."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Authentication, authorization, and the filter chain",
+            "prompt": "Read the explanation, then configure and test the boundary.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The filter chain runs before MVC",
+                    "body": "Spring Security wraps the request in a chain of servlet filters before the DispatcherServlet runs. A SecurityFilterChain bean decides which requests are public, which require authentication, and which authentication mechanism to accept. The controller never sees a request that the chain rejects."
+                },
+                {
+                    "title": "Authentication is not authorization",
+                    "body": "Authentication establishes who the caller is. Authorization decides whether that identity may perform the action. An anonymous caller is challenged with 401 Unauthorized. An authenticated caller without the required role is refused with 403 Forbidden."
+                },
+                {
+                    "title": "Test the boundary, not the annotation",
+                    "body": "A MockMvc test that loads the real security configuration proves that anonymous access is rejected and an authenticated member reaches the controller. Testing only a controller method with security disabled cannot catch a missing filter chain."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "SecurityFilterChain",
+                    "definition": "The ordered security filters that process each request before MVC."
+                },
+                {
+                    "term": "Authentication",
+                    "definition": "The process that establishes the caller's identity."
+                },
+                {
+                    "term": "Authorization",
+                    "definition": "The rule that decides whether an identity may perform an action."
+                },
+                {
+                    "term": "MockMvc",
+                    "definition": "A test harness that sends requests through the configured web layer."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "configure",
+            "title": "Configure the filter chain",
+            "prompt": "Edit SecurityConfig.java. Keep /actuator/health public, require authentication for every other request, and enable HTTP Basic.",
+            "evidence": "construction",
+            "hints": [
+                "The method already returns a SecurityFilterChain.",
+                "Use authorizeHttpRequests with requestMatchers and anyRequest.",
+                "Permit the health endpoint and require authentication for the rest.",
+                "Enable HTTP Basic with Customizer.withDefaults()."
+            ],
+            "files": [
+                {
+                    "path": "SecurityConfig.java",
+                    "content": "package com.praxbit.catalog;\n\nimport org.springframework.context.annotation.Bean;\nimport org.springframework.context.annotation.Configuration;\nimport org.springframework.security.config.annotation.web.builders.HttpSecurity;\nimport org.springframework.security.web.SecurityFilterChain;\n\n@Configuration\npublic class SecurityConfig {\n    @Bean\n    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {\n        // TODO: keep health public, require authentication elsewhere, and enable HTTP Basic\n        return http.build();\n    }\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "SecurityConfig.java",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "mvn test",
+                "description": "Compile the project and run the Spring Security filter chain tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Health stays public and the catalog requires authentication.",
+                    "file": "SecurityConfig.java",
+                    "includes": [
+                        "requestMatchers(\"/actuator/health\").permitAll()",
+                        "anyRequest().authenticated()"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "HTTP Basic authenticates requests.",
+                    "file": "SecurityConfig.java",
+                    "includes": [
+                        ".httpBasic(Customizer.withDefaults())"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The filter chain is exposed as a bean.",
+                    "file": "SecurityConfig.java",
+                    "includes": [
+                        "@Bean",
+                        "SecurityFilterChain filterChain(HttpSecurity http)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "code",
+            "id": "test",
+            "title": "Test the security boundary",
+            "prompt": "Edit CatalogSecurityTest.java. Assert that an anonymous request is rejected with 401 and that an authenticated member reaches the controller.",
+            "evidence": "testing",
+            "hints": [
+                "The test already loads the application context and MockMvc.",
+                "Change the anonymous expectation from 200 to 401.",
+                "Add a second test that attaches a mock user to the request.",
+                "Use SecurityMockMvcRequestPostProcessors.user with a role."
+            ],
+            "files": [
+                {
+                    "path": "CatalogSecurityTest.java",
+                    "content": "package com.praxbit.catalog;\n\nimport org.junit.jupiter.api.Test;\nimport org.springframework.beans.factory.annotation.Autowired;\nimport org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;\nimport org.springframework.boot.test.context.SpringBootTest;\nimport org.springframework.test.web.servlet.MockMvc;\n\nimport static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;\nimport static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;\n\n@SpringBootTest\n@AutoConfigureMockMvc\nclass CatalogSecurityTest {\n    @Autowired\n    private MockMvc mockMvc;\n\n    @Test\n    void anonymousRequestIsRejected() throws Exception {\n        // TODO: assert that an anonymous catalog request is unauthorized\n        mockMvc.perform(get(\"/api/products/1\")).andExpect(status().isOk());\n    }\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "CatalogSecurityTest.java",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "mvn test",
+                "description": "Run the MockMvc security tests against the application context."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Anonymous access to the catalog is rejected.",
+                    "file": "CatalogSecurityTest.java",
+                    "includes": [
+                        "mockMvc.perform(get(\"/api/products/1\"))",
+                        "status().isUnauthorized()"
+                    ],
+                    "excludes": [
+                        "get(\"/api/products/1\")).andExpect(status().isOk())"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "An authenticated member can read the catalog.",
+                    "file": "CatalogSecurityTest.java",
+                    "includes": [
+                        "with(user(\"ada\").roles(\"MEMBER\"))",
+                        "status().isOk()"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The test loads the real security configuration.",
+                    "file": "CatalogSecurityTest.java",
+                    "includes": [
+                        "@SpringBootTest",
+                        "@AutoConfigureMockMvc"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a new protected route",
+            "prompt": "A new route is protected with .anyRequest().authenticated(), and the caller sends no credentials. Where is the request rejected?",
+            "evidence": "transfer",
+            "hints": [
+                "The filter chain runs before the controller.",
+                "No credentials means the caller is anonymous, not forbidden.",
+                "401 is the response for a missing authentication challenge.",
+                "The controller method is never invoked."
+            ],
+            "quiz": {
+                "prompt": "A new route is protected with .anyRequest().authenticated(), and the caller sends no credentials. Where is the request rejected?",
+                "options": [
+                    {
+                        "id": "filter-401",
+                        "label": "The filter chain rejects it with 401 before the controller runs."
+                    },
+                    {
+                        "id": "controller-401",
+                        "label": "The controller runs and returns 401 from its method body."
+                    },
+                    {
+                        "id": "filter-403",
+                        "label": "The filter chain returns 403 because the caller is authenticated."
+                    },
+                    {
+                        "id": "success",
+                        "label": "The request succeeds because the route has no role requirement."
+                    }
+                ],
+                "correctId": "filter-401",
+                "explanation": "An anonymous caller has not authenticated, so the authorization filter starts an authentication challenge and returns 401. The controller is downstream and is never invoked."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 170,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
