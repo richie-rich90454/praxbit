@@ -1,0 +1,317 @@
+{
+    "id": "express.validation",
+    "version": 1,
+    "sequence": 226,
+    "courseId": "express",
+    "title": "Validate request bodies at the boundary",
+    "summary": "Build a validation result that cleans valid products and names every invalid field, then review a route that trusts a cast.",
+    "skills": ["express.middleware", "express.errors", "api.validation"],
+    "prerequisites": ["express.middleware", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "validation",
+        "briefing": "A client sent a whitespace-only name and a negative price. Both reached the product store because the route cast the body instead of validating it."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Validate and clean an untrusted product body.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review a route for validation and error-contract risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:express"],
+    "hints": [
+        "Reject arrays and null before reading fields.",
+        "Trim the name and require it to be non-empty.",
+        "Require a finite number for price and reject negative values.",
+        "Return only the cleaned name and price, not the original body."
+    ],
+    "misconceptions": [
+        {
+            "id": "cast-trust",
+            "description": "Casting request.body to the product type.",
+            "stepId": "apply",
+            "testDescription": "Non-object bodies are rejected.",
+            "feedback": "A type assertion has no runtime effect. A string or array still reaches the handler and is stored as if it were a product.",
+            "followUpSkill": "express.middleware"
+        },
+        {
+            "id": "negative-price",
+            "description": "Accepting any numeric price.",
+            "stepId": "apply",
+            "testDescription": "Negative prices are reported as field errors.",
+            "feedback": "A price below zero is not a valid product. Reject it with a field error instead of storing a negative total.",
+            "followUpSkill": "api.validation"
+        },
+        {
+            "id": "ship-unvalidated",
+            "description": "Shipping a handler that trusts the body cast.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "The cast and the truthy name check leave real invalid input unhandled. Block the route until validation returns a result and delegates failures.",
+            "followUpSkill": "express.errors"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Validate at the edge",
+                "body": "request.body is unknown data. Check its shape, trim strings, and reject non-finite or negative prices before the handler stores anything."
+            },
+            {
+                "title": "Return a result, not a boolean",
+                "body": "A validation result that carries either the cleaned value or a list of field errors gives the middleware enough information to answer precisely."
+            },
+            {
+                "title": "Keep one error contract",
+                "body": "The validator should not write the response. The route middleware turns a failed result into next(error) so the shared error handler owns the response shape."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Validation result",
+                "definition": "A value that describes either cleaned input or the fields that failed."
+            },
+            {
+                "term": "Boundary",
+                "definition": "The point where external data enters the application."
+            },
+            {
+                "term": "Error contract",
+                "definition": "The shared shape and statuses used for failures."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Validation at the edge",
+            "prompt": "Read the explanation, then implement the validator.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Validate at the edge",
+                    "body": "request.body is unknown data. Check its shape, trim strings, and reject non-finite or negative prices before the handler stores anything."
+                },
+                {
+                    "title": "Return a result, not a boolean",
+                    "body": "A validation result that carries either the cleaned value or a list of field errors gives the middleware enough information to answer precisely."
+                },
+                {
+                    "title": "Keep one error contract",
+                    "body": "The validator should not write the response. The route middleware turns a failed result into next(error) so the shared error handler owns the response shape."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Validation result",
+                    "definition": "A value that describes either cleaned input or the fields that failed."
+                },
+                {
+                    "term": "Boundary",
+                    "definition": "The point where external data enters the application."
+                },
+                {
+                    "term": "Error contract",
+                    "definition": "The shared shape and statuses used for failures."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Validate a product body",
+            "prompt": "Edit validate.ts. Reject non-object bodies, trim the name, require a finite non-negative price, and return each failed field exactly once.",
+            "evidence": "construction",
+            "hints": [
+                "Check typeof body, null, and Array.isArray first.",
+                "Read name only when it is a string, then trim it.",
+                "Use Number.isFinite and a lower bound for price.",
+                "Return the cleaned object on success."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "validate.ts",
+                    "content": "type ProductInput = { name: string; price: number };\ntype Validation =\n  | { ok: true; value: ProductInput }\n  | { ok: false; errors: string[] };\n\nfunction validateProduct(body: unknown): Validation {\n  // TODO: reject non-object bodies, empty names, and negative or non-finite prices\n  return { ok: true, value: body as ProductInput };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "validate.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Non-object bodies are rejected.",
+                    "name": "validateProduct",
+                    "args": ["not a product"],
+                    "expected": {
+                        "ok": false,
+                        "errors": ["body"]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty name is reported.",
+                    "name": "validateProduct",
+                    "args": [
+                        {
+                            "name": "   ",
+                            "price": 4.5
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "errors": ["name"]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Negative prices are reported as field errors.",
+                    "name": "validateProduct",
+                    "args": [
+                        {
+                            "name": "Notebook",
+                            "price": -1
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "errors": ["price"]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Both invalid fields are reported together.",
+                    "name": "validateProduct",
+                    "args": [
+                        {
+                            "name": "",
+                            "price": "free"
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "errors": ["name", "price"]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A valid product is trimmed and cleaned.",
+                    "name": "validateProduct",
+                    "args": [
+                        {
+                            "name": "  Notebook  ",
+                            "price": 4.5,
+                            "role": "admin"
+                        }
+                    ],
+                    "expected": {
+                        "ok": true,
+                        "value": {
+                            "name": "Notebook",
+                            "price": 4.5
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the unvalidated route",
+            "prompt": "Review app.ts and select every real validation or error-contract problem.",
+            "evidence": "review",
+            "hints": [
+                "Check what !body.name does for a string of spaces.",
+                "Ask what the cast changes at runtime.",
+                "Look for next(error) or a shared error handler.",
+                "Reject findings that describe checks the route does not contain."
+            ],
+            "artifact": {
+                "title": "app.ts",
+                "caption": "The route casts the body, checks only name truthiness, and writes its own error response.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import express from \"express\";\n\ntype Product = { name: string; price: number };\nconst products: Product[] = [];\n\nexport const app = express();\napp.use(express.json());\n\napp.post(\"/products\", function createProduct(request, response) {\n  const body = request.body as Product;\n  if (!body.name) {\n    response.status(400).json({ error: \"invalid_name\" });\n    return;\n  }\n  products.push(body);\n  response.status(201).json(body);\n});\n"
+            },
+            "findings": [
+                {
+                    "id": "truthy",
+                    "label": "The truthy name check accepts a whitespace-only name and never validates price.",
+                    "correct": true
+                },
+                {
+                    "id": "cast",
+                    "label": "The type assertion tells TypeScript to trust the body but does not validate it at runtime.",
+                    "correct": true
+                },
+                {
+                    "id": "direct",
+                    "label": "Validation writes its own response instead of delegating to the shared error handler.",
+                    "correct": true
+                },
+                {
+                    "id": "price",
+                    "label": "The handler rejects negative prices.",
+                    "correct": false
+                },
+                {
+                    "id": "extra",
+                    "label": "The handler rejects unknown fields such as role.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The truthy check lets whitespace through, price is never inspected, and the cast is erased at runtime. The route answers directly instead of delegating to the shared error handler, and it rejects neither negative prices nor extra fields."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
