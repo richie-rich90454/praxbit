@@ -1,0 +1,263 @@
+{
+    "id": "css.color-contrast",
+    "version": 1,
+    "sequence": 219,
+    "courseId": "css",
+    "title": "Color, contrast, and theming",
+    "summary": "Choose text and background colors that meet contrast needs and use CSS variables.",
+    "skills": [
+        "web.css",
+        "web.accessibility"
+    ],
+    "prerequisites": [
+        "web.css"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-css",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "computed-style-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "low-contrast",
+        "briefing": "The product card uses light gray text on white, which many users cannot read. Replace it with a high-contrast token and keep the accent for actions only."
+    },
+    "objectives": [
+        {
+            "id": "contrast",
+            "description": "Use a readable text color.",
+            "stepIds": [
+                "fix-color"
+            ]
+        },
+        {
+            "id": "tokens",
+            "description": "Use CSS variables for colors.",
+            "stepIds": [
+                "fix-color"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain contrast and theming.",
+            "stepIds": [
+                "color-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:palette"
+    ],
+    "hints": [
+        "Use a dark text color on white, such as #000 or #222.",
+        "Define colors as CSS variables in :root.",
+        "Reserve the accent color for actions.",
+        "Set :root { --text: #000; --paper: #fff; --accent: #B54131; } and .card { color: var(--text); background: var(--paper); }."
+    ],
+    "misconceptions": [
+        {
+            "id": "color-only",
+            "description": "Using color alone to convey meaning.",
+            "stepId": "fix-color",
+            "testDescription": "Body text uses a high-contrast color.",
+            "feedback": "Color alone is not enough; add text or icons. Also ensure sufficient contrast.",
+            "followUpSkill": "web.accessibility"
+        },
+        {
+            "id": "contrast-optional",
+            "description": "Believing contrast is only a visual preference.",
+            "stepId": "color-claims",
+            "answer": "optional",
+            "feedback": "Low contrast excludes users with low vision. Contrast is an accessibility requirement, not decoration.",
+            "followUpSkill": "web.accessibility"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Contrast",
+                "body": "Text must stand out from its background. Light gray on white is hard to read. Use dark text on light backgrounds and check contrast ratios."
+            },
+            {
+                "title": "Theming with variables",
+                "body": "CSS custom properties in :root define a palette. Components reference variables instead of hard-coded colors, making themes consistent and changeable."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Contrast ratio",
+                "definition": "The luminance difference between text and background."
+            },
+            {
+                "term": "CSS variable",
+                "definition": "A custom property that stores a reusable value."
+            },
+            {
+                "term": "Accent color",
+                "definition": "A color used sparingly to highlight actions."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Color and contrast",
+            "prompt": "Read the explanation, then fix the CSS.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Contrast",
+                    "body": "Text must stand out from its background. Light gray on white is hard to read. Use dark text on light backgrounds and check contrast ratios."
+                },
+                {
+                    "title": "Theming with variables",
+                    "body": "CSS custom properties in :root define a palette. Components reference variables instead of hard-coded colors, making themes consistent and changeable."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Contrast ratio",
+                    "definition": "The luminance difference between text and background."
+                },
+                {
+                    "term": "CSS variable",
+                    "definition": "A custom property that stores a reusable value."
+                },
+                {
+                    "term": "Accent color",
+                    "definition": "A color used sparingly to highlight actions."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-color",
+            "title": "Fix color contrast",
+            "prompt": "Edit styles.css. Use a high-contrast text color and CSS variables.",
+            "evidence": "construction",
+            "language": "css",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Card</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <article class=\"card\"><p>Readable text</p><button class=\"cta\">Buy</button></article>\n</body>\n</html>\n",
+                    "editable": false,
+                    "language": "html"
+                },
+                {
+                    "path": "styles.css",
+                    "content": ".card { color: #aaa; background: #fff; padding: 16px; }\n.cta { background: #B54131; color: #fff; }\n",
+                    "editable": true,
+                    "language": "css"
+                }
+            ],
+            "entry": "styles.css",
+            "preview": "css",
+            "tests": [
+                {
+                    "kind": "css",
+                    "description": "Body text uses a high-contrast color.",
+                    "selector": ".card",
+                    "property": "color",
+                    "expected": "rgb(0, 0, 0)"
+                },
+                {
+                    "kind": "css",
+                    "description": "The card background is white.",
+                    "selector": ".card",
+                    "property": "background-color",
+                    "expected": "rgb(255, 255, 255)"
+                },
+                {
+                    "kind": "css",
+                    "description": "The call to action uses the accent background.",
+                    "selector": ".cta",
+                    "property": "background-color",
+                    "expected": "rgb(181, 65, 49)"
+                },
+                {
+                    "kind": "static",
+                    "description": "Colors are defined as CSS variables.",
+                    "file": "styles.css",
+                    "includes": [
+                        "--"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "hints": [
+                "Change the card text color to black.",
+                "Define variables in :root.",
+                "Keep the accent for the button.",
+                "Use :root { --text: #000; --paper: #fff; --accent: #B54131; } and reference them."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "color-claims",
+            "title": "Color and contrast claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Check contrast claims.",
+                "Color alone is not a reliable signal.",
+                "Variables keep palettes consistent.",
+                "Select contrast requirement and variables; reject optional and color-only."
+            ],
+            "statements": [
+                {
+                    "id": "contrast-required",
+                    "label": "Sufficient contrast is required for readability.",
+                    "correct": true
+                },
+                {
+                    "id": "color-only",
+                    "label": "Color alone is sufficient to convey meaning.",
+                    "correct": false
+                },
+                {
+                    "id": "variables",
+                    "label": "CSS variables make theming consistent.",
+                    "correct": true
+                },
+                {
+                    "id": "optional",
+                    "label": "Contrast is only a visual preference.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Contrast supports readability and variables keep color usage consistent."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and computed-style tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
