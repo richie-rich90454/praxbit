@@ -1,6 +1,6 @@
 {
     "id": "campus.permission-denied",
-    "version": 1,
+    "version": 2,
     "sequence": 27,
     "courseId": "campus",
     "title": "Permission denied",
@@ -59,13 +59,24 @@
             "id": "chmod-777",
             "description": "Granting everyone access to fix a permission error.",
             "stepId": "repair-modes",
-            "feedback": "World-writable configuration and secrets are a security failure. Grant only the access the service needs."
+            "diagnostic": "Sets config.json or api.key to mode 777 instead of the least access required.",
+            "feedback": "World-writable configuration and secrets are a security failure. Grant only the access the service needs.",
+            "followUpSkill": "ops.permissions"
         },
         {
             "id": "secret-public",
             "description": "Leaving a secret readable by every user.",
             "stepId": "repair-modes",
-            "feedback": "Secret material should not be world-readable. Mode 600 limits read and write to the owner."
+            "diagnostic": "Leaves api.key world-readable at mode 644.",
+            "feedback": "Secret material should not be world-readable. Mode 600 limits read and write to the owner.",
+            "followUpSkill": "ops.permissions"
+        },
+        {
+            "id": "world-access-is-fix",
+            "description": "Believing mode 777 is an acceptable fix for configuration errors.",
+            "stepId": "permission-check",
+            "answer": "world",
+            "feedback": "Broad access solves today's error and creates a security problem. Use the narrowest mode that lets the service work."
         }
     ],
     "lesson": {
@@ -98,6 +109,12 @@
         {
             "kind": "terminal",
             "id": "repair-modes",
+            "hints": [
+                "Diagnose the permission error, set the config and key modes, restart, and verify.",
+                "File modes grant read, write, and execute separately to owner, group, and others.",
+                "Mode 640 lets the owner read and write and the group read, while others get nothing.",
+                "Set config.json to 640 and secrets/api.key to 600, restart orders-api, then confirm it is running."
+            ],
             "title": "Repair file access",
             "prompt": "Use the terminal. Diagnose the failure, set config.json to 640, set secrets/api.key to 600, restart orders-api, and verify it runs.",
             "evidence": "debugging",
@@ -182,6 +199,12 @@
         {
             "kind": "explain",
             "id": "permission-check",
+            "hints": [
+                "Select statements about least access and how permissions are evaluated.",
+                "Permissions apply to the user the service runs as; secrets need narrower access than config.",
+                "A shared team file can be 640, while a private key should be 600.",
+                "Three statements are accurate; reject mode 777 as a fix."
+            ],
             "title": "Least access",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
