@@ -5,22 +5,14 @@
     "courseId": "fastapi",
     "title": "Typed routes with Pydantic",
     "summary": "Register a FastAPI app, parse a Pydantic request body, and return a typed item.",
-    "skills": [
-        "fastapi.routes"
-    ],
-    "prerequisites": [
-        "python.functions",
-        "http.basics"
-    ],
+    "skills": ["fastapi.routes"],
+    "prerequisites": ["python.functions", "http.basics"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:fastapi"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastapi"],
     "hints": [
         "The app and both routes are already registered.",
         "read_item receives item_id; use it to pick the matching record.",
@@ -169,10 +152,7 @@
                     "kind": "static",
                     "description": "The app and GET route are registered with FastAPI decorators.",
                     "file": "main.py",
-                    "includes": [
-                        "app = FastAPI()",
-                        "@app.get(\"/items/{item_id}\")"
-                    ],
+                    "includes": ["app = FastAPI()", "@app.get(\"/items/{item_id}\")"],
                     "excludes": []
                 },
                 {
@@ -195,29 +175,21 @@
                         "item = items[item_id - 1]",
                         "return Item(**item)"
                     ],
-                    "excludes": [
-                        "return items[0]"
-                    ]
+                    "excludes": ["return items[0]"]
                 },
                 {
                     "kind": "static",
                     "description": "The app also exposes a typed POST route.",
                     "file": "main.py",
-                    "includes": [
-                        "@app.post(\"/items\")"
-                    ],
+                    "includes": ["@app.post(\"/items\")"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.py",
-                    "includes": [
-                        "app = FastAPI()"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["app = FastAPI()"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -291,8 +263,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
