@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "preferences",
-            "description": "Treating Preferences as secure storage.",
+            "description": "Using Preferences as an encrypted credential store.",
             "stepId": "apply",
-            "feedback": "Preferences writes readable files. Credentials belong in Keychain or Keystore through a secure storage plugin."
+            "testDescription": "Native credentials use secure storage and web sessions use a server-set cookie.",
+            "feedback": "Preferences is plain storage. Use the platform Keychain or Keystore for credentials.",
+            "followUpSkill": "web.browser-apis"
         },
         {
             "id": "deep-link",
-            "description": "Routing an app URL before the session is restored.",
+            "description": "Routing a deep link without validating its host and session.",
             "stepId": "review",
-            "feedback": "Validate the host, wait for the session, then route. Otherwise a link can land inside an authenticated area."
+            "answer": "ship:token-localstorage,deep-link-bypass,sync-overwrite",
+            "feedback": "Any app can send a custom-scheme link. Restrict hosts, validate the route, and require an authenticated session."
         },
         {
             "id": "last-write-wins",
-            "description": "Sending the whole local record without a revision check.",
+            "description": "Overwriting a newer server revision during sync.",
             "stepId": "apply",
-            "feedback": "Compare revisions and surface a conflict; never replace a newer server record with older local state."
+            "testDescription": "Sync keeps the newer server revision and reports a conflict.",
+            "feedback": "Last-write-wins silently discards another device's edit. Compare revisions and surface a conflict."
         }
     ],
     "lesson": {
@@ -225,7 +229,18 @@
                     "includes": ["Capacitor.isNativePlatform()"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Keep native credentials in Keychain or Keystore.",
+                "Treat deep links as untrusted input.",
+                "Check notification permission before requesting it.",
+                "Resolve sync conflicts by revision and report them instead of overwriting."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -282,7 +297,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "localStorage exposes the token to any script on the origin. The deep link handler routes any URL before checking a session or host. The order write carries no revision, so a newer server record is overwritten. The artifact does not use the platform keychain and never compares revisions."
+            "explanation": "localStorage exposes the token to any script on the origin. The deep link handler routes any URL before checking a session or host. The order write carries no revision, so a newer server record is overwritten. The artifact does not use the platform keychain and never compares revisions.",
+            "hints": [
+                "Find credentials stored where page script can read them.",
+                "Check the deep-link allowlist and session requirement.",
+                "Ask what happens when two devices edit the same record.",
+                "Block the change: tokens in localStorage, an open deep link, and last-write-wins lose data."
+            ]
         }
     ],
     "evaluation": {
