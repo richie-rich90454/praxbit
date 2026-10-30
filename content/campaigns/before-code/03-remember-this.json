@@ -1,6 +1,6 @@
 {
     "id": "before-code.remember-this",
-    "version": 1,
+    "version": 2,
     "sequence": 3,
     "courseId": "before-code",
     "title": "Remember this",
@@ -50,13 +50,23 @@
             "description": "Treating assignment as a permanent mathematical equality.",
             "stepId": "assignment-check",
             "answer": "forever",
-            "feedback": "Assignment stores the current value. A later assignment can replace it. The cell is not locked to that number forever."
+            "feedback": "Assignment stores the current value. A later assignment can replace it. The cell is not locked to that number forever.",
+            "followUpSkill": "concept.state"
         },
         {
             "id": "add-before-set",
-            "description": "Adding before initializing the count.",
+            "description": "Applying an add before the set that should follow it.",
             "stepId": "memory",
-            "feedback": "The count started at 0. Adding one produces 1, not 3. Set the intended starting value first."
+            "diagnostic": "Applies add-one before set-two, so the later set overwrites the increment and boxCount ends at 2 instead of 3.",
+            "feedback": "The last write wins. If set-two runs after add-one, the increment is lost. Order the writes so the desired value is written last.",
+            "followUpSkill": "concept.state"
+        },
+        {
+            "id": "state-is-invisible",
+            "description": "Believing stored values cannot affect later output.",
+            "stepId": "state-claims",
+            "answer": "invisible",
+            "feedback": "Stored values are exactly what later steps read. A total, cart, or pickup code changes the output of the steps that follow."
         }
     ],
     "lesson": {
@@ -89,6 +99,12 @@
         {
             "kind": "state",
             "id": "memory",
+            "hints": [
+                "Apply operations until both memory cells match the target state.",
+                "State changes only when an operation writes to a cell, and a later write replaces an earlier one.",
+                "To reach 3 from 0 you can set 2 and then add 1, but only when the add happens after the set.",
+                "Set the pickup code first, then reach a box count of 3 with two writes in the right order."
+            ],
             "title": "Set the pickup desk memory",
             "prompt": "Apply operations until the memory matches the target. Operations may be applied in a useful order; each click changes state.",
             "evidence": "construction",
@@ -146,7 +162,7 @@
             "id": "assignment-check",
             "title": "What remains after assignment?",
             "prompt": "A program runs: bagCount = 2, then bagCount = 5. What does bagCount hold afterwards?",
-            "evidence": "prediction",
+            "evidence": "transfer",
             "quiz": {
                 "prompt": "Choose the value after both assignments.",
                 "options": [
@@ -171,15 +187,21 @@
                 "explanation": "The second assignment replaces the stored value. The cell holds 5 after the program reaches that line."
             },
             "hints": [
-                "Read the assignments from top to bottom.",
-                "The second assignment happens later.",
-                "The later value replaces the earlier one.",
-                "bagCount holds 5. The 2 was overwritten."
+                "Track the stored value after each of the two assignment lines.",
+                "Assignment replaces the current value; it does not create a permanent equation.",
+                "If x = 1 and then x = 9, x holds 9 afterward, not both values.",
+                "The second line runs after the first. Decide which write the cell keeps, then choose that value."
             ]
         },
         {
             "kind": "explain",
             "id": "state-claims",
+            "hints": [
+                "Select claims that describe how stored values behave across steps.",
+                "State carries results forward and can be overwritten by later steps.",
+                "A shopping cart total that persists between clicks depends on stored state.",
+                "Two statements are true; reject the claims that state is invisible or that different state must behave identically."
+            ],
             "title": "State and correctness",
             "prompt": "Select the accurate statements about state.",
             "evidence": "explanation",
