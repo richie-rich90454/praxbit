@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "events.ts": "type Event =\n  | { kind: \"order\"; total: number }\n  | { kind: \"refund\"; total: number }\n  | { kind: \"visit\"; count: number };\n\nfunction describe(event: Event): string {\n  switch (event.kind) {\n    case \"order\":\n      return `order ${event.total}`;\n    case \"refund\":\n      return `refund ${event.total}`;\n    case \"visit\":\n      return `visit ${event.count}`;\n    default: {\n      const neverEvent: never = event;\n      return neverEvent;\n    }\n  }\n}\n"
+            }
+        }
+    }
+}
