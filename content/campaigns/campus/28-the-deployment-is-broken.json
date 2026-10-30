@@ -1,6 +1,6 @@
 {
     "id": "campus.the-deployment-is-broken",
-    "version": 1,
+    "version": 2,
     "sequence": 28,
     "courseId": "campus",
     "title": "The deployment is broken",
@@ -54,13 +54,24 @@
             "id": "deletes-release",
             "description": "Deleting the broken release path instead of restoring the link.",
             "stepId": "restore-release",
-            "feedback": "The problem is the link target, not the old directory. Repoint current to a verified release."
+            "diagnostic": "Deletes the current link or release directory instead of repointing current at a verified release.",
+            "feedback": "The problem is the link target, not the old directory. Repoint current to a verified release.",
+            "followUpSkill": "ops.deployment"
         },
         {
             "id": "restart-proof",
             "description": "Assuming a restart proves the deployment works.",
             "stepId": "restore-release",
-            "feedback": "The service must start and answer a health request. A command exiting is not deployment success."
+            "diagnostic": "Stops after restarting orders-api without requesting the health endpoint.",
+            "feedback": "The service must start and answer a health request. A command exiting is not deployment success.",
+            "followUpSkill": "ops.deployment"
+        },
+        {
+            "id": "delete-makes-rollback-easy",
+            "description": "Believing deleting previous releases makes rollback easier.",
+            "stepId": "deployment-check",
+            "answer": "delete",
+            "feedback": "Rollback needs an intact earlier release. Deleting previous releases removes the recovery target."
         }
     ],
     "lesson": {
@@ -93,6 +104,12 @@
         {
             "kind": "terminal",
             "id": "restore-release",
+            "hints": [
+                "Inspect the broken link, point current at the intact release, restart, and check health.",
+                "A stable symlink selects the active release; recovery repoints it rather than deleting artifacts.",
+                "If a shortcut points to a missing folder, repair the shortcut target, not the archive.",
+                "Read the link, repoint current to releases/2026-10-19, restart orders-api, then request health."
+            ],
             "title": "Restore the release",
             "prompt": "Inspect the deployment, repoint current at releases/2026-10-19, restart orders-api, and verify its health endpoint.",
             "evidence": "debugging",
@@ -181,6 +198,12 @@
         {
             "kind": "explain",
             "id": "deployment-check",
+            "hints": [
+                "Select statements about rollback safety and verification.",
+                "Rollback targets a known-good release and finishes with a health check.",
+                "Deleting old releases removes the very artifacts a rollback needs.",
+                "Three statements are accurate; reject the claim that deleting previous releases makes rollback easier."
+            ],
             "title": "Safe recovery",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
