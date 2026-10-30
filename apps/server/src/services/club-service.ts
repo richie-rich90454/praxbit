@@ -452,32 +452,37 @@ export class ClubService {
         readonly handle: string;
         readonly role: "owner" | "member";
     }): Promise<void> {
-        const service = this;
-        await withTransaction(this.pool, async function updateRole(client): Promise<void> {
-            await service.requireOwner(client, input.clubId, input.actorUserId);
-            const target = await service.clubs.findMembershipByHandle(
-                client,
-                input.clubId,
-                input.handle,
-            );
-            if (target === undefined) {
-                throw notFound("club_member_not_found", "That member is not in this club.");
+        await withTransaction(this.pool, this.updateMemberRoleWork.bind(this, input));
+    }
+
+    private async updateMemberRoleWork(
+        input: {
+            readonly actorUserId: string;
+            readonly clubId: string;
+            readonly handle: string;
+            readonly role: "owner" | "member";
+        },
+        client: QueryExecutor,
+    ): Promise<void> {
+        await this.requireOwner(client, input.clubId, input.actorUserId);
+        const target = await this.clubs.findMembershipByHandle(client, input.clubId, input.handle);
+        if (target === undefined) {
+            throw notFound("club_member_not_found", "That member is not in this club.");
+        }
+        if (target.role === input.role) {
+            return;
+        }
+        if (input.role === "member") {
+            const owners = await this.clubs.countOwners(client, input.clubId);
+            if (owners <= 1) {
+                throw new AppError(
+                    409,
+                    "last_owner_required",
+                    "A club needs at least one owner. Promote another member first.",
+                );
             }
-            if (target.role === input.role) {
-                return;
-            }
-            if (input.role === "member") {
-                const owners = await service.clubs.countOwners(client, input.clubId);
-                if (owners <= 1) {
-                    throw new AppError(
-                        409,
-                        "last_owner_required",
-                        "A club needs at least one owner. Promote another member first.",
-                    );
-                }
-            }
-            await service.clubs.setMemberRole(client, input.clubId, input.handle, input.role);
-        });
+        }
+        await this.clubs.setMemberRole(client, input.clubId, input.handle, input.role);
     }
 
     public async removeMember(input: {
@@ -485,29 +490,33 @@ export class ClubService {
         readonly clubId: string;
         readonly handle: string;
     }): Promise<void> {
-        const service = this;
-        await withTransaction(this.pool, async function removeMember(client): Promise<void> {
-            await service.requireOwner(client, input.clubId, input.actorUserId);
-            const target = await service.clubs.findMembershipByHandle(
-                client,
-                input.clubId,
-                input.handle,
-            );
-            if (target === undefined) {
-                throw notFound("club_member_not_found", "That member is not in this club.");
+        await withTransaction(this.pool, this.removeMemberWork.bind(this, input));
+    }
+
+    private async removeMemberWork(
+        input: {
+            readonly actorUserId: string;
+            readonly clubId: string;
+            readonly handle: string;
+        },
+        client: QueryExecutor,
+    ): Promise<void> {
+        await this.requireOwner(client, input.clubId, input.actorUserId);
+        const target = await this.clubs.findMembershipByHandle(client, input.clubId, input.handle);
+        if (target === undefined) {
+            throw notFound("club_member_not_found", "That member is not in this club.");
+        }
+        if (target.role === "owner") {
+            const owners = await this.clubs.countOwners(client, input.clubId);
+            if (owners <= 1) {
+                throw new AppError(
+                    409,
+                    "last_owner_required",
+                    "The last owner cannot be removed. Promote another member first.",
+                );
             }
-            if (target.role === "owner") {
-                const owners = await service.clubs.countOwners(client, input.clubId);
-                if (owners <= 1) {
-                    throw new AppError(
-                        409,
-                        "last_owner_required",
-                        "The last owner cannot be removed. Promote another member first.",
-                    );
-                }
-            }
-            await service.clubs.removeMember(client, input.clubId, input.handle);
-        });
+        }
+        await this.clubs.removeMember(client, input.clubId, input.handle);
     }
 
     public async listInvites(input: {
@@ -577,19 +586,28 @@ export class ClubService {
         readonly inviteId: string;
         readonly now: Date;
     }): Promise<void> {
-        const service = this;
-        await withTransaction(this.pool, async function revoke(client): Promise<void> {
-            await service.requireOwner(client, input.clubId, input.userId);
-            const revoked = await service.clubs.revokeInvite(
-                client,
-                input.clubId,
-                input.inviteId,
-                input.now,
-            );
-            if (!revoked) {
-                throw notFound("club_invite_not_found", "Unknown active invite.");
-            }
-        });
+        await withTransaction(this.pool, this.revokeInviteWork.bind(this, input));
+    }
+
+    private async revokeInviteWork(
+        input: {
+            readonly userId: string;
+            readonly clubId: string;
+            readonly inviteId: string;
+            readonly now: Date;
+        },
+        client: QueryExecutor,
+    ): Promise<void> {
+        await this.requireOwner(client, input.clubId, input.userId);
+        const revoked = await this.clubs.revokeInvite(
+            client,
+            input.clubId,
+            input.inviteId,
+            input.now,
+        );
+        if (!revoked) {
+            throw notFound("club_invite_not_found", "Unknown active invite.");
+        }
     }
 
     public async reportClub(input: {
