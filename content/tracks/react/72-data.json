@@ -44,19 +44,32 @@
             "id": "fetch-render",
             "description": "Fetching during render.",
             "stepId": "apply",
-            "feedback": "Render must stay pure. Start the request in an effect and store the result in state."
+            "feedback": "Render must stay pure. Start the request in an effect and store the result in state.",
+            "testDescription": "The effect loads once and aborts on cleanup.",
+            "followUpSkill": "react.data"
         },
         {
             "id": "stale-update",
             "description": "Updating state after the component is gone.",
             "stepId": "apply",
-            "feedback": "Cancel the request or guard the update so a stale response cannot write state."
+            "feedback": "Cancel the request or guard the update so a stale response cannot write state.",
+            "diagnostic": "A response can resolve after unmount and call setState on a component that no longer exists.",
+            "followUpSkill": "react.effects"
         },
         {
             "id": "missing-states",
             "description": "Returning only products and hiding loading and error.",
             "stepId": "apply",
-            "feedback": "A request has several states. The interface cannot explain failure or show progress without them."
+            "feedback": "A request has several states. The interface cannot explain failure or show progress without them.",
+            "testDescription": "The hook exposes products, loading, and error state."
+        },
+        {
+            "id": "ship-with-race",
+            "description": "Shipping a data component without cancellation or error states.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Fetching during render, missing keys, missing cancellation, and a missing error state are functional defects. Block the change.",
+            "followUpSkill": "react.data"
         }
     ],
     "lesson": {
@@ -191,7 +204,18 @@
                     "includes": ["const [loading, setLoading] = useState("],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Keep products state and add loading and error state next to it.",
+                "Start the request inside useEffect with an empty dependency array.",
+                "Create an AbortController, pass its signal to fetch, and return a cleanup that aborts.",
+                "Check response.ok, set an error message in catch, and clear loading in finally."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the React Testing Library suite with Vitest."
+            }
         },
         {
             "kind": "review",
@@ -248,7 +272,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "Fetching during render repeats work and can update after unmount. The list also lacks stable keys, and a failed request has no error state or loading state to show."
+            "explanation": "Fetching during render repeats work and can update after unmount. The list also lacks stable keys, and a failed request has no error state or loading state to show.",
+            "hints": [
+                "Check where the fetch call runs in the component lifecycle.",
+                "Look for a key on each rendered list item.",
+                "Look for loading, error, and cancellation paths.",
+                "Treat the missing pieces as blockers, not style issues."
+            ]
         }
     ],
     "evaluation": {
