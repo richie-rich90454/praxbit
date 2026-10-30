@@ -94,15 +94,19 @@ DATABASE_URL=postgres://localhost/praxbit_test pnpm db:migrate
 DATABASE_URL=postgres://localhost/praxbit_test pnpm test:integration
 pnpm test:security
 pnpm test:e2e
+pnpm test:e2e:no-ai
 pnpm test:a11y
+pnpm test:wcag
 pnpm test:visual
+pnpm content:report
+pnpm verify:hosting -- --base http://127.0.0.1:8787
 ```
 
-`test:e2e`, `test:a11y`, and `test:visual` require a built web app and installed Playwright browsers:
+`test:e2e` creates a disposable `praxbit_e2e` schema in the database from `DATABASE_URL`, migrates it, and starts the production server on `127.0.0.1:4173`. It requires PostgreSQL and installed Playwright browsers:
 
 ```bash
 pnpm build
-pnpm exec playwright install chromium
+pnpm exec playwright install chromium firefox webkit
 pnpm test:e2e
 ```
 
@@ -148,11 +152,14 @@ Do not copy external course text, exercises, images, or code without a compatibl
 Run:
 
 ```bash
+pnpm content:tracks
+pnpm content:sequences
 pnpm content:validate
+pnpm content:report
 pnpm exec vitest run --project content
 ```
 
-The validator reports deferred checks separately. A deferred CSS computed-style check is not a pass; verify it in a real browser.
+`content:tracks` rebuilds `content/tracks.json` from the mission directories. `content:sequences` normalizes track course ids and global sequence order. Run both after adding or moving a mission. The validator reports deferred checks separately. A deferred CSS computed-style check is not a pass; verify it in a real browser.
 
 ## Accessibility review
 
