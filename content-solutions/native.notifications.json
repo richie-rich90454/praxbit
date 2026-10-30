@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "payload-code": {
+            "files": {
+                "payload.js": "const ALLOWED_ROUTES = new Set([\"/orders\", \"/messages\", \"/settings\"]);\n\nfunction routeFrom(deepLink) {\n  if (typeof deepLink !== \"string\") return \"/home\";\n  const match = /^campus:\\/\\/([^/?#]+)(\\/[^?#]*)?/.exec(deepLink);\n  if (match === null) return \"/home\";\n  const first = \"/\" + match[1];\n  if (!ALLOWED_ROUTES.has(first)) return \"/home\";\n  return first + (match[2] ?? \"\");\n}\n\nfunction buildPushPayload(message, deepLink) {\n  const body = message.length > 80 ? message.slice(0, 77) + \"...\" : message;\n  return {\n    title: \"Campus\",\n    body: body,\n    data: { route: routeFrom(deepLink) },\n  };\n}\n"
+            }
+        }
+    }
+}
