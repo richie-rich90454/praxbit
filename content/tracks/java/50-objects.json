@@ -5,25 +5,14 @@
     "courseId": "java",
     "title": "Objects and failure in Java",
     "summary": "Handle a parse failure explicitly and reason about collections and checked exceptions.",
-    "skills": [
-        "java.oop",
-        "java.collections",
-        "java.concurrency",
-        "java.build"
-    ],
-    "prerequisites": [
-        "java.syntax",
-        "concept.testing"
-    ],
+    "skills": ["java.oop", "java.collections", "java.concurrency", "java.build"],
+    "prerequisites": ["java.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -35,31 +24,20 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:java"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
     "hints": [
         "The parsing call can throw NumberFormatException.",
         "Wrap the parse in a try block.",
@@ -180,34 +158,22 @@
                     "kind": "static",
                     "description": "The parser keeps the taught signature.",
                     "file": "Main.java",
-                    "includes": [
-                        "static int parseCount(String text)"
-                    ],
+                    "includes": ["static int parseCount(String text)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Invalid text is handled by the specific parse exception.",
                     "file": "Main.java",
-                    "includes": [
-                        "try {",
-                        "catch (NumberFormatException error)",
-                        "return -1;"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["try {", "catch (NumberFormatException error)", "return -1;"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.java",
-                    "includes": [
-                        "static int parseCount(String text)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["static int parseCount(String text)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -324,7 +290,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
