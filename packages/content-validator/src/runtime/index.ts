@@ -1,5 +1,6 @@
 import type { CodeTest, ContentLanguage } from "@praxbit/contracts";
 import type { TestOutcome, TestRunResult } from "../types.ts";
+import { runAstTestGroup, type AstTest } from "./ast.ts";
 import { runJavaScriptTests } from "./javascript.ts";
 import { runCssDeferred, runDomTests } from "./html.ts";
 import { runPythonFunctionTests } from "./python.ts";
@@ -35,6 +36,9 @@ export async function runCodeTests(input: CodeRunInput): Promise<TestRunResult> 
     });
     const staticTests = input.tests.filter(function isStatic(test: CodeTest): boolean {
         return test.kind === "static" || test.kind === "regex" || test.kind === "json";
+    });
+    const astTests = input.tests.filter(function isAst(test: CodeTest): test is AstTest {
+        return test.kind === "ast";
     });
 
     if (functionTests.length > 0) {
@@ -91,6 +95,10 @@ export async function runCodeTests(input: CodeRunInput): Promise<TestRunResult> 
         outcomes.push(...runStaticTests(input.files, staticTests));
     }
 
+    if (astTests.length > 0) {
+        outcomes.push(...(await runAstTestGroup(input.files, astTests)));
+    }
+
     const handled = new Set<CodeTest["kind"]>([
         "function",
         "dom",
@@ -99,6 +107,7 @@ export async function runCodeTests(input: CodeRunInput): Promise<TestRunResult> 
         "static",
         "regex",
         "json",
+        "ast",
     ]);
     for (const test of input.tests) {
         if (!handled.has(test.kind)) {
