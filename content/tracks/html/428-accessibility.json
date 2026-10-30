@@ -5,24 +5,14 @@
     "courseId": "html",
     "title": "Accessibility essentials",
     "summary": "Add alternative text, accessible names, and a sensible heading hierarchy.",
-    "skills": [
-        "web.html",
-        "web.accessibility"
-    ],
-    "prerequisites": [
-        "web.html",
-        "web.accessibility"
-    ],
+    "skills": ["web.html", "web.accessibility"],
+    "prerequisites": ["web.html", "web.accessibility"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-html",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "dom-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "dom-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "alternative-text",
             "description": "Give meaningful images alternative text.",
-            "stepIds": [
-                "fix-a11y"
-            ]
+            "stepIds": ["fix-a11y"]
         },
         {
             "id": "accessible-names",
             "description": "Name icon-only controls.",
-            "stepIds": [
-                "fix-a11y"
-            ]
+            "stepIds": ["fix-a11y"]
         },
         {
             "id": "understanding",
             "description": "Explain accessibility basics.",
-            "stepIds": [
-                "a11y-claims"
-            ]
+            "stepIds": ["a11y-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:accessibility"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:accessibility"],
     "hints": [
         "Every meaningful image needs alt text.",
         "Icon-only buttons need aria-label.",
@@ -267,7 +246,5 @@
         "screenReaderNotes": "Each test announces its selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
