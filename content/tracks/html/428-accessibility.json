@@ -1,0 +1,273 @@
+{
+    "id": "html.accessibility",
+    "version": 1,
+    "sequence": 214,
+    "courseId": "html",
+    "title": "Accessibility essentials",
+    "summary": "Add alternative text, accessible names, and a sensible heading hierarchy.",
+    "skills": [
+        "web.html",
+        "web.accessibility"
+    ],
+    "prerequisites": [
+        "web.html",
+        "web.accessibility"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-html",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "dom-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "inaccessible-page",
+        "briefing": "The product page has images without descriptions, an icon button with no name, and headings that skip levels. Fix the markup so assistive technology can navigate and announce it."
+    },
+    "objectives": [
+        {
+            "id": "alternative-text",
+            "description": "Give meaningful images alternative text.",
+            "stepIds": [
+                "fix-a11y"
+            ]
+        },
+        {
+            "id": "accessible-names",
+            "description": "Name icon-only controls.",
+            "stepIds": [
+                "fix-a11y"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain accessibility basics.",
+            "stepIds": [
+                "a11y-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:accessibility"
+    ],
+    "hints": [
+        "Every meaningful image needs alt text.",
+        "Icon-only buttons need aria-label.",
+        "Keep one h1 and use h2 for sections.",
+        "Add alt to both images, aria-label to the cart button, and keep the h1 followed by h2 headings."
+    ],
+    "misconceptions": [
+        {
+            "id": "empty-alt-always",
+            "description": "Giving every image an empty alt, including meaningful ones.",
+            "stepId": "fix-a11y",
+            "testDescription": "Product images have descriptive alternative text.",
+            "feedback": "Empty alt marks an image as decorative. Product images carry information and need a description.",
+            "followUpSkill": "web.accessibility"
+        },
+        {
+            "id": "visual-only",
+            "description": "Assuming a visible icon is enough to name a control.",
+            "stepId": "a11y-claims",
+            "answer": "icon-name",
+            "feedback": "An icon without a text alternative has no accessible name. Add aria-label or visible text.",
+            "followUpSkill": "web.accessibility"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Alternative text",
+                "body": "Alternative text conveys the purpose of an image. Decorative images use an empty alt. Meaningful images describe what the image communicates in context."
+            },
+            {
+                "title": "Accessible names",
+                "body": "Every interactive control needs an accessible name. Icon-only buttons use aria-label. Visible text inside a button also works."
+            },
+            {
+                "title": "Heading hierarchy",
+                "body": "Headings create an outline. Use one h1 per page and nest h2 and h3 in order so screen reader users can navigate by headings."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Accessible name",
+                "definition": "The label assistive technology announces for a control."
+            },
+            {
+                "term": "Decorative image",
+                "definition": "An image that conveys no information and uses empty alt."
+            },
+            {
+                "term": "Heading outline",
+                "definition": "The nested structure of h1 through h6 elements."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Accessibility essentials",
+            "prompt": "Read the explanation, then fix the page.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Alternative text",
+                    "body": "Alternative text conveys the purpose of an image. Decorative images use an empty alt. Meaningful images describe what the image communicates in context."
+                },
+                {
+                    "title": "Accessible names",
+                    "body": "Every interactive control needs an accessible name. Icon-only buttons use aria-label. Visible text inside a button also works."
+                },
+                {
+                    "title": "Heading hierarchy",
+                    "body": "Headings create an outline. Use one h1 per page and nest h2 and h3 in order so screen reader users can navigate by headings."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Accessible name",
+                    "definition": "The label assistive technology announces for a control."
+                },
+                {
+                    "term": "Decorative image",
+                    "definition": "An image that conveys no information and uses empty alt."
+                },
+                {
+                    "term": "Heading outline",
+                    "definition": "The nested structure of h1 through h6 elements."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-a11y",
+            "title": "Fix accessibility issues",
+            "prompt": "Edit index.html. Add alt text, name the icon button, and fix heading levels.",
+            "evidence": "construction",
+            "language": "html",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Products</title>\n</head>\n<body>\n  <h1>Products</h1>\n  <h3>Featured</h3>\n  <img src=\"pencils.svg\">\n  <button>🛒</button>\n  <h3>Sale</h3>\n  <img src=\"notebook.svg\">\n</body>\n</html>\n",
+                    "editable": true,
+                    "language": "html"
+                }
+            ],
+            "entry": "index.html",
+            "preview": "html",
+            "tests": [
+                {
+                    "kind": "dom",
+                    "description": "The page has exactly one h1.",
+                    "selector": "h1",
+                    "property": "count",
+                    "expected": 1
+                },
+                {
+                    "kind": "dom",
+                    "description": "Product images have descriptive alternative text.",
+                    "selector": "img",
+                    "property": "attribute",
+                    "attribute": "alt",
+                    "expected": "not-empty"
+                },
+                {
+                    "kind": "dom",
+                    "description": "Both product images have alt text.",
+                    "selector": "img[alt]:not([alt=\"\"])",
+                    "property": "count",
+                    "expected": 2
+                },
+                {
+                    "kind": "dom",
+                    "description": "The icon button has an accessible name.",
+                    "selector": "button",
+                    "property": "attribute",
+                    "attribute": "aria-label",
+                    "expected": "not-empty"
+                },
+                {
+                    "kind": "dom",
+                    "description": "Section headings are h2.",
+                    "selector": "h2",
+                    "property": "count",
+                    "expected": 2
+                }
+            ],
+            "hints": [
+                "Add alt attributes describing each product image.",
+                "Add aria-label to the cart button.",
+                "Change the h3 elements to h2.",
+                "Keep the single h1 and use h2 for Featured and Sale."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "a11y-claims",
+            "title": "Accessibility claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Check whether each statement treats accessibility as built into markup.",
+                "Icons alone are not names.",
+                "Empty alt is for decorative images only.",
+                "Select alt text, aria-label, and heading order; reject icon-as-name."
+            ],
+            "statements": [
+                {
+                    "id": "alt-meaningful",
+                    "label": "Meaningful images need descriptive alternative text.",
+                    "correct": true
+                },
+                {
+                    "id": "icon-name",
+                    "label": "An icon-only button is accessible without an accessible name.",
+                    "correct": false
+                },
+                {
+                    "id": "heading-order",
+                    "label": "Headings should follow a logical order for navigation.",
+                    "correct": true
+                },
+                {
+                    "id": "empty-alt",
+                    "label": "Empty alt is appropriate for decorative images only.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Accessibility is carried by markup: alternative text, accessible names, and a logical heading outline."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 100,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and HTML tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
