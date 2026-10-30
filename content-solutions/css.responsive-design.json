@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-responsive": {
+            "files": {
+                "styles.css": ".catalog { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }\n.card { padding: 16px; border: 1px solid #D6D6D6; }\n@media (max-width: 600px) {\n  .catalog { grid-template-columns: 1fr; }\n}\n"
+            }
+        }
+    }
+}
