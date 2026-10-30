@@ -1,4 +1,4 @@
-import { createEffect, onCleanup, onMount, type JSX } from "solid-js";
+import { createEffect, createUniqueId, onCleanup, onMount, type JSX } from "solid-js";
 import { EditorState } from "@codemirror/state";
 import {
     EditorView,
@@ -8,7 +8,13 @@ import {
     highlightSpecialChars,
     drawSelection,
 } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import {
+    defaultKeymap,
+    history,
+    historyKeymap,
+    indentLess,
+    indentMore,
+} from "@codemirror/commands";
 import { bracketMatching, defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
@@ -77,6 +83,7 @@ const editorTheme = EditorView.theme({
 });
 
 export function CodeEditor(props: CodeEditorProps): JSX.Element {
+    const hintId = createUniqueId();
     let container: HTMLDivElement | undefined;
     let view: EditorView | undefined;
 
@@ -110,12 +117,20 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
                     ...defaultKeymap,
                     ...historyKeymap,
                     ...searchKeymap,
-                    indentWithTab,
+                    {
+                        key: "Mod-]",
+                        run: indentMore,
+                    },
+                    {
+                        key: "Mod-[",
+                        run: indentLess,
+                    },
                 ]),
                 runKeymap,
                 EditorView.lineWrapping,
                 EditorView.contentAttributes.of({
                     "aria-label": props.label,
+                    "aria-describedby": hintId,
                     "aria-multiline": "true",
                 }),
                 EditorState.readOnly.of(props.readOnly === true),
@@ -152,6 +167,10 @@ export function CodeEditor(props: CodeEditorProps): JSX.Element {
     return (
         <div class="stack stack--tight">
             <span class="meta">{props.label}</span>
+            <span class="meta" id={hintId}>
+                Tab leaves the editor. Ctrl/Cmd+] indents, Ctrl/Cmd+[ outdents, and Ctrl/Cmd+Enter
+                runs.
+            </span>
             <div class="code-editor" ref={container} aria-label={props.label} />
         </div>
     );
