@@ -44,13 +44,25 @@
             "id": "permissive-schema",
             "description": "Assuming a properties list rejects other keys.",
             "stepId": "apply",
-            "feedback": "It only documents known keys. Add additionalProperties: false when unknown input must fail."
+            "feedback": "It only documents known keys. Add additionalProperties: false when unknown input must fail.",
+            "testDescription": "Body and params schemas reject unknown fields.",
+            "followUpSkill": "fastify.schemas"
         },
         {
             "id": "global-plugin",
             "description": "Expecting a plugin hook to apply to routes outside the plugin.",
             "stepId": "apply",
-            "feedback": "Encapsulation keeps the hook inside the child context. Register the hook at the scope that needs it or expose it deliberately."
+            "feedback": "Encapsulation keeps the hook inside the child context. Register the hook at the scope that needs it or expose it deliberately.",
+            "diagnostic": "An encapsulated hook does not apply to routes registered outside the plugin.",
+            "followUpSkill": "fastify.plugins"
+        },
+        {
+            "id": "ship-permissive",
+            "description": "Shipping a permissive schema and an unwrapped plugin.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Unknown body fields still pass validation, and the encapsulated hook never protects the root route. Block the change.",
+            "followUpSkill": "fastify.plugins"
         }
     ],
     "lesson": {
@@ -175,7 +187,18 @@
                     "includes": ["async function catalog(app: FastifyInstance)"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Type the plugin parameter as FastifyInstance and import the type.",
+                "Add body and params schemas with the required fields.",
+                "Set additionalProperties: false on each object schema.",
+                "Return reply.status(201).send(product) using only validated fields."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Fastify route tests with node:test or Vitest."
+            }
         },
         {
             "kind": "review",
@@ -227,7 +250,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "Fastify allows unknown keys unless additionalProperties is false, so role reaches the store. Hooks added inside a plugin are encapsulated and never run for the root POST route. Assigning request.user also needs a type augmentation."
+            "explanation": "Fastify allows unknown keys unless additionalProperties is false, so role reaches the store. Hooks added inside a plugin are encapsulated and never run for the root POST route. Assigning request.user also needs a type augmentation.",
+            "hints": [
+                "Check the body schema for additionalProperties.",
+                "Check where the authentication hook is registered.",
+                "Check whether request.user has a type declaration.",
+                "Reject the false serialization finding and block on scope and validation."
+            ]
         }
     ],
     "evaluation": {
