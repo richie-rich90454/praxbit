@@ -44,13 +44,24 @@
             "id": "mutate-input",
             "description": "Assigning to an @Input inside the child.",
             "stepId": "apply",
-            "feedback": "The parent owns the input value. Emit an output event or call a callback instead of writing to the property."
+            "feedback": "The parent owns the input value. Emit an output event or call a callback instead of writing to the property.",
+            "diagnostic": "Writing to an @Input does not update the parent and Angular reports that the input is read-only in strict templates.",
+            "followUpSkill": "angular.components"
         },
         {
             "id": "missing-required",
             "description": "Declaring an optional input and rendering an empty card when the parent forgets it.",
             "stepId": "apply",
-            "feedback": "Make the input required so the compiler reports the missing binding before the page ships."
+            "feedback": "Make the input required so the compiler reports the missing binding before the page ships.",
+            "testDescription": "The product input is required and typed."
+        },
+        {
+            "id": "input-write-ok",
+            "description": "Believing an input can be assigned to send data back to the parent.",
+            "stepId": "check",
+            "answer": "input-write",
+            "feedback": "An input is written by the parent binding. The child emits an output or calls a callback instead of assigning to it.",
+            "followUpSkill": "angular.components"
         }
     ],
     "lesson": {
@@ -173,7 +184,18 @@
                     "includes": ["@Component({"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Keep @Component and add standalone: true.",
+                "Replace the optional input with @Input({ required: true }) product!: Product.",
+                "Use {{ product.name }} and {{ product.price.toFixed(2) }} in the inline template.",
+                "Remove the TODO comment after the template renders both values."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "npx ng test",
+                "description": "Run the Angular unit tests with the Angular CLI."
+            }
         },
         {
             "kind": "explain",
@@ -203,7 +225,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "The decorator ties a class to a template and a selector. Inputs are read-only from the child's perspective: the parent owns the value, and the child renders it. A required input turns an incomplete call site into a compiler error."
+            "explanation": "The decorator ties a class to a template and a selector. Inputs are read-only from the child's perspective: the parent owns the value, and the child renders it. A required input turns an incomplete call site into a compiler error.",
+            "hints": [
+                "Check each statement against standalone component imports.",
+                "Reject the idea that a child writes back through an input.",
+                "Confirm when a required input fails the build.",
+                "Select only statements about selectors, standalone imports, and required inputs."
+            ]
         }
     ],
     "evaluation": {
