@@ -44,12 +44,15 @@
             "id": "off-by-one-bounds",
             "description": "Using strict bounds that skip the remaining single element.",
             "stepId": "search-code",
-            "feedback": "The loop must include the case low === high. Use while (low <= high)."
+            "testDescription": "Finds the last element.",
+            "feedback": "The loop must include the case low === high. Use while (low <= high).",
+            "followUpSkill": "algorithms.complexity"
         },
         {
             "id": "linear-complexity",
             "description": "Believing binary search scans every element.",
             "stepId": "search-reasoning",
+            "answer": "linear",
             "feedback": "Each comparison discards half of the remaining range, so the time grows logarithmically."
         }
     ],
@@ -84,7 +87,7 @@
             "kind": "code",
             "id": "search-code",
             "title": "Implement binary search",
-            "prompt": "Edit search.js. binarySearch(sorted, target) returns the target index or -1. The input is sorted ascending.",
+            "prompt": "Edit search.js. binarySearch(sorted, target) returns the target index or -1. The input is sorted ascending. Use a while loop that halves the remaining range; do not scan every element with a for loop.",
             "evidence": "construction",
             "language": "javascript",
             "files": [
@@ -139,7 +142,42 @@
                     "name": "binarySearch",
                     "args": [[7], 7],
                     "expected": 0
+                },
+                {
+                    "kind": "ast",
+                    "description": "Branches for equality and direction without scanning with a for loop.",
+                    "file": "search.js",
+                    "language": "javascript",
+                    "require": [
+                        {
+                            "node": "variable-declaration",
+                            "name": "low"
+                        },
+                        {
+                            "node": "variable-declaration",
+                            "name": "high"
+                        },
+                        {
+                            "node": "variable-declaration",
+                            "name": "middle"
+                        },
+                        {
+                            "node": "if-statement",
+                            "min": 2
+                        }
+                    ],
+                    "forbid": [
+                        {
+                            "node": "for-statement"
+                        }
+                    ]
                 }
+            ],
+            "hints": [
+                "Keep a low and a high bound around the remaining range.",
+                "Compare the middle value and discard the half that cannot contain the target.",
+                "The loop must still run when low equals high.",
+                "Use while (low <= high), compute the middle, and move low or high past the middle."
             ]
         },
         {
@@ -170,7 +208,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Sorted order makes the halving decision valid. The final single-element range must not be skipped."
+            "explanation": "Sorted order makes the halving decision valid. The final single-element range must not be skipped.",
+            "hints": [
+                "What property must the input have before halving is valid?",
+                "How much of the remaining range does one comparison remove?",
+                "The final single-element range must still be checked.",
+                "Select sorted input, halving, and the low === high case; reject linear growth."
+            ]
         }
     ],
     "evaluation": {
