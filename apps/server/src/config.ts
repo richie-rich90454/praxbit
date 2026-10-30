@@ -167,8 +167,14 @@ export function loadConfiguration(environment: NodeJS.ProcessEnv = process.env):
 
     const corsOrigins = parseOrigins(optionalString(environment, "CORS_ORIGINS"));
     for (const origin of corsOrigins) {
-        if (!origin.startsWith("http://") && !origin.startsWith("https://")) {
-            throw new Error(`CORS_ORIGINS entries must be absolute http(s) origins: ${origin}.`);
+        if (
+            !origin.startsWith("http://") &&
+            !origin.startsWith("https://") &&
+            !origin.startsWith("capacitor://")
+        ) {
+            throw new Error(
+                `CORS_ORIGINS entries must be absolute http(s) or capacitor:// origins: ${origin}.`,
+            );
         }
     }
 
