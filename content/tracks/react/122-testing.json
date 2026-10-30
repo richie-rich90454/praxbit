@@ -5,25 +5,14 @@
     "courseId": "react",
     "title": "Test request states and failures",
     "summary": "Implement a request reducer with explicit transitions, then design a test suite that covers loading, empty success, rejection, and retry.",
-    "skills": [
-        "concept.testing",
-        "react.data",
-        "react.effects"
-    ],
-    "prerequisites": [
-        "react.data",
-        "concept.state"
-    ],
+    "skills": ["concept.testing", "react.data", "react.effects"],
+    "prerequisites": ["react.data", "concept.state"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "execution",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "execution", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -35,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Implement explicit request transitions.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-design",
             "description": "Select the cases a request test suite must cover.",
-            "stepIds": [
-                "design"
-            ]
+            "stepIds": ["design"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:react"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
     "hints": [
         "Map each action type to exactly one next state.",
         "Starting a request always replaces the previous state with loading.",
@@ -202,18 +182,12 @@
                         },
                         {
                             "type": "success",
-                            "data": [
-                                1,
-                                2
-                            ]
+                            "data": [1, 2]
                         }
                     ],
                     "expected": {
                         "status": "success",
-                        "data": [
-                            1,
-                            2
-                        ]
+                        "data": [1, 2]
                     }
                 },
                 {
@@ -223,9 +197,7 @@
                     "args": [
                         {
                             "status": "success",
-                            "data": [
-                                1
-                            ]
+                            "data": [1]
                         },
                         {
                             "type": "error",
@@ -330,7 +302,5 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
