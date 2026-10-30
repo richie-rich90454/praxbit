@@ -1,0 +1,344 @@
+{
+    "version": 1,
+    "courseId": "swift",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "quantity-parser",
+        "briefing": "A stock import accepts quantities from a text file. Invalid rows must report why they failed without crashing the importer."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ],
+    "accessibility": {
+        "summary": "The Swift workspace is keyboard accessible. Checks verify source structure; they do not compile or run Swift.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "swift.errors",
+    "sequence": 205,
+    "title": "Typed errors at the input boundary",
+    "summary": "Throw specific parse errors instead of trapping, then repair a report that turns every failure into zero.",
+    "skills": [
+        "swift.syntax",
+        "swift.tooling"
+    ],
+    "prerequisites": [
+        "swift.syntax",
+        "concept.testing"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Throw typed errors from a validation function.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find a handler that hides invalid input.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Choose the call that propagates an error.",
+            "stepIds": [
+                "propagate"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:swift"
+    ],
+    "hints": [
+        "An enum that conforms to Error can name each failure.",
+        "guard let converts the text safely.",
+        "Throw a different case for non-positive values.",
+        "Use do/catch when the caller must see which error happened."
+    ],
+    "misconceptions": [
+        {
+            "id": "force-unwrap-parse",
+            "description": "Force unwrapping the result of Int(text).",
+            "stepId": "apply",
+            "testDescription": "Invalid text throws the notANumber case.",
+            "feedback": "Int(text)! traps on non-numeric input. guard let turns that absence into a typed throw the caller can handle.",
+            "followUpSkill": "swift.syntax"
+        },
+        {
+            "id": "try-optional",
+            "description": "Believing try? preserves the error for the caller.",
+            "stepId": "propagate",
+            "answer": "try-optional",
+            "feedback": "try? converts any thrown error into nil. Use try inside a throwing function or do/catch when the caller needs the failure.",
+            "followUpSkill": "swift.tooling"
+        },
+        {
+            "id": "swallow-error",
+            "description": "Logging an import failure and continuing with zero.",
+            "stepId": "diagnose",
+            "answer": "log-nothing",
+            "feedback": "A log line is not a recovery policy. Re-throw, return a failure result, or skip and report the row explicitly.",
+            "followUpSkill": "swift.tooling"
+        },
+        {
+            "id": "wrong-case",
+            "description": "Reporting every failure as the same error case.",
+            "stepId": "apply",
+            "diagnostic": "Throwing notANumber for a negative value so the caller cannot distinguish syntax from range.",
+            "feedback": "Separate syntax failures from range failures. The caller can retry a missing value, but a negative quantity needs a different response."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Errors are typed values",
+                "body": "An enum conforming to Error names each failure: enum QuantityError: Error { case notANumber; case notPositive }. A throwing function writes throws after its parameter list, and every failure leaves through throw. The compiler checks that callers use try, try?, or do/catch."
+            },
+            {
+                "title": "Validate at the boundary",
+                "body": "Convert text once, then check the domain rule. guard let value = Int(text) else { throw QuantityError.notANumber } makes the syntax failure explicit. A second guard rejects zero and negative values. Keeping validation in one small function gives tests a clear contract."
+            },
+            {
+                "title": "Choose a recovery policy",
+                "body": "try? is appropriate only when every failure has the same harmless outcome. try! asserts that failure is impossible and traps otherwise. do/catch preserves the specific error, and a throwing caller can propagate it with try. Swift Package Manager runs the suite with swift test, while swiftc compiles a single file."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Throwing function",
+                "definition": "A function marked throws that can exit by throwing an error value."
+            },
+            {
+                "term": "Error enum",
+                "definition": "An enum conforming to Error whose cases name distinct failures."
+            },
+            {
+                "term": "guard let",
+                "definition": "An early-exit binding that unwraps an optional or leaves the scope."
+            },
+            {
+                "term": "try?",
+                "definition": "An expression that converts a thrown error into nil."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Throwing and recovering",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Errors are typed values",
+                    "body": "An enum conforming to Error names each failure: enum QuantityError: Error { case notANumber; case notPositive }. A throwing function writes throws after its parameter list, and every failure leaves through throw. The compiler checks that callers use try, try?, or do/catch."
+                },
+                {
+                    "title": "Validate at the boundary",
+                    "body": "Convert text once, then check the domain rule. guard let value = Int(text) else { throw QuantityError.notANumber } makes the syntax failure explicit. A second guard rejects zero and negative values. Keeping validation in one small function gives tests a clear contract."
+                },
+                {
+                    "title": "Choose a recovery policy",
+                    "body": "try? is appropriate only when every failure has the same harmless outcome. try! asserts that failure is impossible and traps otherwise. do/catch preserves the specific error, and a throwing caller can propagate it with try. Swift Package Manager runs the suite with swift test, while swiftc compiles a single file."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Throwing function",
+                    "definition": "A function marked throws that can exit by throwing an error value."
+                },
+                {
+                    "term": "Error enum",
+                    "definition": "An enum conforming to Error whose cases name distinct failures."
+                },
+                {
+                    "term": "guard let",
+                    "definition": "An early-exit binding that unwraps an optional or leaves the scope."
+                },
+                {
+                    "term": "try?",
+                    "definition": "An expression that converts a thrown error into nil."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Parse a positive quantity",
+            "prompt": "Edit main.swift. parseQuantity throws notANumber for non-numeric text and notPositive for zero or negative values.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the QuantityError cases and the throws return type.",
+                "Use guard let to convert the text.",
+                "Throw notANumber when the conversion fails.",
+                "Throw notPositive when the value is not greater than zero."
+            ],
+            "language": "swift",
+            "files": [
+                {
+                    "path": "main.swift",
+                    "content": "enum QuantityError: Error {\n    case notANumber\n    case notPositive\n}\n\nfunc parseQuantity(_ text: String) throws -> Int {\n    return Int(text)! // TODO: throw a typed error instead of trapping\n}\n\nlet value = try? parseQuantity(\"12\")\nprint(value ?? -1)\n",
+                    "editable": true,
+                    "language": "swift"
+                }
+            ],
+            "entry": "main.swift",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "swiftc main.swift -o main && ./main",
+                "description": "Compiles the file with swiftc and runs the executable to confirm the non-trapping path."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The error enum and throwing signature are intact.",
+                    "file": "main.swift",
+                    "includes": [
+                        "enum QuantityError: Error {",
+                        "func parseQuantity(_ text: String) throws -> Int"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Invalid text throws the notANumber case.",
+                    "file": "main.swift",
+                    "includes": [
+                        "guard let value = Int(text) else {",
+                        "throw QuantityError.notANumber"
+                    ],
+                    "excludes": [
+                        "Int(text)!"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Zero and negative values throw the notPositive case.",
+                    "file": "main.swift",
+                    "includes": [
+                        "guard value > 0 else {",
+                        "throw QuantityError.notPositive"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The zero that hides a typo",
+            "prompt": "An import of 200 rows reports success with a total of zero. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The parser probably told the caller something useful.",
+                "try? turns every thrown error into nil.",
+                "nil is then flattened to zero by the default.",
+                "Use do/catch and report the specific error."
+            ],
+            "instructions": [
+                {
+                    "id": "parse",
+                    "label": "let quantity = try? parseQuantity(text)"
+                },
+                {
+                    "id": "default",
+                    "label": "let total = quantity ?? 0"
+                },
+                {
+                    "id": "print",
+                    "label": "print(total)"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "parse",
+            "fixes": [
+                {
+                    "id": "do-catch",
+                    "label": "Use do/catch, print the specific error, and stop the row."
+                },
+                {
+                    "id": "force",
+                    "label": "Use try! so the error cannot be ignored."
+                },
+                {
+                    "id": "log-nothing",
+                    "label": "Keep try? and return zero without a log line."
+                }
+            ],
+            "correctFixId": "do-catch",
+            "explanation": "try? discards which error occurred, and ?? 0 turns every failure into a plausible-looking total. do/catch keeps the failure visible. try! would crash the importer instead of reporting the row."
+        },
+        {
+            "kind": "quiz",
+            "id": "propagate",
+            "title": "Propagate or erase",
+            "prompt": "Inside a throwing import function, which call passes a parse failure to its caller?",
+            "evidence": "transfer",
+            "hints": [
+                "A throwing function can forward an error with try.",
+                "try? converts the error to nil.",
+                "try! traps instead of forwarding.",
+                "A bare call does not satisfy the compiler."
+            ],
+            "quiz": {
+                "prompt": "Inside a throwing import function, which call passes a parse failure to its caller?",
+                "options": [
+                    {
+                        "id": "try",
+                        "label": "let quantity = try parseQuantity(text)"
+                    },
+                    {
+                        "id": "try-optional",
+                        "label": "let quantity = try? parseQuantity(text)"
+                    },
+                    {
+                        "id": "force",
+                        "label": "let quantity = try! parseQuantity(text)"
+                    },
+                    {
+                        "id": "plain",
+                        "label": "let quantity = parseQuantity(text)"
+                    }
+                ],
+                "correctId": "try",
+                "explanation": "try propagates the thrown error from a throwing function. try? returns nil, try! traps, and a plain call does not compile."
+            }
+        }
+    ]
+}
