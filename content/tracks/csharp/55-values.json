@@ -5,22 +5,14 @@
     "courseId": "csharp",
     "title": "Typed values in C#",
     "summary": "Use a typed list and a foreach loop to count positive values.",
-    "skills": [
-        "csharp.syntax"
-    ],
-    "prerequisites": [
-        "concept.state",
-        "concept.conditions"
-    ],
+    "skills": ["csharp.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:csharp"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:csharp"],
     "hints": [
         "The loop already visits each value.",
         "Test whether the value is greater than zero.",
@@ -160,33 +143,22 @@
                     "kind": "static",
                     "description": "The count method keeps the typed list parameter.",
                     "file": "Program.cs",
-                    "includes": [
-                        "static int CountPositive(List<int> values)"
-                    ],
+                    "includes": ["static int CountPositive(List<int> values)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The foreach loop counts only positive values.",
                     "file": "Program.cs",
-                    "includes": [
-                        "if (value > 0)",
-                        "count += 1;"
-                    ],
-                    "excludes": [
-                        "count += 0"
-                    ]
+                    "includes": ["if (value > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Program.cs",
-                    "includes": [
-                        "static int CountPositive(List<int> values)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["static int CountPositive(List<int> values)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -255,8 +227,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "games"
-    ]
+    "tags": ["professional", "games"]
 }
