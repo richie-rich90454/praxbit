@@ -228,7 +228,8 @@ describe("launch content", function launchContent(): void {
                                 return (
                                     test.kind === "static" ||
                                     test.kind === "regex" ||
-                                    test.kind === "json"
+                                    test.kind === "json" ||
+                                    test.kind === "ast"
                                 );
                             }),
                             `${mission.id}/${step.id}`,
