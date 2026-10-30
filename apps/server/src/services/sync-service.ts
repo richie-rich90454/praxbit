@@ -11,10 +11,12 @@ import type {
     WorldState,
 } from "@praxbit/contracts";
 import type { Pool } from "pg";
+import { levelForExperience } from "@praxbit/domain";
 import { AppError } from "../http/app-error.ts";
 import { withTransaction } from "../db/pool.ts";
 import type { QueryExecutor } from "../db/rows.ts";
 import { lockUserLearning } from "../db/locks.ts";
+import type { ContentCatalog } from "../content/catalog.ts";
 import type { SyncRepository } from "../repositories/sync-repository.ts";
 import type { UserRepository } from "../repositories/user-repository.ts";
 import type { WorldRepository } from "../repositories/world-repository.ts";
@@ -31,6 +33,7 @@ export class SyncService {
     private readonly users: UserRepository;
     private readonly worlds: WorldRepository;
     private readonly sync: SyncRepository;
+    private readonly content: ContentCatalog;
     private readonly evidence: EvidenceService;
     private readonly completions: CompletionService;
     private readonly projects: ProjectService;
@@ -42,6 +45,7 @@ export class SyncService {
         readonly users: UserRepository;
         readonly worlds: WorldRepository;
         readonly sync: SyncRepository;
+        readonly content: ContentCatalog;
         readonly evidence: EvidenceService;
         readonly completions: CompletionService;
         readonly projects: ProjectService;
@@ -52,6 +56,7 @@ export class SyncService {
         this.users = dependencies.users;
         this.worlds = dependencies.worlds;
         this.sync = dependencies.sync;
+        this.content = dependencies.content;
         this.evidence = dependencies.evidence;
         this.completions = dependencies.completions;
         this.projects = dependencies.projects;
@@ -196,6 +201,58 @@ export class SyncService {
                 }
                 case "preferences": {
                     await this.users.savePreferences(executor, userId, operation.preferences);
+                    return {
+                        operationId: operation.operationId,
+                        kind: operation.kind,
+                        status: "accepted",
+                    };
+                }
+                case "progress": {
+                    const current = await this.users.getProgress(executor, userId);
+                    const experience = Math.max(current.experience, operation.experience);
+                    const streakDays = Math.max(current.streakDays, operation.streakDays);
+                    const longestStreak = Math.max(
+                        current.longestStreak,
+                        operation.longestStreak,
+                        streakDays,
+                    );
+                    const lastPracticeOn =
+                        current.lastPracticeOn === undefined
+                            ? operation.lastPracticeOn
+                            : operation.lastPracticeOn === undefined
+                              ? current.lastPracticeOn
+                              : current.lastPracticeOn > operation.lastPracticeOn
+                                ? current.lastPracticeOn
+                                : operation.lastPracticeOn;
+                    const placementSkippedSkills = [
+                        ...new Set([
+                            ...current.placementSkippedSkills,
+                            ...operation.placementSkippedSkills,
+                        ]),
+                    ];
+                    await this.users.saveProgress(executor, userId, {
+                        experience,
+                        level: Math.max(current.level, levelForExperience(experience)),
+                        streakDays,
+                        longestStreak,
+                        lastPracticeOn,
+                        placementSkippedSkills,
+                    });
+                    const knownAchievementIds = new Set(
+                        this.content.achievements.map(function idOf(achievement): string {
+                            return achievement.id;
+                        }),
+                    );
+                    // shortcut: migration trusts known achievement ids from the authenticated client;
+                    // later awards still come from server-side evidence rules.
+                    await this.users.grantAchievements(
+                        executor,
+                        userId,
+                        operation.achievements.filter(function known(id): boolean {
+                            return knownAchievementIds.has(id);
+                        }),
+                        now,
+                    );
                     return {
                         operationId: operation.operationId,
                         kind: operation.kind,
