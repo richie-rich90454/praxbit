@@ -1,18 +1,27 @@
 {
     "id": "nestjs.modules",
     "version": 1,
-    "sequence": 85,
+    "sequence": 153,
     "courseId": "nestjs",
     "title": "Modules, controllers, and providers",
     "summary": "Wire a controller and a provider into a feature module with constructor injection.",
-    "skills": ["nestjs.modules", "nestjs.providers"],
-    "prerequisites": ["node.middleware", "architecture.modularity"],
+    "skills": [
+        "nestjs.modules",
+        "nestjs.providers"
+    ],
+    "prerequisites": [
+        "node.middleware",
+        "architecture.modularity"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:nestjs"
+    ],
     "hints": [
         "Add ProductsService to the module providers array.",
         "Declare a constructor parameter typed as ProductsService.",
@@ -153,36 +171,51 @@
                     "kind": "static",
                     "description": "The controller owns the products route.",
                     "file": "products.module.ts",
-                    "includes": ["@Controller(\"products\")", "@Get()"],
+                    "includes": [
+                        "@Controller(\"products\")",
+                        "@Get()"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The controller receives its service through constructor injection.",
                     "file": "products.module.ts",
-                    "includes": ["constructor(private readonly products: ProductsService)"],
-                    "excludes": ["new ProductsService()"]
+                    "includes": [
+                        "constructor(private readonly products: ProductsService)"
+                    ],
+                    "excludes": [
+                        "new ProductsService()"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The service is registered as a provider in the module.",
                     "file": "products.module.ts",
-                    "includes": ["providers: [ProductsService]"],
+                    "includes": [
+                        "providers: [ProductsService]"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The handler delegates to the injected service.",
                     "file": "products.module.ts",
-                    "includes": ["return this.products.findAll();"],
+                    "includes": [
+                        "return this.products.findAll();"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "products.module.ts",
-                    "includes": ["@Controller(\"products\")"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "@Controller(\"products\")"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -251,5 +284,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
