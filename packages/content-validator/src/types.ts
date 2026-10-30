@@ -49,6 +49,7 @@ export interface TestRunResult {
 
 export interface MissionStepSolution {
     readonly files: Readonly<Record<string, string>>;
+    readonly alternatives?: readonly Readonly<Record<string, string>>[];
 }
 
 export interface MissionSolution {
