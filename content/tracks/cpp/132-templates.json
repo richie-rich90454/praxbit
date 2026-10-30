@@ -5,22 +5,14 @@
     "courseId": "cpp",
     "title": "Write a constrained template",
     "summary": "Turn an int-only clamp into a template and explain instantiation errors.",
-    "skills": [
-        "cpp.templates"
-    ],
-    "prerequisites": [
-        "cpp.syntax",
-        "cpp.stl"
-    ],
+    "skills": ["cpp.templates"],
+    "prerequisites": ["cpp.syntax", "cpp.stl"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "write-template",
             "description": "Write a function template that handles both bounds.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "explain-instantiation",
             "description": "Explain where template errors appear and why.",
-            "stepIds": [
-                "template-transfer"
-            ]
+            "stepIds": ["template-transfer"]
         },
         {
             "id": "explain-templates",
             "description": "Explain instantiation, concepts, and header definitions accurately.",
-            "stepIds": [
-                "template-check"
-            ]
+            "stepIds": ["template-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:cpp"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:cpp"],
     "hints": [
         "Replace every int in the signature with the type parameter.",
         "Declare template <typename T> before the function.",
@@ -190,34 +171,21 @@
                     "kind": "static",
                     "description": "The template is declared with a type parameter.",
                     "file": "main.cpp",
-                    "includes": [
-                        "template <typename T>",
-                        "T clamp_value(T value, T low, T high)"
-                    ],
-                    "excludes": [
-                        "int clamp_value(int value"
-                    ]
+                    "includes": ["template <typename T>", "T clamp_value(T value, T low, T high)"],
+                    "excludes": ["int clamp_value(int value"]
                 },
                 {
                     "kind": "static",
                     "description": "The function handles both bounds.",
                     "file": "main.cpp",
-                    "includes": [
-                        "if (value < low)",
-                        "if (value > high)",
-                        "return high;"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["if (value < low)", "if (value > high)", "return high;"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The helper remains usable with doubles.",
                     "file": "main.cpp",
-                    "includes": [
-                        "clamp_value(1.5, 0.0, 1.0)"
-                    ],
+                    "includes": ["clamp_value(1.5, 0.0, 1.0)"],
                     "excludes": []
                 }
             ],
@@ -307,9 +275,7 @@
     },
     "rewards": {
         "experience": 145,
-        "unlocks": [
-            "cpp.threads-cmake"
-        ]
+        "unlocks": ["cpp.threads-cmake"]
     },
     "persistence": {
         "kind": "none"
@@ -320,7 +286,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
