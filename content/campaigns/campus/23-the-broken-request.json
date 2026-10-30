@@ -1,6 +1,6 @@
 {
     "id": "campus.the-broken-request",
-    "version": 1,
+    "version": 2,
     "sequence": 23,
     "courseId": "campus",
     "title": "The broken request",
@@ -49,13 +49,31 @@
             "id": "status-ignored",
             "description": "Treating a 500 response body as a valid order.",
             "stepId": "repair-response",
-            "feedback": "HTTP status is part of the response contract. A server error may have a body, but it is not a successful order."
+            "testDescription": "A server failure is reported.",
+            "feedback": "HTTP status is part of the response contract. A server error may have a body, but it is not a successful order.",
+            "followUpSkill": "http.basics"
         },
         {
             "id": "json-throws",
             "description": "Letting JSON.parse failure escape as an unhandled exception.",
             "stepId": "repair-response",
+            "testDescription": "Malformed JSON is reported, not thrown.",
             "feedback": "Malformed JSON is an expected boundary condition. Catch it and return a structured error the caller can handle."
+        },
+        {
+            "id": "json-body-means-success",
+            "description": "Treating a JSON body as proof that the request succeeded.",
+            "stepId": "status-check",
+            "answer": "yes",
+            "feedback": "Status and body carry different information. A 500 response can contain valid JSON that describes the failure.",
+            "followUpSkill": "http.basics"
+        },
+        {
+            "id": "json-success",
+            "description": "Believing valid JSON always means the request succeeded.",
+            "stepId": "http-check",
+            "answer": "json-success",
+            "feedback": "Parsing proves only that the text is JSON. The status and the body's fields must still be checked."
         }
     ],
     "lesson": {
@@ -90,7 +108,7 @@
             "id": "status-check",
             "title": "Read the status",
             "prompt": "A response returns status 500 and a JSON body containing an error message. Should the client treat it as a successful order?",
-            "evidence": "prediction",
+            "evidence": "transfer",
             "quiz": {
                 "prompt": "Choose the correct interpretation.",
                 "options": [
@@ -115,15 +133,21 @@
                 "explanation": "The 5xx status signals a server-side failure. A JSON body can describe the failure, but it is not a successful order."
             },
             "hints": [
-                "What does 500 mean?",
-                "JSON is a format, not proof of success.",
-                "5xx indicates server failure.",
-                "Report the failure rather than using the body as an order."
+                "Decide whether a 500 response can still be a successful order.",
+                "The status code summarizes the outcome; a JSON error body is still an error.",
+                "A delivery notice with a tracking number is not a delivered parcel if the carrier marked it failed.",
+                "500 means server failure, so report it even though the body parses as JSON."
             ]
         },
         {
             "kind": "code",
             "id": "repair-response",
+            "hints": [
+                "Implement parseOrderResponse so success and each failure case return the documented shape.",
+                "Check the status first, then parse safely, then validate the body.",
+                "For 400 with {\"error\":\"invalid\"}, return {ok:false,error:\"invalid\"}; for unparseable text, return invalid-json.",
+                "Branch on 2xx, wrap JSON.parse in try and catch, require an id for success, and return stable error codes."
+            ],
             "title": "Repair the response parser",
             "prompt": "Edit client.js. Implement the documented result shape and run the tests.",
             "evidence": "debugging",
@@ -204,6 +228,12 @@
         {
             "kind": "explain",
             "id": "http-check",
+            "hints": [
+                "Select statements about checking both the status and the body.",
+                "Status and body answer different questions; both are required before trusting remote data.",
+                "A 200 with malformed JSON is still unusable, and a 500 body may be valid JSON describing failure.",
+                "Three statements are accurate; reject the claim that valid JSON always means success."
+            ],
             "title": "Why check twice?",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
