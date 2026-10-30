@@ -1,18 +1,28 @@
 {
     "id": "c.memory",
     "version": 1,
-    "sequence": 52,
+    "sequence": 76,
     "courseId": "c",
     "title": "Pointers and memory in C",
     "summary": "Swap values through pointers, then diagnose a missing address in scanf.",
-    "skills": ["c.memory", "c.pointers", "c.toolchain"],
-    "prerequisites": ["c.syntax", "concept.testing"],
+    "skills": [
+        "c.memory",
+        "c.pointers",
+        "c.toolchain"
+    ],
+    "prerequisites": [
+        "c.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +34,31 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": ["diagnose"]
+            "stepIds": [
+                "diagnose"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:c"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:c"
+    ],
     "hints": [
         "You need one temporary value to avoid overwriting the first value.",
         "Read *left into the temporary first.",
@@ -49,13 +70,25 @@
             "id": "pointer-copy",
             "description": "Swapping the pointer variables themselves.",
             "stepId": "apply",
-            "feedback": "Swapping the local pointer variables does not change the caller's integers. Dereference both pointers."
+            "testDescription": "The values are exchanged through dereferenced pointers.",
+            "feedback": "Swapping the local pointer variables does not change the caller's integers. Dereference both pointers.",
+            "followUpSkill": "c.memory"
         },
         {
             "id": "missing-amp",
-            "description": "Passing integers instead of addresses.",
-            "stepId": "apply",
-            "feedback": "swap needs addresses. Call swap(&first, &second), not swap(first, second)."
+            "description": "Passing an integer instead of its address to scanf.",
+            "stepId": "diagnose",
+            "answer": "format",
+            "feedback": "The format is already %d. scanf needs the address: pass &count.",
+            "followUpSkill": "c.memory"
+        },
+        {
+            "id": "pointer-assignment",
+            "description": "Thinking pointer assignment copies the pointed-to value.",
+            "stepId": "check",
+            "answer": "copy",
+            "feedback": "Assigning one pointer to another changes which address is stored. Dereference to change the value.",
+            "followUpSkill": "c.memory"
         }
     ],
     "lesson": {
@@ -138,7 +171,9 @@
                     "kind": "static",
                     "description": "The swap function takes two integer pointers.",
                     "file": "main.c",
-                    "includes": ["void swap(int *left, int *right)"],
+                    "includes": [
+                        "void swap(int *left, int *right)"
+                    ],
                     "excludes": []
                 },
                 {
@@ -150,16 +185,33 @@
                         "*left = *right;",
                         "*right = temporary;"
                     ],
-                    "excludes": ["TODO"]
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.c",
-                    "includes": ["void swap(int *left, int *right)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "void swap(int *left, int *right)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Keep one temporary value so the first assignment is not lost.",
+                "Read *left into the temporary.",
+                "Assign *right to *left.",
+                "Finish with *right = temporary."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "cc -std=c17 -Wall -Wextra -Werror main.c -o main",
+                "description": "Compile main.c with warnings treated as errors using the C compiler."
+            }
         },
         {
             "kind": "debug",
@@ -201,7 +253,13 @@
                 }
             ],
             "correctFixId": "address",
-            "explanation": "scanf needs the address of the object it should fill. Passing count by value gives it no writable location."
+            "explanation": "scanf needs the address of the object it should fill. Passing count by value gives it no writable location.",
+            "hints": [
+                "scanf needs the address of the variable it should fill.",
+                "Passing count by value gives scanf no writable location.",
+                "The format %d is correct for int.",
+                "Change the call to scanf(\"%d\", &count)."
+            ]
         },
         {
             "kind": "explain",
@@ -231,7 +289,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Pointers hold addresses. Dereferencing writes through the address; assigning pointers only changes which address is stored."
+            "explanation": "Pointers hold addresses. Dereferencing writes through the address; assigning pointers only changes which address is stored.",
+            "hints": [
+                "Two statements are accurate.",
+                "Dereferencing writes through the pointer.",
+                "Assigning pointers changes addresses, not values.",
+                "Select deref and address."
+            ]
         }
     ],
     "evaluation": {
@@ -251,5 +315,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems"]
+    "tags": [
+        "systems"
+    ]
 }
