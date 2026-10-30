@@ -1,0 +1,425 @@
+{
+    "id": "algorithms.recursion",
+    "version": 1,
+    "sequence": 416,
+    "courseId": "algorithms",
+    "title": "A function that calls itself",
+    "summary": "Write a recursive traversal with a base case, trace the unwinding, and recognize repeated subproblems.",
+    "skills": ["algorithms.recursion", "algorithms.complexity"],
+    "prerequisites": ["js.functions", "algorithms.complexity"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "recursion",
+        "briefing": "The campus inventory is stored as nested lists. A report needs the total count, but the current function stops at the first level and crashes on deeply nested input. Write the recursive sum, trace one call, and decide when recursion needs a cache."
+    },
+    "objectives": [
+        {
+            "id": "implement",
+            "description": "Implement a recursive nested sum with a base case.",
+            "stepIds": ["sum-code"]
+        },
+        {
+            "id": "trace",
+            "description": "Trace a recursive call to its final value.",
+            "stepIds": ["recursion-trace"]
+        },
+        {
+            "id": "transfer",
+            "description": "Recognize stack depth and repeated subproblems.",
+            "stepIds": ["recursion-transfer"]
+        },
+        {
+            "id": "cost",
+            "description": "Recognize repeated work in a recursive call tree.",
+            "stepIds": ["recursion-cost"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:function"],
+    "hints": [
+        "A number is already a sum; an empty list sums to zero.",
+        "For a list, add the sum of each item.",
+        "The recursive call must move toward a smaller input.",
+        "Return 0 for an empty list and recurse on each nested value."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-base",
+            "description": "Recursing without a base case.",
+            "stepId": "sum-code",
+            "testDescription": "Sums an empty list.",
+            "feedback": "Every recursive function needs an input it can answer directly. An empty list is the base case here.",
+            "followUpSkill": "algorithms.recursion"
+        },
+        {
+            "id": "flat-only",
+            "description": "Adding only top-level numbers.",
+            "stepId": "sum-code",
+            "testDescription": "Sums nested lists.",
+            "feedback": "A nested list needs the same function applied to each child. One loop over the top level is not enough."
+        },
+        {
+            "id": "wrong-unwind",
+            "description": "Recording the value before the recursive calls return.",
+            "stepId": "recursion-trace",
+            "answer": "{\"index\":\"3\",\"result\":\"6\"}",
+            "feedback": "The final result is available only after the deepest call returns and each frame adds its value."
+        },
+        {
+            "id": "linear-recursion",
+            "description": "Assuming naive Fibonacci runs in linear time.",
+            "stepId": "recursion-transfer",
+            "answer": "linear",
+            "feedback": "Naive Fibonacci repeats the same subproblems; the call tree grows exponentially unless it memoizes."
+        },
+        {
+            "id": "naive-linear",
+            "description": "Counting each call once and calling the exponential tree linear.",
+            "stepId": "recursion-cost",
+            "answer": "linear",
+            "feedback": "Each call branches into two more calls, so the naive call tree grows exponentially. Memoization removes the repeated subtrees."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A base case and a smaller call",
+                "body": "A recursive function needs a direct answer for the smallest input and a recursive call that makes progress toward it. For nested lists, an empty list is zero and a number is itself; a list adds the results of its children."
+            },
+            {
+                "title": "The call stack remembers the return path",
+                "body": "Each call waits for its recursive child. The final value is built while the stack unwinds, so the deepest frame returns first. That is why the result appears only after the inner call completes."
+            },
+            {
+                "title": "Recursion has costs and shortcuts",
+                "body": "Every active call uses stack space, so deep input can overflow. When the same subproblem appears many times, memoization turns exponential work into linear work. Some recursions can be rewritten as a loop."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Base case",
+                "definition": "The input a recursive function answers without another call."
+            },
+            {
+                "term": "Recursive case",
+                "definition": "The branch that calls the function on a smaller or simpler input."
+            },
+            {
+                "term": "Call stack",
+                "definition": "The active function frames, each waiting for its nested calls."
+            },
+            {
+                "term": "Memoization",
+                "definition": "Caching a subproblem result so repeated calls reuse it."
+            },
+            {
+                "term": "Stack overflow",
+                "definition": "Running out of stack space because recursion went too deep."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Base case, progress, unwind",
+            "prompt": "Read the explanation, then implement the nested sum.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A base case and a smaller call",
+                    "body": "A recursive function needs a direct answer for the smallest input and a recursive call that makes progress toward it. For nested lists, an empty list is zero and a number is itself; a list adds the results of its children."
+                },
+                {
+                    "title": "The call stack remembers the return path",
+                    "body": "Each call waits for its recursive child. The final value is built while the stack unwinds, so the deepest frame returns first. That is why the result appears only after the inner call completes."
+                },
+                {
+                    "title": "Recursion has costs and shortcuts",
+                    "body": "Every active call uses stack space, so deep input can overflow. When the same subproblem appears many times, memoization turns exponential work into linear work. Some recursions can be rewritten as a loop."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Base case",
+                    "definition": "The input a recursive function answers without another call."
+                },
+                {
+                    "term": "Recursive case",
+                    "definition": "The branch that calls the function on a smaller or simpler input."
+                },
+                {
+                    "term": "Call stack",
+                    "definition": "The active function frames, each waiting for its nested calls."
+                },
+                {
+                    "term": "Memoization",
+                    "definition": "Caching a subproblem result so repeated calls reuse it."
+                },
+                {
+                    "term": "Stack overflow",
+                    "definition": "Running out of stack space because recursion went too deep."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "sum-code",
+            "title": "Sum a nested list",
+            "prompt": "Edit nested.js. sumNested(value) returns the sum of every number in a number or a nested array. Empty arrays add zero, and non-number values are ignored.",
+            "evidence": "construction",
+            "hints": [
+                "Start with the two base cases: a number and an empty list.",
+                "For a list, add the results for each item.",
+                "Call sumNested on each child instead of assuming it is a number.",
+                "Return 0 for an empty list and ignore values that are neither numbers nor arrays."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "nested.js",
+                    "content": "function sumNested(value) {\n  return 0;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "nested.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Sums one number.",
+                    "name": "sumNested",
+                    "args": [5],
+                    "expected": 5
+                },
+                {
+                    "kind": "function",
+                    "description": "Sums an empty list.",
+                    "name": "sumNested",
+                    "args": [[]],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Sums nested lists.",
+                    "name": "sumNested",
+                    "args": [[1, [2, 3], [[4]]]],
+                    "expected": 10
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles negative values.",
+                    "name": "sumNested",
+                    "args": [[-2, [5, -1]]],
+                    "expected": 2
+                },
+                {
+                    "kind": "function",
+                    "description": "Ignores values that are not numbers or arrays.",
+                    "name": "sumNested",
+                    "args": [[1, "two", null, [3]]],
+                    "expected": 4
+                },
+                {
+                    "kind": "ast",
+                    "description": "Calls itself on nested input.",
+                    "file": "nested.js",
+                    "language": "javascript",
+                    "require": [
+                        {
+                            "node": "function-call",
+                            "name": "sumNested",
+                            "min": 1
+                        }
+                    ],
+                    "forbid": []
+                }
+            ]
+        },
+        {
+            "kind": "trace",
+            "id": "recursion-trace",
+            "title": "Trace the unwinding",
+            "prompt": "Step through the recursive sum of [1, 2, 3, 4] and enter the final watched values.",
+            "evidence": "prediction",
+            "hints": [
+                "The first call starts at index 0.",
+                "Each call adds its value and advances the index.",
+                "The deepest call sees index 4 and returns 0.",
+                "The final result is 1 + 2 + 3 + 4 = 10 at index 4."
+            ],
+            "lines": [
+                {
+                    "id": "line-1",
+                    "code": "function total(items, index) {"
+                },
+                {
+                    "id": "line-2",
+                    "code": "  if (index === items.length) return 0;"
+                },
+                {
+                    "id": "line-3",
+                    "code": "  return items[index] + total(items, index + 1);"
+                },
+                {
+                    "id": "line-4",
+                    "code": "}"
+                },
+                {
+                    "id": "line-5",
+                    "code": "total([1, 2, 3, 4], 0)"
+                }
+            ],
+            "watches": [
+                {
+                    "id": "index",
+                    "label": "index",
+                    "initial": "0"
+                },
+                {
+                    "id": "result",
+                    "label": "returned result",
+                    "initial": "?"
+                }
+            ],
+            "snapshots": [
+                {
+                    "lineId": "line-1",
+                    "values": {
+                        "index": "0",
+                        "result": "?"
+                    },
+                    "note": "The outer call starts with the whole list."
+                },
+                {
+                    "lineId": "line-3",
+                    "values": {
+                        "index": "0",
+                        "result": "waiting"
+                    },
+                    "note": "It needs the result of total(items, 1)."
+                },
+                {
+                    "lineId": "line-2",
+                    "values": {
+                        "index": "4",
+                        "result": "0"
+                    },
+                    "note": "The base case returns zero without another call."
+                },
+                {
+                    "lineId": "line-5",
+                    "values": {
+                        "index": "4",
+                        "result": "10"
+                    },
+                    "note": "Each waiting frame adds its value while unwinding."
+                }
+            ],
+            "explanation": "The base case at index 4 returns 0. The frames then add 4, 3, 2, and 1 on the way out, producing 10."
+        },
+        {
+            "kind": "quiz",
+            "id": "recursion-cost",
+            "title": "Why cache a recursion?",
+            "prompt": "Naive recursive Fibonacci recomputes the same values. What is its growth?",
+            "evidence": "prediction",
+            "hints": [
+                "Draw the calls for fib(5).",
+                "Each call creates two more calls.",
+                "The tree grows by a factor on each level.",
+                "The naive version is exponential."
+            ],
+            "quiz": {
+                "prompt": "Choose the closest growth for naive recursive Fibonacci.",
+                "options": [
+                    {
+                        "id": "exponential",
+                        "label": "Exponential"
+                    },
+                    {
+                        "id": "linear",
+                        "label": "Linear"
+                    },
+                    {
+                        "id": "constant",
+                        "label": "Constant"
+                    },
+                    {
+                        "id": "nlogn",
+                        "label": "O(n log n)"
+                    }
+                ],
+                "correctId": "exponential",
+                "explanation": "The call tree repeats subproblems. Memoization reduces it to linear work in n."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "recursion-transfer",
+            "title": "Use recursion deliberately",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Every recursive call needs a stopping case.",
+                "Deep recursion consumes stack space.",
+                "Repeated subproblems suggest a cache.",
+                "Select base cases, stack limits, memoization, and loop alternatives; reject linear naive Fibonacci."
+            ],
+            "statements": [
+                {
+                    "id": "base",
+                    "label": "Every recursive function needs at least one base case.",
+                    "correct": true
+                },
+                {
+                    "id": "progress",
+                    "label": "Each recursive call must make progress toward a base case.",
+                    "correct": true
+                },
+                {
+                    "id": "stack",
+                    "label": "Deep recursion can overflow the call stack.",
+                    "correct": true
+                },
+                {
+                    "id": "memo",
+                    "label": "Memoization helps when the same subproblem appears repeatedly.",
+                    "correct": true
+                },
+                {
+                    "id": "linear",
+                    "label": "Naive recursive Fibonacci runs in linear time.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Recursion is a structure with a base case, progress, and a stack cost. Caching or iteration addresses repeated work and depth."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems"]
+}
