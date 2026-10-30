@@ -10,14 +10,17 @@ import {
     registerPraxbitBackgroundSync,
     startBackgroundSyncObservers,
 } from "./background-sync.ts";
+import { resolveApiBaseUrl } from "./api-base.ts";
 import { reminderScheduler } from "./notifications.ts";
 import { createBearerTokenStore } from "./token-storage.ts";
 
 export const platformCapabilities = detectPlatformCapabilities();
 const tokenStore = createBearerTokenStore();
+const configuredApiBase = import.meta.env["VITE_API_BASE_URL"] as string | undefined;
 
 export const db = new PraxbitDatabase();
 export const api = new ApiClient({
+    baseUrl: resolveApiBaseUrl(platformCapabilities.native, configuredApiBase),
     native: platformCapabilities.native,
     onNativeToken: function persistNativeToken(token): void {
         if (token === undefined) {
