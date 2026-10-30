@@ -30,6 +30,11 @@
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
             "stepIds": ["check"]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Count positives in a new array with filter and count.",
+            "stepIds": ["count"]
         }
     ],
     "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:swift"],
@@ -41,16 +46,34 @@
     ],
     "misconceptions": [
         {
-            "id": "force",
-            "description": "Using ! without evidence that a value exists.",
+            "id": "nonnegative",
+            "description": "Counting zero as a positive change.",
             "stepId": "apply",
-            "feedback": "Force unwrapping traps on nil. Use if let or guard let."
+            "testDescription": "The loop counts only positive values.",
+            "feedback": "Zero is not positive. The condition must be value > 0, not value >= 0.",
+            "followUpSkill": "swift.syntax"
         },
         {
-            "id": "let",
-            "description": "Declaring a counter with let.",
+            "id": "let-counter",
+            "description": "Declaring the counter with let and trying to increment it.",
             "stepId": "apply",
-            "feedback": "let is immutable. Use var for a value that changes."
+            "diagnostic": "Declaring count with let, then assigning count += 1 inside the loop.",
+            "feedback": "let creates a constant. A counter that changes needs var.",
+            "followUpSkill": "swift.syntax"
+        },
+        {
+            "id": "force-safe",
+            "description": "Believing force unwrapping is safe after an optional check.",
+            "stepId": "check",
+            "answer": "force",
+            "feedback": "Force unwrapping traps when the optional is nil. Use if let or guard let so the compiler proves the value exists."
+        },
+        {
+            "id": "count-everything",
+            "description": "Counting every array element instead of the filtered ones.",
+            "stepId": "count",
+            "answer": "size",
+            "feedback": "count on the filtered array counts only positives. Counting the original array includes zero and negatives."
         }
     ],
     "lesson": {
@@ -117,6 +140,12 @@
             "title": "Count positive stock changes",
             "prompt": "Edit main.swift. countPositive returns how many values are greater than zero.",
             "evidence": "construction",
+            "hints": [
+                "Keep the [Int] parameter and Int return type.",
+                "Add a branch inside the for loop.",
+                "Compare value with zero.",
+                "Increment count only when value > 0."
+            ],
             "language": "swift",
             "files": [
                 {
@@ -128,6 +157,11 @@
             ],
             "entry": "main.swift",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "swiftc main.swift -o main && ./main",
+                "description": "Compiles the file with swiftc and runs the resulting executable."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -158,6 +192,12 @@
             "title": "Check the semantics",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
+            "hints": [
+                "let is the constant declaration.",
+                "An optional either contains a value or nil.",
+                "Force unwrapping is not a check.",
+                "Arrays preserve insertion order."
+            ],
             "statements": [
                 {
                     "id": "let",
@@ -181,6 +221,42 @@
                 }
             ],
             "explanation": "Swift distinguishes constants from variables and makes absence explicit with optionals."
+        },
+        {
+            "kind": "quiz",
+            "id": "count",
+            "title": "Filter and count",
+            "prompt": "Given let values = [4, 0, -3, 7], what does values.filter { $0 > 0 }.count return?",
+            "evidence": "transfer",
+            "hints": [
+                "filter keeps elements that satisfy the closure.",
+                "Zero does not satisfy $0 > 0.",
+                "The negative value does not satisfy it either.",
+                "Two values remain."
+            ],
+            "quiz": {
+                "prompt": "Given let values = [4, 0, -3, 7], what does values.filter { $0 > 0 }.count return?",
+                "options": [
+                    {
+                        "id": "two",
+                        "label": "2"
+                    },
+                    {
+                        "id": "three",
+                        "label": "3, because zero is included"
+                    },
+                    {
+                        "id": "size",
+                        "label": "4, because count uses the original array"
+                    },
+                    {
+                        "id": "zero",
+                        "label": "0, because filter returns an empty array"
+                    }
+                ],
+                "correctId": "two",
+                "explanation": "filter keeps 4 and 7, so the resulting array has two elements. count reports that array's length."
+            }
         }
     ],
     "evaluation": {
