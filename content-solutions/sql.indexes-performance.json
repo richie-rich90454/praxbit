@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "build-index": {
+            "files": {
+                "query.sql": "CREATE INDEX idx_orders_customer_placed ON orders (customer_id, placed_at);\n"
+            }
+        }
+    }
+}
