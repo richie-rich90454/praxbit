@@ -5,24 +5,14 @@
     "courseId": "javascript",
     "title": "Arrays and objects",
     "summary": "Read and update arrays and objects without surprising mutations.",
-    "skills": [
-        "js.arrays",
-        "js.objects",
-        "js.functions"
-    ],
-    "prerequisites": [
-        "js.functions"
-    ],
+    "skills": ["js.arrays", "js.objects", "js.functions"],
+    "prerequisites": ["js.functions"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "immutable-update",
             "description": "Return a new object with an updated field.",
-            "stepIds": [
-                "implement-update"
-            ]
+            "stepIds": ["implement-update"]
         },
         {
             "id": "arrays",
             "description": "Work with array length and indices.",
-            "stepIds": [
-                "implement-update"
-            ]
+            "stepIds": ["implement-update"]
         },
         {
             "id": "understanding",
             "description": "Explain arrays and objects.",
-            "stepIds": [
-                "collection-claims"
-            ]
+            "stepIds": ["collection-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:data"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:data"],
     "hints": [
         "Spread the original object into a new one.",
         "Override the requested key.",
@@ -272,7 +251,5 @@
         "screenReaderNotes": "Each test announces its description and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
