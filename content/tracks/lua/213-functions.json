@@ -37,7 +37,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "lua.functions",
-    "sequence": 213,
+    "sequence": 122,
     "title": "Varargs and multiple returns",
     "summary": "Count and sum variadic arguments, then repair a summary that loses values after the first nil.",
     "skills": [
