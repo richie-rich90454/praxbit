@@ -5,23 +5,14 @@
     "courseId": "html",
     "title": "Links, images, and media",
     "summary": "Use anchors, images with alt text, and responsive media elements correctly.",
-    "skills": [
-        "web.html",
-        "web.accessibility"
-    ],
-    "prerequisites": [
-        "web.html"
-    ],
+    "skills": ["web.html", "web.accessibility"],
+    "prerequisites": ["web.html"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-html",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "dom-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "dom-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "links",
             "description": "Use meaningful anchor text and destinations.",
-            "stepIds": [
-                "fix-media"
-            ]
+            "stepIds": ["fix-media"]
         },
         {
             "id": "media",
             "description": "Provide alt text and accessible media.",
-            "stepIds": [
-                "fix-media"
-            ]
+            "stepIds": ["fix-media"]
         },
         {
             "id": "transfer",
             "description": "Transfer link and media decisions to a new page.",
-            "stepIds": [
-                "media-transfer"
-            ]
+            "stepIds": ["media-transfer"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:media"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:media"],
     "hints": [
         "Anchor text should describe the destination.",
         "Images need alt text; decorative ones use empty alt.",
@@ -258,7 +238,5 @@
         "screenReaderNotes": "Each test announces its selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
