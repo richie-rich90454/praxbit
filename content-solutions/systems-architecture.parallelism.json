@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "counter-code": {
+            "files": {
+                "counter.js": "async function incrementAll(counter, times) {\n  let queue = Promise.resolve();\n  function increment() {\n    queue = queue.then(async function run() {\n      const current = counter.value;\n      await Promise.resolve();\n      counter.value = current + 1;\n    });\n    return queue;\n  }\n  const jobs = [];\n  for (let index = 0; index < times; index += 1) {\n    jobs.push(increment());\n  }\n  await Promise.all(jobs);\n  return counter.value;\n}\n"
+            }
+        }
+    }
+}
