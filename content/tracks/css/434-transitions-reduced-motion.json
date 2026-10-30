@@ -1,0 +1,254 @@
+{
+    "id": "css.transitions-reduced-motion",
+    "version": 1,
+    "sequence": 220,
+    "courseId": "css",
+    "title": "Transitions and reduced motion",
+    "summary": "Animate state changes smoothly and respect prefers-reduced-motion.",
+    "skills": [
+        "web.css",
+        "web.accessibility"
+    ],
+    "prerequisites": [
+        "web.css"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-css",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "computed-style-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "jarring-hover",
+        "briefing": "Buttons snap between states and a spinner animates forever. Add a short transition and disable non-essential motion for users who request reduced motion."
+    },
+    "objectives": [
+        {
+            "id": "transition",
+            "description": "Add a transition to button state changes.",
+            "stepIds": [
+                "fix-motion"
+            ]
+        },
+        {
+            "id": "reduced-motion",
+            "description": "Respect prefers-reduced-motion.",
+            "stepIds": [
+                "fix-motion"
+            ]
+        },
+        {
+            "id": "transfer",
+            "description": "Transfer motion decisions to a new component.",
+            "stepIds": [
+                "motion-transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:animation"
+    ],
+    "hints": [
+        "Transition background-color and transform over about 150ms.",
+        "Use prefers-reduced-motion to disable non-essential animation.",
+        "Keep the focus outline visible.",
+        "Add transition: background-color 150ms ease, transform 150ms ease; and @media (prefers-reduced-motion: reduce) { * { transition: none; animation: none; } }."
+    ],
+    "misconceptions": [
+        {
+            "id": "infinite-spin",
+            "description": "Leaving an infinite animation without a reduced-motion fallback.",
+            "stepId": "fix-motion",
+            "testDescription": "A reduced-motion media query is present.",
+            "feedback": "Infinite or large motion must be disabled or reduced when the user requests it.",
+            "followUpSkill": "web.accessibility"
+        },
+        {
+            "id": "motion-required",
+            "description": "Believing animations are required to understand the interface.",
+            "stepId": "motion-transfer",
+            "answer": "required",
+            "feedback": "Motion should enhance, not carry meaning. The interface must work without it.",
+            "followUpSkill": "web.accessibility"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Transitions",
+                "body": "Transitions interpolate between values over time. Keep them short, around 100-200ms, and animate only transform and opacity when possible."
+            },
+            {
+                "title": "Reduced motion",
+                "body": "Some users experience discomfort from motion. The prefers-reduced-motion media query lets you disable or simplify animations while keeping functionality."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Transition",
+                "definition": "A smooth change between CSS values."
+            },
+            {
+                "term": "prefers-reduced-motion",
+                "definition": "A media query matching users who request less motion."
+            },
+            {
+                "term": "Non-essential motion",
+                "definition": "Animation that is not required to use the interface."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Transitions and reduced motion",
+            "prompt": "Read the explanation, then fix the CSS.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Transitions",
+                    "body": "Transitions interpolate between values over time. Keep them short, around 100-200ms, and animate only transform and opacity when possible."
+                },
+                {
+                    "title": "Reduced motion",
+                    "body": "Some users experience discomfort from motion. The prefers-reduced-motion media query lets you disable or simplify animations while keeping functionality."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Transition",
+                    "definition": "A smooth change between CSS values."
+                },
+                {
+                    "term": "prefers-reduced-motion",
+                    "definition": "A media query matching users who request less motion."
+                },
+                {
+                    "term": "Non-essential motion",
+                    "definition": "Animation that is not required to use the interface."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-motion",
+            "title": "Add transitions and reduced motion",
+            "prompt": "Edit styles.css. Add a short transition and a prefers-reduced-motion fallback.",
+            "evidence": "construction",
+            "language": "css",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Button</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <button class=\"cta\">Save</button>\n  <div class=\"spinner\"></div>\n</body>\n</html>\n",
+                    "editable": false,
+                    "language": "html"
+                },
+                {
+                    "path": "styles.css",
+                    "content": ".cta { background: #B54131; color: #fff; padding: 8px 12px; }\n.cta:hover { background: #8f3226; transform: translateY(-1px); }\n.spinner { width: 24px; height: 24px; border: 3px solid #D6D6D6; border-top-color: #B54131; border-radius: 50%; animation: spin 1s linear infinite; }\n@keyframes spin { to { transform: rotate(360deg); } }\n",
+                    "editable": true,
+                    "language": "css"
+                }
+            ],
+            "entry": "styles.css",
+            "preview": "css",
+            "tests": [
+                {
+                    "kind": "css",
+                    "description": "The button has a transition.",
+                    "selector": ".cta",
+                    "property": "transition-duration",
+                    "expected": "0.15s"
+                },
+                {
+                    "kind": "regex",
+                    "description": "A reduced-motion media query is present.",
+                    "file": "styles.css",
+                    "pattern": "prefers-reduced-motion",
+                    "flags": "i"
+                },
+                {
+                    "kind": "regex",
+                    "description": "The reduced-motion query disables animation.",
+                    "file": "styles.css",
+                    "pattern": "animation:\\s*none",
+                    "flags": "i"
+                }
+            ],
+            "hints": [
+                "Add transition: background-color 150ms ease, transform 150ms ease.",
+                "Add a prefers-reduced-motion media query.",
+                "Disable animation and transition in the query.",
+                "Use transition: background-color 150ms ease, transform 150ms ease; and @media (prefers-reduced-motion: reduce) { .cta, .spinner { transition: none; animation: none; } }."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "motion-transfer",
+            "title": "Transfer motion decisions",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Check each statement against motion best practices.",
+                "Short transitions aid perception.",
+                "Reduced motion is a user preference.",
+                "Select short transitions and reduced motion; reject required and infinite default."
+            ],
+            "statements": [
+                {
+                    "id": "short",
+                    "label": "Short transitions help users perceive state changes.",
+                    "correct": true
+                },
+                {
+                    "id": "reduced",
+                    "label": "prefers-reduced-motion should disable non-essential animation.",
+                    "correct": true
+                },
+                {
+                    "id": "required",
+                    "label": "Animations are required to understand the interface.",
+                    "correct": false
+                },
+                {
+                    "id": "infinite",
+                    "label": "Infinite animations are fine without a fallback.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Motion should be short, optional, and respectful of user preferences."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and computed-style tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
