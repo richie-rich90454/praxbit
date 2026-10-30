@@ -8,9 +8,10 @@ import {
     onMount,
     type JSX,
 } from "solid-js";
-import type { WorldSystemId } from "@praxbit/contracts";
+import type { WorldSystem, WorldSystemId } from "@praxbit/contracts";
 import type { CampusRenderer } from "@praxbit/game";
-import { worldHealth } from "@praxbit/domain";
+import { isWorldRecovered, worldHealth } from "@praxbit/domain";
+import { announce } from "../../app/AppShell.tsx";
 import { useLearning } from "../learning/learning-store.tsx";
 import { Pip } from "../../design/Pip.tsx";
 import "./world.css";
@@ -45,9 +46,24 @@ export function WorldScreen(): JSX.Element {
     const [busy, setBusy] = createSignal(false);
     const [actionError, setActionError] = createSignal("");
     const [actionNotice, setActionNotice] = createSignal("");
+    const [actionFailed, setActionFailed] = createSignal(false);
 
     const health = createMemo(function worldHealthSummary() {
         return worldHealth(learning.world());
+    });
+
+    const recovered = createMemo(function worldRecoveryState() {
+        return isWorldRecovered(learning.world());
+    });
+
+    const incidentOpen = createMemo(function incidentState() {
+        return learning.world().flags["incidentOpen"] === true;
+    });
+
+    const unhealthySystems = createMemo(function affectedSystems() {
+        return learning.world().systems.filter(function unhealthy(system): boolean {
+            return system.status !== "healthy";
+        });
     });
 
     const selectedSystem = createMemo(function selectedSystemValue() {
@@ -56,10 +72,20 @@ export function WorldScreen(): JSX.Element {
         });
     });
 
+    const selectedBlocker = createMemo(function selectedRestartBlocker() {
+        return restartBlocker(selectedSystem());
+    });
+
     function selectSystem(systemId: WorldSystemId): void {
         setSelected(systemId);
         setActionError("");
         setActionNotice("");
+        const system = learning.world().systems.find(function match(item): boolean {
+            return item.id === systemId;
+        });
+        if (system !== undefined) {
+            announce(`${system.name}. Status ${statusLabel(system.status)}. ${system.summary}`);
+        }
     }
 
     onMount(function mount(): void {
@@ -101,6 +127,28 @@ export function WorldScreen(): JSX.Element {
         renderer = undefined;
     });
 
+    function restartBlocker(system: WorldSystem | undefined): string | undefined {
+        if (system === undefined) {
+            return undefined;
+        }
+        if (system.kind !== "service" && system.kind !== "automation") {
+            return `${system.name} is not a restartable service. Correct the underlying prerequisite instead.`;
+        }
+        const blocked = system.dependsOn.flatMap(function dependencyName(id): string[] {
+            const dependency = learning.world().systems.find(function match(item): boolean {
+                return item.id === id;
+            });
+            if (dependency === undefined) {
+                return [id];
+            }
+            return dependency.status === "healthy" ? [] : [dependency.name];
+        });
+        if (blocked.length > 0) {
+            return `Restart blocked: ${blocked.join(", ")} ${blocked.length === 1 ? "is" : "are"} not healthy. An incorrect restart opens an incident.`;
+        }
+        return undefined;
+    }
+
     async function restartSystem(): Promise<void> {
         const system = selectedSystem();
         if (system === undefined || busy()) {
@@ -108,10 +156,20 @@ export function WorldScreen(): JSX.Element {
         }
         setActionError("");
         setActionNotice("");
+        setActionFailed(false);
         setBusy(true);
         try {
-            await learning.performWorldAction({ id: "restart-service", systemId: system.id });
-            setActionNotice(`Restart recorded for ${system.name}.`);
+            const outcome = await learning.performWorldAction({
+                id: "restart-service",
+                systemId: system.id,
+            });
+            const message =
+                outcome.state.log[outcome.state.log.length - 1]?.text ??
+                (outcome.changed
+                    ? `Restart recorded for ${system.name}.`
+                    : "No system state changed.");
+            setActionNotice(message);
+            setActionFailed(outcome.state.flags["incidentOpen"] === true);
         } catch (error) {
             setActionError(
                 error instanceof Error
@@ -137,15 +195,40 @@ export function WorldScreen(): JSX.Element {
                 <div class="row">
                     <span class="meta">
                         {health().healthy} of {health().total} systems healthy
+                        {recovered() ? " · campus recovered" : " · recovery in progress"}
                     </span>
-                    <Pip
-                        pose={health().healthy === health().total ? "celebrating" : "alert"}
-                        size={72}
-                    />
+                    <span aria-hidden="true">
+                        <Pip
+                            pose={health().healthy === health().total ? "celebrating" : "alert"}
+                            size={72}
+                        />
+                    </span>
                 </div>
             </div>
 
             <div class="stack stack--wide">
+                <Show when={incidentOpen()}>
+                    <div class="notice world-incident" role="alert">
+                        <strong>Open incident</strong>
+                        <p class="small">
+                            A recovery action was attempted before its prerequisites were met.
+                            Correct the affected prerequisites, then restart the intended service.
+                        </p>
+                        <Show when={unhealthySystems().length > 0}>
+                            <ul class="world-incident__list small">
+                                <For each={unhealthySystems()}>
+                                    {function system(item): JSX.Element {
+                                        return (
+                                            <li>
+                                                {item.name}: {statusLabel(item.status)}
+                                            </li>
+                                        );
+                                    }}
+                                </For>
+                            </ul>
+                        </Show>
+                    </div>
+                </Show>
                 <div class="surface stack">
                     <div class="surface__header">
                         <div>
@@ -268,14 +351,19 @@ export function WorldScreen(): JSX.Element {
                                 >
                                     <div class="stack stack--tight">
                                         <p class="meta">
-                                            Restarting returns this service to its baseline state
-                                            and records the action in World changes.
+                                            Restarting only succeeds when the service is restartable
+                                            and every dependency is healthy.
                                         </p>
+                                        <Show when={selectedBlocker()}>
+                                            <p class="feedback feedback--info" role="status">
+                                                {selectedBlocker()}
+                                            </p>
+                                        </Show>
                                         <div class="row">
                                             <button
                                                 type="button"
                                                 class="button"
-                                                disabled={busy()}
+                                                disabled={busy() || selectedBlocker() !== undefined}
                                                 onClick={function restart(): void {
                                                     void restartSystem();
                                                 }}
@@ -291,7 +379,14 @@ export function WorldScreen(): JSX.Element {
                                     </p>
                                 </Show>
                                 <Show when={actionNotice().length > 0}>
-                                    <p class="feedback feedback--success" role="status">
+                                    <p
+                                        class={
+                                            actionFailed()
+                                                ? "feedback feedback--error"
+                                                : "feedback feedback--success"
+                                        }
+                                        role={actionFailed() ? "alert" : "status"}
+                                    >
                                         {actionNotice()}
                                     </p>
                                 </Show>
