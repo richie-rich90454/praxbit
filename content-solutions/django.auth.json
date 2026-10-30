@@ -1,0 +1,14 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "views.py": "from functools import wraps\n\nfrom django.http import JsonResponse\nfrom django.urls import path\n\nfrom .models import Item\n\n\ndef require_member(view):\n    @wraps(view)\n    def wrapped(request, *args, **kwargs):\n        if not request.user.is_authenticated:\n            return JsonResponse({\"error\": \"authentication_required\"}, status=401)\n        return view(request, *args, **kwargs)\n\n    return wrapped\n\n\n@require_member\ndef item_list(request):\n    payload = [{\"id\": item.id, \"name\": item.name} for item in Item.objects.all()]\n    return JsonResponse({\"items\": payload})\n\n\nurlpatterns = [\n    path(\"items/\", item_list, name=\"item-list\"),\n]\n"
+            }
+        },
+        "test": {
+            "files": {
+                "test_views.py": "from django.contrib.auth import get_user_model\nfrom django.test import TestCase\nfrom django.urls import reverse\n\n\nclass InventoryAuthTests(TestCase):\n    def test_anonymous_request_is_rejected(self):\n        response = self.client.get(reverse(\"item-list\"))\n        self.assertEqual(response.status_code, 401)\n\n    def test_member_request_is_allowed(self):\n        user = get_user_model().objects.create_user(\"ada\", password=\"secret\")\n        self.client.force_login(user)\n        response = self.client.get(reverse(\"item-list\"))\n        self.assertEqual(response.status_code, 200)\n"
+            }
+        }
+    }
+}
