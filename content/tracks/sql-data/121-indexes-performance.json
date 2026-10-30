@@ -1,0 +1,306 @@
+{
+    "id": "sql.indexes-performance",
+    "version": 1,
+    "sequence": 39,
+    "courseId": "sql-data",
+    "title": "Index the customer order lookup",
+    "summary": "Create a composite index that serves a filtered, ordered query and reason about its cost.",
+    "skills": [
+        "sql.indexes"
+    ],
+    "prerequisites": [
+        "sql.modeling",
+        "sql.queries"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-sql",
+        "capabilities": [
+            "sqlite-wasm",
+            "deterministic-tests",
+            "learning-runtime"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "sql-indexes",
+        "briefing": "The support desk filters orders by customer and sorts them by date. The table has no supporting index. Add one index that matches the query shape, then reason about when it is worth its write cost."
+    },
+    "objectives": [
+        {
+            "id": "build-index",
+            "description": "Create a composite index in the order the query needs.",
+            "stepIds": [
+                "build-index"
+            ]
+        },
+        {
+            "id": "transfer-index",
+            "description": "Choose an index shape for a new query.",
+            "stepIds": [
+                "index-transfer"
+            ]
+        },
+        {
+            "id": "explain-index",
+            "description": "Explain index cost and query planning accurately.",
+            "stepIds": [
+                "index-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:database",
+        "icon:index"
+    ],
+    "hints": [
+        "Look at the filter column and the ordering column in the query.",
+        "The equality column should come first in the composite index.",
+        "Name the index idx_orders_customer_placed and order the columns customer_id, placed_at.",
+        "CREATE INDEX idx_orders_customer_placed ON orders (customer_id, placed_at);"
+    ],
+    "misconceptions": [
+        {
+            "id": "wrong-order",
+            "description": "Putting the ordering column first and losing the equality prefix.",
+            "stepId": "build-index",
+            "testDescription": "The index lists customer_id before placed_at.",
+            "feedback": "The index is ordered left to right. Put the equality column first so the ordering column can serve the sorted result.",
+            "followUpSkill": "sql.indexes"
+        },
+        {
+            "id": "date-only",
+            "description": "Choosing an index on the sort column alone.",
+            "stepId": "index-transfer",
+            "answer": "date-only",
+            "feedback": "An index on placed_at alone can help the order but must still scan or filter by customer. The composite index serves both parts.",
+            "followUpSkill": "sql.indexes"
+        },
+        {
+            "id": "write-free",
+            "description": "Believing indexes have no write cost.",
+            "stepId": "index-check",
+            "answer": "write-free",
+            "feedback": "Indexes consume storage and must be maintained on every write. They are a trade, not a free speedup.",
+            "followUpSkill": "sql.indexes"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A composite index follows the query",
+                "body": "A composite index orders rows by its columns from left to right. A query that filters on customer_id and orders by placed_at can use an index on (customer_id, placed_at) because the equality column comes first and the ordering column follows. Reversing the columns changes which query the index serves."
+            },
+            {
+                "title": "Indexes trade reads for writes",
+                "body": "Every index speeds some lookups and adds work to inserts, updates, and deletes. An index that no query uses is pure cost. Add indexes for measured or clearly expected access patterns, and remove them when the workload changes."
+            },
+            {
+                "title": "Plans are evidence",
+                "body": "EXPLAIN QUERY PLAN shows whether SQLite can use an index for a statement. Read the plan instead of guessing from the schema. The same reasoning applies to PostgreSQL: check the plan, the row estimates, and the actual time."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Composite index",
+                "definition": "An index over two or more columns in a defined order."
+            },
+            {
+                "term": "Leftmost prefix",
+                "definition": "The leading columns of a composite index that a query can use efficiently."
+            },
+            {
+                "term": "Covering index",
+                "definition": "An index that contains every column a query needs, so the table need not be read."
+            },
+            {
+                "term": "Query plan",
+                "definition": "The access strategy the database chooses for a statement."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A composite index follows the query",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A composite index follows the query",
+                    "body": "A composite index orders rows by its columns from left to right. A query that filters on customer_id and orders by placed_at can use an index on (customer_id, placed_at) because the equality column comes first and the ordering column follows. Reversing the columns changes which query the index serves."
+                },
+                {
+                    "title": "Indexes trade reads for writes",
+                    "body": "Every index speeds some lookups and adds work to inserts, updates, and deletes. An index that no query uses is pure cost. Add indexes for measured or clearly expected access patterns, and remove them when the workload changes."
+                },
+                {
+                    "title": "Plans are evidence",
+                    "body": "EXPLAIN QUERY PLAN shows whether SQLite can use an index for a statement. Read the plan instead of guessing from the schema. The same reasoning applies to PostgreSQL: check the plan, the row estimates, and the actual time."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Composite index",
+                    "definition": "An index over two or more columns in a defined order."
+                },
+                {
+                    "term": "Leftmost prefix",
+                    "definition": "The leading columns of a composite index that a query can use efficiently."
+                },
+                {
+                    "term": "Covering index",
+                    "definition": "An index that contains every column a query needs, so the table need not be read."
+                },
+                {
+                    "term": "Query plan",
+                    "definition": "The access strategy the database chooses for a statement."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "build-index",
+            "title": "Create the supporting index",
+            "prompt": "Edit query.sql. Create idx_orders_customer_placed on orders so the customer filter and placed_at order are both supported.",
+            "evidence": "construction",
+            "language": "sql",
+            "files": [
+                {
+                    "path": "query.sql",
+                    "content": "CREATE INDEX idx_orders_customer_placed ON orders (placed_at);\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "query.sql",
+            "preview": "sql",
+            "tests": [
+                {
+                    "kind": "sql",
+                    "description": "The index lists customer_id before placed_at.",
+                    "verify": "SELECT name FROM pragma_index_info('idx_orders_customer_placed') ORDER BY seqno;",
+                    "expectedRows": [
+                        [
+                            "customer_id"
+                        ],
+                        [
+                            "placed_at"
+                        ]
+                    ]
+                }
+            ],
+            "hints": [
+                "The index must begin with the column used in the equality filter.",
+                "Put customer_id first and placed_at second.",
+                "Use CREATE INDEX with the exact index name from the prompt.",
+                "CREATE INDEX idx_orders_customer_placed ON orders (customer_id, placed_at);"
+            ],
+            "database": {
+                "schemaSql": "CREATE TABLE orders (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, total_cents INTEGER NOT NULL, placed_at TEXT NOT NULL);\n",
+                "seedSql": "INSERT INTO orders (id, customer_id, total_cents, placed_at) VALUES ('o1', 'c1', 2500, '2026-10-01'), ('o2', 'c1', 7500, '2026-10-02'), ('o3', 'c2', 12900, '2026-10-03'), ('o4', 'c3', 4000, '2026-10-04');\n"
+            }
+        },
+        {
+            "kind": "quiz",
+            "id": "index-transfer",
+            "title": "Index a new query",
+            "prompt": "A different report filters by customer_id and orders by placed_at descending. Which index shape serves it best?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the index definition.",
+                "options": [
+                    {
+                        "id": "composite",
+                        "label": "CREATE INDEX idx ON orders (customer_id, placed_at);"
+                    },
+                    {
+                        "id": "date-only",
+                        "label": "CREATE INDEX idx ON orders (placed_at);"
+                    },
+                    {
+                        "id": "total",
+                        "label": "CREATE INDEX idx ON orders (total_cents);"
+                    },
+                    {
+                        "id": "no-index",
+                        "label": "No index; sort the table on every request."
+                    }
+                ],
+                "correctId": "composite",
+                "explanation": "The equality filter uses customer_id, and the ordering uses placed_at. The composite index matches both parts of the query."
+            },
+            "hints": [
+                "Start with the column that appears in the equality filter.",
+                "Then add the column used by ORDER BY.",
+                "A two-column index can serve both the filter and the order.",
+                "Choose CREATE INDEX idx ON orders (customer_id, placed_at)."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "index-check",
+            "title": "Index cost and planning",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "leading",
+                    "label": "The leftmost column of a composite index is the most important for matching a query.",
+                    "correct": true
+                },
+                {
+                    "id": "write",
+                    "label": "Indexes add work to inserts, updates, and deletes.",
+                    "correct": true
+                },
+                {
+                    "id": "covering",
+                    "label": "A covering index can answer a query without reading the table rows.",
+                    "correct": true
+                },
+                {
+                    "id": "write-free",
+                    "label": "Indexes make every write faster.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Indexes accelerate selected reads but cost storage and write maintenance. Read the query plan before assuming an index is used.",
+            "hints": [
+                "Three statements are accurate.",
+                "Indexes are not free: they must be updated when rows change.",
+                "A covering index contains every column the query reads.",
+                "Select leading, write, and covering."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": [
+            "sql.transactions-isolation"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The SQL editor and result table are keyboard accessible. SQLite runs locally in the browser.",
+        "keyboardNotes": "Use Tab to move between the editor and the results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
