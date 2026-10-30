@@ -30,6 +30,11 @@
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
             "stepIds": ["check"]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Count positives in a new array with a predicate.",
+            "stepIds": ["count"]
         }
     ],
     "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:ruby"],
@@ -41,16 +46,36 @@
     ],
     "misconceptions": [
         {
-            "id": "nil",
-            "description": "Assuming nil responds to every method.",
+            "id": "nonpositive",
+            "description": "Counting zero as a positive change.",
             "stepId": "apply",
-            "feedback": "nil is an object, but most methods are not defined on it. Check for nil or use a safe navigation pattern."
+            "testDescription": "The block counts only positive values.",
+            "feedback": "Integer#positive? requires a value greater than zero. Zero and negative values both fail it.",
+            "followUpSkill": "ruby.syntax"
         },
         {
-            "id": "mutation",
-            "description": "Mutating the array while iterating over it.",
-            "stepId": "apply",
-            "feedback": "Changing a collection during each can skip or repeat elements. Build a new collection or iterate over a copy."
+            "id": "nil-method",
+            "description": "Assuming nil responds to every method.",
+            "stepId": "check",
+            "answer": "nil",
+            "feedback": "nil is an object, but most methods are not defined on it. Check for nil or use a safe navigation pattern.",
+            "followUpSkill": "ruby.syntax"
+        },
+        {
+            "id": "symbol-string",
+            "description": "Treating a symbol as the same object as a string.",
+            "stepId": "check",
+            "answer": "symbol",
+            "feedback": "Symbols are immutable interned names. They are not the same object as a mutable string with the same text.",
+            "followUpSkill": "ruby.syntax"
+        },
+        {
+            "id": "count-everything",
+            "description": "Counting every array element instead of the positive ones.",
+            "stepId": "count",
+            "answer": "size",
+            "feedback": "count with a block counts only elements that make the block true. Array#size counts every element.",
+            "followUpSkill": "ruby.syntax"
         }
     ],
     "lesson": {
@@ -117,6 +142,12 @@
             "title": "Count positive stock changes",
             "prompt": "Edit main.rb. count_positive returns how many values are greater than zero.",
             "evidence": "construction",
+            "hints": [
+                "The each loop already visits every value.",
+                "Ask each integer whether it is positive.",
+                "Use the positive? predicate.",
+                "Add count += 1 if value.positive? inside the block."
+            ],
             "language": "ruby",
             "files": [
                 {
@@ -128,6 +159,11 @@
             ],
             "entry": "main.rb",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "ruby main.rb",
+                "description": "Runs the file with Ruby and prints the count."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -158,6 +194,12 @@
             "title": "Values and blocks",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
+            "hints": [
+                "A Ruby name can be rebound to another type.",
+                "Symbol is not the same object as String.",
+                "each yields each element to a block.",
+                "nil does not accept arbitrary methods."
+            ],
             "statements": [
                 {
                     "id": "dynamic",
@@ -181,6 +223,42 @@
                 }
             ],
             "explanation": "Ruby resolves method calls at runtime. Symbols are immutable names, and nil is an object that does not silently accept every method."
+        },
+        {
+            "kind": "quiz",
+            "id": "count",
+            "title": "Count with a predicate",
+            "prompt": "Given [4, 0, -3, 7].count { |value| value.positive? }, what is the result?",
+            "evidence": "transfer",
+            "hints": [
+                "The block answers a yes-or-no question per element.",
+                "Zero is not positive.",
+                "The negative value is not positive either.",
+                "Two elements satisfy the block."
+            ],
+            "quiz": {
+                "prompt": "Given [4, 0, -3, 7].count { |value| value.positive? }, what is the result?",
+                "options": [
+                    {
+                        "id": "two",
+                        "label": "2"
+                    },
+                    {
+                        "id": "three",
+                        "label": "3, because zero is counted"
+                    },
+                    {
+                        "id": "size",
+                        "label": "4, because count ignores the block"
+                    },
+                    {
+                        "id": "zero",
+                        "label": "0, because count only works on ranges"
+                    }
+                ],
+                "correctId": "two",
+                "explanation": "Array#count with a block increments only when the block returns true. The values 4 and 7 are positive."
+            }
         }
     ],
     "evaluation": {
