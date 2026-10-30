@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.swift": "struct Reading {\n    let sensor: String\n    let value: Int\n}\n\nfunc totalsBySensor(_ readings: [Reading]) -> [String: Int] {\n    readings.reduce(into: [String: Int]()) { totals, reading in\n        totals[reading.sensor, default: 0] += reading.value\n    }\n}\n\nlet readings = [\n    Reading(sensor: \"wheel\", value: 3),\n    Reading(sensor: \"wheel\", value: 2),\n    Reading(sensor: \"camera\", value: 4),\n]\nprint(totalsBySensor(readings))\n"
+            }
+        }
+    }
+}
