@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SkillGraph } from "../../packages/domain/src/skills/graph.ts";
 import {
+    PRACTICE_BUDGET_MINUTES,
     buildPracticePlan,
     recommendMission,
     requiredConcepts,
@@ -149,6 +150,48 @@ describe("recommendMission", function recommendMissionTest(): void {
         expect(result?.reasons).toContain("It offers another attempt at a recent difficulty.");
     });
 
+    it("breaks score ties by mission id, not input order", function tieBreak(): void {
+        const alpha = makeMission({
+            id: "campus.alpha",
+            sequence: 2,
+            skills: ["js.events"],
+            prerequisites: [],
+        });
+        const beta = makeMission({
+            id: "campus.beta",
+            sequence: 2,
+            skills: ["js.events"],
+            prerequisites: [],
+        });
+        const forward = recommendMission(context({ missions: [alpha, beta] }));
+        const reverse = recommendMission(context({ missions: [beta, alpha] }));
+        expect(forward?.missionId).toBe("campus.alpha");
+        expect(reverse?.missionId).toBe("campus.alpha");
+    });
+
+    it("rewards a mission that introduces a skill outside recent work", function variety(): void {
+        const repeated = makeMission({
+            id: "campus.repeated",
+            sequence: 2,
+            skills: ["js.events"],
+            prerequisites: [],
+        });
+        const fresh = makeMission({
+            id: "campus.fresh",
+            sequence: 3,
+            skills: ["js.conditions"],
+            prerequisites: [],
+        });
+        const result = recommendMission(
+            context({
+                missions: [repeated, fresh],
+                completedMissionSkills: ["js.events"],
+            }),
+        );
+        expect(result?.missionId).toBe("campus.fresh");
+        expect(result?.reasons).toContain("It introduces a skill outside your recent work.");
+    });
+
     it("is deterministic for the same input and orders alternatives", function determinism(): void {
         const missions = [
             makeMission({
@@ -266,5 +309,171 @@ describe("buildPracticePlan", function practicePlan(): void {
         const plan = buildPracticePlan(context({ mastery }), "short");
         expect(plan.weakSkillIds).toHaveLength(5);
         expect(plan.weakSkillIds[0]).toBe("skill.0");
+    });
+
+    it("keeps a short plan inside five minutes and excludes longer incidents", function shortBudget(): void {
+        const incident = makeMission({
+            id: "campus.long-incident",
+            sequence: 2,
+            skills: ["js.events"],
+            estimatedMinutes: 10,
+            prerequisites: [],
+            persistence: { kind: "world-action", action: "restart-service" },
+        });
+        const quick = makeMission({
+            id: "campus.quick",
+            sequence: 3,
+            skills: ["js.events"],
+            estimatedMinutes: 4,
+            prerequisites: [],
+        });
+        const plan = buildPracticePlan(
+            context({
+                missions: [incident, quick],
+                reviews: [review("js.events", "2026-10-27T00:00:00.000Z")],
+            }),
+            "short",
+        );
+        expect(plan.missionIds).toEqual(["campus.quick"]);
+        expect(plan.estimatedMinutes).toBeLessThanOrEqual(PRACTICE_BUDGET_MINUTES.short);
+    });
+
+    it("keeps every selected length inside its budget", function budgets(): void {
+        const missions = [2, 3, 4, 5].map(function make(index): ReturnType<typeof makeMission> {
+            return makeMission({
+                id: `campus.budget-${index}`,
+                sequence: index + 1,
+                courseId: `course-${index}`,
+                skills: ["js.events"],
+                estimatedMinutes: 5,
+                prerequisites: [],
+            });
+        });
+        const reviews = missions.map(function due(mission): ReviewItem {
+            return review(mission.skills[0] ?? "js.events", "2026-10-27T00:00:00.000Z");
+        });
+        for (const length of ["short", "medium", "long"] as const) {
+            const plan = buildPracticePlan(context({ missions, reviews }), length);
+            expect(plan.estimatedMinutes).toBeLessThanOrEqual(PRACTICE_BUDGET_MINUTES[length]);
+            expect(new Set(plan.missionIds).size).toBe(plan.missionIds.length);
+            const courses = plan.missionIds.map(function courseOf(missionId): string {
+                return (
+                    missions.find(function match(mission): boolean {
+                        return mission.id === missionId;
+                    })?.courseId ?? ""
+                );
+            });
+            expect(new Set(courses).size).toBe(courses.length);
+        }
+    });
+
+    it("filters ineligible and completed missions without a due review", function eligibility(): void {
+        const locked = makeMission({
+            id: "campus.locked",
+            sequence: 2,
+            skills: ["js.conditions"],
+            prerequisites: ["concept.base"],
+            estimatedMinutes: 4,
+        });
+        const finished = makeMission({
+            id: "campus.finished",
+            sequence: 2,
+            skills: ["js.events"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+        });
+        const ready = makeMission({
+            id: "campus.ready",
+            sequence: 3,
+            skills: ["js.events"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+        });
+        const plan = buildPracticePlan(
+            context({
+                missions: [locked, finished, ready],
+                mastery: { "concept.base": 0.2 },
+                completedMissionIds: ["campus.finished"],
+                reviews: [review("js.events", "2026-10-27T00:00:00.000Z")],
+            }),
+            "short",
+        );
+        expect(plan.missionIds).toEqual(["campus.ready"]);
+    });
+
+    it("prefers the selected challenge level", function challenge(): void {
+        const beginner = makeMission({
+            id: "campus.beginner",
+            sequence: 2,
+            skills: ["js.events"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+            difficulty: "beginner",
+        });
+        const advanced = makeMission({
+            id: "campus.advanced",
+            sequence: 3,
+            skills: ["js.conditions"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+            difficulty: "advanced",
+        });
+        const plan = buildPracticePlan(
+            context({
+                missions: [beginner, advanced],
+                challenge: "stretch",
+                reviews: [
+                    review("js.events", "2026-10-27T00:00:00.000Z"),
+                    review("js.conditions", "2026-10-27T00:00:00.000Z"),
+                ],
+            }),
+            "short",
+        );
+        expect(plan.missionIds).toEqual(["campus.advanced"]);
+    });
+
+    it("excludes a challenge level the learner did not choose for practice", function gentle(): void {
+        const advanced = makeMission({
+            id: "campus.advanced",
+            sequence: 2,
+            skills: ["js.conditions"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+            difficulty: "advanced",
+        });
+        const beginner = makeMission({
+            id: "campus.beginner",
+            sequence: 3,
+            skills: ["js.events"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+            difficulty: "beginner",
+        });
+        const plan = buildPracticePlan(
+            context({ missions: [advanced, beginner], challenge: "gentle" }),
+            "short",
+        );
+        expect(plan.missionIds).toEqual(["campus.beginner"]);
+    });
+
+    it("breaks plan ties by mission id, not input order", function planTieBreak(): void {
+        const alpha = makeMission({
+            id: "campus.alpha",
+            sequence: 2,
+            skills: ["js.events"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+        });
+        const beta = makeMission({
+            id: "campus.beta",
+            sequence: 2,
+            skills: ["js.events"],
+            prerequisites: [],
+            estimatedMinutes: 4,
+        });
+        const forward = buildPracticePlan(context({ missions: [alpha, beta] }), "short");
+        const reverse = buildPracticePlan(context({ missions: [beta, alpha] }), "short");
+        expect(forward.missionIds).toEqual(["campus.alpha"]);
+        expect(reverse.missionIds).toEqual(["campus.alpha"]);
     });
 });
