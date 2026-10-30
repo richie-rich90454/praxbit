@@ -61,6 +61,37 @@ const StaticTestSchema = z.strictObject({
     excludes: z.array(z.string().min(1).max(200)).max(10),
 });
 
+export const AstNodeKindSchema = z.enum([
+    "function-declaration",
+    "function-call",
+    "import",
+    "class-declaration",
+    "return-statement",
+    "if-statement",
+    "for-statement",
+    "variable-declaration",
+]);
+export type AstNodeKind = z.infer<typeof AstNodeKindSchema>;
+
+export const AstNodeMatcherSchema = z.strictObject({
+    node: AstNodeKindSchema,
+    name: z.string().min(1).max(120).optional(),
+    min: z.number().int().min(1).max(50).optional(),
+});
+export type AstNodeMatcher = z.infer<typeof AstNodeMatcherSchema>;
+
+export const CodeVerificationSchema = z.enum(["execution", "ast", "structural", "simulation"]);
+export type CodeVerification = z.infer<typeof CodeVerificationSchema>;
+
+const AstTestSchema = z.strictObject({
+    kind: z.literal("ast"),
+    description: z.string().min(1).max(300),
+    file: z.string().min(1).max(200),
+    language: z.enum(["javascript", "typescript"]),
+    require: z.array(AstNodeMatcherSchema).min(1).max(12),
+    forbid: z.array(AstNodeMatcherSchema).max(12).optional(),
+});
+
 export const CodeTestSchema = z.discriminatedUnion("kind", [
     FunctionTestSchema,
     DomTestSchema,
@@ -69,5 +100,6 @@ export const CodeTestSchema = z.discriminatedUnion("kind", [
     JsonTestSchema,
     SqlTestSchema,
     StaticTestSchema,
+    AstTestSchema,
 ]);
 export type CodeTest = z.infer<typeof CodeTestSchema>;
