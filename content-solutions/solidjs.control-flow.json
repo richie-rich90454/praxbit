@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "rows.ts": "type Row = { id: string; label: string };\ntype ReconcileResult = { rows: Row[]; reused: number };\n\nfunction reconcileRows(current: Row[], next: Row[]): ReconcileResult {\n  const existing = new Map(current.map((row) => [row.id, row]));\n  let reused = 0;\n  const rows = next.map((row) => {\n    const previous = existing.get(row.id);\n    if (previous === undefined) {\n      return row;\n    }\n    reused += 1;\n    return { ...previous, ...row };\n  });\n  return { rows, reused };\n}\n"
+            }
+        }
+    }
+}
