@@ -42,15 +42,18 @@
     "misconceptions": [
         {
             "id": "more-text",
-            "description": "Believing a longer prompt is automatically better.",
+            "description": "Putting format before the goal and constraints.",
             "stepId": "prompt-parts",
-            "feedback": "Length is not specification. A short prompt with clear constraints and tests can be stronger than a long vague one."
+            "answer": "goal,constraints,context,success,format",
+            "feedback": "A format without context or constraints gives the model no basis for the content. State the goal, context, constraints, and success criteria before the format.",
+            "followUpSkill": "ai.prompting"
         },
         {
             "id": "model-tests",
-            "description": "Expecting the model to verify its own correctness.",
+            "description": "Trusting the model to certify its own output.",
             "stepId": "prompt-check",
-            "feedback": "The prompt can request tests, but independent execution and review are still required."
+            "answer": "self-check",
+            "feedback": "A self-check can help, but the contract needs externally observable criteria that a test or reviewer can apply."
         }
     ],
     "lesson": {
@@ -109,7 +112,13 @@
                 }
             ],
             "correctOrder": ["goal", "context", "constraints", "success", "format"],
-            "explanation": "Goal and context establish the task. Constraints narrow acceptable solutions. Success criteria and output format make the result checkable."
+            "explanation": "Goal and context establish the task. Constraints narrow acceptable solutions. Success criteria and output format make the result checkable.",
+            "hints": [
+                "Start with what the model must achieve.",
+                "Add the material it needs before the rules that constrain it.",
+                "State the constraints and the evidence of success before the output shape.",
+                "Order: goal, context, constraints, success criteria, output format."
+            ]
         },
         {
             "kind": "explain",
@@ -139,7 +148,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "A prompt contract improves direction, but execution and independent review remain the engineer's responsibility."
+            "explanation": "A prompt contract improves direction, but execution and independent review remain the engineer's responsibility.",
+            "hints": [
+                "A contract names observable success, not a feeling.",
+                "Constraints tell the model what it must not do.",
+                "A self-check is useful but does not replace measurable criteria.",
+                "Select criteria, constraints, and context; reject the claim that asking the model to check itself is enough."
+            ]
         }
     ],
     "evaluation": {
