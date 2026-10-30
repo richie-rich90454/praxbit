@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "server.ts": "import Fastify, { type FastifyInstance } from \"fastify\";\nimport fp from \"fastify-plugin\";\n\nexport const app = Fastify({ logger: false });\n\nasync function catalog(fastify: FastifyInstance) {\n  fastify.decorate(\"catalog\", {\n    list: () => [{ id: \"notebook\", name: \"Notebook\", price: 4.5 }],\n  });\n}\n\nexport const catalogPlugin = fp(catalog);\n\napp.register(catalogPlugin);\n"
+            }
+        }
+    }
+}
