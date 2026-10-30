@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,9 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ],
+    "tags": ["systems"],
     "accessibility": {
         "summary": "The Zig workspace is keyboard accessible. Checks verify source structure; they do not compile or run Zig.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -39,45 +34,28 @@
     "sequence": 118,
     "title": "Wire the Zig build steps",
     "summary": "Add an executable module and a test runner to build.zig, then fix a test step that compiles tests without running them.",
-    "skills": [
-        "zig.build",
-        "zig.testing"
-    ],
-    "prerequisites": [
-        "zig.syntax",
-        "git.basics"
-    ],
+    "skills": ["zig.build", "zig.testing"],
+    "prerequisites": ["zig.syntax", "git.basics"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Declare executable and test steps in build.zig.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find a test step that never runs the test binary.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Predict which steps a default build runs.",
-            "stepIds": [
-                "default"
-            ]
+            "stepIds": ["default"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:zig"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:zig"],
     "hints": [
         "build.zig is a Zig program that receives a *std.Build.",
         "createModule names the root source file and target.",
@@ -229,9 +207,7 @@
                         "b.createModule(.{",
                         ".root_source_file = b.path(\"src/main.zig\")"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
