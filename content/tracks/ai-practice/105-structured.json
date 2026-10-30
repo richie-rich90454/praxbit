@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "cast",
-            "description": "Casting parsed JSON to the expected type.",
+            "description": "Casting a model reply to a type without validating it.",
             "stepId": "apply",
-            "feedback": "A cast is erased at runtime. Validate each field and range before the value is stored."
+            "testDescription": "Every field of the model reply is checked before it is used.",
+            "feedback": "A cast is a compile-time claim, not a runtime check. Validate the parsed value before use.",
+            "followUpSkill": "api.validation"
         },
         {
             "id": "retry-forever",
-            "description": "Retrying until the model produces valid output.",
+            "description": "Retrying a malformed reply without a cap.",
             "stepId": "apply",
-            "feedback": "A bad model or prompt can fail forever. Cap attempts and tokens, then return a failure."
+            "testDescription": "Attempts are capped and each call has an output limit.",
+            "feedback": "Unbounded retries multiply cost and latency. Cap attempts and fail with a clear error."
         },
         {
             "id": "log-payload",
-            "description": "Logging the full prompt or reply while debugging.",
-            "stepId": "apply",
-            "feedback": "Prompts and replies carry user content. Log identifiers, counts, and lengths instead."
+            "description": "Logging the full prompt or reply for debugging.",
+            "stepId": "review",
+            "answer": "ship:cast,unbounded,output-cap,log",
+            "feedback": "Prompts and replies can contain personal data. Log counts, lengths, and failure reasons instead."
         }
     ],
     "lesson": {
@@ -208,7 +212,18 @@
                     "includes": ["typeof record.title"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Parse the reply before reading any field.",
+                "Validate every field, including types and allowed values.",
+                "Cap attempts, output length, and total token budget.",
+                "Report validation failures without echoing the raw reply, and log only counts and lengths."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -270,7 +285,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The cast accepts any object, the loop has no attempt or token limit, and each attempt allows a huge reply. The log also writes the customer note and the raw output, which may contain personal data."
+            "explanation": "The cast accepts any object, the loop has no attempt or token limit, and each attempt allows a huge reply. The log also writes the customer note and the raw output, which may contain personal data.",
+            "hints": [
+                "Find where an unvalidated reply is cast to a type.",
+                "Check retry and output limits.",
+                "Ask what the logs retain.",
+                "Block the change: the cast, unbounded retry, and payload logging all cross trust boundaries."
+            ]
         }
     ],
     "evaluation": {
