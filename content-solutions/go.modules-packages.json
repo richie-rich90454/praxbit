@@ -1,0 +1,10 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "go.mod": "module campus.example/service\n\ngo 1.23\n",
+                "main.go": "package main\n\nimport (\n    \"fmt\"\n\n    \"campus.example/service/internal/pricing\"\n)\n\nfunc main() {\n    fmt.Println(pricing.Total([]int{1200, 800}))\n}\n"
+            }
+        }
+    }
+}
