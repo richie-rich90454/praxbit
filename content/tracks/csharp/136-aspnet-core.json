@@ -1,0 +1,331 @@
+{
+    "id": "csharp.aspnet-core",
+    "version": 1,
+    "sequence": 89,
+    "courseId": "csharp",
+    "title": "Expose an ASP.NET Core endpoint",
+    "summary": "Return the right status for a found or missing order from a minimal API.",
+    "skills": [
+        "csharp.dotnet",
+        "csharp.async"
+    ],
+    "prerequisites": [
+        "csharp.dotnet",
+        "http.basics"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "csharp-aspnet",
+        "briefing": "The campus order endpoint always returns 200 with a placeholder string, even when the order does not exist. Return the order as JSON when found and a 404 when it is missing."
+    },
+    "objectives": [
+        {
+            "id": "map-endpoint",
+            "description": "Map an order route to a handler with dependency injection.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-status",
+            "description": "Choose the status code for a missing resource.",
+            "stepIds": [
+                "aspnet-transfer"
+            ]
+        },
+        {
+            "id": "explain-http",
+            "description": "Explain route binding, results, and dependency injection accurately.",
+            "stepIds": [
+                "aspnet-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:csharp"
+    ],
+    "hints": [
+        "The route template already contains {id}.",
+        "Ask the store for the order before building the response.",
+        "Return Results.NotFound when the store returns null.",
+        "Return Results.Ok with an object for the found case."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-404",
+            "description": "Returning a placeholder for a missing order.",
+            "stepId": "apply",
+            "testDescription": "A missing order returns 404.",
+            "feedback": "A missing resource is a 404. Return Results.NotFound when the store finds nothing.",
+            "followUpSkill": "csharp.dotnet"
+        },
+        {
+            "id": "ok-missing",
+            "description": "Returning 200 for a resource that does not exist.",
+            "stepId": "aspnet-transfer",
+            "answer": "ok",
+            "feedback": "200 means the request succeeded with a representation. A missing resource should return 404.",
+            "followUpSkill": "csharp.dotnet"
+        },
+        {
+            "id": "always-200",
+            "description": "Believing every handler should return 200.",
+            "stepId": "aspnet-check",
+            "answer": "always-200",
+            "feedback": "The status code is part of the contract. Not found, validation failure, and server failure need different codes.",
+            "followUpSkill": "csharp.dotnet"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Minimal APIs map routes to handlers",
+                "body": "WebApplication.CreateBuilder creates the host, and app.MapGet registers a handler for a route. Route values such as {id} bind to handler parameters by name. The handler returns an IResult that sets the status code and response body."
+            },
+            {
+                "title": "Results express the outcome",
+                "body": "Results.Ok returns 200 with a body. Results.NotFound returns 404. A handler should choose the status from the domain outcome instead of returning 200 for every request. Typed results make the contract explicit and testable."
+            },
+            {
+                "title": "Dependency injection reaches handlers",
+                "body": "Services registered on builder.Services are available as handler parameters or through constructor injection. Scoped services resolve per request. Keep the handler thin: validate input, call the service, and translate the result into an HTTP response."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Minimal API",
+                "definition": "An ASP.NET Core endpoint defined with route mapping methods."
+            },
+            {
+                "term": "Route parameter",
+                "definition": "A named segment in a route template bound to a handler argument."
+            },
+            {
+                "term": "IResult",
+                "definition": "An abstraction for an HTTP response produced by a minimal API handler."
+            },
+            {
+                "term": "Middleware",
+                "definition": "A component that processes requests in a pipeline."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Minimal APIs map routes to handlers",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Minimal APIs map routes to handlers",
+                    "body": "WebApplication.CreateBuilder creates the host, and app.MapGet registers a handler for a route. Route values such as {id} bind to handler parameters by name. The handler returns an IResult that sets the status code and response body."
+                },
+                {
+                    "title": "Results express the outcome",
+                    "body": "Results.Ok returns 200 with a body. Results.NotFound returns 404. A handler should choose the status from the domain outcome instead of returning 200 for every request. Typed results make the contract explicit and testable."
+                },
+                {
+                    "title": "Dependency injection reaches handlers",
+                    "body": "Services registered on builder.Services are available as handler parameters or through constructor injection. Scoped services resolve per request. Keep the handler thin: validate input, call the service, and translate the result into an HTTP response."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Minimal API",
+                    "definition": "An ASP.NET Core endpoint defined with route mapping methods."
+                },
+                {
+                    "term": "Route parameter",
+                    "definition": "A named segment in a route template bound to a handler argument."
+                },
+                {
+                    "term": "IResult",
+                    "definition": "An abstraction for an HTTP response produced by a minimal API handler."
+                },
+                {
+                    "term": "Middleware",
+                    "definition": "A component that processes requests in a pipeline."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Return the order or 404",
+            "prompt": "Edit Program.cs. The /orders/{id} handler resolves IOrderStore, returns Results.Ok with the order when found, and Results.NotFound when the store returns null.",
+            "evidence": "construction",
+            "language": "csharp",
+            "files": [
+                {
+                    "path": "Program.cs",
+                    "content": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\nusing Microsoft.Extensions.DependencyInjection;\n\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSingleton<IOrderStore, InMemoryOrderStore>();\nvar app = builder.Build();\n\napp.MapGet(\"/orders/{id}\", (string id, IOrderStore store) =>\n{\n    // TODO: return the order or 404\n    return \"order\";\n});\n\napp.Run();\n\ninterface IOrderStore\n{\n    string? Find(string id);\n}\n\nclass InMemoryOrderStore : IOrderStore\n{\n    public string? Find(string id) => id == \"o1\" ? \"campus\" : null;\n}\n",
+                    "editable": true,
+                    "language": "csharp"
+                },
+                {
+                    "path": "Campus.csproj",
+                    "content": "<Project Sdk=\"Microsoft.NET.Sdk.Web\">\n  <PropertyGroup>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n</Project>\n",
+                    "editable": false,
+                    "language": "xml"
+                }
+            ],
+            "entry": "Program.cs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet build",
+                "description": "Build the project with the .NET SDK."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The endpoint is registered on the orders route.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "app.MapGet(\"/orders/{id}\"",
+                        "WebApplication.CreateBuilder(args)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A missing order returns 404.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "Results.NotFound()",
+                        "Results.Ok("
+                    ],
+                    "excludes": [
+                        "return \"order\";"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "app.Run();"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The store is already injected into the handler.",
+                "Call store.Find(id) and keep the result.",
+                "Check for null before choosing the result.",
+                "Return Results.Ok(order) or Results.NotFound()."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "aspnet-transfer",
+            "title": "Choose the status",
+            "prompt": "A GET /orders/unknown request reaches the handler and the store returns null. Which status should the response use?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the status code.",
+                "options": [
+                    {
+                        "id": "not-found",
+                        "label": "404 Not Found"
+                    },
+                    {
+                        "id": "ok",
+                        "label": "200 OK"
+                    },
+                    {
+                        "id": "created",
+                        "label": "201 Created"
+                    },
+                    {
+                        "id": "server-error",
+                        "label": "500 Internal Server Error"
+                    }
+                ],
+                "correctId": "not-found",
+                "explanation": "The request is valid but the resource does not exist. 404 communicates that outcome; 500 would blame the server for a normal miss."
+            },
+            "hints": [
+                "The route is valid but the resource is absent.",
+                "Choose the client-error status for a missing resource.",
+                "Do not use a server error for an expected miss.",
+                "Choose 404 Not Found."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "aspnet-check",
+            "title": "Routes, results, and services",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "binding",
+                    "label": "A route parameter such as {id} binds to a handler argument by name.",
+                    "correct": true
+                },
+                {
+                    "id": "di",
+                    "label": "A service registered on builder.Services can be injected into a handler.",
+                    "correct": true
+                },
+                {
+                    "id": "always-200",
+                    "label": "A handler should return 200 for every request that reaches it.",
+                    "correct": false
+                },
+                {
+                    "id": "run",
+                    "label": "app.Run starts the HTTP server.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Route binding and DI supply the handler's inputs. The result chooses the status, and missing resources should not masquerade as success.",
+            "hints": [
+                "Three statements are accurate.",
+                "The status code communicates the domain outcome.",
+                "app.Run starts the host.",
+                "Select binding, di, and run."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 155,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
