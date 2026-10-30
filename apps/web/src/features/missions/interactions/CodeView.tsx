@@ -172,19 +172,17 @@ export function CodeView(props: CodeViewProps): JSX.Element {
             const message = error instanceof Error ? error.message : String(error);
             setRuntimeError(message);
             announce(`Runtime error. ${message}`);
-            props.onResult(
-                {
-                    ...evaluateStep(props.step, {
-                        kind: "code",
-                        passedTests: [],
-                        failedTests: props.step.tests.map(function descriptionOf(test): string {
-                            return test.description;
-                        }),
-                        totalTests: props.step.tests.length,
+            props.onResult({
+                ...evaluateStep(props.step, {
+                    kind: "code",
+                    passedTests: [],
+                    failedTests: props.step.tests.map(function descriptionOf(test): string {
+                        return test.description;
                     }),
-                    diagnostic: message,
-                },
-            );
+                    totalTests: props.step.tests.length,
+                }),
+                diagnostic: message,
+            });
         } finally {
             setRunning(false);
         }
