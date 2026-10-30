@@ -5,23 +5,14 @@
     "courseId": "devops",
     "title": "A backup you have not restored is a hope",
     "summary": "Order a restore drill, write an encrypted backup runbook, and reason about recovery objectives.",
-    "skills": [
-        "ops.deployment",
-        "engineering.incident"
-    ],
-    "prerequisites": [
-        "devops.ci",
-        "ops.deployment"
-    ],
+    "skills": ["ops.deployment", "engineering.incident"],
+    "prerequisites": ["devops.ci", "ops.deployment"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "order",
             "description": "Order a restore drill from verification to documentation.",
-            "stepIds": [
-                "restore-order"
-            ]
+            "stepIds": ["restore-order"]
         },
         {
             "id": "runbook",
             "description": "Write a backup script with encryption, checksums, and a restore test.",
-            "stepIds": [
-                "backup-plan"
-            ]
+            "stepIds": ["backup-plan"]
         },
         {
             "id": "transfer",
             "description": "Explain RPO, RTO, and why snapshots are not backups.",
-            "stepIds": [
-                "recovery-transfer"
-            ]
+            "stepIds": ["recovery-transfer"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:server-room",
-        "icon:database"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:database"],
     "hints": [
         "A backup is only evidence after a restore succeeds.",
         "Keep the encryption key away from the backup host.",
@@ -204,13 +184,7 @@
                     "label": "Record the result and fix the runbook or retention gaps"
                 }
             ],
-            "correctOrder": [
-                "verify",
-                "restore",
-                "checks",
-                "measure",
-                "document"
-            ],
+            "correctOrder": ["verify", "restore", "checks", "measure", "document"],
             "explanation": "Verification prevents restoring corruption. Isolation protects production. Checks prove the data is usable, the measurement proves the RTO, and documentation turns the drill into improvement."
         },
         {
@@ -246,60 +220,36 @@
                     "kind": "static",
                     "description": "The dump is consistent and the script stops on failure.",
                     "file": "backup.sh",
-                    "includes": [
-                        "set -euo pipefail",
-                        "pg_dump",
-                        "--format=custom"
-                    ],
+                    "includes": ["set -euo pipefail", "pg_dump", "--format=custom"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The dump is encrypted and its integrity is recorded.",
                     "file": "backup.sh",
-                    "includes": [
-                        "age -r",
-                        "sha256sum"
-                    ],
-                    "excludes": [
-                        "gpg --symmetric"
-                    ]
+                    "includes": ["age -r", "sha256sum"],
+                    "excludes": ["gpg --symmetric"]
                 },
                 {
                     "kind": "static",
                     "description": "Keeps the key out of the backup host.",
                     "file": "backup.sh",
-                    "includes": [
-                        "BACKUP_RECIPIENT",
-                        "secret manager"
-                    ],
-                    "excludes": [
-                        "AGE-SECRET-KEY"
-                    ]
+                    "includes": ["BACKUP_RECIPIENT", "secret manager"],
+                    "excludes": ["AGE-SECRET-KEY"]
                 },
                 {
                     "kind": "static",
                     "description": "Copies offsite and applies retention.",
                     "file": "backup.sh",
-                    "includes": [
-                        "aws s3 cp",
-                        "find",
-                        "-mtime"
-                    ],
+                    "includes": ["aws s3 cp", "find", "-mtime"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Includes a real restore verification.",
                     "file": "backup.sh",
-                    "includes": [
-                        "pg_restore",
-                        "--list",
-                        "restore-test"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["pg_restore", "--list", "restore-test"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -367,8 +317,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
