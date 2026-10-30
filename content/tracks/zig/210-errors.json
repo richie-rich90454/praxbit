@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,9 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ],
+    "tags": ["systems"],
     "accessibility": {
         "summary": "The Zig workspace is keyboard accessible. Checks verify source structure; they do not compile or run Zig.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -39,44 +34,28 @@
     "sequence": 117,
     "title": "Error unions at the input boundary",
     "summary": "Return typed errors from a port parser, then diagnose a catch that reports every failure as out of range.",
-    "skills": [
-        "zig.syntax"
-    ],
-    "prerequisites": [
-        "zig.syntax",
-        "concept.conditions"
-    ],
+    "skills": ["zig.syntax"],
+    "prerequisites": ["zig.syntax", "concept.conditions"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Return typed errors from a parser.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Separate a parse failure from a range failure.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Predict how catch handles a parser error.",
-            "stepIds": [
-                "catch"
-            ]
+            "stepIds": ["catch"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:zig"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:zig"],
     "hints": [
         "An error set names each failure the function can return.",
         "std.fmt.parseInt returns an error union.",
@@ -237,21 +216,14 @@
                         "std.fmt.parseInt(u32, text, 10) catch return PortError.InvalidNumber",
                         "value > 65535"
                     ],
-                    "excludes": [
-                        "catch 0",
-                        "TODO"
-                    ]
+                    "excludes": ["catch 0", "TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.zig",
-                    "includes": [
-                        "fn parsePort"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["fn parsePort"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
