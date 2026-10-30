@@ -37,7 +37,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "ruby.errors",
-    "sequence": 208,
+    "sequence": 113,
     "title": "Rescue narrowly, fail loudly",
     "summary": "Raise a custom error for bad quantities, then repair a job that logs failures and keeps reporting success.",
     "skills": [
