@@ -47,16 +47,25 @@
     "misconceptions": [
         {
             "id": "trusts-comment",
-            "description": "Accepting a complexity comment without reading the loops.",
+            "description": "Accepting a linear-time comment on a nested loop.",
             "stepId": "complexity-review",
-            "feedback": "The comment says linear, but the nested loop performs quadratic work."
+            "answer": "accept:nested,quadratic,comment,set",
+            "feedback": "The code scans the input inside another scan. A comment cannot change the growth rate.",
+            "followUpSkill": "algorithms.complexity"
         },
         {
             "id": "single-measurement",
-            "description": "Judging growth from one timing.",
+            "description": "Concluding growth from one timing.",
             "stepId": "complexity-check",
             "answer": "one",
-            "feedback": "One timing cannot distinguish growth rates. Measure several input sizes and compare the trend."
+            "feedback": "A single timing mixes input size with machine speed and noise. Measure several sizes and compare the trend."
+        },
+        {
+            "id": "comments-prove",
+            "description": "Treating a code comment as performance evidence.",
+            "stepId": "performance-claims",
+            "answer": "comment",
+            "feedback": "Comments describe intent. Use the algorithm's structure and measurements across input sizes."
         }
     ],
     "lesson": {
@@ -141,7 +150,13 @@
                 }
             ],
             "correctVerdict": "reject",
-            "explanation": "The nested loop is quadratic in the worst case. A Set can track seen values in one pass."
+            "explanation": "The nested loop is quadratic in the worst case. A Set can track seen values in one pass.",
+            "hints": [
+                "Find the loops that depend on the input size.",
+                "Check whether the comment matches the code.",
+                "Ask what evidence would confirm the growth rate.",
+                "Reject the change: the nested scan is quadratic, and the comment is not evidence."
+            ]
         },
         {
             "kind": "quiz",
@@ -173,10 +188,10 @@
                 "explanation": "Growth is visible only by comparing multiple sizes. A single timing cannot separate linear from quadratic behavior."
             },
             "hints": [
-                "Growth requires more than one data point.",
-                "Measure small, medium, and large inputs.",
-                "Compare the ratios as n grows.",
-                "Measure several input sizes and compare the trend."
+                "One measurement confounds input size with machine noise.",
+                "Several input sizes reveal a growth trend.",
+                "A comment describes intent, not runtime.",
+                "Choose measure several sizes and compare the growth."
             ]
         },
         {
@@ -207,7 +222,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Estimates guide design; measurements verify behavior under realistic conditions."
+            "explanation": "Estimates guide design; measurements verify behavior under realistic conditions.",
+            "hints": [
+                "Complexity describes how work grows, not one stopwatch reading.",
+                "Measurements need more than one input size.",
+                "Comments can be stale or wrong.",
+                "Select structure, measurement, and avoiding premature optimization; reject comments as proof."
+            ]
         }
     ],
     "evaluation": {
