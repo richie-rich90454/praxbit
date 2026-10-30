@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.go": "package main\n\nimport (\n    \"encoding/json\"\n    \"net/http\"\n)\n\ntype order struct {\n    ID    string `json:\"id\"`\n    Total int    `json:\"total\"`\n}\n\nfunc main() {\n    mux := http.NewServeMux()\n    mux.HandleFunc(\"/orders/\", func(w http.ResponseWriter, r *http.Request) {\n        w.Header().Set(\"Content-Type\", \"application/json\")\n        json.NewEncoder(w).Encode(order{ID: \"o1\", Total: 2500})\n    })\n    http.ListenAndServe(\":8080\", mux)\n}\n"
+            }
+        }
+    }
+}
