@@ -1,0 +1,306 @@
+{
+    "id": "react.testing",
+    "version": 1,
+    "sequence": 217,
+    "courseId": "react",
+    "title": "Test request states and failures",
+    "summary": "Implement a request reducer with explicit transitions, then design a test suite that covers loading, empty success, rejection, and retry.",
+    "skills": ["concept.testing", "react.data", "react.effects"],
+    "prerequisites": ["react.data", "concept.state"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "testing",
+        "briefing": "The product page keeps old products visible after a failed refresh. The team wants the request logic tested before another UI change ships."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Implement explicit request transitions.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-design",
+            "description": "Select the cases a request test suite must cover.",
+            "stepIds": ["design"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
+    "hints": [
+        "Map each action type to exactly one next state.",
+        "Starting a request always replaces the previous state with loading.",
+        "An error state carries only the message, not the old data.",
+        "A retry must be able to move from error back to loading."
+    ],
+    "misconceptions": [
+        {
+            "id": "error-keeps-data",
+            "description": "Keeping stale success data after an error.",
+            "stepId": "apply",
+            "testDescription": "An error replaces previous success data.",
+            "feedback": "An error state should describe the failure, not a mix of failure and old data. Keeping both makes the screen lie about what is current.",
+            "followUpSkill": "react.data"
+        },
+        {
+            "id": "loading-stale",
+            "description": "Ignoring the start action during a retry.",
+            "stepId": "apply",
+            "testDescription": "Starting a request enters the loading state.",
+            "feedback": "A retry starts a new request. If the reducer ignores start, the screen keeps showing the old error while the request is in flight.",
+            "followUpSkill": "react.effects"
+        },
+        {
+            "id": "happy-path-only",
+            "description": "Testing only the successful response.",
+            "stepId": "design",
+            "answer": "stale-success",
+            "feedback": "A happy-path-only suite cannot detect stale data or a missing retry. Failure and empty-success cases are part of the behavior, not extras.",
+            "followUpSkill": "concept.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A request is a state machine",
+                "body": "Idle, loading, success, and error are distinct states. A reducer makes the transitions explicit, so a failed refresh cannot leave stale success data on screen."
+            },
+            {
+                "title": "Test the transition, not the markup",
+                "body": "Start from the state before the action and assert the state after it. A test for the error transition fails when the reducer silently keeps the previous data."
+            },
+            {
+                "title": "Design the failure cases first",
+                "body": "A useful request test covers loading, success, empty success, rejection, and a retry after failure. A suite that only checks the happy path cannot catch the bugs users report."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Reducer",
+                "definition": "A pure function that returns the next state for an action."
+            },
+            {
+                "term": "Transition",
+                "definition": "The change from one state to another after an action."
+            },
+            {
+                "term": "Test case",
+                "definition": "One input, action, and expected observable result."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Request states and test cases",
+            "prompt": "Read the explanation, then implement the reducer.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A request is a state machine",
+                    "body": "Idle, loading, success, and error are distinct states. A reducer makes the transitions explicit, so a failed refresh cannot leave stale success data on screen."
+                },
+                {
+                    "title": "Test the transition, not the markup",
+                    "body": "Start from the state before the action and assert the state after it. A test for the error transition fails when the reducer silently keeps the previous data."
+                },
+                {
+                    "title": "Design the failure cases first",
+                    "body": "A useful request test covers loading, success, empty success, rejection, and a retry after failure. A suite that only checks the happy path cannot catch the bugs users report."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Reducer",
+                    "definition": "A pure function that returns the next state for an action."
+                },
+                {
+                    "term": "Transition",
+                    "definition": "The change from one state to another after an action."
+                },
+                {
+                    "term": "Test case",
+                    "definition": "One input, action, and expected observable result."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Reduce request actions",
+            "prompt": "Edit requestState.ts. Implement reduceRequest so start, success, and error each produce the correct state and an error never keeps stale data.",
+            "evidence": "construction",
+            "hints": [
+                "Use a switch on action.type and return a full state object per branch.",
+                "The start branch returns only { status: \"loading\" }.",
+                "The success branch keeps action.data and the success status.",
+                "The error branch returns only the message and the error status."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "requestState.ts",
+                    "content": "type RequestState<T> =\n  | { status: \"idle\" }\n  | { status: \"loading\" }\n  | { status: \"success\"; data: T }\n  | { status: \"error\"; message: string };\n\ntype RequestAction<T> =\n  | { type: \"start\" }\n  | { type: \"success\"; data: T }\n  | { type: \"error\"; message: string };\n\nfunction reduceRequest<T>(state: RequestState<T>, action: RequestAction<T>): RequestState<T> {\n  // TODO: handle start, success, and error without keeping stale data\n  return state;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "requestState.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Starting a request enters the loading state.",
+                    "name": "reduceRequest",
+                    "args": [
+                        {
+                            "status": "idle"
+                        },
+                        {
+                            "type": "start"
+                        }
+                    ],
+                    "expected": {
+                        "status": "loading"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A success stores the response data.",
+                    "name": "reduceRequest",
+                    "args": [
+                        {
+                            "status": "loading"
+                        },
+                        {
+                            "type": "success",
+                            "data": [1, 2]
+                        }
+                    ],
+                    "expected": {
+                        "status": "success",
+                        "data": [1, 2]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An error replaces previous success data.",
+                    "name": "reduceRequest",
+                    "args": [
+                        {
+                            "status": "success",
+                            "data": [1]
+                        },
+                        {
+                            "type": "error",
+                            "message": "offline"
+                        }
+                    ],
+                    "expected": {
+                        "status": "error",
+                        "message": "offline"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A retry moves an error back to loading.",
+                    "name": "reduceRequest",
+                    "args": [
+                        {
+                            "status": "error",
+                            "message": "offline"
+                        },
+                        {
+                            "type": "start"
+                        }
+                    ],
+                    "expected": {
+                        "status": "loading"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "test-design",
+            "id": "design",
+            "title": "Design the request test suite",
+            "prompt": "Select every case the request test suite must cover. Leave out cases that test the wrong behavior.",
+            "evidence": "testing",
+            "hints": [
+                "Start with the four states the interface can render.",
+                "Add the retry transition because it starts a second request.",
+                "Reject cases that preserve stale data or encourage brittle markup snapshots.",
+                "Keep only behaviors a user can observe."
+            ],
+            "cases": [
+                {
+                    "id": "loading",
+                    "label": "Shows progress while the request is pending.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "success",
+                    "label": "Renders the returned products after a successful response.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "empty",
+                    "label": "Shows an empty-state message when the response contains no products.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "error",
+                    "label": "Shows the error message and a retry action after a rejected request.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "retry",
+                    "label": "Moves from error back to loading when the user retries.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "stale-success",
+                    "label": "Keeps the previous success data visible after a failed refresh.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "snapshot",
+                    "label": "Asserts the exact HTML string of the entire page.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "unmount",
+                    "label": "Calls setState after unmount without a guard.",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The suite needs loading, success, empty success, error, and retry. Keeping stale data contradicts the error state, exact page snapshots are brittle, and an unguarded post-unmount update is the bug rather than the expected behavior."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
