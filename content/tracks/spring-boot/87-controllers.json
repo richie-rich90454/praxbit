@@ -5,23 +5,14 @@
     "courseId": "spring-boot",
     "title": "Controllers that answer with a status",
     "summary": "Map a GET route, validate the path id, and choose the response status explicitly.",
-    "skills": [
-        "spring.boot",
-        "spring.controllers"
-    ],
-    "prerequisites": [
-        "java.oop",
-        "http.basics"
-    ],
+    "skills": ["spring.boot", "spring.controllers"],
+    "prerequisites": ["java.oop", "http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:spring"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:spring"],
     "hints": [
         "The controller already injects ProductService, so keep that constructor.",
         "Add @Validated on the class and @Positive on the path variable.",
@@ -178,11 +160,7 @@
                     "kind": "static",
                     "description": "The class stays a validated REST controller.",
                     "file": "ProductController.java",
-                    "includes": [
-                        "@RestController",
-                        "@Validated",
-                        "class ProductController"
-                    ],
+                    "includes": ["@RestController", "@Validated", "class ProductController"],
                     "excludes": []
                 },
                 {
@@ -205,20 +183,14 @@
                         "ResponseEntity::ok",
                         "ResponseEntity.notFound().build()"
                     ],
-                    "excludes": [
-                        "orElse(null)"
-                    ]
+                    "excludes": ["orElse(null)"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductController.java",
-                    "includes": [
-                        "@RestController"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["@RestController"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -292,7 +264,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
