@@ -1,18 +1,28 @@
 {
     "id": "ai-practice.privacy",
     "version": 1,
-    "sequence": 408,
+    "sequence": 200,
     "courseId": "ai-practice",
     "title": "Minimize before you send",
     "summary": "Redact direct identifiers, review a retention design, and keep prompts and responses inside a defined boundary.",
-    "skills": ["ai.foundations", "concept.responsibility"],
-    "prerequisites": ["ai.foundations", "concept.security"],
+    "skills": [
+        "ai.foundations",
+        "concept.responsibility"
+    ],
+    "prerequisites": [
+        "ai.foundations",
+        "concept.security"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +34,31 @@
         {
             "id": "redact",
             "description": "Redact direct identifiers without losing the fields the task needs.",
-            "stepIds": ["redact-code"]
+            "stepIds": [
+                "redact-code"
+            ]
         },
         {
             "id": "review",
             "description": "Identify retention and sharing problems in the design.",
-            "stepIds": ["retention-review"]
+            "stepIds": [
+                "retention-review"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain minimization, purpose, retention, and vendor boundaries.",
-            "stepIds": ["privacy-transfer"]
+            "stepIds": [
+                "privacy-transfer"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:lock"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:lock"
+    ],
     "hints": [
         "Name the fields the task actually needs before redacting.",
         "Replace direct identifiers with a fixed marker.",
@@ -227,7 +248,9 @@
                     "kind": "function",
                     "description": "Returns null for a null record.",
                     "name": "redactPii",
-                    "args": [null],
+                    "args": [
+                        null
+                    ],
                     "expected": null
                 }
             ]
@@ -354,5 +377,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
