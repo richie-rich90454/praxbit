@@ -1,0 +1,317 @@
+{
+    "id": "solidjs.testing",
+    "version": 1,
+    "sequence": 221,
+    "courseId": "solidjs",
+    "title": "Test cart actions as pure transitions",
+    "summary": "Implement cart actions as pure transitions, then design tests for duplicate SKUs, removal, clearing, and mutation bugs.",
+    "skills": ["concept.testing", "solid.signals", "solid.control-flow"],
+    "prerequisites": ["solid.signals", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "testing",
+        "briefing": "The cart grows a duplicate row every time the same product is added. The team wants the update logic tested before the store is wired into more screens."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Implement cart actions without mutating the current array.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-design",
+            "description": "Select the test cases that cover real cart behavior.",
+            "stepIds": ["design"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "hints": [
+        "Find an existing line by SKU before adding a new one.",
+        "Merge a duplicate by returning a new array with an increased quantity.",
+        "Removing and clearing return filtered or empty arrays.",
+        "Never call push or sort on the incoming array."
+    ],
+    "misconceptions": [
+        {
+            "id": "duplicate-row",
+            "description": "Appending a second row for the same SKU.",
+            "stepId": "apply",
+            "testDescription": "Adding the same SKU increases its quantity.",
+            "feedback": "A cart has one row per SKU. Merge quantities when the SKU already exists so totals and removal stay correct.",
+            "followUpSkill": "solid.signals"
+        },
+        {
+            "id": "mutate-array",
+            "description": "Mutating the current array in place.",
+            "stepId": "apply",
+            "testDescription": "Removing a SKU returns a new array.",
+            "feedback": "A signal only notifies when it receives a different value. Return a new array from every action.",
+            "followUpSkill": "solid.control-flow"
+        },
+        {
+            "id": "snapshot-suite",
+            "description": "Testing rendered markup instead of transitions.",
+            "stepId": "design",
+            "answer": "snapshot",
+            "feedback": "Markup snapshots do not prove merge or removal behavior. Test the reducer with explicit starting arrays and actions.",
+            "followUpSkill": "concept.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Stores update through functions",
+                "body": "A cart store should expose actions that return the next array. Merging a duplicate SKU and removing the last unit are transitions, not mutations of the current array."
+            },
+            {
+                "title": "Test the transition",
+                "body": "Call the reducer with a starting array and an action, then assert the returned array. Testing the signal wrapper adds noise without proving the update logic."
+            },
+            {
+                "title": "Name the risky cases",
+                "body": "Duplicate SKUs, removal of the last unit, clearing, and unknown actions are the cases that break a cart. A happy-path test that only adds one row misses them."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Action",
+                "definition": "A plain object that describes an update to a store."
+            },
+            {
+                "term": "Reducer",
+                "definition": "A function that returns the next state for an action."
+            },
+            {
+                "term": "Immutable update",
+                "definition": "Returning a new array instead of changing the current one."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Cart transitions and tests",
+            "prompt": "Read the explanation, then implement the reducer.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Stores update through functions",
+                    "body": "A cart store should expose actions that return the next array. Merging a duplicate SKU and removing the last unit are transitions, not mutations of the current array."
+                },
+                {
+                    "title": "Test the transition",
+                    "body": "Call the reducer with a starting array and an action, then assert the returned array. Testing the signal wrapper adds noise without proving the update logic."
+                },
+                {
+                    "title": "Name the risky cases",
+                    "body": "Duplicate SKUs, removal of the last unit, clearing, and unknown actions are the cases that break a cart. A happy-path test that only adds one row misses them."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Action",
+                    "definition": "A plain object that describes an update to a store."
+                },
+                {
+                    "term": "Reducer",
+                    "definition": "A function that returns the next state for an action."
+                },
+                {
+                    "term": "Immutable update",
+                    "definition": "Returning a new array instead of changing the current one."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Reduce cart actions",
+            "prompt": "Edit cartStore.ts. Implement add, remove, and clear. Merge duplicate SKUs, return new arrays, and leave the input untouched.",
+            "evidence": "construction",
+            "hints": [
+                "Use a switch on action.type and handle every action explicitly.",
+                "For add, search for a line with the same SKU.",
+                "For a duplicate, map the array and increase only that line's quantity.",
+                "For remove, filter by SKU; for clear, return a new empty array."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "cartStore.ts",
+                    "content": "type CartLine = { sku: string; quantity: number };\ntype CartAction =\n  | { type: \"add\"; line: CartLine }\n  | { type: \"remove\"; sku: string }\n  | { type: \"clear\" };\n\nfunction reduceCart(lines: CartLine[], action: CartAction): CartLine[] {\n  // TODO: merge duplicate SKUs, remove lines, clear the cart, and return new arrays\n  return lines;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "cartStore.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Adding a new SKU appends one line.",
+                    "name": "reduceCart",
+                    "args": [
+                        [],
+                        {
+                            "type": "add",
+                            "line": {
+                                "sku": "pen",
+                                "quantity": 1
+                            }
+                        }
+                    ],
+                    "expected": [
+                        {
+                            "sku": "pen",
+                            "quantity": 1
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Adding the same SKU increases its quantity.",
+                    "name": "reduceCart",
+                    "args": [
+                        [
+                            {
+                                "sku": "pen",
+                                "quantity": 1
+                            }
+                        ],
+                        {
+                            "type": "add",
+                            "line": {
+                                "sku": "pen",
+                                "quantity": 2
+                            }
+                        }
+                    ],
+                    "expected": [
+                        {
+                            "sku": "pen",
+                            "quantity": 3
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Removing a SKU returns a new array.",
+                    "name": "reduceCart",
+                    "args": [
+                        [
+                            {
+                                "sku": "pen",
+                                "quantity": 1
+                            },
+                            {
+                                "sku": "ink",
+                                "quantity": 2
+                            }
+                        ],
+                        {
+                            "type": "remove",
+                            "sku": "pen"
+                        }
+                    ],
+                    "expected": [
+                        {
+                            "sku": "ink",
+                            "quantity": 2
+                        }
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Clearing returns an empty array.",
+                    "name": "reduceCart",
+                    "args": [
+                        [
+                            {
+                                "sku": "pen",
+                                "quantity": 1
+                            }
+                        ],
+                        {
+                            "type": "clear"
+                        }
+                    ],
+                    "expected": []
+                }
+            ]
+        },
+        {
+            "kind": "test-design",
+            "id": "design",
+            "title": "Design the cart tests",
+            "prompt": "Select every case the cart reducer needs. Leave out cases that assert the wrong behavior.",
+            "evidence": "transfer",
+            "hints": [
+                "Cover merge, remove, clear, and an unknown action.",
+                "Think about the input array after the call.",
+                "Reject assertions that require mutation or rendered HTML.",
+                "Keep cases that describe the reducer contract."
+            ],
+            "cases": [
+                {
+                    "id": "merge",
+                    "label": "Adding an existing SKU increases its quantity.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "remove",
+                    "label": "Removing the last unit drops the line.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "clear",
+                    "label": "Clearing returns an empty array.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "unknown",
+                    "label": "An unknown action leaves the array unchanged.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "mutation",
+                    "label": "Asserts that the original array was mutated in place.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "snapshot",
+                    "label": "Compares the rendered store output as an HTML string.",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The reducer contract covers merge, remove, clear, and an unknown action that returns the same array. Mutation is the bug, and HTML snapshots do not exercise the reducer."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
