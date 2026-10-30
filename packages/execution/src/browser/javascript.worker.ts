@@ -88,6 +88,10 @@ function displayValue(value: unknown): string {
     }
 }
 
+function cloneJson<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T;
+}
+
 function installNetworkBlocks(): void {
     const blocked = function blockedNetwork(): never {
         throw new Error("Network access is disabled inside the exercise worker.");
@@ -174,7 +178,7 @@ self.onmessage = async function handleMessage(event: MessageEvent<WorkerRequest>
                 continue;
             }
             const actual: unknown = await Promise.resolve(
-                Reflect.apply(fn, undefined, [...test.args]),
+                Reflect.apply(fn, undefined, cloneJson([...test.args])),
             );
             const passed = normalizedJson(actual) === normalizedJson(test.expected);
             outcomes.push({
