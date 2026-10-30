@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.kt": "import kotlinx.coroutines.flow.Flow\nimport kotlinx.coroutines.flow.map\nimport kotlinx.coroutines.flow.take\nimport kotlinx.coroutines.flow.toList\n\nsuspend fun firstDoubled(readings: Flow<Int>): List<Int> =\n    readings.map { it * 2 }.take(2).toList()\n"
+            }
+        }
+    }
+}
