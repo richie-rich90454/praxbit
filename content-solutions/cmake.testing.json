@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "CMakeLists.txt": "cmake_minimum_required(VERSION 3.24)\nproject(campus_inventory LANGUAGES CXX)\n\nenable_testing()\n\nadd_library(inventory_core STATIC src/inventory.cpp)\ntarget_include_directories(inventory_core PUBLIC include)\n\nadd_executable(inventory_tests tests/inventory_test.cpp)\ntarget_link_libraries(inventory_tests PRIVATE inventory_core)\n\nadd_test(NAME inventory_tests COMMAND inventory_tests)\nset_tests_properties(inventory_tests PROPERTIES FAIL_REGULAR_EXPRESSION \"FAILED\")\n"
+            }
+        }
+    }
+}
