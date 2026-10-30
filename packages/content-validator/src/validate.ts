@@ -4,11 +4,13 @@ import {
     type AchievementDefinition,
     type CodeStep,
     type CodeTest,
+    type CodeVerification,
     type ContentLanguage,
     type Mission,
     type MissionStep,
     type ProjectDefinition,
     type SkillDefinition,
+    type Track,
 } from "@praxbit/contracts";
 import { SkillGraph } from "@praxbit/domain";
 import { isSafeRelativePath } from "./paths.ts";
@@ -18,8 +20,8 @@ import type { LoadedContent, ValidationIssue } from "./types.ts";
 export type CodeLanguage = ContentLanguage;
 
 const VALID_TEST_KINDS: Readonly<Record<CodeLanguage, readonly CodeTest["kind"][]>> = {
-    javascript: ["function", "dom", "css", "regex", "static", "json"],
-    typescript: ["function", "regex", "static", "json"],
+    javascript: ["function", "dom", "css", "regex", "static", "json", "ast"],
+    typescript: ["function", "regex", "static", "json", "ast"],
     html: ["dom", "css", "regex", "static", "json"],
     css: ["css", "regex", "static"],
     json: ["json", "regex", "static"],
@@ -63,6 +65,44 @@ const RUNTIME_FOR_LANGUAGE: Readonly<Record<CodeLanguage, string>> = {
 
 const PIP_POSES = new Set(["observing", "explaining", "thinking", "alert", "celebrating"]);
 const SYSTEMS = new Set<string>(WorldSystemIdSchema.options);
+
+const EXECUTION_TEST_KINDS = new Set<CodeTest["kind"]>(["function", "dom", "css", "sql"]);
+const STATIC_TEST_KINDS = new Set<CodeTest["kind"]>(["static", "regex", "json"]);
+
+export const TRACK_MINIMUM_MISSIONS: Readonly<Record<Track["kind"], number>> = {
+    campaign: 12,
+    language: 5,
+    framework: 4,
+    discipline: 5,
+};
+
+export function inferCodeVerification(tests: readonly CodeTest[]): CodeVerification {
+    if (
+        tests.some(function executes(test): boolean {
+            return EXECUTION_TEST_KINDS.has(test.kind);
+        })
+    ) {
+        return "execution";
+    }
+    if (
+        tests.some(function parses(test): boolean {
+            return test.kind === "ast";
+        })
+    ) {
+        return "ast";
+    }
+    return "structural";
+}
+
+function isAssessedStep(step: MissionStep): boolean {
+    return step.kind !== "lesson";
+}
+
+function isStaticOnly(tests: readonly CodeTest[]): boolean {
+    return tests.every(function isStatic(test): boolean {
+        return STATIC_TEST_KINDS.has(test.kind);
+    });
+}
 
 const RULE_KIND: Readonly<Record<AchievementDefinition["rule"], AchievementDefinition["kind"]>> = {
     "first-independent-transfer": "independent-transfer",
@@ -187,7 +227,17 @@ function validateHints(mission: Mission, filePath: string, issues: ValidationIss
     });
     checkUnique(normalized, "duplicate-hint", filePath, "Mission hint", issues);
     for (const step of mission.steps) {
+        if (step.kind === "lesson") {
+            continue;
+        }
         if (step.hints === undefined) {
+            issues.push(
+                errorIssue(
+                    "step-hints-missing",
+                    filePath,
+                    `Assessed step ${mission.id}/${step.id} has no step hints; add four escalating hints.`,
+                ),
+            );
             continue;
         }
         if (step.hints.length !== 4) {
@@ -455,8 +505,98 @@ function answerMatchesStep(step: MissionStep, answer: string): boolean {
     }
 }
 
+type AnswerVerdict = "reachable" | "correct" | "unmatched";
+
+function wrongChoiceVerdict(
+    options: readonly { readonly id: string }[],
+    correctId: string,
+    answer: string,
+): AnswerVerdict {
+    if (
+        !options.some(function sameId(option): boolean {
+            return option.id === answer;
+        })
+    ) {
+        return "unmatched";
+    }
+    return answer === correctId ? "correct" : "reachable";
+}
+
+function wrongAnswerVerdict(step: MissionStep, answer: string): AnswerVerdict {
+    switch (step.kind) {
+        case "quiz":
+            return wrongChoiceVerdict(step.quiz.options, step.quiz.correctId, answer);
+        case "rule":
+            return wrongChoiceVerdict(step.rules, step.correctRuleId, answer);
+        case "machine": {
+            const prediction = wrongChoiceVerdict(
+                step.prediction.options,
+                step.prediction.correctId,
+                answer,
+            );
+            if (prediction !== "unmatched") {
+                return prediction;
+            }
+            const transfer = wrongChoiceVerdict(
+                step.transfer.options,
+                step.transfer.correctId,
+                answer,
+            );
+            if (transfer !== "unmatched") {
+                return transfer;
+            }
+            let combination: AnswerVerdict = "unmatched";
+            for (const predicted of step.prediction.options) {
+                for (const transferred of step.transfer.options) {
+                    if (`${predicted.id}:${transferred.id}` !== answer) {
+                        continue;
+                    }
+                    combination =
+                        predicted.id === step.prediction.correctId &&
+                        transferred.id === step.transfer.correctId
+                            ? "correct"
+                            : "reachable";
+                }
+            }
+            return combination;
+        }
+        case "debug": {
+            const instruction = wrongChoiceVerdict(step.instructions, step.buggyId, answer);
+            if (instruction !== "unmatched") {
+                return instruction;
+            }
+            const fix = wrongChoiceVerdict(step.fixes, step.correctFixId, answer);
+            if (fix !== "unmatched") {
+                return fix;
+            }
+            let combination: AnswerVerdict = "unmatched";
+            for (const instructionOption of step.instructions) {
+                for (const fixOption of step.fixes) {
+                    if (`${instructionOption.id}:${fixOption.id}` !== answer) {
+                        continue;
+                    }
+                    combination =
+                        instructionOption.id === step.buggyId && fixOption.id === step.correctFixId
+                            ? "correct"
+                            : "reachable";
+                }
+            }
+            return combination;
+        }
+        case "code":
+            return step.tests.some(function sameDescription(test): boolean {
+                return test.description === answer;
+            })
+                ? "reachable"
+                : "unmatched";
+        default:
+            return answerMatchesStep(step, answer) ? "reachable" : "unmatched";
+    }
+}
+
 function validateMisconceptions(
     mission: Mission,
+    skillIds: ReadonlySet<string>,
     filePath: string,
     issues: ValidationIssue[],
 ): void {
@@ -482,6 +622,19 @@ function validateMisconceptions(
             ),
         );
     }
+    if (
+        !mission.misconceptions.some(function hasFollowUp(item): boolean {
+            return item.followUpSkill !== undefined;
+        })
+    ) {
+        issues.push(
+            errorIssue(
+                "mission-follow-up-skill-missing",
+                filePath,
+                `Mission ${mission.id} has no misconception with a followUpSkill; at least one is required.`,
+            ),
+        );
+    }
     checkUnique(
         mission.misconceptions.map(function idOf(item): string {
             return item.id;
@@ -491,6 +644,7 @@ function validateMisconceptions(
         "Misconception id",
         issues,
     );
+    const covered = new Set<string>();
     for (const misconception of mission.misconceptions) {
         if (!stepIds.has(misconception.stepId)) {
             issues.push(
@@ -506,12 +660,103 @@ function validateMisconceptions(
         if (step === undefined) {
             continue;
         }
-        if (misconception.answer !== undefined && !answerMatchesStep(step, misconception.answer)) {
+        if (!isAssessedStep(step)) {
             issues.push(
                 errorIssue(
-                    "misconception-answer-unmatched",
+                    "misconception-step-not-assessed",
                     filePath,
-                    `Misconception ${misconception.id} answer "${misconception.answer}" cannot match a response key for ${step.kind} step ${step.id}.`,
+                    `Misconception ${misconception.id} refers to lesson step ${step.id}, which cannot produce a wrong answer.`,
+                ),
+            );
+        }
+        if (
+            misconception.followUpSkill !== undefined &&
+            !skillIds.has(misconception.followUpSkill)
+        ) {
+            issues.push(
+                errorIssue(
+                    "misconception-skill-missing",
+                    filePath,
+                    `Misconception ${misconception.id} has unknown follow-up skill ${misconception.followUpSkill}.`,
+                ),
+            );
+        }
+        let reachable = false;
+        if (misconception.answer !== undefined) {
+            const verdict = wrongAnswerVerdict(step, misconception.answer);
+            if (verdict === "reachable") {
+                reachable = true;
+            } else if (verdict === "correct") {
+                issues.push(
+                    errorIssue(
+                        "misconception-answer-correct",
+                        filePath,
+                        `Misconception ${misconception.id} answer "${misconception.answer}" is the correct answer for step ${step.id}; a misconception must match a wrong answer.`,
+                    ),
+                );
+            } else if (answerMatchesStep(step, misconception.answer)) {
+                issues.push(
+                    errorIssue(
+                        "misconception-answer-unmatched",
+                        filePath,
+                        `Misconception ${misconception.id} answer "${misconception.answer}" is a response key but not a wrong option; add an explicit diagnostic for ${step.kind} step ${step.id}.`,
+                    ),
+                );
+            } else {
+                issues.push(
+                    errorIssue(
+                        "misconception-answer-unmatched",
+                        filePath,
+                        `Misconception ${misconception.id} answer "${misconception.answer}" cannot match a wrong response key for ${step.kind} step ${step.id}.`,
+                    ),
+                );
+            }
+        }
+        if (misconception.testDescription !== undefined) {
+            const matches =
+                step.kind === "code" &&
+                step.tests.some(function sameDescription(test): boolean {
+                    return test.description === misconception.testDescription;
+                });
+            if (matches) {
+                reachable = true;
+            } else {
+                issues.push(
+                    errorIssue(
+                        "misconception-test-description-unmatched",
+                        filePath,
+                        `Misconception ${misconception.id} testDescription "${misconception.testDescription}" does not match a code test description on step ${step.id}.`,
+                    ),
+                );
+            }
+        }
+        if (misconception.diagnostic !== undefined) {
+            reachable = true;
+        }
+        if (
+            misconception.answer === undefined &&
+            misconception.testDescription === undefined &&
+            misconception.diagnostic === undefined
+        ) {
+            issues.push(
+                errorIssue(
+                    "misconception-signature-missing",
+                    filePath,
+                    `Misconception ${misconception.id} has no reachable answer, testDescription, or diagnostic signature.`,
+                ),
+            );
+        }
+        if (reachable && isAssessedStep(step)) {
+            covered.add(step.id);
+        }
+    }
+    for (const step of mission.steps) {
+        if (isAssessedStep(step) && !covered.has(step.id)) {
+            issues.push(
+                errorIssue(
+                    "step-misconception-missing",
+                    filePath,
+                    `Assessed step ${mission.id}/${step.id} has no reachable misconception.`,
                 ),
             );
         }
@@ -522,7 +767,6 @@ function validateCodeStep(
     mission: Mission,
     step: CodeStep,
     filePath: string,
-    skillIds: ReadonlySet<string>,
     issues: ValidationIssue[],
 ): void {
     const stepPath = `${filePath}#${step.id}`;
@@ -638,22 +882,103 @@ function validateCodeStep(
         );
     }
 
-    for (const skillId of mission.misconceptions
-        .filter(function sameStep(item): boolean {
-            return item.stepId === step.id && item.followUpSkill !== undefined;
-        })
-        .map(function followUp(item): string {
-            return item.followUpSkill ?? "";
-        })) {
-        if (!skillIds.has(skillId)) {
+    const inferred = inferCodeVerification(step.tests);
+    const staticOnly = isStaticOnly(step.tests);
+    const hasAst = step.tests.some(function parses(test): boolean {
+        return test.kind === "ast";
+    });
+    const hasExecution = step.tests.some(function executes(test): boolean {
+        return EXECUTION_TEST_KINDS.has(test.kind);
+    });
+    if (staticOnly) {
+        if (step.verification === undefined) {
             issues.push(
                 errorIssue(
-                    "misconception-skill-missing",
+                    "verification-mode-missing",
                     stepPath,
-                    `Follow-up skill does not exist: ${skillId}`,
+                    `Code step ${step.id} uses only static, regex, or JSON tests; declare verification "structural" to avoid claiming execution.`,
+                ),
+            );
+        } else if (step.verification !== "structural") {
+            issues.push(
+                errorIssue(
+                    "verification-mode-mismatch",
+                    stepPath,
+                    `Code step ${step.id} uses only static, regex, or JSON tests but declares verification "${step.verification}".`,
                 ),
             );
         }
+        if (step.localVerification === undefined) {
+            issues.push(
+                errorIssue(
+                    "local-verification-missing",
+                    stepPath,
+                    `Code step ${step.id} is structural only; add localVerification with an honest command and description.`,
+                ),
+            );
+        }
+        if (language === "javascript" || language === "typescript") {
+            issues.push(
+                errorIssue(
+                    "static-tests-javascript",
+                    stepPath,
+                    `Code step ${step.id} tests ${language} by substring or regex; use function or ast tests instead.`,
+                ),
+            );
+        }
+    }
+    if (step.verification === "execution" && !hasExecution) {
+        issues.push(
+            errorIssue(
+                "verification-overclaim",
+                stepPath,
+                `Code step ${step.id} declares verification "execution" but has no executable test kind.`,
+            ),
+        );
+    }
+    if (step.verification === "ast" && !hasAst) {
+        issues.push(
+            errorIssue(
+                "verification-mode-mismatch",
+                stepPath,
+                `Code step ${step.id} declares verification "ast" but has no ast test.`,
+            ),
+        );
+    }
+    if (step.verification === "structural" && !staticOnly) {
+        issues.push(
+            errorIssue(
+                "verification-mode-mismatch",
+                stepPath,
+                `Code step ${step.id} declares verification "structural" but includes executable or AST tests.`,
+            ),
+        );
+    }
+    if (
+        step.verification === "simulation" &&
+        mission.runtime.kind !== "guided-simulation" &&
+        mission.runtime.kind !== "simulated-linux"
+    ) {
+        issues.push(
+            errorIssue(
+                "verification-mode-mismatch",
+                stepPath,
+                `Code step ${step.id} declares verification "simulation" but the mission runtime is ${mission.runtime.kind}.`,
+            ),
+        );
+    }
+    if (
+        step.localVerification !== undefined &&
+        step.verification !== "structural" &&
+        step.verification !== "simulation"
+    ) {
+        issues.push(
+            warningIssue(
+                "local-verification-unused",
+                stepPath,
+                `Code step ${step.id} declares localVerification but its verification mode is "${step.verification ?? inferred}".`,
+            ),
+        );
     }
 }
 
@@ -714,7 +1039,10 @@ function validateTestDetails(
         }
     }
     if (
-        (test.kind === "regex" || test.kind === "static" || test.kind === "json") &&
+        (test.kind === "regex" ||
+            test.kind === "static" ||
+            test.kind === "json" ||
+            test.kind === "ast") &&
         !fileNames.has(test.file)
     ) {
         issues.push(
@@ -895,11 +1223,11 @@ function validateMission(
     validateAssets(mission, filePath, issues);
     validateHints(mission, filePath, issues);
     validateObjectives(mission, filePath, issues);
-    validateMisconceptions(mission, filePath, issues);
+    validateMisconceptions(mission, skillIds, filePath, issues);
 
     for (const step of mission.steps) {
         if (step.kind === "code") {
-            validateCodeStep(mission, step, filePath, skillIds, issues);
+            validateCodeStep(mission, step, filePath, issues);
         }
     }
 }
@@ -1252,6 +1580,49 @@ function validateEvents(
     }
 }
 
+function validateTrackStandards(loaded: LoadedContent, issues: ValidationIssue[]): void {
+    const missionsById = new Map(
+        loaded.missions.map(function toEntry(mission): [string, Mission] {
+            return [mission.id, mission];
+        }),
+    );
+    for (const track of loaded.tracks) {
+        const trackPath = `content/tracks.json#${track.id}`;
+        const minimum = TRACK_MINIMUM_MISSIONS[track.kind];
+        if (track.missionIds.length < minimum) {
+            const shortfall = minimum - track.missionIds.length;
+            issues.push(
+                errorIssue(
+                    "track-mission-minimum",
+                    trackPath,
+                    `Track ${track.id} (${track.kind}) has ${track.missionIds.length} missions; at least ${minimum} are required (${shortfall} short).`,
+                ),
+            );
+        }
+        if (track.kind === "campaign") {
+            continue;
+        }
+        const hasTransfer = track.missionIds.some(function hasTransferStep(missionId): boolean {
+            const mission = missionsById.get(missionId);
+            return (
+                mission !== undefined &&
+                mission.steps.some(function transfers(step): boolean {
+                    return step.evidence === "transfer";
+                })
+            );
+        });
+        if (!hasTransfer) {
+            issues.push(
+                errorIssue(
+                    "track-transfer-missing",
+                    trackPath,
+                    `Track ${track.id} has no step with evidence "transfer".`,
+                ),
+            );
+        }
+    }
+}
+
 export function validateContentDocuments(loaded: LoadedContent): readonly ValidationIssue[] {
     const issues: ValidationIssue[] = [...loaded.issues];
     validateSkillGraph(loaded, issues);
@@ -1370,6 +1741,7 @@ export function validateContentDocuments(loaded: LoadedContent): readonly Valida
             }
         }
     }
+    validateTrackStandards(loaded, issues);
     for (const mission of loaded.missions) {
         if (!tracked.has(mission.id)) {
             issues.push(
