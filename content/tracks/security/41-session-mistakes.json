@@ -44,13 +44,16 @@
             "id": "localstorage-secure",
             "description": "Treating localStorage as a secure credential store.",
             "stepId": "session-review",
-            "feedback": "Any script running in the page can read localStorage. An XSS bug then becomes session theft."
+            "answer": "accept:httponly,secure,samesite,localstorage",
+            "feedback": "Any script running in the page can read localStorage. Accepting the design makes an XSS bug into session theft.",
+            "followUpSkill": "security.auth"
         },
         {
             "id": "httponly-enough",
             "description": "Believing HttpOnly alone protects a session.",
             "stepId": "session-check",
-            "feedback": "HttpOnly blocks script reads, but transport security, SameSite, and CSRF protection are also part of session safety."
+            "answer": "local",
+            "feedback": "HttpOnly blocks script reads, but transport security, SameSite, and CSRF protection are also part of session safety. localStorage remains unsafe."
         }
     ],
     "lesson": {
@@ -135,7 +138,13 @@
                 }
             ],
             "correctVerdict": "reject",
-            "explanation": "The cookie is script-accessible, transport-unprotected, and cross-site sendable. The token is also copied into localStorage."
+            "explanation": "The cookie is script-accessible, transport-unprotected, and cross-site sendable. The token is also copied into localStorage.",
+            "hints": [
+                "Read every Set-Cookie attribute and every place the token is stored.",
+                "Check whether page script can read the token.",
+                "Check transport, cross-site sending, and CSRF assumptions.",
+                "Reject until the cookie is HttpOnly, Secure, SameSite, and the token leaves localStorage."
+            ]
         },
         {
             "kind": "explain",
@@ -165,7 +174,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Session safety combines cookie attributes, transport security, CSRF defenses, and care about script access."
+            "explanation": "Session safety combines cookie attributes, transport security, CSRF defenses, and care about script access.",
+            "hints": [
+                "Match each attribute to the risk it reduces.",
+                "Ask what an XSS flaw can read in the page.",
+                "Remember that cookies are sent by the browser even when a script did not start the request.",
+                "Select HttpOnly, Secure, and SameSite; reject localStorage as a token store."
+            ]
         }
     ],
     "evaluation": {
