@@ -5,24 +5,14 @@
     "courseId": "c",
     "title": "Pointers and memory in C",
     "summary": "Swap values through pointers, then diagnose a missing address in scanf.",
-    "skills": [
-        "c.memory",
-        "c.pointers",
-        "c.toolchain"
-    ],
-    "prerequisites": [
-        "c.syntax",
-        "concept.testing"
-    ],
+    "skills": ["c.memory", "c.pointers", "c.toolchain"],
+    "prerequisites": ["c.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:c"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:c"],
     "hints": [
         "You need one temporary value to avoid overwriting the first value.",
         "Read *left into the temporary first.",
@@ -171,9 +150,7 @@
                     "kind": "static",
                     "description": "The swap function takes two integer pointers.",
                     "file": "main.c",
-                    "includes": [
-                        "void swap(int *left, int *right)"
-                    ],
+                    "includes": ["void swap(int *left, int *right)"],
                     "excludes": []
                 },
                 {
@@ -185,20 +162,14 @@
                         "*left = *right;",
                         "*right = temporary;"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.c",
-                    "includes": [
-                        "void swap(int *left, int *right)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["void swap(int *left, int *right)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -315,7 +286,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
