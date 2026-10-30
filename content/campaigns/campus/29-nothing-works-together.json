@@ -1,6 +1,6 @@
 {
     "id": "campus.nothing-works-together",
-    "version": 1,
+    "version": 2,
     "sequence": 29,
     "courseId": "campus",
     "title": "Nothing works together",
@@ -54,13 +54,24 @@
             "id": "partial-mutation",
             "description": "Changing inventory while still validating later lines.",
             "stepId": "integrate-order",
-            "feedback": "If line two fails after line one decremented stock, inventory is corrupted. Validate everything before applying anything."
+            "testDescription": "Insufficient stock leaves every line unchanged.",
+            "feedback": "If line two fails after line one decremented stock, inventory is corrupted. Validate everything before applying anything.",
+            "followUpSkill": "testing.integration"
         },
         {
             "id": "mutates-input",
-            "description": "Returning a mutated input as if it were a new state.",
+            "description": "Returning a mutated input instead of a new state.",
             "stepId": "integrate-order",
-            "feedback": "Mutating the caller's inventory makes retries and comparisons unpredictable. Build a new inventory after validation."
+            "testDescription": "Insufficient stock leaves every line unchanged.",
+            "feedback": "Mutating the caller's inventory makes retries and comparisons unpredictable. Build a new inventory after validation.",
+            "followUpSkill": "js.objects"
+        },
+        {
+            "id": "partial-ok",
+            "description": "Believing a partial inventory update is acceptable when a later line fails.",
+            "stepId": "integration-check",
+            "answer": "partial",
+            "feedback": "A failed order must leave every line untouched. Partial writes corrupt stock even when an error is returned."
         }
     ],
     "lesson": {
@@ -93,6 +104,12 @@
         {
             "kind": "code",
             "id": "integrate-order",
+            "hints": [
+                "Validate the entire order before changing inventory, then return a new inventory and total.",
+                "All-or-nothing means no writes until every line passes validation.",
+                "If line two is invalid, line one's decrement must not remain; validate both lines first.",
+                "First loop to check known ids, positive quantities, duplicates, and stock; then build a new inventory from a copy."
+            ],
             "title": "Integrate order processing",
             "prompt": "Edit orders.js. placeOrder(inventory, order) validates the entire order, then returns a new inventory and total. Use the documented errors and run the tests.",
             "evidence": "construction",
@@ -288,6 +305,12 @@
         {
             "kind": "explain",
             "id": "integration-check",
+            "hints": [
+                "Select statements about validation, atomicity, and stable errors.",
+                "Validate all lines before side effects, return new state, and use predictable error codes.",
+                "A partial update after a failed second line corrupts stock even though the call returned an error.",
+                "Three statements are accurate; reject the claim that partial updates are acceptable."
+            ],
             "title": "Contracts and failure",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
