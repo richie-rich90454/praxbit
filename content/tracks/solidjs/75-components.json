@@ -1,18 +1,26 @@
 {
     "id": "solidjs.components",
     "version": 1,
-    "sequence": 75,
+    "sequence": 133,
     "courseId": "solidjs",
     "title": "Fine-grained components",
     "summary": "Build a SolidJS component that reads props through the props object so updates stay live.",
-    "skills": ["solid.components"],
-    "prerequisites": ["web.html", "js.functions"],
+    "skills": [
+        "solid.components"
+    ],
+    "prerequisites": [
+        "web.html",
+        "js.functions"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:solid"
+    ],
     "hints": [
         "Keep the props parameter in the function signature.",
         "Read props.name inside JSX instead of copying it into a local variable.",
@@ -153,22 +170,36 @@
                     "kind": "static",
                     "description": "The component keeps props as a live object.",
                     "file": "ProductCard.tsx",
-                    "includes": ["export function ProductCard(props: ProductProps)", "props.name"],
-                    "excludes": ["{ name, price }"]
+                    "includes": [
+                        "export function ProductCard(props: ProductProps)",
+                        "props.name"
+                    ],
+                    "excludes": [
+                        "{ name, price }"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The component renders the name and a two-decimal price.",
                     "file": "ProductCard.tsx",
-                    "includes": ["<h3>{props.name}</h3>", "props.price.toFixed(2)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "<h3>{props.name}</h3>",
+                        "props.price.toFixed(2)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductCard.tsx",
-                    "includes": ["export function ProductCard(props: ProductProps)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "export function ProductCard(props: ProductProps)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -242,5 +273,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
