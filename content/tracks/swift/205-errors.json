@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,9 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ],
+    "tags": ["professional"],
     "accessibility": {
         "summary": "The Swift workspace is keyboard accessible. Checks verify source structure; they do not compile or run Swift.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -39,45 +34,28 @@
     "sequence": 108,
     "title": "Typed errors at the input boundary",
     "summary": "Throw specific parse errors instead of trapping, then repair a report that turns every failure into zero.",
-    "skills": [
-        "swift.syntax",
-        "swift.tooling"
-    ],
-    "prerequisites": [
-        "swift.syntax",
-        "concept.testing"
-    ],
+    "skills": ["swift.syntax", "swift.tooling"],
+    "prerequisites": ["swift.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Throw typed errors from a validation function.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find a handler that hides invalid input.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Choose the call that propagates an error.",
-            "stepIds": [
-                "propagate"
-            ]
+            "stepIds": ["propagate"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:swift"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:swift"],
     "hints": [
         "An enum that conforms to Error can name each failure.",
         "guard let converts the text safely.",
@@ -238,21 +216,14 @@
                         "guard let value = Int(text) else {",
                         "throw QuantityError.notANumber"
                     ],
-                    "excludes": [
-                        "Int(text)!"
-                    ]
+                    "excludes": ["Int(text)!"]
                 },
                 {
                     "kind": "static",
                     "description": "Zero and negative values throw the notPositive case.",
                     "file": "main.swift",
-                    "includes": [
-                        "guard value > 0 else {",
-                        "throw QuantityError.notPositive"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["guard value > 0 else {", "throw QuantityError.notPositive"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
