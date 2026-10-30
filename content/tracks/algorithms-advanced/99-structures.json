@@ -1,18 +1,27 @@
 {
     "id": "algorithms-advanced.structures",
     "version": 1,
-    "sequence": 99,
+    "sequence": 186,
     "courseId": "algorithms-advanced",
     "title": "Queues and linked structures",
     "summary": "Implement a bounded ring buffer with constant-time enqueue and dequeue, and reason about linked pointers and iterator invalidation.",
-    "skills": ["algorithms.arrays", "algorithms.complexity"],
-    "prerequisites": ["algorithms.arrays", "concept.data"],
+    "skills": [
+        "algorithms.arrays",
+        "algorithms.complexity"
+    ],
+    "prerequisites": [
+        "algorithms.arrays",
+        "concept.data"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:algorithms"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:algorithms"
+    ],
     "hints": [
         "Compute the tail as (head + count) % capacity before writing.",
         "Reject enqueue when count equals capacity; do not grow the array.",
@@ -192,7 +210,9 @@
                         "this.slots[tail] = value;",
                         "this.count += 1;"
                     ],
-                    "excludes": ["TODO"]
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -204,21 +224,32 @@
                         "this.head = (this.head + 1) % this.capacity;",
                         "this.count -= 1;"
                     ],
-                    "excludes": [".shift()"]
+                    "excludes": [
+                        ".shift()"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "Size returns the stored count instead of scanning the slots.",
                     "file": "structures.ts",
-                    "includes": ["get size(): number {", "return this.count;"],
-                    "excludes": ["this.slots.length"]
+                    "includes": [
+                        "get size(): number {",
+                        "return this.count;"
+                    ],
+                    "excludes": [
+                        "this.slots.length"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "structures.ts",
-                    "includes": ["export class FrameQueue<T> {"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "export class FrameQueue<T> {"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -292,5 +323,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "systems"]
+    "tags": [
+        "professional",
+        "systems"
+    ]
 }
