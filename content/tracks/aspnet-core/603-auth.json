@@ -5,23 +5,14 @@
     "courseId": "aspnet-core",
     "title": "JWT authentication in the middleware pipeline",
     "summary": "Register JWT bearer authentication, order the pipeline, and protect an action with a role requirement.",
-    "skills": [
-        "aspnet.middleware",
-        "aspnet.di"
-    ],
-    "prerequisites": [
-        "aspnet.di",
-        "security.auth"
-    ],
+    "skills": ["aspnet.middleware", "aspnet.di"],
+    "prerequisites": ["aspnet.di", "security.auth"],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-register",
             "description": "Register JWT bearer authentication and authorization services.",
-            "stepIds": [
-                "configure"
-            ]
+            "stepIds": ["configure"]
         },
         {
             "id": "objective-protect",
             "description": "Require an authenticated member on a controller action.",
-            "stepIds": [
-                "protect"
-            ]
+            "stepIds": ["protect"]
         },
         {
             "id": "objective-transfer",
             "description": "Distinguish a missing identity from a missing role.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:api",
-        "icon:dotnet"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:dotnet"],
     "hints": [
         "AddAuthentication selects the default scheme; AddJwtBearer configures it.",
         "Read the authority and audience from configuration.",
@@ -215,9 +195,7 @@
                     "kind": "static",
                     "description": "Authorization services are registered.",
                     "file": "Program.cs",
-                    "includes": [
-                        "builder.Services.AddAuthorization();"
-                    ],
+                    "includes": ["builder.Services.AddAuthorization();"],
                     "excludes": []
                 },
                 {
@@ -227,9 +205,7 @@
                     "includes": [
                         "app.UseAuthentication();\napp.UseAuthorization();\n\napp.MapControllers();"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 }
             ],
             "language": "text"
@@ -270,21 +246,14 @@
                         "using Microsoft.AspNetCore.Authorization;",
                         "[Authorize(Roles = \"Member\")]"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The controller remains an API controller with its route.",
                     "file": "CatalogController.cs",
-                    "includes": [
-                        "[ApiController]",
-                        "[Route(\"api/[controller]\")]"
-                    ],
-                    "excludes": [
-                        "AllowAnonymous"
-                    ]
+                    "includes": ["[ApiController]", "[Route(\"api/[controller]\")]"],
+                    "excludes": ["AllowAnonymous"]
                 }
             ],
             "language": "text"
@@ -343,8 +312,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
