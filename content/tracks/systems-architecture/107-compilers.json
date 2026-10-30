@@ -1,18 +1,27 @@
 {
     "id": "systems-architecture.compilers",
     "version": 1,
-    "sequence": 107,
+    "sequence": 202,
     "courseId": "systems-architecture",
     "title": "From source to executable",
     "summary": "Trace a program through lexing, parsing, type checking, IR, optimization, and code generation, and make diagnostics reproducible.",
-    "skills": ["compilers.basics", "concept.testing"],
-    "prerequisites": ["concept.instructions", "concept.testing"],
+    "skills": [
+        "compilers.basics",
+        "concept.testing"
+    ],
+    "prerequisites": [
+        "concept.instructions",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:systems"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:systems"
+    ],
     "hints": [
         "The pipeline is text, tokens, AST, typed AST, IR, optimized IR, and target instructions.",
         "A parse can succeed while a name is undefined or a call has the wrong arity; the type checker is what rejects it.",
@@ -187,7 +205,9 @@
                     "includes": [
                         "source -> lexer -> parser -> AST -> type checker -> IR -> optimizer -> code generator -> executable"
                     ],
-                    "excludes": ["source -> parse -> optimize -> executable"]
+                    "excludes": [
+                        "source -> parse -> optimize -> executable"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -220,7 +240,9 @@
                         "An optimization is valid only when it preserves observable behavior",
                         "volatile"
                     ],
-                    "excludes": ["An optimization may change any behavior"]
+                    "excludes": [
+                        "An optimization may change any behavior"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -230,7 +252,9 @@
                         "file path, then byte offset, then diagnostic code",
                         "byte-identical"
                     ],
-                    "excludes": ["Print each error as soon as it is found."]
+                    "excludes": [
+                        "Print each error as soon as it is found."
+                    ]
                 },
                 {
                     "kind": "static",
@@ -239,7 +263,9 @@
                     "includes": [
                         "source -> lexer -> parser -> AST -> type checker -> IR -> optimizer -> code generator -> executable"
                     ],
-                    "excludes": ["TODO"]
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -335,5 +361,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
