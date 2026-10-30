@@ -1,18 +1,29 @@
 {
     "id": "solidjs.testing",
     "version": 1,
-    "sequence": 221,
+    "sequence": 136,
     "courseId": "solidjs",
     "title": "Test cart actions as pure transitions",
     "summary": "Implement cart actions as pure transitions, then design tests for duplicate SKUs, removal, clearing, and mutation bugs.",
-    "skills": ["concept.testing", "solid.signals", "solid.control-flow"],
-    "prerequisites": ["solid.signals", "concept.testing"],
+    "skills": [
+        "concept.testing",
+        "solid.signals",
+        "solid.control-flow"
+    ],
+    "prerequisites": [
+        "solid.signals",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-apply",
             "description": "Implement cart actions without mutating the current array.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-design",
             "description": "Select the test cases that cover real cart behavior.",
-            "stepIds": ["design"]
+            "stepIds": [
+                "design"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:solid"
+    ],
     "hints": [
         "Find an existing line by SKU before adding a new one.",
         "Merge a duplicate by returning a new array with an increased quantity.",
@@ -313,5 +333,7 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
