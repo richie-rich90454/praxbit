@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "validate.ts": "type ProductInput = { name: string; price: number };\ntype Validation =\n  | { ok: true; value: ProductInput }\n  | { ok: false; errors: string[] };\n\nfunction validateProduct(body: unknown): Validation {\n  if (typeof body !== \"object\" || body === null || Array.isArray(body)) {\n    return { ok: false, errors: [\"body\"] };\n  }\n  const record = body as Record<string, unknown>;\n  const errors: string[] = [];\n  const name = typeof record.name === \"string\" ? record.name.trim() : \"\";\n  if (name.length === 0) {\n    errors.push(\"name\");\n  }\n  if (\n    typeof record.price !== \"number\" ||\n    !Number.isFinite(record.price) ||\n    record.price < 0\n  ) {\n    errors.push(\"price\");\n  }\n  if (errors.length > 0) {\n    return { ok: false, errors };\n  }\n  return { ok: true, value: { name, price: record.price as number } };\n}\n"
+            }
+        }
+    }
+}
