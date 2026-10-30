@@ -84,4 +84,4 @@ The app does not currently call `navigator.storage.persist()`. On browsers that 
 - There is no offline AI. The AI gateway requires the server and provider.
 - There is no offline account creation or login.
 - The first install must be online.
-- The PWA is installable but not store-published. Native offline behavior requires device testing through Capacitor.
+- The PWA is installable but not store-published. Native offline behavior requires device testing through Capacitor; the Android and iOS projects build in CI without signing.
