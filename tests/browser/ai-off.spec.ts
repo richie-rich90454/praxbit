@@ -1,7 +1,27 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 interface Capabilities {
     readonly aiTutor: boolean;
+}
+
+const AI_MISSION = JSON.parse(
+    readFileSync(
+        new URL("../../content/campaigns/campus/25-the-ai-says-it-is-fixed.json", import.meta.url),
+        "utf8",
+    ),
+) as {
+    readonly steps: readonly { readonly id: string; readonly hints?: readonly string[] }[];
+};
+
+function hintsForStep(stepId: string): readonly string[] {
+    const step = AI_MISSION.steps.find(function same(item): boolean {
+        return item.id === stepId;
+    });
+    if (step?.hints === undefined || step.hints.length !== 4) {
+        throw new Error(`No four-level step hints for ${stepId}.`);
+    }
+    return step.hints;
 }
 
 async function replaceEditor(page: Page, source: string): Promise<void> {
@@ -70,12 +90,7 @@ test.describe("AI independence", function aiIndependence(): void {
         ).toBeVisible();
         await expect(page.getByRole("heading", { name: "Live AI tutor" })).toHaveCount(0);
 
-        const hints = [
-            "Read the comparison. Which quantities does it allow?",
-            "Test zero and negative quantities, not just the example in the message.",
-            "The claim is unsupported and the function accepts impossible shipments.",
-            "Reject the patch, implement both bounds and integer checks, then verify with boundary tests.",
-        ];
+        const hints = hintsForStep("ai-review");
         await page.getByRole("button", { name: "Show a hint" }).click();
         await expect(page.getByText(hints[0] ?? "", { exact: true })).toBeVisible();
         for (const hint of hints.slice(1)) {
