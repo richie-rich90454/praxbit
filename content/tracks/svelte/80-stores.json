@@ -44,19 +44,25 @@
             "id": "mutate-store",
             "description": "Calling cart.update and mutating the array in place.",
             "stepId": "apply",
-            "feedback": "Svelte compares the value returned by update. A mutated array keeps the same reference, so subscribers may not see a change. Return a new array."
+            "feedback": "Svelte compares the value returned by update. A mutated array keeps the same reference, so subscribers may not see a change. Return a new array.",
+            "testDescription": "Adding a line keeps the existing array.",
+            "followUpSkill": "svelte.stores"
         },
         {
             "id": "module-browser",
             "description": "Reading localStorage at module scope.",
             "stepId": "apply",
-            "feedback": "The module also runs during a server or prerender build where localStorage is absent. Read browser storage inside a guarded function."
+            "feedback": "The module also runs during a server or prerender build where localStorage is absent. Read browser storage inside a guarded function.",
+            "testDescription": "The store reads browser storage defensively.",
+            "followUpSkill": "web.browser-apis"
         },
         {
             "id": "forget-unsubscribe",
             "description": "Calling subscribe in onMount without returning the unsubscribe function.",
             "stepId": "review",
-            "feedback": "onMount treats a returned function as cleanup. Return the unsubscribe function so the callback stops when the component is destroyed."
+            "feedback": "onMount treats a returned function as cleanup. Return the unsubscribe function so the callback stops when the component is destroyed.",
+            "answer": "ship",
+            "followUpSkill": "svelte.stores"
         }
     ],
     "lesson": {
@@ -205,7 +211,18 @@
                     "includes": ["typeof localStorage === \"undefined\""],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Move browser storage access into a loadSaved function.",
+                "Return [] when localStorage is undefined or the stored value is not an array.",
+                "Create cart with writable<CartLine[]>(loadSaved()).",
+                "Derive itemCount with derived and append lines with [...lines, line]."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Svelte testing suite with Vitest."
+            }
         },
         {
             "kind": "review",
@@ -257,7 +274,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The manual subscription in onMount runs after the component is destroyed because nothing returns the unsubscribe function. clearCart mutates the array held by the store, so the store never notifies subscribers and derived values go stale. Use $cart in markup or return the unsubscribe function, and replace the array through update."
+            "explanation": "The manual subscription in onMount runs after the component is destroyed because nothing returns the unsubscribe function. clearCart mutates the array held by the store, so the store never notifies subscribers and derived values go stale. Use $cart in markup or return the unsubscribe function, and replace the array through update.",
+            "hints": [
+                "Check the return value of the onMount subscription.",
+                "Check whether clearCart writes through set or update.",
+                "Reject findings about automatic $ subscriptions leaking.",
+                "Block the change for cleanup and immutability problems."
+            ]
         }
     ],
     "evaluation": {
