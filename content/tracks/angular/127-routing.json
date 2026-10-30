@@ -1,0 +1,271 @@
+{
+    "id": "angular.routing",
+    "version": 1,
+    "sequence": 222,
+    "courseId": "angular",
+    "title": "Guarded lazy checkout routes",
+    "summary": "Implement a functional checkout decision, then review a route table that eagerly loads checkout and never guards or titles it.",
+    "skills": ["angular.routing", "web.accessibility", "angular.services"],
+    "prerequisites": ["angular.services", "web.routing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "routing",
+        "briefing": "The checkout route ships in the initial bundle, opens with an empty cart, and leaves the old page title in the browser tab."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Implement a pure functional guard decision.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review route configuration for access, loading, and accessibility.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
+    "hints": [
+        "Check signedIn before itemCount.",
+        "Return login for a signed-out visitor.",
+        "Return catalog for a signed-in visitor with no items.",
+        "Use loadComponent and a title on the checkout route."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-allow",
+            "description": "Allowing checkout because the route exists.",
+            "stepId": "apply",
+            "testDescription": "Signed-out visitors are sent to login.",
+            "feedback": "A route that exists is not a route that is allowed. The guard must return login for a signed-out visitor.",
+            "followUpSkill": "angular.routing"
+        },
+        {
+            "id": "empty-cart",
+            "description": "Letting a signed-in visitor check out with no items.",
+            "stepId": "apply",
+            "testDescription": "An empty cart is sent to the catalog.",
+            "feedback": "Checkout with no items cannot complete. Redirect to the catalog so the user can add something first.",
+            "followUpSkill": "web.accessibility"
+        },
+        {
+            "id": "ship-eager",
+            "description": "Accepting an eager, unguarded, untitled route.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Eager loading, missing authorization, and a stale title are production defects. The route table must change before release.",
+            "followUpSkill": "angular.routing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A guard is a function",
+                "body": "A functional CanActivate guard returns true, false, or a UrlTree. Keep the decision pure so it can be tested without the router or a TestBed."
+            },
+            {
+                "title": "Lazy routes shrink the first bundle",
+                "body": "loadComponent imports a standalone component only when the route activates. Eagerly importing checkout puts its code in the initial bundle for every visitor."
+            },
+            {
+                "title": "Titles and focus are navigation",
+                "body": "A route title updates the browser and assistive technology. The app shell still has to move focus to the new heading after activation."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Functional guard",
+                "definition": "A route guard written as a function instead of a class."
+            },
+            {
+                "term": "loadComponent",
+                "definition": "A route property that lazily imports a standalone component."
+            },
+            {
+                "term": "Route title",
+                "definition": "A route property that sets the document title after navigation."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Guards, lazy routes, and titles",
+            "prompt": "Read the explanation, then implement the guard decision.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A guard is a function",
+                    "body": "A functional CanActivate guard returns true, false, or a UrlTree. Keep the decision pure so it can be tested without the router or a TestBed."
+                },
+                {
+                    "title": "Lazy routes shrink the first bundle",
+                    "body": "loadComponent imports a standalone component only when the route activates. Eagerly importing checkout puts its code in the initial bundle for every visitor."
+                },
+                {
+                    "title": "Titles and focus are navigation",
+                    "body": "A route title updates the browser and assistive technology. The app shell still has to move focus to the new heading after activation."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Functional guard",
+                    "definition": "A route guard written as a function instead of a class."
+                },
+                {
+                    "term": "loadComponent",
+                    "definition": "A route property that lazily imports a standalone component."
+                },
+                {
+                    "term": "Route title",
+                    "definition": "A route property that sets the document title after navigation."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Decide checkout access",
+            "prompt": "Edit checkout.guard.ts. Return login for a signed-out visitor, catalog for an empty cart, and allow only when both conditions pass.",
+            "evidence": "construction",
+            "hints": [
+                "Use signedIn as the first branch.",
+                "Check itemCount <= 0 in the second branch.",
+                "Return allow only after both checks pass.",
+                "Keep the return type so every branch is explicit."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "checkout.guard.ts",
+                    "content": "type CheckoutAccess = \"allow\" | \"login\" | \"catalog\";\n\nfunction checkoutAccess(signedIn: boolean, itemCount: number): CheckoutAccess {\n  // TODO: require sign-in and at least one cart item\n  return \"allow\";\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "checkout.guard.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Signed-out visitors are sent to login.",
+                    "name": "checkoutAccess",
+                    "args": [false, 2],
+                    "expected": "login"
+                },
+                {
+                    "kind": "function",
+                    "description": "Signed-out visitors with an empty cart still go to login.",
+                    "name": "checkoutAccess",
+                    "args": [false, 0],
+                    "expected": "login"
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty cart is sent to the catalog.",
+                    "name": "checkoutAccess",
+                    "args": [true, 0],
+                    "expected": "catalog"
+                },
+                {
+                    "kind": "function",
+                    "description": "A signed-in visitor with items is allowed.",
+                    "name": "checkoutAccess",
+                    "args": [true, 1],
+                    "expected": "allow"
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the route table",
+            "prompt": "Review app.routes.ts and select every real access, loading, or accessibility problem.",
+            "evidence": "transfer",
+            "hints": [
+                "Look for canActivate on the checkout route.",
+                "Check whether CheckoutComponent is imported at the top of the file.",
+                "Look for a title property on the route.",
+                "Reject findings that describe code the route table does not contain."
+            ],
+            "artifact": {
+                "title": "app.routes.ts",
+                "caption": "Checkout is eagerly imported, has no guard, and declares no title.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { Routes } from \"@angular/router\";\nimport { CatalogComponent } from \"./catalog.component\";\nimport { CheckoutComponent } from \"./checkout.component\";\n\nexport const routes: Routes = [\n  { path: \"\", component: CatalogComponent },\n  {\n    path: \"checkout\",\n    component: CheckoutComponent,\n    data: { requiresCart: true },\n  },\n];\n"
+            },
+            "findings": [
+                {
+                    "id": "no-guard",
+                    "label": "The checkout route has no canActivate guard, so an empty cart can open it.",
+                    "correct": true
+                },
+                {
+                    "id": "eager",
+                    "label": "CheckoutComponent is imported eagerly instead of with loadComponent, so it ships in the initial bundle.",
+                    "correct": true
+                },
+                {
+                    "id": "title",
+                    "label": "The checkout route declares no title, so the browser tab keeps the previous page name.",
+                    "correct": true
+                },
+                {
+                    "id": "guard",
+                    "label": "A functional guard already protects the checkout route.",
+                    "correct": false
+                },
+                {
+                    "id": "lazy",
+                    "label": "The route uses loadComponent for checkout.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The route has metadata but no guard, imports CheckoutComponent eagerly, and never sets a title. The data property alone does not enforce access or lazy loading."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
