@@ -5,22 +5,14 @@
     "courseId": "html",
     "title": "Document structure and metadata",
     "summary": "Write a complete HTML document with doctype, language, head metadata, and a body.",
-    "skills": [
-        "web.html"
-    ],
-    "prerequisites": [
-        "concept.instructions"
-    ],
+    "skills": ["web.html"],
+    "prerequisites": ["concept.instructions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-html",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "dom-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "dom-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "document-shell",
             "description": "Add the doctype, html, head, and body structure.",
-            "stepIds": [
-                "build-document"
-            ]
+            "stepIds": ["build-document"]
         },
         {
             "id": "metadata",
             "description": "Provide charset, viewport, and title metadata.",
-            "stepIds": [
-                "build-document"
-            ]
+            "stepIds": ["build-document"]
         },
         {
             "id": "understanding",
             "description": "Explain document structure and metadata.",
-            "stepIds": [
-                "document-claims"
-            ]
+            "stepIds": ["document-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:page"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:page"],
     "hints": [
         "Start with <!doctype html> and wrap everything in html with a lang attribute.",
         "The head carries charset, viewport, and title; the body carries visible content.",
@@ -168,18 +149,14 @@
                     "kind": "static",
                     "description": "The document starts with a doctype declaration.",
                     "file": "index.html",
-                    "includes": [
-                        "<!doctype html>"
-                    ],
+                    "includes": ["<!doctype html>"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The html element declares a language.",
                     "file": "index.html",
-                    "includes": [
-                        "<html lang=\"en\">"
-                    ],
+                    "includes": ["<html lang=\"en\">"],
                     "excludes": []
                 },
                 {
@@ -193,10 +170,7 @@
                     "kind": "static",
                     "description": "The head includes charset and viewport metadata.",
                     "file": "index.html",
-                    "includes": [
-                        "<meta charset=\"utf-8\">",
-                        "name=\"viewport\""
-                    ],
+                    "includes": ["<meta charset=\"utf-8\">", "name=\"viewport\""],
                     "excludes": []
                 },
                 {
@@ -269,7 +243,5 @@
         "screenReaderNotes": "Each test announces its selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
