@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "validate-call": {
+            "files": {
+                "tools.js": "const TOOLS = {\n  lookupOrder: [\"orderId\"],\n  refund: [\"orderId\", \"amount\", \"reason\"],\n};\n\nfunction isPlainObject(value) {\n  return typeof value === \"object\" && value !== null && !Array.isArray(value);\n}\n\nfunction isValidToolCall(call) {\n  if (!isPlainObject(call) || typeof call.name !== \"string\") return false;\n  const allowed = TOOLS[call.name];\n  if (allowed === undefined) return false;\n  const args = call.arguments;\n  if (!isPlainObject(args)) return false;\n  const keys = Object.keys(args);\n  if (keys.length !== allowed.length) return false;\n  for (const key of keys) {\n    if (!allowed.includes(key)) return false;\n  }\n  if (typeof args.orderId !== \"string\" || args.orderId.length === 0) return false;\n  if (call.name === \"lookupOrder\") return true;\n  return (\n    Number.isInteger(args.amount) &&\n    args.amount >= 1 &&\n    args.amount <= 500 &&\n    typeof args.reason === \"string\" &&\n    args.reason.length >= 3 &&\n    args.reason.length <= 200\n  );\n}\n"
+            }
+        }
+    }
+}
