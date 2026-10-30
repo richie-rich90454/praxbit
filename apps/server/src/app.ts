@@ -6,7 +6,7 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import { ZodError } from "zod";
 import type { Pool } from "pg";
-import type { ServerConfig } from "./config.ts";
+import { isWebBuildPresent, type ServerConfig } from "./config.ts";
 import type { ContentCatalog } from "./content/catalog.ts";
 import { createApplicationServices } from "./services/application-services.ts";
 import { AppError, errorBody } from "./http/app-error.ts";
@@ -29,7 +29,16 @@ import { createClubRoutes, createEventRoutes } from "./routes/club-routes.ts";
 import { createAiRoutes } from "./routes/ai-routes.ts";
 import { createAdminRoutes } from "./routes/admin-routes.ts";
 import { createCatalogRoutes } from "./routes/catalog-routes.ts";
-import { createHealthRoutes, createOpenApiRoutes } from "./routes/health-routes.ts";
+import {
+    createHealthRoutes,
+    createCapabilityRoutes,
+    createOpenApiRoutes,
+} from "./routes/health-routes.ts";
+import {
+    createMetricsRegistry,
+    createMetricsRoutes,
+    metricsMiddleware,
+} from "./routes/metrics-routes.ts";
 import type { AppEnvironment } from "./types.ts";
 
 export interface ApplicationDependencies {
@@ -48,8 +57,13 @@ export function createApplication(dependencies: ApplicationDependencies): Hono<A
     });
     const app = new Hono<AppEnvironment>();
     const startedAt = dependencies.startedAt ?? Date.now();
+    const metrics = createMetricsRegistry();
+    const webRoot =
+        dependencies.webDirectory === undefined ? undefined : resolve(dependencies.webDirectory);
+    const webBuildPresent = isWebBuildPresent(webRoot);
 
     app.use("*", requestIdMiddleware());
+    app.use("*", metricsMiddleware(metrics));
     app.use("*", requestLogMiddleware(dependencies.config.nodeEnvironment !== "test"));
     app.use("*", securityHeadersMiddleware(dependencies.config));
 
@@ -89,8 +103,23 @@ export function createApplication(dependencies: ApplicationDependencies): Hono<A
     app.use("/api/*", authenticationMiddleware(services.auth, dependencies.config));
     app.use("/api/*", csrfMiddleware());
 
-    app.route("/", createHealthRoutes(services, startedAt));
+    app.route(
+        "/",
+        createHealthRoutes(services, {
+            startedAt,
+            webBuildPresent,
+            webBuildRequired: dependencies.config.nodeEnvironment === "production",
+        }),
+    );
     app.route("/api/v1", createOpenApiRoutes());
+    app.route("/api/v1", createCapabilityRoutes(services));
+    app.route(
+        "/",
+        createMetricsRoutes(services, metrics, {
+            webBuildPresent,
+            webBuildRequired: dependencies.config.nodeEnvironment === "production",
+        }),
+    );
     app.route("/api/v1/auth", createAuthRoutes(services));
     app.route("/api/v1/me", createMeRoutes(services));
     app.route("/api/v1/attempts", createAttemptRoutes(services));
@@ -103,9 +132,8 @@ export function createApplication(dependencies: ApplicationDependencies): Hono<A
     app.route("/api/v1/admin", createAdminRoutes(services));
     app.route("/api/v1", createCatalogRoutes(services));
 
-    const webDirectory = dependencies.webDirectory;
-    if (webDirectory !== undefined && existsSync(webDirectory)) {
-        const webRoot = resolve(webDirectory);
+    if (webRoot !== undefined && existsSync(webRoot)) {
+        const webRootPath: string = webRoot;
         const contentTypes: Readonly<Record<string, string>> = {
             ".css": "text/css; charset=utf-8",
             ".html": "text/html; charset=utf-8",
@@ -128,8 +156,8 @@ export function createApplication(dependencies: ApplicationDependencies): Hono<A
             { readonly body: Blob; readonly type: string; readonly cache: string } | undefined
         > {
             const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
-            const absolute = resolve(webRoot, relative);
-            if (absolute !== webRoot && !absolute.startsWith(`${webRoot}${sep}`)) {
+            const absolute = resolve(webRootPath, relative);
+            if (absolute !== webRootPath && !absolute.startsWith(`${webRootPath}${sep}`)) {
                 return undefined;
             }
             try {
