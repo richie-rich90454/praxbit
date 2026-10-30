@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "build-form": {
+            "files": {
+                "index.html": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Checkout</title>\n</head>\n<body>\n  <h1>Checkout</h1>\n  <form>\n    <label for=\"email\">Email</label>\n    <input id=\"email\" name=\"email\" type=\"email\" required>\n    <label for=\"quantity\">Quantity</label>\n    <input id=\"quantity\" name=\"quantity\" type=\"number\" required>\n    <button type=\"submit\">Submit</button>\n  </form>\n</body>\n</html>\n"
+            }
+        }
+    }
+}
