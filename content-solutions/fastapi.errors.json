@@ -1,0 +1,14 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.py": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass ItemCreate(BaseModel):\n    name: str\n\n\nclass DuplicateItem(Exception):\n    def __init__(self, name: str) -> None:\n        self.name = name\n\n\n@app.exception_handler(DuplicateItem)\ndef duplicate_item_handler(request: Request, exception: DuplicateItem) -> JSONResponse:\n    return JSONResponse(\n        status_code=409,\n        content={\"code\": \"item_exists\", \"name\": exception.name},\n    )\n\n\n@app.post(\"/items\")\ndef create_item(payload: ItemCreate) -> dict[str, str]:\n    raise DuplicateItem(payload.name)\n"
+            }
+        },
+        "test": {
+            "files": {
+                "test_main.py": "from fastapi.testclient import TestClient\n\nfrom main import app\n\nclient = TestClient(app)\n\n\ndef test_duplicate_item_returns_conflict() -> None:\n    response = client.post(\"/items\", json={\"name\": \"Microscope\"})\n    assert response.status_code == 409\n    assert response.json() == {\"code\": \"item_exists\", \"name\": \"Microscope\"}\n"
+            }
+        }
+    }
+}
