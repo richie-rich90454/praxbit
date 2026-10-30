@@ -1,18 +1,27 @@
 {
     "id": "algorithms-advanced.graphs",
     "version": 1,
-    "sequence": 101,
+    "sequence": 188,
     "courseId": "algorithms-advanced",
     "title": "Graphs and dynamic programming",
     "summary": "Traverse graphs with an explicit queue and visited set, then reuse subproblems instead of recomputing them.",
-    "skills": ["algorithms.graphs", "algorithms.dp"],
-    "prerequisites": ["algorithms.hashing", "algorithms.complexity"],
+    "skills": [
+        "algorithms.graphs",
+        "algorithms.dp"
+    ],
+    "prerequisites": [
+        "algorithms.hashing",
+        "algorithms.complexity"
+    ],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:algorithms"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:algorithms"
+    ],
     "hints": [
         "Start the visited set with the start node and process the queue with a head index.",
         "Mark a neighbor visited before you enqueue it; otherwise cycles enqueue it repeatedly.",
@@ -204,7 +222,9 @@
                         "const node = queue[head];",
                         "head += 1;"
                     ],
-                    "excludes": ["TODO"]
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -234,15 +254,24 @@
                     "kind": "static",
                     "description": "The frontier no longer uses a stack pop or an array shift.",
                     "file": "graphs.ts",
-                    "includes": ["while (head < queue.length) {"],
-                    "excludes": [".pop()", ".shift()"]
+                    "includes": [
+                        "while (head < queue.length) {"
+                    ],
+                    "excludes": [
+                        ".pop()",
+                        ".shift()"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "graphs.ts",
-                    "includes": ["const visited = new Set<string>([start]);"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "const visited = new Set<string>([start]);"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -338,5 +367,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "systems"]
+    "tags": [
+        "professional",
+        "systems"
+    ]
 }
