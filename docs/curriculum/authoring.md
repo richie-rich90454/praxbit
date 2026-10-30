@@ -106,19 +106,90 @@ The evaluator is chosen by step kind. The authored data must make the intended a
 - State/trace: a target state or final snapshot with every watched value.
 - Rule: a `correctRuleId` that exists in the rules.
 - Review: findings with at least one correct and one incorrect, plus a correct verdict.
-- Code: 1–12 tests of a supported kind for the language.
+- Code: 1–12 tests of a supported kind for the language. Use `function`, `dom`, `css`, or `sql` when the runtime executes the work; use `ast` for JavaScript and TypeScript structure; use `static`, `regex`, or `json` only when the work is deliberately structural.
 - Git: checks that the seed repository can actually satisfy.
 - Terminal: objectives whose checks match the initial simulation and a valid solution.
 - Test design/explain: a correct selected set, not a single trick option.
 
 Alternative valid solutions should be considered. If the evaluator accepts only one arrangement, the prompt must make that arrangement required. Do not author a “choose any order” task with a single exact sequence.
 
+## Code verification modes
+
+Every code step must say what its tests actually prove. `verification` is optional in the schema and is inferred from the test kinds when omitted:
+
+| Mode | Meaning |
+| --- | --- |
+| `execution` | At least one test runs the learner's work: `function`, `dom`, `css`, or `sql`. |
+| `ast` | At least one `ast` test parses JavaScript or TypeScript and inspects real syntax nodes. |
+| `structural` | Only `static`, `regex`, or `json` tests run. This proves text or data shape, not behavior. |
+| `simulation` | The check runs inside a guided or simulated runtime. Use only with `guided-simulation` or `simulated-linux`. |
+
+The validator enforces these rules:
+
+- A step whose tests are only `static`, `regex`, or `json` must declare `verification: "structural"` and must include `localVerification`.
+- `localVerification` is `{ "command": "...", "description": "..." }`. The command is an honest way to verify the work outside Praxbit, such as `javac Answer.java`. The description states what the command proves. The validator does not run it.
+- Do not declare `execution` unless an executable test kind is present.
+- An `ast` declaration requires at least one AST test.
+- JavaScript and TypeScript steps must use `function` or `ast` tests. Substring and regex tests alone are rejected because they cannot distinguish real syntax from comments and strings.
+- A `structural` declaration must not include executable or AST tests.
+- A `simulation` declaration must match the mission runtime.
+
+## AST tests
+
+An `ast` test parses a JavaScript or TypeScript file with the TypeScript compiler and counts real syntax nodes. Comments and string contents are not nodes, so a comment that says `eval(...)` does not count as an `eval` call.
+
+| Node | Matches | `name` matches |
+| --- | --- | --- |
+| `function-declaration` | Function declarations, including exported declarations | The function name |
+| `function-call` | Call expressions | The callee text or its final property name, such as `console.log` or `log` |
+| `import` | Static import declarations | The module specifier and every imported or local binding |
+| `class-declaration` | Class declarations, including exported declarations | The class name |
+| `return-statement` | Return statements | Not used |
+| `if-statement` | If statements | Not used |
+| `for-statement` | `for`, `for...in`, and `for...of` loops | Not used |
+| `variable-declaration` | Variable declarations, including destructuring bindings | Each bound identifier |
+
+`require` needs at least one matcher. `min` defaults to 1. `forbid` is optional and fails when a matching node is present. A file that does not parse fails the test with the parser diagnostic.
+
+```json
+{
+    "kind": "ast",
+    "description": "Declares slugify and never calls eval.",
+    "file": "answer.ts",
+    "language": "typescript",
+    "require": [
+        { "node": "function-declaration", "name": "slugify" },
+        { "node": "return-statement", "min": 1 }
+    ],
+    "forbid": [{ "node": "function-call", "name": "eval" }]
+}
+```
+
+AST tests prove structure, not behavior. When the language has an execution runtime, pair the AST test with a `function` test that checks a real result.
+
+## Track and mission standards
+
+The validator enforces these minimums and reports every shortfall with the track or mission id:
+
+| Track kind   | Minimum missions |
+| ------------ | ---------------- |
+| `campaign`   | 12               |
+| `language`   | 5                |
+| `framework`  | 4                |
+| `discipline` | 5                |
+
+- Every non-campaign track has at least one step with `evidence: "transfer"`.
+- Every mission is listed in at least one track, and every track reference resolves to a mission.
+- Every assessed step (every step except `lesson`) has exactly four step hints. Mission-level hints do not replace step hints.
+- Every assessed step has at least one reachable misconception. A misconception is reachable when its `answer` is a wrong option id for a quiz, rule, machine, or debug step; a test description for a code step; or when it declares an explicit `diagnostic`. Interactions that do not have enumerable options, such as order, state, trace, binary, filesystem, and network, must use `diagnostic`. Code steps may also use `testDescription`. A misconception must not match the correct answer.
+- Every mission has at least one misconception with `followUpSkill`, and every follow-up skill exists in `skills.json`.
+
 ## Hints and misconceptions
 
 - Four hints per mission, escalating from observation to a concrete next action. Each hint should help the learner think, not dump the final answer.
-- Step hints are optional but must also be exactly four when present.
-- At least two misconceptions per mission. Each must name the step, describe the incorrect belief, give corrective feedback, and optionally link a follow-up skill.
-- An optional `answer` key matches the evaluator's answer key. Do not put a full solution in a misconception.
+- Every assessed step has exactly four step hints. Do not repeat a mission hint as a step hint.
+- At least two misconceptions per mission. Each must name an assessed step, describe the incorrect belief, give corrective feedback, and at least one per mission must link a follow-up skill.
+- An optional `answer` key matches a wrong option for quiz, rule, machine, or debug steps. For code steps, `testDescription` names the failing test. For interactions without enumerable options, `diagnostic` records a specific failure signature. Do not put a full solution in a misconception.
 
 ## Reference solutions
 
@@ -157,6 +228,20 @@ Project solutions: `content-solutions/projects.json`
 - Paths must be safe relative paths and must match authored files.
 - A solution file must not be referenced by the learner-visible content.
 - The validator runs the solution against the tests where the runtime is available. A deferred runtime check is not a pass.
+- The validator also runs each mission's authored starter files. A code step with an editable starter must fail at least one executed test before the learner edits it. Steps with no editable starter are skipped. A starter that already passes every test is reported as `starter-passes-tests`.
+- Optional alternatives prove that a second valid approach is accepted. Add them under the step and keep each alternative to files that differ from the reference:
+
+```json
+{
+    "steps": {
+        "format-price": {
+            "files": { "prices.py": "…" },
+            "alternatives": [{ "files": { "prices.py": "…" } }]
+        }
+    }
+}
+```
+
 - Keep solutions out of Git history if the repository is public and the mission is meant to be a challenge? The repository currently stores them for validation. Do not ship `content-solutions/` in the web bundle or production content directory unless you intend to expose them.
 
 ## Assets and licensing
@@ -175,8 +260,11 @@ Project solutions: `content-solutions/projects.json`
 
 ```bash
 pnpm content:validate
+pnpm content:report
 pnpm exec vitest run --project content
 ```
+
+`pnpm content:report` prints a per-track mission count, the required minimum, transfer coverage, and every missing standard. It exits successfully even when content violates the standards, so contributors can collect the full work list. `pnpm content:validate` prints the same issues and fails on any error.
 
 To validate a different checkout, pass its root to the CLI:
 
