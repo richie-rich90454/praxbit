@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "slo-query": {
+            "files": {
+                "availability.sql": "SELECT service,\n       COUNT(*) AS total,\n       SUM(CASE WHEN status >= 500 THEN 1 ELSE 0 END) AS errors,\n       ROUND(\n         1.0 * SUM(CASE WHEN status < 500 THEN 1 ELSE 0 END) / COUNT(*),\n         3\n       ) AS availability\nFROM requests\nGROUP BY service\nORDER BY service;\n"
+            }
+        }
+    }
+}
