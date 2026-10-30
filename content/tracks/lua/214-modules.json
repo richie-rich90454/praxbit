@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,10 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "games",
-        "systems"
-    ],
+    "tags": ["games", "systems"],
     "accessibility": {
         "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -40,45 +34,28 @@
     "sequence": 123,
     "title": "Modules, require, and load paths",
     "summary": "Return an inventory module from its own file, require it from a script, and fix a load path that is set too late.",
-    "skills": [
-        "lua.modules",
-        "lua.tables"
-    ],
-    "prerequisites": [
-        "lua.tables",
-        "git.basics"
-    ],
+    "skills": ["lua.modules", "lua.tables"],
+    "prerequisites": ["lua.tables", "git.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Build and require a table-based module.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find a require that runs before the load path is ready.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Explain what two require calls share.",
-            "stepIds": [
-                "cache"
-            ]
+            "stepIds": ["cache"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:lua"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:lua"],
     "hints": [
         "A module is a table returned from its file.",
         "require searches package.path for a matching name.",
@@ -232,34 +209,22 @@
                     "kind": "static",
                     "description": "The module defaults missing counts to zero.",
                     "file": "inventory.lua",
-                    "includes": [
-                        "(items[name] or 0) + count"
-                    ],
-                    "excludes": [
-                        "items[name] = 0",
-                        "TODO"
-                    ]
+                    "includes": ["(items[name] or 0) + count"],
+                    "excludes": ["items[name] = 0", "TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The module exposes a total and returns its table.",
                     "file": "inventory.lua",
-                    "includes": [
-                        "function Inventory.total(items)",
-                        "return Inventory"
-                    ],
+                    "includes": ["function Inventory.total(items)", "return Inventory"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Main requires the module by name.",
                     "file": "main.lua",
-                    "includes": [
-                        "local Inventory = require(\"inventory\")"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["local Inventory = require(\"inventory\")"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
