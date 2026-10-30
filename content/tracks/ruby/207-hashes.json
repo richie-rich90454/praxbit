@@ -1,0 +1,343 @@
+{
+    "version": 1,
+    "courseId": "ruby",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "category-totals",
+        "briefing": "The campus store exports order rows as hashes. Summarize amounts by category without mutating shared defaults."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ],
+    "accessibility": {
+        "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "ruby.hashes",
+    "sequence": 207,
+    "title": "Hashes, defaults, and grouped totals",
+    "summary": "Total order rows with a default-zero hash, then diagnose a shared default array that leaks items across categories.",
+    "skills": [
+        "ruby.syntax",
+        "ruby.objects"
+    ],
+    "prerequisites": [
+        "ruby.syntax",
+        "concept.data"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Accumulate rows into a default-zero hash.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find the shared mutable default behind duplicate items.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Choose a safe default for grouping lists.",
+            "stepIds": [
+                "grouping"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:ruby"
+    ],
+    "hints": [
+        "rows.each_with_object starts from a hash you control.",
+        "Hash.new(0) gives a missing key a numeric default.",
+        "The block receives each row and the accumulating hash.",
+        "Add row[:amount] to the category total."
+    ],
+    "misconceptions": [
+        {
+            "id": "nil-append",
+            "description": "Switching to nil and appending without creating a list.",
+            "stepId": "diagnose",
+            "answer": "nil-default",
+            "feedback": "Hash.new(nil) still returns nothing to append to. The block default must create and store a new array for each key."
+        },
+        {
+            "id": "nil-default",
+            "description": "Adding to a missing key that defaults to nil.",
+            "stepId": "apply",
+            "testDescription": "Each category accumulates into a default-zero hash.",
+            "feedback": "A plain hash returns nil for a missing key, and nil + amount raises NoMethodError. Supply a zero default or fetch with a fallback.",
+            "followUpSkill": "ruby.objects"
+        },
+        {
+            "id": "shared-empty-string",
+            "description": "Using a mutable string default for grouped names.",
+            "stepId": "grouping",
+            "answer": "empty-string",
+            "feedback": "Hash.new(\"\") shares one string object. Use a block such as Hash.new { |hash, key| hash[key] = [] } so each key gets its own value."
+        },
+        {
+            "id": "string-symbol-keys",
+            "description": "Reading string keys from rows that use symbols.",
+            "stepId": "apply",
+            "diagnostic": "Looking up row[\"category\"] when the rows store row[:category].",
+            "feedback": "A Ruby symbol is not a string. Read the same key type the producer wrote, or normalize keys at the boundary.",
+            "followUpSkill": "ruby.syntax"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Hashes map keys to values",
+                "body": "A Hash stores key-value pairs: { tools: 5, paper: 2 }. A missing key returns nil by default. Ruby distinguishes symbol keys from string keys, so row[:category] and row[\"category\"] are different lookups. Use symbols for fixed field names and normalize external input at the boundary."
+            },
+            {
+                "title": "Defaults can be shared",
+                "body": "Hash.new(0) returns the same immutable zero for every missing key, so totals[key] += amount works: the read returns zero, then assignment stores the sum. Hash.new([]) is different: every missing key returns the same mutable array object. Appending to it mutates one array that all those keys share. Use Hash.new { |hash, key| hash[key] = [] } to create a fresh array per key."
+            },
+            {
+                "title": "each_with_object keeps state local",
+                "body": "rows.each_with_object(Hash.new(0)) do |row, totals| ... end passes the same accumulator into each block and returns it at the end. The block's return value is ignored, so no separate assignment is needed. Prefer this over a method-level mutable hash when a helper may be called concurrently or reused."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Hash default",
+                "definition": "The value a hash returns for a key that has not been stored."
+            },
+            {
+                "term": "each_with_object",
+                "definition": "An iteration that threads an explicit accumulator through a block."
+            },
+            {
+                "term": "Symbol key",
+                "definition": "An immutable name such as :tools used as a hash key."
+            },
+            {
+                "term": "Shared default",
+                "definition": "One mutable object returned for every missing key, causing cross-key mutation."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Hash defaults and accumulation",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Hashes map keys to values",
+                    "body": "A Hash stores key-value pairs: { tools: 5, paper: 2 }. A missing key returns nil by default. Ruby distinguishes symbol keys from string keys, so row[:category] and row[\"category\"] are different lookups. Use symbols for fixed field names and normalize external input at the boundary."
+                },
+                {
+                    "title": "Defaults can be shared",
+                    "body": "Hash.new(0) returns the same immutable zero for every missing key, so totals[key] += amount works: the read returns zero, then assignment stores the sum. Hash.new([]) is different: every missing key returns the same mutable array object. Appending to it mutates one array that all those keys share. Use Hash.new { |hash, key| hash[key] = [] } to create a fresh array per key."
+                },
+                {
+                    "title": "each_with_object keeps state local",
+                    "body": "rows.each_with_object(Hash.new(0)) do |row, totals| ... end passes the same accumulator into each block and returns it at the end. The block's return value is ignored, so no separate assignment is needed. Prefer this over a method-level mutable hash when a helper may be called concurrently or reused."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Hash default",
+                    "definition": "The value a hash returns for a key that has not been stored."
+                },
+                {
+                    "term": "each_with_object",
+                    "definition": "An iteration that threads an explicit accumulator through a block."
+                },
+                {
+                    "term": "Symbol key",
+                    "definition": "An immutable name such as :tools used as a hash key."
+                },
+                {
+                    "term": "Shared default",
+                    "definition": "One mutable object returned for every missing key, causing cross-key mutation."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Total amounts by category",
+            "prompt": "Edit main.rb. totals_by_category returns a hash that sums row[:amount] for each row[:category].",
+            "evidence": "construction",
+            "hints": [
+                "Keep the method name and the rows parameter.",
+                "Start from Hash.new(0) so missing totals read as zero.",
+                "Use each_with_object to carry the totals through the rows.",
+                "Add row[:amount] to totals[row[:category]]."
+            ],
+            "language": "ruby",
+            "files": [
+                {
+                    "path": "main.rb",
+                    "content": "def totals_by_category(rows)\n  totals = {}\n  rows.each do |row|\n    # TODO: add row[:amount] to the category total\n  end\n  totals\nend\n\nputs totals_by_category([{ category: :tools, amount: 3 }, { category: :tools, amount: 2 }, { category: :paper, amount: 4 }])\n",
+                    "editable": true,
+                    "language": "ruby"
+                }
+            ],
+            "entry": "main.rb",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "ruby main.rb",
+                "description": "Runs the file with Ruby and prints the category totals."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The method keeps the taught name and parameter.",
+                    "file": "main.rb",
+                    "includes": [
+                        "def totals_by_category(rows)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Each category accumulates into a default-zero hash.",
+                    "file": "main.rb",
+                    "includes": [
+                        "rows.each_with_object(Hash.new(0)) do |row, totals|",
+                        "totals[row[:category]] += row[:amount]"
+                    ],
+                    "excludes": [
+                        "totals = {}",
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.rb",
+                    "includes": [
+                        "def totals_by_category"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "Every category shows every item",
+            "prompt": "The grouped report lists the same items under unrelated categories. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The bug appears only when a key is read before it is stored.",
+                "Hash.new takes one default object, not a factory.",
+                "An array default is mutable and shared.",
+                "Use a block default that stores a new array per key."
+            ],
+            "instructions": [
+                {
+                    "id": "default",
+                    "label": "totals = Hash.new([])"
+                },
+                {
+                    "id": "rows",
+                    "label": "rows.each do |row|"
+                },
+                {
+                    "id": "append",
+                    "label": "  totals[row[:category]] << row[:item]"
+                },
+                {
+                    "id": "end",
+                    "label": "end"
+                }
+            ],
+            "buggyId": "default",
+            "fixes": [
+                {
+                    "id": "block-default",
+                    "label": "Use Hash.new { |hash, key| hash[key] = [] }."
+                },
+                {
+                    "id": "nil-default",
+                    "label": "Use Hash.new(nil) and append with ||= [] ."
+                },
+                {
+                    "id": "dup",
+                    "label": "Call .dup on the list after every insert."
+                }
+            ],
+            "correctFixId": "block-default",
+            "explanation": "Hash.new([]) evaluates the array once, so every missing key returns the same object. A block default runs per key and stores a fresh array, keeping categories independent."
+        },
+        {
+            "kind": "quiz",
+            "id": "grouping",
+            "title": "Pick a safe grouping default",
+            "prompt": "The next report groups item names by category. Which hash construction keeps each category's list independent?",
+            "evidence": "transfer",
+            "hints": [
+                "The default must create a new list for each missing key.",
+                "A plain object argument is evaluated once.",
+                "A block default runs on each miss.",
+                "Store the new list inside the block."
+            ],
+            "quiz": {
+                "prompt": "The next report groups item names by category. Which hash construction keeps each category's list independent?",
+                "options": [
+                    {
+                        "id": "block",
+                        "label": "Hash.new { |hash, key| hash[key] = [] }"
+                    },
+                    {
+                        "id": "array",
+                        "label": "Hash.new([])"
+                    },
+                    {
+                        "id": "nil",
+                        "label": "Hash.new(nil)"
+                    },
+                    {
+                        "id": "empty-string",
+                        "label": "Hash.new(\"\")"
+                    }
+                ],
+                "correctId": "block",
+                "explanation": "The block runs for each missing key and stores a new array. Hash.new([]) and Hash.new(\"\") share one mutable object, and nil cannot be appended to."
+            }
+        }
+    ]
+}
