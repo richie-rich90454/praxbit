@@ -78,6 +78,17 @@ describe("server configuration", function configurationSuite(): void {
         expect(config.rateLimits.aiHintsPerHour).toBeGreaterThan(0);
     });
 
+    it("accepts Capacitor origins for native API clients", function testNativeCors(): void {
+        const config = loadConfiguration({
+            ...baseEnvironment(),
+            CORS_ORIGINS: "https://localhost,capacitor://localhost",
+        });
+        expect(config.corsOrigins).toEqual(["https://localhost", "capacitor://localhost"]);
+        expect(function invalidScheme(): void {
+            loadConfiguration({ ...baseEnvironment(), CORS_ORIGINS: "file://localhost" });
+        }).toThrow(/capacitor:\/\//);
+    });
+
     it("requires the web build only in production", async function testWebBuildRequirement(): Promise<void> {
         const directory = await temporaryDirectory();
         expect(isWebBuildPresent(directory)).toBe(false);
