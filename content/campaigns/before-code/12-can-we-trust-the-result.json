@@ -1,6 +1,6 @@
 {
     "id": "before-code.can-we-trust-the-result",
-    "version": 1,
+    "version": 2,
     "sequence": 12,
     "courseId": "before-code",
     "title": "Can we trust the result?",
@@ -49,13 +49,25 @@
             "id": "one-test-proves-all",
             "description": "Treating one passing example as proof of universal correctness.",
             "stepId": "patch-review",
-            "feedback": "A test checks a case, not every case. The patch still accepts zero and negative quantities."
+            "answer": "safe",
+            "feedback": "A test checks a case, not every case. The patch still accepts zero and negative quantities.",
+            "followUpSkill": "concept.testing"
         },
         {
             "id": "boundary-is-optional",
             "description": "Skipping edge cases because the happy path works.",
             "stepId": "test-cases",
-            "feedback": "Boundaries are where counts and comparisons change behavior. Testing only the ordinary case hides off-by-one and zero/negative mistakes."
+            "answer": "normal",
+            "feedback": "Boundaries are where counts and comparisons change behavior. Testing only the ordinary case hides off-by-one and zero or negative mistakes.",
+            "followUpSkill": "testing.boundaries"
+        },
+        {
+            "id": "confidence-is-ownership",
+            "description": "Believing AI confidence transfers responsibility away from the reviewer.",
+            "stepId": "responsibility-check",
+            "answer": "ai-authority",
+            "feedback": "Responsibility stays with the person who accepts the change. Confident output is still output that must be verified.",
+            "followUpSkill": "concept.responsibility"
         }
     ],
     "lesson": {
@@ -88,6 +100,12 @@
         {
             "kind": "test-design",
             "id": "test-cases",
+            "hints": [
+                "Choose the smallest set that covers ordinary use and both edges of the rule.",
+                "Boundaries are the values where the decision changes: 0, 1, stock, and stock + 1.",
+                "For a rule of 1 through 5 inclusive, test 0, 1, 5, and 6 rather than repeating 3.",
+                "Pair one ordinary case with the values where the rule changes decision, including both sides of the upper bound. A repeated ordinary case and reading code add nothing."
+            ],
             "title": "Choose the tests",
             "prompt": "The rule is: allow a shipment only when quantity is between 1 and available stock, inclusive. Select the cases you would keep.",
             "evidence": "testing",
@@ -133,6 +151,12 @@
         {
             "kind": "review",
             "id": "patch-review",
+            "hints": [
+                "Compare the patch's condition with the full rule and with the evidence it claims.",
+                "A review checks lower and upper bounds, invalid input, and whether the tests support the claim.",
+                "quantity <= stock is true for 0 and -1, so the same condition fails two boundary cases.",
+                "Use the selected findings to judge the deployment claim. A single ordinary case cannot justify accepting a range bug."
+            ],
             "title": "Review the AI patch",
             "prompt": "Inspect the patch and the claim. Select every finding supported by the evidence, then choose a verdict.",
             "evidence": "review",
@@ -190,6 +214,12 @@
         {
             "kind": "explain",
             "id": "responsibility-check",
+            "hints": [
+                "Select statements about who answers for a deployed change.",
+                "Delegation transfers work, not accountability, and claims need evidence proportional to impact.",
+                "A bridge engineer can delegate inspections but still owns the safety sign-off.",
+                "Two statements are responsible; reject compilation as proof and confidence as a substitute for verification."
+            ],
             "title": "Who owns the outcome?",
             "prompt": "Select every statement that reflects responsible engineering.",
             "evidence": "explanation",
