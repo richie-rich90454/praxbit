@@ -1,0 +1,365 @@
+{
+    "id": "spring-boot.validation",
+    "version": 1,
+    "sequence": 159,
+    "courseId": "spring-boot",
+    "title": "Validation and one error shape",
+    "summary": "Validate a JSON body with Bean Validation and turn field failures into ProblemDetail responses.",
+    "skills": [
+        "spring.controllers",
+        "spring.boot"
+    ],
+    "prerequisites": [
+        "spring.controllers",
+        "api.validation"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "validation",
+        "briefing": "The product endpoint accepts a blank name and a negative stock, so invalid rows reach the database. Validation failures also return a generic 500. Validate the request and return one stable 400 shape."
+    },
+    "objectives": [
+        {
+            "id": "objective-validate",
+            "description": "Attach constraints to the request contract and trigger them.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-errors",
+            "description": "Explain how Bean Validation failures become ProblemDetail responses.",
+            "stepIds": [
+                "check"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Apply the validation boundary to a new parameter.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:spring"
+    ],
+    "hints": [
+        "Bean Validation constraints belong on the request record, not on the entity.",
+        "Add @Valid to the @RequestBody parameter so the constraints run.",
+        "Use @NotBlank with a size limit for the name and @PositiveOrZero for the stock.",
+        "Handle MethodArgumentNotValidException in a @RestControllerAdvice and return ProblemDetail.forStatusAndDetail."
+    ],
+    "misconceptions": [
+        {
+            "id": "valid-missing",
+            "description": "Adding constraints without @Valid on the parameter.",
+            "stepId": "apply",
+            "testDescription": "The request body is validated before the service runs.",
+            "feedback": "Constraints on a record are metadata until a validation trigger runs. Put @Valid on the @RequestBody parameter.",
+            "followUpSkill": "spring.controllers"
+        },
+        {
+            "id": "wrong-status",
+            "description": "Answering 200 after creating a resource.",
+            "stepId": "apply",
+            "testDescription": "A created product is answered with 201.",
+            "feedback": "A successful create returns 201 and a Location or body that identifies the new resource. Use ResponseEntity.status(HttpStatus.CREATED)."
+        },
+        {
+            "id": "stack-trace",
+            "description": "Returning the exception and stack trace to the client.",
+            "stepId": "apply",
+            "testDescription": "The response never exposes a stack trace.",
+            "feedback": "ProblemDetail carries a status, title, and detail. Log the exception on the server; do not serialize the stack."
+        },
+        {
+            "id": "advice-scope",
+            "description": "Expecting @ExceptionHandler on a controller to cover other controllers.",
+            "stepId": "check",
+            "diagnostic": "Believing a handler declared on one controller applies across the application.",
+            "feedback": "@RestControllerAdvice is the shared boundary. A handler on one controller only covers that controller.",
+            "followUpSkill": "spring.controllers"
+        },
+        {
+            "id": "automatic-method-validation",
+            "description": "Assuming every constraint is enforced without a trigger.",
+            "stepId": "transfer",
+            "answer": "automatic-400",
+            "feedback": "Constraints are metadata. A body needs @Valid, and method parameters need @Validated on the controller.",
+            "followUpSkill": "spring.controllers"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Constraints describe the request contract",
+                "body": "Bean Validation annotations such as @NotBlank, @Size, and @PositiveOrZero declare what a valid request looks like. On a record, the annotations sit on the components. @Valid on the controller parameter tells Spring to run the validator and collect field errors before the method body executes."
+            },
+            {
+                "title": "A validation failure is a client error",
+                "body": "Spring raises MethodArgumentNotValidException when a @Valid body fails. An @ExceptionHandler in an @RestControllerAdvice can translate that exception into a 400 response. ProblemDetail is the standard error body introduced for RFC 9457 and carries a status, title, detail, and extension properties."
+            },
+            {
+                "title": "Keep one boundary",
+                "body": "Handling validation in every controller duplicates the shape and lets messages drift. One advice class gives every endpoint the same status and field list, while the service layer can assume its input already satisfies the contract."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Bean Validation",
+                "definition": "The annotation-based constraint model used by Jakarta Validation."
+            },
+            {
+                "term": "@Valid",
+                "definition": "The trigger that asks Spring to validate a bound argument."
+            },
+            {
+                "term": "ProblemDetail",
+                "definition": "A standard error body with status, title, detail, and extensions."
+            },
+            {
+                "term": "Controller advice",
+                "definition": "A class whose exception handlers apply across controllers."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Constraints, triggers, and error responses",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Constraints describe the request contract",
+                    "body": "Bean Validation annotations such as @NotBlank, @Size, and @PositiveOrZero declare what a valid request looks like. On a record, the annotations sit on the components. @Valid on the controller parameter tells Spring to run the validator and collect field errors before the method body executes."
+                },
+                {
+                    "title": "A validation failure is a client error",
+                    "body": "Spring raises MethodArgumentNotValidException when a @Valid body fails. An @ExceptionHandler in an @RestControllerAdvice can translate that exception into a 400 response. ProblemDetail is the standard error body introduced for RFC 9457 and carries a status, title, detail, and extension properties."
+                },
+                {
+                    "title": "Keep one boundary",
+                    "body": "Handling validation in every controller duplicates the shape and lets messages drift. One advice class gives every endpoint the same status and field list, while the service layer can assume its input already satisfies the contract."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Bean Validation",
+                    "definition": "The annotation-based constraint model used by Jakarta Validation."
+                },
+                {
+                    "term": "@Valid",
+                    "definition": "The trigger that asks Spring to validate a bound argument."
+                },
+                {
+                    "term": "ProblemDetail",
+                    "definition": "A standard error body with status, title, detail, and extensions."
+                },
+                {
+                    "term": "Controller advice",
+                    "definition": "A class whose exception handlers apply across controllers."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Validate the create route",
+            "prompt": "Edit ProductController.java. Add constraints to CreateProduct, trigger validation with @Valid, return 201 on success, and map field failures to a 400 ProblemDetail in a shared advice.",
+            "evidence": "construction",
+            "language": "text",
+            "hints": [
+                "Keep the constructor and the POST mapping.",
+                "Put @NotBlank and @Size on the name and @PositiveOrZero on the stock.",
+                "Add @Valid to the @RequestBody parameter and return ResponseEntity<Product>.",
+                "Create an @RestControllerAdvice with an @ExceptionHandler(MethodArgumentNotValidException.class) method that returns ProblemDetail."
+            ],
+            "files": [
+                {
+                    "path": "ProductController.java",
+                    "content": "package com.praxbit.catalog;\n\nimport org.springframework.web.bind.annotation.PostMapping;\nimport org.springframework.web.bind.annotation.RequestBody;\nimport org.springframework.web.bind.annotation.RestController;\n\n@RestController\npublic class ProductController {\n    private final ProductService service;\n\n    public ProductController(ProductService service) {\n        this.service = service;\n    }\n\n    @PostMapping(\"/api/products\")\n    public Product create(@RequestBody CreateProduct request) {\n        // TODO: validate the request and return 201 with the created product\n        return service.create(request.name(), request.stock());\n    }\n}\n\nrecord CreateProduct(String name, int stock) {\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "ProductController.java",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "mvn test",
+                "description": "Compile the project and run the Spring Boot validation and controller tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The request body is validated before the service runs.",
+                    "file": "ProductController.java",
+                    "includes": [
+                        "@Valid @RequestBody CreateProduct request",
+                        "record CreateProduct(",
+                        "@NotBlank @Size(max = 120) String name",
+                        "@PositiveOrZero int stock"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A created product is answered with 201.",
+                    "file": "ProductController.java",
+                    "includes": [
+                        "public ResponseEntity<Product> create(",
+                        "ResponseEntity.status(HttpStatus.CREATED).body(product)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Validation failures become a ProblemDetail response.",
+                    "file": "ProductController.java",
+                    "includes": [
+                        "@RestControllerAdvice",
+                        "@ExceptionHandler(MethodArgumentNotValidException.class)",
+                        "ProblemDetail.forStatusAndDetail"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The response never exposes a stack trace.",
+                    "file": "ProductController.java",
+                    "includes": [
+                        "ProblemDetail"
+                    ],
+                    "excludes": [
+                        "\"stack\""
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "ProductController.java",
+                    "includes": [
+                        "@RestController"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "How validation reaches the response",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Separate the constraint declaration from the validation trigger.",
+                "A field failure is a client error, not a server failure.",
+                "ProblemDetail is a response body, not an exception type.",
+                "A controller advice shares handlers across controllers."
+            ],
+            "statements": [
+                {
+                    "id": "valid-trigger",
+                    "label": "@Valid on a @RequestBody parameter runs the constraints before the handler body.",
+                    "correct": true
+                },
+                {
+                    "id": "problem-detail",
+                    "label": "ProblemDetail can carry a status, title, detail, and custom properties.",
+                    "correct": true
+                },
+                {
+                    "id": "advice",
+                    "label": "@RestControllerAdvice lets one exception handler serve multiple controllers.",
+                    "correct": true
+                },
+                {
+                    "id": "constraints-false",
+                    "label": "Constraints on a record component are ignored unless the record is also an entity.",
+                    "correct": false
+                },
+                {
+                    "id": "status-false",
+                    "label": "A validation failure should return 500 so clients know the request was rejected.",
+                    "correct": false
+                }
+            ],
+            "explanation": "@Valid is the trigger that runs Bean Validation on the bound body. A failure is a client error and becomes a 400. ProblemDetail is the standard body, and an advice class makes the handler shared instead of duplicating it in every controller."
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfers to a query parameter",
+            "prompt": "A teammate adds @Positive to a query parameter on a controller that has no @Validated annotation. What happens?",
+            "evidence": "transfer",
+            "hints": [
+                "The constraint exists, but the trigger is the question.",
+                "Bean Validation on a body and method validation on parameters use different triggers.",
+                "Without @Validated, Spring does not apply method-level constraints.",
+                "The request reaches the handler and the constraint is not enforced."
+            ],
+            "quiz": {
+                "prompt": "A teammate adds @Positive to a query parameter on a controller that has no @Validated annotation. What happens?",
+                "options": [
+                    {
+                        "id": "not-validated",
+                        "label": "The constraint is not applied; method validation needs @Validated on the controller."
+                    },
+                    {
+                        "id": "automatic-400",
+                        "label": "Spring returns 400 automatically because every constraint is always enforced."
+                    },
+                    {
+                        "id": "server-error",
+                        "label": "Spring returns 500 because the constraint cannot run without @Valid."
+                    },
+                    {
+                        "id": "ignored-value",
+                        "label": "Spring removes the parameter from the method signature."
+                    }
+                ],
+                "correctId": "not-validated",
+                "explanation": "@Valid covers a bound body. Constraints on method parameters require method validation, which Spring enables for a controller annotated with @Validated. Without the trigger, the handler receives the value unchecked."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
