@@ -1,0 +1,344 @@
+{
+    "version": 1,
+    "courseId": "kotlin",
+    "prerequisites": [
+        "kotlin.coroutines",
+        "concept.iteration"
+    ],
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "sensor-flow",
+        "briefing": "A rover streams wheel-speed readings. The dashboard needs two doubled samples and must stop collecting when the screen closes."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ],
+    "accessibility": {
+        "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "kotlin.flow",
+    "sequence": 203,
+    "title": "Flows, limits, and cancellation",
+    "summary": "Transform a cold Flow, stop after two readings, and repair a loop that ignores cancellation.",
+    "skills": [
+        "kotlin.coroutines",
+        "kotlin.oop"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Transform and limit a cold Flow.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Repair a producer that ignores cancellation.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Identify the terminal operation that starts collection.",
+            "stepIds": [
+                "start"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:kotlin"
+    ],
+    "hints": [
+        "Flow operators are lazy until a terminal operation collects.",
+        "map transforms each emitted value.",
+        "take(2) completes the flow after two values.",
+        "toList collects the remaining emissions into a list."
+    ],
+    "misconceptions": [
+        {
+            "id": "eager-flow",
+            "description": "Expecting a Flow builder to run before collection.",
+            "stepId": "apply",
+            "testDescription": "The flow is doubled, limited, and collected with Flow operators.",
+            "feedback": "A flow builder is cold. Nothing is emitted until collect, toList, first, or another terminal operation runs.",
+            "followUpSkill": "kotlin.coroutines"
+        },
+        {
+            "id": "shared-mutable-list",
+            "description": "Collecting into a shared mutable list from several coroutines.",
+            "stepId": "apply",
+            "diagnostic": "Collecting concurrent flows into one mutableListOf without synchronization or a Channel.",
+            "feedback": "A plain MutableList is not thread-safe. Let each collection produce its own value, or use a Channel or StateFlow for shared state.",
+            "followUpSkill": "kotlin.coroutines"
+        },
+        {
+            "id": "noncancellable",
+            "description": "Hiding a producer from cancellation.",
+            "stepId": "diagnose",
+            "answer": "noncancellable",
+            "feedback": "NonCancellable is only for cleanup that must finish. A long-running producer must observe cancellation."
+        },
+        {
+            "id": "operator-starts",
+            "description": "Believing map or take starts a cold flow.",
+            "stepId": "start",
+            "answer": "map",
+            "feedback": "Intermediate operators return another cold flow. Only a terminal operation such as collect starts the producer."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Flows are cold streams",
+                "body": "flow { emit(read()) } builds a cold stream. Each collector runs the builder again, so producers are not shared by default. Intermediate operators such as map, filter, and take return a new flow description. Terminal operations such as collect, toList, and first start the work."
+            },
+            {
+                "title": "Cancellation is cooperative",
+                "body": "A coroutine stops only where it checks for cancellation or suspends in a cancellable call. A tight while (true) loop that never suspends keeps running after its scope is cancelled. Call currentCoroutineContext().ensureActive() inside long loops, and keep blocking work off the dispatcher. finally blocks run during cancellation, but suspending cleanup needs withContext(NonCancellable) if it must complete."
+            },
+            {
+                "title": "Test flows with a controlled scope",
+                "body": "kotlinx-coroutines-test provides runTest, which skips delays and fails when work leaks past the test. Collect the flow with toList and compare the result. Keep take and flowOf in tests so the suite does not depend on a real sensor clock."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Cold flow",
+                "definition": "A flow whose builder runs separately for each collector."
+            },
+            {
+                "term": "Terminal operation",
+                "definition": "An operation such as collect or toList that starts a flow."
+            },
+            {
+                "term": "Cooperative cancellation",
+                "definition": "Cancellation that takes effect only at suspension or explicit checks."
+            },
+            {
+                "term": "NonCancellable",
+                "definition": "A context used for cleanup that must finish during cancellation."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Cold streams and cancellation",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Flows are cold streams",
+                    "body": "flow { emit(read()) } builds a cold stream. Each collector runs the builder again, so producers are not shared by default. Intermediate operators such as map, filter, and take return a new flow description. Terminal operations such as collect, toList, and first start the work."
+                },
+                {
+                    "title": "Cancellation is cooperative",
+                    "body": "A coroutine stops only where it checks for cancellation or suspends in a cancellable call. A tight while (true) loop that never suspends keeps running after its scope is cancelled. Call currentCoroutineContext().ensureActive() inside long loops, and keep blocking work off the dispatcher. finally blocks run during cancellation, but suspending cleanup needs withContext(NonCancellable) if it must complete."
+                },
+                {
+                    "title": "Test flows with a controlled scope",
+                    "body": "kotlinx-coroutines-test provides runTest, which skips delays and fails when work leaks past the test. Collect the flow with toList and compare the result. Keep take and flowOf in tests so the suite does not depend on a real sensor clock."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Cold flow",
+                    "definition": "A flow whose builder runs separately for each collector."
+                },
+                {
+                    "term": "Terminal operation",
+                    "definition": "An operation such as collect or toList that starts a flow."
+                },
+                {
+                    "term": "Cooperative cancellation",
+                    "definition": "Cancellation that takes effect only at suspension or explicit checks."
+                },
+                {
+                    "term": "NonCancellable",
+                    "definition": "A context used for cleanup that must finish during cancellation."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Double and limit the readings",
+            "prompt": "Edit Main.kt. firstDoubled collects the first two readings, doubles each one, and returns them in order.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the Flow<Int> parameter and the suspend modifier.",
+                "Map each reading before limiting the stream.",
+                "take(2) completes after two values.",
+                "Use toList to collect the result."
+            ],
+            "language": "kotlin",
+            "files": [
+                {
+                    "path": "Main.kt",
+                    "content": "import kotlinx.coroutines.flow.Flow\n\nsuspend fun firstDoubled(readings: Flow<Int>): List<Int> {\n    // TODO: double each reading, take the first two, and collect to a list\n    return emptyList()\n}\n",
+                    "editable": true,
+                    "language": "kotlin"
+                }
+            ],
+            "entry": "Main.kt",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "./gradlew test --tests 'FirstDoubledTest'",
+                "description": "Runs the project's Flow tests with the Gradle wrapper, using kotlinx-coroutines-test."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The loader remains a suspend function over a Flow.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "import kotlinx.coroutines.flow.Flow",
+                        "suspend fun firstDoubled(readings: Flow<Int>): List<Int>"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The flow is doubled, limited, and collected with Flow operators.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "map { it * 2 }",
+                        "take(2)",
+                        "toList()"
+                    ],
+                    "excludes": [
+                        "emptyList()",
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "suspend fun firstDoubled"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The producer that never stops",
+            "prompt": "The rover link keeps sampling after the dashboard closes. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "Cancellation reaches a coroutine only at a suspension point or check.",
+                "The loop never suspends or checks the context.",
+                "NonCancellable makes the problem worse.",
+                "Call ensureActive inside the loop."
+            ],
+            "instructions": [
+                {
+                    "id": "builder",
+                    "label": "flow {"
+                },
+                {
+                    "id": "loop",
+                    "label": "    while (true) {"
+                },
+                {
+                    "id": "emit",
+                    "label": "        emit(read())"
+                },
+                {
+                    "id": "close",
+                    "label": "    }"
+                }
+            ],
+            "buggyId": "loop",
+            "fixes": [
+                {
+                    "id": "ensure-active",
+                    "label": "Call currentCoroutineContext().ensureActive() inside the loop."
+                },
+                {
+                    "id": "noncancellable",
+                    "label": "Wrap the loop in withContext(NonCancellable)."
+                },
+                {
+                    "id": "swallow",
+                    "label": "Catch CancellationException and continue sampling."
+                }
+            ],
+            "correctFixId": "ensure-active",
+            "explanation": "A tight loop with no suspension point never observes cancellation. NonCancellable explicitly hides the scope from cancellation, and swallowing CancellationException breaks structured concurrency."
+        },
+        {
+            "kind": "quiz",
+            "id": "start",
+            "title": "What starts the stream",
+            "prompt": "Which call actually starts collecting a cold Flow?",
+            "evidence": "transfer",
+            "hints": [
+                "Intermediate operators describe work; they do not run it.",
+                "map and take return another flow.",
+                "flowOf builds a flow rather than consuming one.",
+                "A terminal operation consumes the stream."
+            ],
+            "quiz": {
+                "prompt": "Which call actually starts collecting a cold Flow?",
+                "options": [
+                    {
+                        "id": "collect",
+                        "label": "collect { value -> println(value) }"
+                    },
+                    {
+                        "id": "map",
+                        "label": "map { value -> value * 2 }"
+                    },
+                    {
+                        "id": "take",
+                        "label": "take(2)"
+                    },
+                    {
+                        "id": "flowOf",
+                        "label": "flowOf(1, 2, 3)"
+                    }
+                ],
+                "correctId": "collect",
+                "explanation": "collect is a terminal operation, so it runs the builder. map and take only add intermediate stages, and flowOf creates another cold flow."
+            }
+        }
+    ]
+}
