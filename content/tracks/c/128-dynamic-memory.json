@@ -5,22 +5,14 @@
     "courseId": "c",
     "title": "Grow a buffer safely",
     "summary": "Allocate a result buffer, return ownership to the caller, and handle realloc failure.",
-    "skills": [
-        "c.pointers",
-        "c.memory"
-    ],
-    "prerequisites": [
-        "c.memory"
-    ],
+    "skills": ["c.pointers", "c.memory"],
+    "prerequisites": ["c.memory"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "allocate-result",
             "description": "Allocate and return an owned result buffer.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "diagnose-realloc",
             "description": "Diagnose a lost allocation during realloc.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "explain-heap",
             "description": "Explain heap lifetime and realloc behavior accurately.",
-            "stepIds": [
-                "memory-check"
-            ]
+            "stepIds": ["memory-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:c"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:c"],
     "hints": [
         "A local array cannot be returned from the function.",
         "Allocate length integers with malloc.",
@@ -190,21 +171,14 @@
                     "kind": "static",
                     "description": "The result is allocated on the heap.",
                     "file": "main.c",
-                    "includes": [
-                        "malloc(",
-                        "(size_t)length * sizeof(int)"
-                    ],
-                    "excludes": [
-                        "int fixed[8]"
-                    ]
+                    "includes": ["malloc(", "(size_t)length * sizeof(int)"],
+                    "excludes": ["int fixed[8]"]
                 },
                 {
                     "kind": "static",
                     "description": "The caller releases the returned buffer.",
                     "file": "main.c",
-                    "includes": [
-                        "free(positives);"
-                    ],
+                    "includes": ["free(positives);"],
                     "excludes": []
                 },
                 {
@@ -214,9 +188,7 @@
                     "includes": [
                         "int *copy_positives(const int *values, int length, int *out_length)"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -317,9 +289,7 @@
     },
     "rewards": {
         "experience": 145,
-        "unlocks": [
-            "c.sockets"
-        ]
+        "unlocks": ["c.sockets"]
     },
     "persistence": {
         "kind": "none"
@@ -330,7 +300,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
