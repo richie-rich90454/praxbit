@@ -1,18 +1,28 @@
 {
     "id": "ai-practice.evaluation",
     "version": 1,
-    "sequence": 406,
+    "sequence": 198,
     "courseId": "ai-practice",
     "title": "Measure the answer, not the vibe",
     "summary": "Score a fixed evaluation set, separate regressions from noise, and analyze failures by category.",
-    "skills": ["ai.evaluation", "concept.testing"],
-    "prerequisites": ["ai.evaluation", "concept.testing"],
+    "skills": [
+        "ai.evaluation",
+        "concept.testing"
+    ],
+    "prerequisites": [
+        "ai.evaluation",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +34,31 @@
         {
             "id": "score",
             "description": "Score a fixed set with exact, reproducible comparisons.",
-            "stepIds": ["score-cases"]
+            "stepIds": [
+                "score-cases"
+            ]
         },
         {
             "id": "design-set",
             "description": "Choose an evaluation set with coverage and regressions.",
-            "stepIds": ["eval-set"]
+            "stepIds": [
+                "eval-set"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain error analysis and threshold decisions.",
-            "stepIds": ["eval-transfer"]
+            "stepIds": [
+                "eval-transfer"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:chart"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:chart"
+    ],
     "hints": [
         "An evaluation needs fixed inputs and expected outputs.",
         "Compare structured values canonically, not by display text.",
@@ -224,7 +245,10 @@
                     "expected": {
                         "total": 3,
                         "passed": 1,
-                        "failed": ["b", "c"]
+                        "failed": [
+                            "b",
+                            "c"
+                        ]
                     }
                 },
                 {
@@ -262,7 +286,9 @@
                     "kind": "function",
                     "description": "Handles an empty set.",
                     "name": "scoreCases",
-                    "args": [[]],
+                    "args": [
+                        []
+                    ],
                     "expected": {
                         "total": 0,
                         "passed": 0,
@@ -277,7 +303,10 @@
                         [
                             {
                                 "id": "shape",
-                                "expected": [1, 2],
+                                "expected": [
+                                    1,
+                                    2
+                                ],
                                 "actual": {
                                     "0": 1,
                                     "1": 2
@@ -288,7 +317,9 @@
                     "expected": {
                         "total": 1,
                         "passed": 0,
-                        "failed": ["shape"]
+                        "failed": [
+                            "shape"
+                        ]
                     }
                 }
             ]
@@ -388,5 +419,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
