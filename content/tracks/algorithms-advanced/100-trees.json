@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "sorted-insert",
-            "description": "Inserting sorted keys into a plain binary search tree and expecting logarithmic height.",
+            "description": "Inserting sorted values into an unbalanced search tree.",
             "stepId": "review",
-            "feedback": "A plain BST has no balancing step. Ascending keys create a chain; use a balanced tree or a median-first insertion order."
+            "answer": "ship:chain,order,rotation",
+            "feedback": "Sorted insertion produces a linked chain with linear search. A balanced tree or a different structure is required.",
+            "followUpSkill": "algorithms.complexity"
         },
         {
             "id": "sibling-order",
-            "description": "Expecting a heap to order left and right children.",
+            "description": "Comparing siblings instead of parent and child in a heap.",
             "stepId": "apply",
-            "feedback": "A heap only guarantees parent-child order. Siblings have no required relationship."
+            "testDescription": "Parent and child indexes follow the array heap layout.",
+            "feedback": "A heap orders each parent against its children. Sibling order is irrelevant."
         },
         {
             "id": "scan-heap",
-            "description": "Rebuilding the heap by scanning all values after every insert.",
+            "description": "Scanning the whole heap to find the next value.",
             "stepId": "apply",
-            "feedback": "Bubbling one path is O(log n); a full scan is O(n) per operation."
+            "testDescription": "Extract moves the last value to the root and bubbles it down.",
+            "feedback": "Extract replaces the root with the last value and repairs downward, keeping the operation logarithmic."
         }
     ],
     "lesson": {
@@ -219,7 +223,18 @@
                     "includes": ["export class MinHeap {"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Insert at the next free index, then restore heap order upward.",
+                "Extract by replacing the root with the last value, then bubble down.",
+                "Compare a parent at i with children at 2i+1 and 2i+2.",
+                "Stop each repair loop as soon as the parent-child order holds."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -276,7 +291,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The insert function preserves the BST invariant, but ascending keys create a right spine. Search and insert then walk O(n) nodes. The shape must be bounded by a balanced tree or a different insertion order before this is used for deadlines."
+            "explanation": "The insert function preserves the BST invariant, but ascending keys create a right spine. Search and insert then walk O(n) nodes. The shape must be bounded by a balanced tree or a different insertion order before this is used for deadlines.",
+            "hints": [
+                "Check whether the tree is balanced under the stated operation.",
+                "Look for a linear scan hidden inside a logarithmic operation.",
+                "Verify the heap invariant and the rotation logic.",
+                "Block the change: ordered insertion makes a chain, and a scan breaks the heap's cost."
+            ]
         }
     ],
     "evaluation": {
