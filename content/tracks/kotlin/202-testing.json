@@ -40,7 +40,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "kotlin.testing",
-    "sequence": 202,
+    "sequence": 103,
     "title": "Validate configuration without exceptions",
     "summary": "Turn malformed port text into null instead of an exception, then diagnose a fallback that hides bad configuration.",
     "skills": [
