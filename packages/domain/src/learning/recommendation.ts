@@ -29,6 +29,34 @@ export interface MissionRecommendation {
 }
 
 const MASTERY_ELIGIBILITY = 0.6;
+const DAY_MS = 86_400_000;
+
+export const PRACTICE_BUDGET_MINUTES: Readonly<Record<SessionLength, number>> = {
+    short: 5,
+    medium: 12,
+    long: 25,
+};
+
+const PRACTICE_ACTIVITY_LIMIT: Readonly<Record<SessionLength, number>> = {
+    short: 1,
+    medium: 3,
+    long: 4,
+};
+
+interface ScoringSets {
+    readonly dueSkillIds: ReadonlySet<string>;
+    readonly completed: ReadonlySet<string>;
+    readonly skipped: ReadonlySet<string>;
+    readonly completedSkills: ReadonlySet<string>;
+    readonly weakSkills: ReadonlySet<string>;
+}
+
+interface ScoredMission {
+    readonly mission: Mission;
+    readonly score: number;
+    readonly reasons: readonly string[];
+    readonly dueMatches: number;
+}
 
 function intersectionSize(left: readonly string[], right: readonly string[]): number {
     const set = new Set(left);
@@ -41,133 +69,180 @@ function intersectionSize(left: readonly string[], right: readonly string[]): nu
     return count;
 }
 
-function stringHash(value: string): number {
-    let hash = 0;
-    for (let index = 0; index < value.length; index += 1) {
-        hash = (hash * 31 + value.charCodeAt(index)) | 0;
+function dueSkillIds(context: RecommendationContext): readonly string[] {
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    for (const review of context.reviews) {
+        if (new Date(review.dueAt).getTime() > context.now.getTime() || seen.has(review.skillId)) {
+            continue;
+        }
+        seen.add(review.skillId);
+        ids.push(review.skillId);
     }
-    return Math.abs(hash);
+    return ids;
+}
+
+function scoringSets(context: RecommendationContext): ScoringSets {
+    return {
+        dueSkillIds: new Set(dueSkillIds(context)),
+        completed: new Set(context.completedMissionIds),
+        skipped: new Set(context.skippedSkills),
+        completedSkills: new Set(context.completedMissionSkills ?? []),
+        weakSkills: new Set(
+            Object.entries(context.mastery)
+                .filter(function isWeak(entry): boolean {
+                    return entry[1] < 0.5;
+                })
+                .map(function skillId(entry): string {
+                    return entry[0];
+                }),
+        ),
+    };
+}
+
+function scoreMission(
+    mission: Mission,
+    context: RecommendationContext,
+    sets: ScoringSets,
+): ScoredMission | undefined {
+    const eligible =
+        mission.prerequisites.length === 0 ||
+        mission.prerequisites.every(function ready(skillId: string): boolean {
+            return (
+                sets.skipped.has(skillId) ||
+                sets.completedSkills.has(skillId) ||
+                (context.mastery[skillId] ?? 0) >= MASTERY_ELIGIBILITY
+            );
+        });
+    if (!eligible) {
+        return undefined;
+    }
+
+    const dueMatches = mission.skills.filter(function due(skillId: string): boolean {
+        return sets.dueSkillIds.has(skillId);
+    }).length;
+    const isCompleted = sets.completed.has(mission.id);
+    if (isCompleted && dueMatches === 0) {
+        return undefined;
+    }
+
+    const reasons: string[] = [];
+    let score = 0;
+    let overdueDays = 0;
+
+    if (dueMatches > 0) {
+        score += Math.min(120, dueMatches * 60);
+        reasons.push("Review is due for a skill this mission practices.");
+        for (const review of context.reviews) {
+            if (!mission.skills.includes(review.skillId)) {
+                continue;
+            }
+            const due = new Date(review.dueAt).getTime();
+            if (due <= context.now.getTime()) {
+                overdueDays = Math.max(
+                    overdueDays,
+                    Math.floor((context.now.getTime() - due) / DAY_MS),
+                );
+            }
+        }
+        score += Math.min(30, overdueDays * 5);
+    }
+    if (isCompleted) {
+        score -= 20;
+        reasons.push("This mission is a review of completed work.");
+    }
+
+    const weakMatches = mission.skills.filter(function weak(skillId: string): boolean {
+        return sets.weakSkills.has(skillId);
+    }).length;
+    if (weakMatches > 0 && !isCompleted) {
+        score += weakMatches * 10;
+        reasons.push("It strengthens a skill with limited evidence.");
+    }
+
+    const misconceptionMatches = intersectionSize(mission.skills, context.misconceptionSkills);
+    if (misconceptionMatches > 0 && !isCompleted) {
+        score += 18 * misconceptionMatches;
+        reasons.push("It revisits a misconception you encountered.");
+    }
+
+    const failureMatches = intersectionSize(mission.skills, context.recentFailureSkills);
+    if (failureMatches > 0) {
+        score += 8 * failureMatches;
+        reasons.push("It offers another attempt at a recent difficulty.");
+    }
+
+    const interestMatches = intersectionSize(mission.tags, context.interests);
+    if (interestMatches > 0) {
+        score += 14 * interestMatches;
+        reasons.push("It matches your selected interests.");
+    }
+
+    const lastSequence = context.completedSequences[mission.courseId] ?? 0;
+    if (mission.sequence === lastSequence + 1) {
+        score += 22;
+        reasons.push("It continues the story where you stopped.");
+    } else if (mission.sequence <= lastSequence) {
+        score -= 15;
+    }
+
+    const difficultyFit = challengeFit(mission, context.challenge);
+    score += difficultyFit;
+    if (difficultyFit >= 10) {
+        reasons.push("The difficulty matches your selected challenge level.");
+    }
+
+    const novelSkills = mission.skills.filter(function novel(skillId: string): boolean {
+        return !sets.completedSkills.has(skillId);
+    }).length;
+    if (novelSkills > 0 && sets.completedSkills.size > 0 && !isCompleted) {
+        score += Math.min(8, novelSkills * 4);
+        reasons.push("It introduces a skill outside your recent work.");
+    }
+
+    if (reasons.length === 0) {
+        reasons.push("It is the next eligible step in the curriculum.");
+    }
+
+    return { mission, score, reasons, dueMatches };
+}
+
+function compareScored(left: ScoredMission, right: ScoredMission): number {
+    if (right.score !== left.score) {
+        return right.score - left.score;
+    }
+    if (right.dueMatches !== left.dueMatches) {
+        return right.dueMatches - left.dueMatches;
+    }
+    if (left.mission.estimatedMinutes !== right.mission.estimatedMinutes) {
+        return left.mission.estimatedMinutes - right.mission.estimatedMinutes;
+    }
+    if (left.mission.sequence !== right.mission.sequence) {
+        return left.mission.sequence - right.mission.sequence;
+    }
+    if (left.mission.id === right.mission.id) {
+        return 0;
+    }
+    return left.mission.id < right.mission.id ? -1 : 1;
 }
 
 export function recommendMission(
     context: RecommendationContext,
 ): MissionRecommendation | undefined {
-    const dueSkillIds = new Set(
-        context.reviews
-            .filter(function isDue(review: ReviewItem): boolean {
-                return new Date(review.dueAt).getTime() <= context.now.getTime();
-            })
-            .map(function skillOf(review: ReviewItem): string {
-                return review.skillId;
-            }),
-    );
-    const completed = new Set(context.completedMissionIds);
-    const skipped = new Set(context.skippedSkills);
-    const completedSkills = new Set(context.completedMissionSkills ?? []);
-    const weakSkills = new Set(
-        Object.entries(context.mastery)
-            .filter(function isWeak(entry): boolean {
-                return entry[1] < 0.5;
-            })
-            .map(function skillId(entry): string {
-                return entry[0];
-            }),
-    );
-
-    const scored: { mission: Mission; score: number; reasons: string[] }[] = [];
-
+    const sets = scoringSets(context);
+    const scored: ScoredMission[] = [];
     for (const mission of context.missions) {
-        const eligible =
-            mission.prerequisites.length === 0 ||
-            mission.prerequisites.every(function ready(skillId: string): boolean {
-                return (
-                    skipped.has(skillId) ||
-                    completedSkills.has(skillId) ||
-                    (context.mastery[skillId] ?? 0) >= MASTERY_ELIGIBILITY
-                );
-            });
-        if (!eligible) {
-            continue;
+        const candidate = scoreMission(mission, context, sets);
+        if (candidate !== undefined) {
+            scored.push(candidate);
         }
-
-        const dueMatches = mission.skills.filter(function due(skillId: string): boolean {
-            return dueSkillIds.has(skillId);
-        }).length;
-        const isCompleted = completed.has(mission.id);
-        if (isCompleted && dueMatches === 0) {
-            continue;
-        }
-
-        const reasons: string[] = [];
-        let score = 0;
-
-        if (dueMatches > 0) {
-            score += Math.min(120, dueMatches * 60);
-            reasons.push("Review is due for a skill this mission practices.");
-        }
-        if (isCompleted) {
-            score -= 20;
-            reasons.push("This mission is a review of completed work.");
-        }
-
-        const weakMatches = mission.skills.filter(function weak(skillId: string): boolean {
-            return weakSkills.has(skillId);
-        }).length;
-        if (weakMatches > 0 && !isCompleted) {
-            score += weakMatches * 10;
-            reasons.push("It strengthens a skill with limited evidence.");
-        }
-
-        const misconceptionMatches = intersectionSize(mission.skills, context.misconceptionSkills);
-        if (misconceptionMatches > 0 && !isCompleted) {
-            score += 18 * misconceptionMatches;
-            reasons.push("It revisits a misconception you encountered.");
-        }
-
-        const failureMatches = intersectionSize(mission.skills, context.recentFailureSkills);
-        if (failureMatches > 0) {
-            score += 8 * failureMatches;
-            reasons.push("It offers another attempt at a recent difficulty.");
-        }
-
-        const interestMatches = intersectionSize(mission.tags, context.interests);
-        if (interestMatches > 0) {
-            score += 14 * interestMatches;
-            reasons.push("It matches your selected interests.");
-        }
-
-        const lastSequence = context.completedSequences[mission.courseId] ?? 0;
-        if (mission.sequence === lastSequence + 1) {
-            score += 22;
-            reasons.push("It continues the story where you stopped.");
-        } else if (mission.sequence <= lastSequence) {
-            score -= 15;
-        }
-
-        const difficultyFit = challengeFit(mission, context.challenge);
-        score += difficultyFit;
-        if (difficultyFit >= 10) {
-            reasons.push("The difficulty matches your selected challenge level.");
-        }
-
-        if (reasons.length === 0) {
-            reasons.push("It is the next eligible step in the curriculum.");
-        }
-
-        const jitter = (stringHash(mission.id) + context.variationSeed) % 5 === 0 ? 1 : 0;
-        scored.push({ mission, score: score + jitter, reasons });
     }
 
     if (scored.length === 0) {
         return undefined;
     }
 
-    scored.sort(function byScore(left, right): number {
-        if (right.score !== left.score) {
-            return right.score - left.score;
-        }
-        return left.mission.sequence - right.mission.sequence;
-    });
+    scored.sort(compareScored);
 
     const top = scored[0];
     if (top === undefined) {
@@ -185,6 +260,24 @@ export function recommendMission(
             return { missionId: entry.mission.id, score: entry.score };
         }),
     };
+}
+
+function challengeFitsPlan(
+    mission: Mission,
+    context: RecommendationContext,
+    dueMatches: number,
+): boolean {
+    const needsReview = dueMatches > 0;
+    const needsRepair =
+        intersectionSize(mission.skills, context.recentFailureSkills) > 0 ||
+        intersectionSize(mission.skills, context.misconceptionSkills) > 0;
+    if (context.challenge === "gentle" && mission.difficulty === "advanced") {
+        return needsReview || needsRepair;
+    }
+    if (context.challenge === "stretch" && mission.difficulty === "beginner") {
+        return needsReview;
+    }
+    return true;
 }
 
 function challengeFit(mission: Mission, challenge: ChallengeLevel): number {
@@ -216,14 +309,10 @@ export function buildPracticePlan(
     context: RecommendationContext,
     length: SessionLength,
 ): PracticePlan {
-    const size = length === "short" ? 1 : length === "medium" ? 2 : 4;
-    const dueSkillIds = context.reviews
-        .filter(function isDue(review: ReviewItem): boolean {
-            return new Date(review.dueAt).getTime() <= context.now.getTime();
-        })
-        .map(function skillOf(review: ReviewItem): string {
-            return review.skillId;
-        });
+    const sets = scoringSets(context);
+    const budget = PRACTICE_BUDGET_MINUTES[length];
+    const limit = PRACTICE_ACTIVITY_LIMIT[length];
+    const due = dueSkillIds(context);
     const weakSkillIds = Object.entries(context.mastery)
         .filter(function isWeak(entry): boolean {
             return entry[1] < 0.55 && entry[1] > 0;
@@ -235,33 +324,45 @@ export function buildPracticePlan(
             return entry[0];
         });
 
+    const candidates: ScoredMission[] = [];
+    for (const mission of context.missions) {
+        if (mission.estimatedMinutes > budget) {
+            continue;
+        }
+        const candidate = scoreMission(mission, context, sets);
+        if (candidate !== undefined && challengeFitsPlan(mission, context, candidate.dueMatches)) {
+            candidates.push(candidate);
+        }
+    }
+    candidates.sort(compareScored);
+
     const selected: Mission[] = [];
     const selectedIds = new Set<string>();
-    const totalSkills = [...dueSkillIds, ...weakSkillIds, ...context.interests];
+    const selectedCourses = new Set<string>();
 
-    function addMission(mission: Mission): void {
-        if (selected.length >= size || selectedIds.has(mission.id)) {
+    function add(mission: Mission): void {
+        const total = selected.reduce(function sumMinutes(sum: number, item: Mission): number {
+            return sum + item.estimatedMinutes;
+        }, 0);
+        if (
+            selected.length >= limit ||
+            selectedIds.has(mission.id) ||
+            total + mission.estimatedMinutes > budget
+        ) {
             return;
         }
         selected.push(mission);
         selectedIds.add(mission.id);
+        selectedCourses.add(mission.courseId);
     }
 
-    for (const skillId of totalSkills) {
-        for (const mission of context.missions) {
-            if (mission.skills.includes(skillId)) {
-                addMission(mission);
-            }
-            if (selected.length >= size) {
-                break;
-            }
+    for (const candidate of candidates) {
+        if (!selectedCourses.has(candidate.mission.courseId)) {
+            add(candidate.mission);
         }
     }
-
-    if (selected.length === 0) {
-        for (const mission of context.missions) {
-            addMission(mission);
-        }
+    for (const candidate of candidates) {
+        add(candidate.mission);
     }
 
     const estimatedMinutes = selected.reduce(function total(sum: number, mission: Mission): number {
@@ -272,7 +373,7 @@ export function buildPracticePlan(
         missionIds: selected.map(function idOf(mission: Mission): string {
             return mission.id;
         }),
-        dueSkillIds,
+        dueSkillIds: due,
         weakSkillIds: weakSkillIds.slice(0, 5),
         estimatedMinutes,
     };
