@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.zig": "const std = @import(\"std\");\n\nfn parsePort(text: []const u8) !u16 {\n    const value = std.fmt.parseInt(u32, text, 10) catch return error.InvalidNumber;\n    if (value == 0 or value > 65535) return error.OutOfRange;\n    return @intCast(value);\n}\n\ntest \"parses a valid port\" {\n    try std.testing.expectEqual(@as(u16, 8080), try parsePort(\"8080\"));\n}\n\ntest \"rejects zero\" {\n    try std.testing.expectError(error.OutOfRange, parsePort(\"0\"));\n}\n"
+            }
+        }
+    }
+}
