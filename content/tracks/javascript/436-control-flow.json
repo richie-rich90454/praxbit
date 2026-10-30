@@ -1,0 +1,283 @@
+{
+    "id": "javascript.control-flow",
+    "version": 1,
+    "sequence": 222,
+    "courseId": "javascript",
+    "title": "Control flow and decisions",
+    "summary": "Use conditionals and loops to transform collections of values.",
+    "skills": [
+        "js.conditions",
+        "js.loops",
+        "js.functions"
+    ],
+    "prerequisites": [
+        "js.functions"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "unfiltered-report",
+        "briefing": "The advising report includes every task, including incomplete ones. Write a function that returns only completed task titles."
+    },
+    "objectives": [
+        {
+            "id": "filter",
+            "description": "Filter completed tasks.",
+            "stepIds": [
+                "implement-filter"
+            ]
+        },
+        {
+            "id": "loop",
+            "description": "Iterate without mutating input.",
+            "stepIds": [
+                "implement-filter"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain control flow.",
+            "stepIds": [
+                "control-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:flow"
+    ],
+    "hints": [
+        "Loop over the tasks.",
+        "Check task.done before pushing.",
+        "Return a new array; do not mutate the input.",
+        "Use const result = []; for (const task of tasks) { if (task.done) result.push(task.title); } return result;"
+    ],
+    "misconceptions": [
+        {
+            "id": "mutate-input",
+            "description": "Filtering by deleting from the original array.",
+            "stepId": "implement-filter",
+            "testDescription": "Does not mutate the input array.",
+            "feedback": "Do not mutate the caller's data. Build and return a new array.",
+            "followUpSkill": "js.arrays"
+        },
+        {
+            "id": "truthy-confusion",
+            "description": "Confusing truthy values with strict true.",
+            "stepId": "control-claims",
+            "answer": "truthy",
+            "feedback": "JavaScript coerces values in conditionals. Use strict checks when the distinction matters.",
+            "followUpSkill": "js.conditions"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Conditionals",
+                "body": "if selects a branch based on a condition. Strict equality === avoids type coercion. A condition can be any expression, but relying on truthiness can hide bugs."
+            },
+            {
+                "title": "Loops",
+                "body": "for...of iterates over iterable values. Build new arrays instead of mutating inputs to keep functions predictable."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Truthiness",
+                "definition": "Whether a value coerces to true in a boolean context."
+            },
+            {
+                "term": "Strict equality",
+                "definition": "Comparison with === that does not coerce types."
+            },
+            {
+                "term": "Iteration",
+                "definition": "Visiting each item in a collection."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Control flow",
+            "prompt": "Read the explanation, then implement the filter.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Conditionals",
+                    "body": "if selects a branch based on a condition. Strict equality === avoids type coercion. A condition can be any expression, but relying on truthiness can hide bugs."
+                },
+                {
+                    "title": "Loops",
+                    "body": "for...of iterates over iterable values. Build new arrays instead of mutating inputs to keep functions predictable."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Truthiness",
+                    "definition": "Whether a value coerces to true in a boolean context."
+                },
+                {
+                    "term": "Strict equality",
+                    "definition": "Comparison with === that does not coerce types."
+                },
+                {
+                    "term": "Iteration",
+                    "definition": "Visiting each item in a collection."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "implement-filter",
+            "title": "Filter completed tasks",
+            "prompt": "Edit main.js. Implement completedTitles(tasks) returning titles where done is true.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "main.js",
+                    "content": "function completedTitles(tasks) {\n  // TODO: return titles of completed tasks\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "main.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Returns completed titles.",
+                    "name": "completedTitles",
+                    "args": [
+                        [
+                            {
+                                "title": "Read",
+                                "done": true
+                            },
+                            {
+                                "title": "Write",
+                                "done": false
+                            },
+                            {
+                                "title": "Ship",
+                                "done": true
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        "Read",
+                        "Ship"
+                    ]
+                },
+                {
+                    "kind": "function",
+                    "description": "Returns an empty array when none are done.",
+                    "name": "completedTitles",
+                    "args": [
+                        [
+                            {
+                                "title": "Read",
+                                "done": false
+                            }
+                        ]
+                    ],
+                    "expected": []
+                },
+                {
+                    "kind": "function",
+                    "description": "Does not mutate the input array.",
+                    "name": "completedTitles",
+                    "args": [
+                        [
+                            {
+                                "title": "Read",
+                                "done": true
+                            }
+                        ]
+                    ],
+                    "expected": [
+                        "Read"
+                    ]
+                }
+            ],
+            "hints": [
+                "Create a new array.",
+                "Loop with for...of.",
+                "Push only when task.done is true.",
+                "Return the new array."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "control-claims",
+            "title": "Control flow claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Check strict equality and truthiness.",
+                "=== does not coerce.",
+                "Truthiness can hide bugs.",
+                "Select strict equality and new array; reject truthy-as-true."
+            ],
+            "statements": [
+                {
+                    "id": "strict",
+                    "label": "=== compares without type coercion.",
+                    "correct": true
+                },
+                {
+                    "id": "truthy",
+                    "label": "Any truthy value is exactly true.",
+                    "correct": false
+                },
+                {
+                    "id": "forof",
+                    "label": "for...of iterates over iterable values.",
+                    "correct": true
+                },
+                {
+                    "id": "immutable",
+                    "label": "Returning a new array avoids mutating the input.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Strict checks and non-mutation keep control flow predictable."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor is keyboard accessible, and function tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its description and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
