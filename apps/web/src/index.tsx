@@ -1,15 +1,26 @@
 import { render } from "solid-js/web";
 import { registerSW } from "virtual:pwa-register";
 import { App } from "./app/App.tsx";
+import { installDeepLinkHandler, navigateToPath } from "./platform/deep-link-handler.ts";
+import { restoreNativeToken, resumeSavedReminders } from "./platform/services.ts";
 import "./styles/global.css";
 
-const root = document.querySelector("#root");
-if (root === null) {
-    throw new Error("Praxbit could not find its root element.");
+async function start(): Promise<void> {
+    const root = document.querySelector("#root");
+    if (root === null) {
+        throw new Error("Praxbit could not find its root element.");
+    }
+    registerSW({ immediate: true });
+    await restoreNativeToken();
+    render(function renderApp() {
+        return <App />;
+    }, root);
+    void resumeSavedReminders();
+    try {
+        await installDeepLinkHandler(navigateToPath);
+    } catch {
+        // A native shell without the App plugin still uses ordinary web navigation.
+    }
 }
 
-render(function renderApp() {
-    return <App />;
-}, root);
-
-registerSW({ immediate: true });
+void start();
