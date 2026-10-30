@@ -5,23 +5,14 @@
     "courseId": "cmake",
     "title": "CTest and a failing build that tells you why",
     "summary": "Enable CTest, register a test executable, and make a printed failure fail the test run.",
-    "skills": [
-        "cmake.targets",
-        "cpp.build"
-    ],
-    "prerequisites": [
-        "cmake.targets",
-        "testing.boundaries"
-    ],
+    "skills": ["cmake.targets", "cpp.build"],
+    "prerequisites": ["cmake.targets", "testing.boundaries"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-register",
             "description": "Register a test executable with CTest.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-ctest",
             "description": "Explain what ctest executes and reports.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         },
         {
             "id": "objective-transfer",
             "description": "Diagnose a test run that discovers no tests.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:server-room",
-        "icon:cmake"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:cmake"],
     "hints": [
         "CTest only sees tests that CMake registered.",
         "enable_testing belongs in the top-level CMakeLists.",
@@ -202,30 +182,22 @@
                     "kind": "static",
                     "description": "CTest is enabled at the top level.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "enable_testing()"
-                    ],
+                    "includes": ["enable_testing()"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The test executable links the library under test.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "target_link_libraries(inventory_tests PRIVATE inventory_core)"
-                    ],
+                    "includes": ["target_link_libraries(inventory_tests PRIVATE inventory_core)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The test is registered with a name and command.",
                     "file": "CMakeLists.txt",
-                    "includes": [
-                        "add_test(NAME inventory_tests COMMAND inventory_tests)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["add_test(NAME inventory_tests COMMAND inventory_tests)"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -334,7 +306,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
