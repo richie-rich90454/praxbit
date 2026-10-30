@@ -26,6 +26,10 @@ export interface ClubReport {
     readonly clubId: string;
     readonly reporterId: string | null;
     readonly reason: string;
+    readonly details?: string;
+    readonly targetType: "club" | "member" | "event";
+    readonly targetHandle?: string;
+    readonly targetEventId?: string;
     readonly status: string;
     readonly createdAt: string;
 }
@@ -35,6 +39,10 @@ type ReportRow = {
     club_id: string;
     reporter_user_id: string | null;
     reason: string;
+    details: string | null;
+    target_type: "club" | "member" | "event";
+    target_handle: string | null;
+    target_event_id: string | null;
     status: string;
     created_at: Date | string;
 };
@@ -82,7 +90,8 @@ export class AdminRepository {
     public async listOpenReports(executor: QueryExecutor): Promise<readonly ClubReport[]> {
         const result = await executor.query<ReportRow>(
             `
-                SELECT id, club_id, reporter_user_id, reason, status, created_at
+                SELECT id, club_id, reporter_user_id, reason, details, target_type,
+                       target_handle, target_event_id, status, created_at
                 FROM club_reports
                 WHERE status = 'open'
                 ORDER BY created_at DESC
@@ -90,16 +99,23 @@ export class AdminRepository {
             `,
         );
         return result.rows.map(function reportOf(row: ReportRow): ClubReport {
-            return {
+            const report: ClubReport = {
                 id: row.id,
                 clubId: row.club_id,
                 reporterId: row.reporter_user_id,
                 reason: row.reason,
+                targetType: row.target_type,
                 status: row.status,
                 createdAt:
                     row.created_at instanceof Date
                         ? row.created_at.toISOString()
                         : new Date(row.created_at).toISOString(),
+            };
+            return {
+                ...report,
+                ...(row.details === null ? {} : { details: row.details }),
+                ...(row.target_handle === null ? {} : { targetHandle: row.target_handle }),
+                ...(row.target_event_id === null ? {} : { targetEventId: row.target_event_id }),
             };
         });
     }
