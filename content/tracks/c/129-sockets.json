@@ -5,23 +5,14 @@
     "courseId": "c",
     "title": "Accept a TCP connection",
     "summary": "Open a listening TCP socket with correct byte order and checked system calls.",
-    "skills": [
-        "c.toolchain",
-        "c.pointers"
-    ],
-    "prerequisites": [
-        "c.pointers",
-        "concept.networks"
-    ],
+    "skills": ["c.toolchain", "c.pointers"],
+    "prerequisites": ["c.pointers", "concept.networks"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "open-listener",
             "description": "Create a listening socket with the correct port byte order.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "order-calls",
             "description": "Order the TCP server calls correctly.",
-            "stepIds": [
-                "socket-transfer"
-            ]
+            "stepIds": ["socket-transfer"]
         },
         {
             "id": "explain-sockets",
             "description": "Explain sockets, byte order, and accept accurately.",
-            "stepIds": [
-                "socket-check"
-            ]
+            "stepIds": ["socket-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:c"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:c"],
     "hints": [
         "Convert the port before assigning it to sin_port.",
         "Check every system call that can return -1.",
@@ -191,35 +171,22 @@
                     "kind": "static",
                     "description": "The port is converted to network byte order.",
                     "file": "main.c",
-                    "includes": [
-                        "htons((uint16_t)port)"
-                    ],
-                    "excludes": [
-                        "address.sin_port = port;"
-                    ]
+                    "includes": ["htons((uint16_t)port)"],
+                    "excludes": ["address.sin_port = port;"]
                 },
                 {
                     "kind": "static",
                     "description": "Socket creation is checked before use.",
                     "file": "main.c",
-                    "includes": [
-                        "if (listener < 0)",
-                        "return -1;"
-                    ],
+                    "includes": ["if (listener < 0)", "return -1;"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The listener binds all interfaces and listens.",
                     "file": "main.c",
-                    "includes": [
-                        "INADDR_ANY",
-                        "listen(listener, 8)",
-                        "return listener;"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["INADDR_ANY", "listen(listener, 8)", "return listener;"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -308,9 +275,7 @@
     },
     "rewards": {
         "experience": 150,
-        "unlocks": [
-            "c.make-build"
-        ]
+        "unlocks": ["c.make-build"]
     },
     "persistence": {
         "kind": "none"
@@ -321,8 +286,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
