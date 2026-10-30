@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-cascade": {
+            "files": {
+                "styles.css": ".card .cta { background-color: #B54131; color: #fff; padding: 8px 12px; }\n"
+            }
+        }
+    }
+}
