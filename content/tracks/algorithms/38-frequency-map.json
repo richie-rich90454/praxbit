@@ -1,18 +1,26 @@
 {
     "id": "algorithms.frequency-map",
     "version": 1,
-    "sequence": 38,
+    "sequence": 42,
     "courseId": "algorithms",
     "title": "Frequency map",
     "summary": "Count values with a Map and return the most frequent one deterministically.",
-    "skills": ["algorithms.hashing"],
-    "prerequisites": ["algorithms.arrays"],
+    "skills": [
+        "algorithms.hashing"
+    ],
+    "prerequisites": [
+        "algorithms.arrays"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +32,32 @@
         {
             "id": "count",
             "description": "Count occurrences with a Map.",
-            "stepIds": ["mode-code"]
+            "stepIds": [
+                "mode-code"
+            ]
         },
         {
             "id": "tie",
             "description": "Resolve ties deterministically.",
-            "stepIds": ["mode-code"]
+            "stepIds": [
+                "mode-code"
+            ]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": ["complexity-check", "map-check"]
+            "stepIds": [
+                "complexity-check",
+                "map-check"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:hash"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:database",
+        "icon:hash"
+    ],
     "hints": [
         "Create a Map from value to count.",
         "Loop over values and increment the stored count.",
@@ -124,35 +144,68 @@
                     "kind": "function",
                     "description": "Returns the clear winner.",
                     "name": "mode",
-                    "args": [["pen", "lamp", "pen", "notebook"]],
+                    "args": [
+                        [
+                            "pen",
+                            "lamp",
+                            "pen",
+                            "notebook"
+                        ]
+                    ],
                     "expected": "pen"
                 },
                 {
                     "kind": "function",
                     "description": "Resolves a two-way tie lexicographically.",
                     "name": "mode",
-                    "args": [["lamp", "pen", "lamp", "pen"]],
+                    "args": [
+                        [
+                            "lamp",
+                            "pen",
+                            "lamp",
+                            "pen"
+                        ]
+                    ],
                     "expected": "lamp"
                 },
                 {
                     "kind": "function",
                     "description": "Handles a single value.",
                     "name": "mode",
-                    "args": [["desk"]],
+                    "args": [
+                        [
+                            "desk"
+                        ]
+                    ],
                     "expected": "desk"
                 },
                 {
                     "kind": "function",
                     "description": "Tie between three values picks the smallest.",
                     "name": "mode",
-                    "args": [["z", "a", "m"]],
+                    "args": [
+                        [
+                            "z",
+                            "a",
+                            "m"
+                        ]
+                    ],
                     "expected": "a"
                 },
                 {
                     "kind": "function",
                     "description": "Counts across repeated groups.",
                     "name": "mode",
-                    "args": [["a", "b", "b", "a", "a", "c"]],
+                    "args": [
+                        [
+                            "a",
+                            "b",
+                            "b",
+                            "a",
+                            "a",
+                            "c"
+                        ]
+                    ],
                     "expected": "a"
                 }
             ],
@@ -242,7 +295,9 @@
     },
     "rewards": {
         "experience": 125,
-        "unlocks": ["algorithms.complexity"]
+        "unlocks": [
+            "algorithms.complexity"
+        ]
     },
     "persistence": {
         "kind": "none"
@@ -253,5 +308,7 @@
         "screenReaderNotes": "Tests announce the values, expected mode, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional"]
+    "tags": [
+        "professional"
+    ]
 }
