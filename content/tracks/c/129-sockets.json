@@ -1,0 +1,328 @@
+{
+    "id": "c.sockets",
+    "version": 1,
+    "sequence": 78,
+    "courseId": "c",
+    "title": "Accept a TCP connection",
+    "summary": "Open a listening TCP socket with correct byte order and checked system calls.",
+    "skills": [
+        "c.toolchain",
+        "c.pointers"
+    ],
+    "prerequisites": [
+        "c.pointers",
+        "concept.networks"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "c-sockets",
+        "briefing": "A campus device reports telemetry over TCP. The listener assigns a host-order port and ignores bind failures. Repair the setup so the service binds all interfaces and reports failure."
+    },
+    "objectives": [
+        {
+            "id": "open-listener",
+            "description": "Create a listening socket with the correct port byte order.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "order-calls",
+            "description": "Order the TCP server calls correctly.",
+            "stepIds": [
+                "socket-transfer"
+            ]
+        },
+        {
+            "id": "explain-sockets",
+            "description": "Explain sockets, byte order, and accept accurately.",
+            "stepIds": [
+                "socket-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:c"
+    ],
+    "hints": [
+        "Convert the port before assigning it to sin_port.",
+        "Check every system call that can return -1.",
+        "Close the descriptor when bind or listen fails.",
+        "Use htons((uint16_t)port) and return the listener only after listen succeeds."
+    ],
+    "misconceptions": [
+        {
+            "id": "host-order",
+            "description": "Assigning a host-order port to sin_port.",
+            "stepId": "apply",
+            "testDescription": "The port is converted to network byte order.",
+            "feedback": "sin_port uses network byte order. Assign htons((uint16_t)port) so the server listens on the intended port.",
+            "followUpSkill": "c.toolchain"
+        },
+        {
+            "id": "listen-first",
+            "description": "Listening before binding the address.",
+            "stepId": "socket-transfer",
+            "answer": "listen-first",
+            "feedback": "A socket must be bound before it can listen. The order is socket, bind, listen, accept.",
+            "followUpSkill": "c.toolchain"
+        },
+        {
+            "id": "accept-listener",
+            "description": "Believing accept reuses the listening socket for the connection.",
+            "stepId": "socket-check",
+            "answer": "accept-listener",
+            "feedback": "accept returns a new descriptor for the connection. The listening socket remains open for other clients.",
+            "followUpSkill": "c.toolchain"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A listening socket has an order",
+                "body": "A TCP server creates a socket, binds it to an address and port, listens for connections, and accepts one connection at a time. The socket returned by accept is a new descriptor for that connection; the listening socket stays open for later clients."
+            },
+            {
+                "title": "Byte order is part of the wire format",
+                "body": "Network protocols use big-endian byte order. htons converts a 16-bit port from host order to network order, and htonl does the same for 32-bit values. Assigning a host-order port directly produces a server that listens on the wrong port."
+            },
+            {
+                "title": "Check every system call",
+                "body": "socket, bind, listen, and accept return -1 on failure and set errno. Close the descriptor on a failed bind or listen so the process does not leak it. A server that ignores errors looks alive while serving nothing."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Socket",
+                "definition": "An endpoint for network communication identified by a descriptor."
+            },
+            {
+                "term": "bind",
+                "definition": "The call that associates a socket with a local address and port."
+            },
+            {
+                "term": "listen",
+                "definition": "The call that marks a socket ready to accept connections."
+            },
+            {
+                "term": "accept",
+                "definition": "The call that returns a new socket for an incoming connection."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A listening socket has an order",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A listening socket has an order",
+                    "body": "A TCP server creates a socket, binds it to an address and port, listens for connections, and accepts one connection at a time. The socket returned by accept is a new descriptor for that connection; the listening socket stays open for later clients."
+                },
+                {
+                    "title": "Byte order is part of the wire format",
+                    "body": "Network protocols use big-endian byte order. htons converts a 16-bit port from host order to network order, and htonl does the same for 32-bit values. Assigning a host-order port directly produces a server that listens on the wrong port."
+                },
+                {
+                    "title": "Check every system call",
+                    "body": "socket, bind, listen, and accept return -1 on failure and set errno. Close the descriptor on a failed bind or listen so the process does not leak it. A server that ignores errors looks alive while serving nothing."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Socket",
+                    "definition": "An endpoint for network communication identified by a descriptor."
+                },
+                {
+                    "term": "bind",
+                    "definition": "The call that associates a socket with a local address and port."
+                },
+                {
+                    "term": "listen",
+                    "definition": "The call that marks a socket ready to accept connections."
+                },
+                {
+                    "term": "accept",
+                    "definition": "The call that returns a new socket for an incoming connection."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Open the listener",
+            "prompt": "Edit main.c. open_listener creates a TCP socket, enables address reuse, binds INADDR_ANY on the supplied port, and listens with a backlog of 8.",
+            "evidence": "construction",
+            "language": "c",
+            "files": [
+                {
+                    "path": "main.c",
+                    "content": "#include <arpa/inet.h>\n#include <netinet/in.h>\n#include <stdint.h>\n#include <sys/socket.h>\n#include <unistd.h>\n\nint open_listener(int port) {\n    int listener = socket(AF_INET, SOCK_STREAM, 0);\n    struct sockaddr_in address = {0};\n    address.sin_family = AF_INET;\n    address.sin_port = port; /* TODO: convert to network byte order */\n    address.sin_addr.s_addr = INADDR_ANY;\n    bind(listener, (struct sockaddr *)&address, sizeof(address));\n    listen(listener, 8);\n    return listener;\n}\n",
+                    "editable": true,
+                    "language": "c"
+                }
+            ],
+            "entry": "main.c",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cc -std=c17 -Wall -Wextra -c main.c -o main.o",
+                "description": "Compile main.c with a POSIX C toolchain (Linux, macOS, or WSL); the socket headers are POSIX, not native Windows."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The port is converted to network byte order.",
+                    "file": "main.c",
+                    "includes": [
+                        "htons((uint16_t)port)"
+                    ],
+                    "excludes": [
+                        "address.sin_port = port;"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Socket creation is checked before use.",
+                    "file": "main.c",
+                    "includes": [
+                        "if (listener < 0)",
+                        "return -1;"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The listener binds all interfaces and listens.",
+                    "file": "main.c",
+                    "includes": [
+                        "INADDR_ANY",
+                        "listen(listener, 8)",
+                        "return listener;"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The port currently goes into sin_port unchanged.",
+                "A failed socket call returns a negative descriptor.",
+                "Close the listener if bind or listen fails.",
+                "Enable SO_REUSEADDR before bind."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "socket-transfer",
+            "title": "Order the server calls",
+            "prompt": "A TCP server must accept one connection. Which call order is correct?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the order.",
+                "options": [
+                    {
+                        "id": "correct-order",
+                        "label": "socket, bind, listen, accept"
+                    },
+                    {
+                        "id": "listen-first",
+                        "label": "socket, listen, bind, accept"
+                    },
+                    {
+                        "id": "accept-first",
+                        "label": "socket, accept, bind, listen"
+                    },
+                    {
+                        "id": "bind-only",
+                        "label": "bind, socket, accept, listen"
+                    }
+                ],
+                "correctId": "correct-order",
+                "explanation": "The socket exists first, bind attaches the address, listen marks it ready, and accept returns a connection descriptor."
+            },
+            "hints": [
+                "The socket must exist before it can be bound.",
+                "Binding attaches the local address.",
+                "Listening must happen before accepting.",
+                "Choose socket, bind, listen, accept."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "socket-check",
+            "title": "Sockets and byte order",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "htons",
+                    "label": "htons converts a 16-bit value from host byte order to network byte order.",
+                    "correct": true
+                },
+                {
+                    "id": "accept",
+                    "label": "accept returns a new socket descriptor for the connection.",
+                    "correct": true
+                },
+                {
+                    "id": "bind-before-listen",
+                    "label": "A socket must be bound before it can listen.",
+                    "correct": true
+                },
+                {
+                    "id": "accept-listener",
+                    "label": "accept reuses the listening socket for the connection.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Network order is part of the protocol, accept returns a new descriptor, and bind must precede listen. The listening socket remains available.",
+            "hints": [
+                "Three statements are accurate.",
+                "The listening socket is not the connection socket.",
+                "The address must be attached before listening.",
+                "Select htons, accept, and bind-before-listen."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": [
+            "c.make-build"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
