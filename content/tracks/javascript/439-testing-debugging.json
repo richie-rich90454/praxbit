@@ -1,0 +1,280 @@
+{
+    "id": "javascript.testing-debugging",
+    "version": 1,
+    "sequence": 225,
+    "courseId": "javascript",
+    "title": "Testing and debugging",
+    "summary": "Write small tests, reproduce failures, and fix the root cause.",
+    "skills": [
+        "js.debugging",
+        "concept.testing",
+        "js.functions"
+    ],
+    "prerequisites": [
+        "js.functions"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "failing-sum",
+        "briefing": "The sumEven function returns undefined for an empty list and adds odd numbers instead of even ones. Fix it and add tests that cover the empty case."
+    },
+    "objectives": [
+        {
+            "id": "fix",
+            "description": "Fix sumEven to sum only even numbers.",
+            "stepIds": [
+                "fix-sum"
+            ]
+        },
+        {
+            "id": "tests",
+            "description": "Cover empty and mixed inputs.",
+            "stepIds": [
+                "fix-sum"
+            ]
+        },
+        {
+            "id": "transfer",
+            "description": "Transfer debugging habits to new code.",
+            "stepIds": [
+                "debug-transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:debug"
+    ],
+    "hints": [
+        "Start the total at 0.",
+        "Check number % 2 === 0.",
+        "Handle an empty array by returning 0.",
+        "let total = 0; for (const n of numbers) { if (n % 2 === 0) total += n; } return total;"
+    ],
+    "misconceptions": [
+        {
+            "id": "nan-empty",
+            "description": "Leaving the accumulator undefined.",
+            "stepId": "fix-sum",
+            "testDescription": "Returns 0 for an empty array.",
+            "feedback": "An accumulator must start at 0. An undefined accumulator returns undefined for empty input and NaN once a value is added.",
+            "followUpSkill": "js.debugging"
+        },
+        {
+            "id": "odd-count",
+            "description": "Summing odd numbers instead of even.",
+            "stepId": "fix-sum",
+            "testDescription": "Sums only even numbers.",
+            "feedback": "Check parity with % 2 === 0 before adding.",
+            "followUpSkill": "js.debugging"
+        },
+        {
+            "id": "console-debug",
+            "description": "Believing console.log is a sufficient test.",
+            "stepId": "debug-transfer",
+            "answer": "console-only",
+            "feedback": "Console output is not a repeatable test. Write assertions that fail on regressions.",
+            "followUpSkill": "concept.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Reproduce first",
+                "body": "A bug fix starts with a failing test that reproduces the problem. Without reproduction, you cannot know the fix worked."
+            },
+            {
+                "title": "Small, focused tests",
+                "body": "Test boundaries such as empty input, one item, and mixed input. Assertions should be specific about expected values."
+            },
+            {
+                "title": "Root cause",
+                "body": "Fix the shared logic once instead of patching each call site. Re-run all tests after the change."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Regression",
+                "definition": "A previously working behavior that breaks after a change."
+            },
+            {
+                "term": "Assertion",
+                "definition": "A check that a value matches an expectation."
+            },
+            {
+                "term": "Root cause",
+                "definition": "The underlying reason a bug occurs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Testing and debugging",
+            "prompt": "Read the explanation, then fix the function.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Reproduce first",
+                    "body": "A bug fix starts with a failing test that reproduces the problem. Without reproduction, you cannot know the fix worked."
+                },
+                {
+                    "title": "Small, focused tests",
+                    "body": "Test boundaries such as empty input, one item, and mixed input. Assertions should be specific about expected values."
+                },
+                {
+                    "title": "Root cause",
+                    "body": "Fix the shared logic once instead of patching each call site. Re-run all tests after the change."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Regression",
+                    "definition": "A previously working behavior that breaks after a change."
+                },
+                {
+                    "term": "Assertion",
+                    "definition": "A check that a value matches an expectation."
+                },
+                {
+                    "term": "Root cause",
+                    "definition": "The underlying reason a bug occurs."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-sum",
+            "title": "Fix sumEven",
+            "prompt": "Edit main.js. Fix sumEven so it returns the sum of even numbers, including 0 for empty input.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "main.js",
+                    "content": "function sumEven(numbers) {\n  let total;\n  for (const n of numbers) {\n    if (n % 2 !== 0) {\n      total += n;\n    }\n  }\n  return total;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "main.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Sums only even numbers.",
+                    "name": "sumEven",
+                    "args": [
+                        [
+                            1,
+                            2,
+                            3,
+                            4
+                        ]
+                    ],
+                    "expected": 6
+                },
+                {
+                    "kind": "function",
+                    "description": "Returns 0 for an empty array.",
+                    "name": "sumEven",
+                    "args": [
+                        []
+                    ],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles all odd input.",
+                    "name": "sumEven",
+                    "args": [
+                        [
+                            1,
+                            3,
+                            5
+                        ]
+                    ],
+                    "expected": 0
+                }
+            ],
+            "hints": [
+                "Initialize total to 0.",
+                "Add only when n % 2 === 0.",
+                "Return total.",
+                "let total = 0; for (const n of numbers) { if (n % 2 === 0) total += n; } return total;"
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "debug-transfer",
+            "title": "Transfer debugging habits",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Check each statement.",
+                "Reproduction comes first.",
+                "console.log is not a test.",
+                "Select reproduction, boundary tests, and root cause; reject console-only."
+            ],
+            "statements": [
+                {
+                    "id": "reproduce",
+                    "label": "A fix should start with a failing test that reproduces the bug.",
+                    "correct": true
+                },
+                {
+                    "id": "boundaries",
+                    "label": "Boundary cases such as empty input should be tested.",
+                    "correct": true
+                },
+                {
+                    "id": "root-cause",
+                    "label": "Fixing shared logic once beats patching call sites.",
+                    "correct": true
+                },
+                {
+                    "id": "console-only",
+                    "label": "console.log output is a sufficient automated test.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Debugging is systematic: reproduce, test boundaries, fix the root cause, and re-run."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor is keyboard accessible, and function tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its description and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
