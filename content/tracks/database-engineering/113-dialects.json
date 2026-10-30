@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "same-meaning",
-            "description": "Assuming identical syntax means identical results.",
+            "description": "Assuming identical SQL text has identical behavior everywhere.",
             "stepId": "review",
-            "feedback": "Collation, uniqueness, and type rules differ even when the statement parses. Test the behavior on each target."
+            "answer": "ship:collation,unique,order",
+            "feedback": "Collation, uniqueness, and ordering rules differ. Accepting the query hides portability bugs.",
+            "followUpSkill": "sql.dialects"
         },
         {
             "id": "mysql-values",
-            "description": "Using VALUES(column) in a modern MySQL upsert.",
+            "description": "Using PostgreSQL upsert syntax in MySQL.",
             "stepId": "apply",
-            "feedback": "MySQL deprecated VALUES() in 8.0.20. Use a row alias after the VALUES list."
+            "testDescription": "The MySQL variant uses AUTO_INCREMENT and ON DUPLICATE KEY UPDATE.",
+            "feedback": "MySQL uses ON DUPLICATE KEY UPDATE, not ON CONFLICT. Keep dialect-specific files explicit."
         },
         {
             "id": "sqlite-returning",
-            "description": "Assuming RETURNING works on every SQLite version.",
+            "description": "Assuming SQLite lacks RETURNING.",
             "stepId": "apply",
-            "feedback": "RETURNING arrived in SQLite 3.35. Older versions need a follow-up SELECT."
+            "testDescription": "The SQLite variant uses AUTOINCREMENT, integer booleans, and RETURNING.",
+            "feedback": "Modern SQLite supports RETURNING. The differences that matter are AUTOINCREMENT, type affinity, and boolean storage."
         }
     ],
     "lesson": {
@@ -216,7 +220,18 @@
                     "includes": ["id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Separate portable SQL from vendor-specific syntax.",
+                "Check identity, boolean, and upsert syntax in each dialect.",
+                "Verify what each database returns from an upsert.",
+                "Use identity/boolean in PostgreSQL, AUTO_INCREMENT/ON DUPLICATE KEY UPDATE in MySQL, and AUTOINCREMENT/RETURNING in SQLite."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -273,7 +288,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The statements parse on both engines but compare and sort differently. Pin the collation, test the unique constraint behavior, and set explicit ORDER BY expectations for each dialect."
+            "explanation": "The statements parse on both engines but compare and sort differently. Pin the collation, test the unique constraint behavior, and set explicit ORDER BY expectations for each dialect.",
+            "hints": [
+                "Find assumptions that depend on collation or dialect.",
+                "Check whether ORDER BY is deterministic across databases.",
+                "Ask whether LIMIT without ORDER BY is stable.",
+                "Block the query: collation, uniqueness, and ordering differ across engines."
+            ]
         }
     ],
     "evaluation": {
