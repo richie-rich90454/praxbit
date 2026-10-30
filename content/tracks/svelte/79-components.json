@@ -44,13 +44,24 @@
             "id": "prop-write",
             "description": "Reassigning an exported prop to update the parent.",
             "stepId": "apply",
-            "feedback": "The parent owns the value. Send an event or accept a callback when the child needs to request a change."
+            "feedback": "The parent owns the value. Send an event or accept a callback when the child needs to request a change.",
+            "diagnostic": "Reassigning an exported prop updates the child's local value and warns; it does not change the parent.",
+            "followUpSkill": "svelte.components"
         },
         {
             "id": "global-style",
             "description": "Relying on a global selector to style the card.",
             "stepId": "apply",
-            "feedback": "Svelte scopes the style block to the component. Keep the card rules there so other pages cannot override or inherit them."
+            "feedback": "Svelte scopes the style block to the component. Keep the card rules there so other pages cannot override or inherit them.",
+            "testDescription": "The component owns its styles."
+        },
+        {
+            "id": "assign-parent-ok",
+            "description": "Believing reassigning an exported prop changes the parent variable.",
+            "stepId": "check",
+            "answer": "assign-parent",
+            "feedback": "The parent owns the value. A child assignment changes only its local view and does not update the parent.",
+            "followUpSkill": "svelte.components"
         }
     ],
     "lesson": {
@@ -165,7 +176,18 @@
                     "includes": ["export let name: string;"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Declare export let name: string and export let price: number.",
+                "Render {name} in the heading and {price.toFixed(2)} in a paragraph.",
+                "Keep the article class and the scoped style block.",
+                "Remove the TODO and leave the component styles local."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Svelte testing suite with Vitest."
+            }
         },
         {
             "kind": "explain",
@@ -195,7 +217,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Props enter through export let and stay owned by the parent. Markup renders them with braces, and the compiler keeps style rules local to the component."
+            "explanation": "Props enter through export let and stay owned by the parent. Markup renders them with braces, and the compiler keeps style rules local to the component.",
+            "hints": [
+                "Check whether each statement treats exported props as parent-owned.",
+                "Confirm that Svelte scopes style blocks by default.",
+                "Reject the claim that a child assignment updates the parent.",
+                "Select statements about props, scoped styles, and compiled markup."
+            ]
         }
     ],
     "evaluation": {
