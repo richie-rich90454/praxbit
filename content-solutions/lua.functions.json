@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.lua": "local function stats(...)\n  local count = select(\"#\", ...)\n  local total = 0\n  for index = 1, count do\n    total = total + (select(index, ...) or 0)\n  end\n  return count, total\nend\n\nlocal count, total = stats(3, nil, 2)\nprint(count, total)\n"
+            }
+        }
+    }
+}
