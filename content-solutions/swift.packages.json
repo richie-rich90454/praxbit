@@ -1,0 +1,10 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Package.swift": "// swift-tools-version: 6.0\nimport PackageDescription\n\nlet package = Package(\n    name: \"InventoryCLI\",\n    platforms: [.macOS(.v14)],\n    products: [\n        .executable(name: \"inventory\", targets: [\"Inventory\"])\n    ],\n    targets: [\n        .executableTarget(name: \"Inventory\")\n    ]\n)\n",
+                "Sources/Inventory/main.swift": "import Foundation\n\nactor UsageCounter {\n    private var total = 0\n\n    func record() {\n        total += 1\n    }\n\n    func count() -> Int {\n        total\n    }\n}\n\n@main\nstruct InventoryCLI {\n    static func main() async {\n        let counter = UsageCounter()\n        await counter.record()\n        let total = await counter.count()\n        print(\"records: \\(total)\")\n    }\n}\n"
+            }
+        }
+    }
+}
