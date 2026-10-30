@@ -5,22 +5,14 @@
     "courseId": "java",
     "title": "Run work on an executor",
     "summary": "Split a count across two tasks, collect the futures, and shut the pool down.",
-    "skills": [
-        "java.concurrency"
-    ],
-    "prerequisites": [
-        "java.oop",
-        "java.collections"
-    ],
+    "skills": ["java.concurrency"],
+    "prerequisites": ["java.oop", "java.collections"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "use-executor",
             "description": "Submit the scan work to an executor and collect results.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "diagnose-shutdown",
             "description": "Diagnose a pool that is never shut down.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "explain-concurrency",
             "description": "Explain futures, shutdown, and shared state accurately.",
-            "stepIds": [
-                "executor-check"
-            ]
+            "stepIds": ["executor-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:java"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
     "hints": [
         "Create one fixed pool for the two halves.",
         "submit accepts a Callable and returns a Future.",
@@ -190,30 +171,20 @@
                         "executor.submit(",
                         "Future<Integer>"
                     ],
-                    "excludes": [
-                        "for (int value : values)"
-                    ]
+                    "excludes": ["for (int value : values)"]
                 },
                 {
                     "kind": "static",
                     "description": "The executor is shut down after the results are collected.",
                     "file": "Main.java",
-                    "includes": [
-                        "left.get()",
-                        "right.get()",
-                        "executor.shutdown()"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["left.get()", "right.get()", "executor.shutdown()"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The helper still counts only positive values.",
                     "file": "Main.java",
-                    "includes": [
-                        "if (values[index] > 0)"
-                    ],
+                    "includes": ["if (values[index] > 0)"],
                     "excludes": []
                 }
             ],
@@ -320,9 +291,7 @@
     },
     "rewards": {
         "experience": 145,
-        "unlocks": [
-            "java.maven-build"
-        ]
+        "unlocks": ["java.maven-build"]
     },
     "persistence": {
         "kind": "none"
@@ -333,8 +302,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems"
-    ]
+    "tags": ["professional", "systems"]
 }
