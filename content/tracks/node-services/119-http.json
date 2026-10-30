@@ -1,18 +1,27 @@
 {
     "id": "node.http",
     "version": 1,
-    "sequence": 119,
-    "courseId": "node-services-practice",
+    "sequence": 67,
+    "courseId": "node-services",
     "title": "HTTP handlers with bounded requests",
     "summary": "Read a JSON body with a size limit and answer with the right status code.",
-    "skills": ["node.http", "node.hono"],
-    "prerequisites": ["node.hono", "http.basics"],
+    "skills": [
+        "node.http",
+        "node.hono"
+    ],
+    "prerequisites": [
+        "node.hono",
+        "http.basics"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:node"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:node"
+    ],
     "hints": [
         "Check the method and URL before you read any data.",
         "Track the byte count inside the data listener.",
@@ -44,13 +62,24 @@
             "id": "unbounded",
             "description": "Buffering the whole body without a limit.",
             "stepId": "apply",
-            "feedback": "A large body can exhaust memory. Count bytes and reject with 413 once the limit is passed."
+            "testDescription": "The body is capped at 16 KB and rejected with 413.",
+            "feedback": "A large body can exhaust memory. Count bytes and reject with 413 once the limit is passed.",
+            "followUpSkill": "node.http"
         },
         {
             "id": "trusting-parse",
             "description": "Calling JSON.parse without a catch block.",
             "stepId": "apply",
+            "testDescription": "Malformed JSON is caught and answered with 400.",
             "feedback": "Malformed JSON throws. Catch the parse failure and return 400 instead of letting the exception escape."
+        },
+        {
+            "id": "isolated-exception",
+            "description": "Believing an uncaught exception only affects one request.",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that an uncaught exception only affects that one request.",
+            "feedback": "An uncaught exception can end the request without a response and may reach the process boundary. Handle the failure in the request path.",
+            "followUpSkill": "node.http"
         }
     ],
     "lesson": {
@@ -133,7 +162,10 @@
                     "kind": "static",
                     "description": "The handler accepts only POST /status.",
                     "file": "server.ts",
-                    "includes": ["request.method !== \"POST\"", "request.url !== \"/status\""],
+                    "includes": [
+                        "request.method !== \"POST\"",
+                        "request.url !== \"/status\""
+                    ],
                     "excludes": []
                 },
                 {
@@ -151,24 +183,46 @@
                     "kind": "static",
                     "description": "Malformed JSON is caught and answered with 400.",
                     "file": "server.ts",
-                    "includes": ["JSON.parse", "response.writeHead(400"],
+                    "includes": [
+                        "JSON.parse",
+                        "response.writeHead(400"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "A valid update is stored and answered with 201 JSON.",
                     "file": "server.ts",
-                    "includes": ["latest.push(body)", "response.writeHead(201", "application/json"],
+                    "includes": [
+                        "latest.push(body)",
+                        "response.writeHead(201",
+                        "application/json"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "server.ts",
-                    "includes": ["request.method !== \"POST\""],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "request.method !== \"POST\""
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Reject methods and paths that are not POST /status.",
+                "Count bytes inside the data listener.",
+                "Answer 413 and stop reading once the limit is passed.",
+                "Guard JSON.parse with try/catch and answer 400."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Node service test suite with the project test runner."
+            }
         },
         {
             "kind": "explain",
@@ -198,7 +252,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "A readable request body can be larger than memory. Counting bytes and rejecting early keeps the service alive, while a guarded parse turns malformed input into a 400 instead of a crash."
+            "explanation": "A readable request body can be larger than memory. Counting bytes and rejecting early keeps the service alive, while a guarded parse turns malformed input into a 400 instead of a crash.",
+            "hints": [
+                "Check which statements match the streaming handler.",
+                "A body is unlimited until you enforce a limit.",
+                "JSON.parse throws on malformed input.",
+                "An uncaught exception can end the request without a response."
+            ]
         }
     ],
     "evaluation": {
@@ -218,5 +278,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
