@@ -5,24 +5,14 @@
     "courseId": "svelte",
     "title": "Writable stores with derived state",
     "summary": "Share cart state through a store, derive the item count, and read browser storage safely.",
-    "skills": [
-        "svelte.reactivity",
-        "svelte.stores",
-        "web.browser-apis"
-    ],
-    "prerequisites": [
-        "svelte.components",
-        "concept.state"
-    ],
+    "skills": ["svelte.reactivity", "svelte.stores", "web.browser-apis"],
+    "prerequisites": ["svelte.components", "concept.state"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:svelte"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:svelte"],
     "hints": [
         "Create the array with writable<CartLine[]>(loadSaved()).",
         "Guard localStorage with typeof localStorage === \"undefined\" before reading it.",
@@ -196,22 +177,15 @@
                     "kind": "static",
                     "description": "The store reads browser storage defensively.",
                     "file": "cart.ts",
-                    "includes": [
-                        "typeof localStorage === \"undefined\"",
-                        "Array.isArray(parsed)"
-                    ],
+                    "includes": ["typeof localStorage === \"undefined\"", "Array.isArray(parsed)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The writable store hydrates through the loader.",
                     "file": "cart.ts",
-                    "includes": [
-                        "export const cart = writable<CartLine[]>(loadSaved())"
-                    ],
-                    "excludes": [
-                        "JSON.parse(stored)"
-                    ]
+                    "includes": ["export const cart = writable<CartLine[]>(loadSaved())"],
+                    "excludes": ["JSON.parse(stored)"]
                 },
                 {
                     "kind": "static",
@@ -227,24 +201,15 @@
                     "kind": "static",
                     "description": "Adding a line keeps the existing array.",
                     "file": "cart.ts",
-                    "includes": [
-                        "return [...lines, line]"
-                    ],
-                    "excludes": [
-                        "lines.push(line)",
-                        "TODO"
-                    ]
+                    "includes": ["return [...lines, line]"],
+                    "excludes": ["lines.push(line)", "TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "cart.ts",
-                    "includes": [
-                        "typeof localStorage === \"undefined\""
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["typeof localStorage === \"undefined\""],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -335,7 +300,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
