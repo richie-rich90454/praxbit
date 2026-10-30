@@ -1,18 +1,27 @@
 {
     "id": "react.components",
     "version": 1,
-    "sequence": 71,
+    "sequence": 125,
     "courseId": "react",
     "title": "Components with typed props",
     "summary": "Build a typed product card that renders props without hiding the data contract.",
-    "skills": ["react.components", "web.component-architecture"],
-    "prerequisites": ["js.functions", "web.html"],
+    "skills": [
+        "react.components",
+        "web.component-architecture"
+    ],
+    "prerequisites": [
+        "js.functions",
+        "web.html"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:react"
+    ],
     "hints": [
         "Declare a ProductProps type with name and price.",
         "Destructure name and price in the parameter list.",
@@ -162,15 +180,24 @@
                     "kind": "static",
                     "description": "The component renders the name and a two-decimal price.",
                     "file": "ProductCard.tsx",
-                    "includes": ["<h3>{name}</h3>", "price.toFixed(2)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "<h3>{name}</h3>",
+                        "price.toFixed(2)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductCard.tsx",
-                    "includes": ["type ProductProps"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "type ProductProps"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -244,5 +271,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
