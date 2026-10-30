@@ -1,0 +1,343 @@
+{
+    "version": 1,
+    "courseId": "swift",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "sensor-report",
+        "briefing": "A rover writes one reading per wheel. Sum the readings by sensor and present a stable report for the lab notebook."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ],
+    "accessibility": {
+        "summary": "The Swift workspace is keyboard accessible. Checks verify source structure; they do not compile or run Swift.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "swift.collections",
+    "sequence": 204,
+    "title": "Structs, dictionaries, and stable reports",
+    "summary": "Aggregate sensor readings with value types, then fix a report whose dictionary order changes between runs.",
+    "skills": [
+        "swift.syntax"
+    ],
+    "prerequisites": [
+        "swift.syntax",
+        "concept.data"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Accumulate reading totals in a dictionary.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find the source of unstable dictionary output.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Apply value semantics to a copied record.",
+            "stepIds": [
+                "copy"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:swift"
+    ],
+    "hints": [
+        "A struct copies its stored properties when assigned.",
+        "reduce(into:) threads the dictionary through each reading.",
+        "Subscript with a default so the first reading starts at zero.",
+        "Sort the dictionary entries by key before printing."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-default",
+            "description": "Adding to a dictionary key that has no value yet.",
+            "stepId": "apply",
+            "testDescription": "The totals accumulate per sensor with a default of zero.",
+            "feedback": "A missing dictionary key returns nil. Subscript with default: 0 before adding so the first reading creates the entry.",
+            "followUpSkill": "swift.syntax"
+        },
+        {
+            "id": "reference-struct",
+            "description": "Expecting a struct copy to share storage.",
+            "stepId": "copy",
+            "answer": "shared",
+            "feedback": "Assigning or passing a struct copies its value. Changing the copy does not change the original.",
+            "followUpSkill": "swift.syntax"
+        },
+        {
+            "id": "dictionary-order",
+            "description": "Replacing the dictionary instead of stabilizing its presentation.",
+            "stepId": "diagnose",
+            "answer": "array",
+            "feedback": "Changing the data model does not fix the report order and may lose the lookup. Sort the entries when printing.",
+            "followUpSkill": "swift.syntax"
+        },
+        {
+            "id": "count-instead-of-sum",
+            "description": "Counting readings instead of adding their values.",
+            "stepId": "apply",
+            "diagnostic": "Incrementing the sensor total by one per reading instead of adding reading.value.",
+            "feedback": "The report needs a sum. Add reading.value, not one, so multiple readings accumulate correctly."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Structs are value types",
+                "body": "A struct such as struct Reading { let sensor: String; let value: Int } stores its properties inline. Assignment and parameter passing copy the value, so a report cannot change the caller's array by accident. The compiler also provides a memberwise initializer. Use let for fields that never change and var only for state that must mutate."
+            },
+            {
+                "title": "Group and accumulate",
+                "body": "Dictionary(grouping:by:) groups values under a key, while reduce(into:) accumulates without creating intermediate copies. totals[reading.sensor, default: 0] += reading.value reads a missing key as zero and stores the new total. mapValues transforms a dictionary's values and keeps its keys."
+            },
+            {
+                "title": "Sort before presenting",
+                "body": "A Dictionary is unordered, so iterating it can produce a different order each run. Sorting entries with report.sorted { $0.key < $1.key } gives a deterministic report. If order carries meaning in the domain, keep an array of records and derive the dictionary only for lookup."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Value semantics",
+                "definition": "Copying a value produces an independent value with its own storage."
+            },
+            {
+                "term": "Memberwise initializer",
+                "definition": "The struct initializer the compiler generates from its stored properties."
+            },
+            {
+                "term": "reduce(into:)",
+                "definition": "An accumulation that mutates a single result value in place."
+            },
+            {
+                "term": "Subscript default",
+                "definition": "A value used when a dictionary key is absent, written dictionary[key, default:]."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Value types and aggregation",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Structs are value types",
+                    "body": "A struct such as struct Reading { let sensor: String; let value: Int } stores its properties inline. Assignment and parameter passing copy the value, so a report cannot change the caller's array by accident. The compiler also provides a memberwise initializer. Use let for fields that never change and var only for state that must mutate."
+                },
+                {
+                    "title": "Group and accumulate",
+                    "body": "Dictionary(grouping:by:) groups values under a key, while reduce(into:) accumulates without creating intermediate copies. totals[reading.sensor, default: 0] += reading.value reads a missing key as zero and stores the new total. mapValues transforms a dictionary's values and keeps its keys."
+                },
+                {
+                    "title": "Sort before presenting",
+                    "body": "A Dictionary is unordered, so iterating it can produce a different order each run. Sorting entries with report.sorted { $0.key < $1.key } gives a deterministic report. If order carries meaning in the domain, keep an array of records and derive the dictionary only for lookup."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Value semantics",
+                    "definition": "Copying a value produces an independent value with its own storage."
+                },
+                {
+                    "term": "Memberwise initializer",
+                    "definition": "The struct initializer the compiler generates from its stored properties."
+                },
+                {
+                    "term": "reduce(into:)",
+                    "definition": "An accumulation that mutates a single result value in place."
+                },
+                {
+                    "term": "Subscript default",
+                    "definition": "A value used when a dictionary key is absent, written dictionary[key, default:]."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Total readings by sensor",
+            "prompt": "Edit main.swift. totalsBySensor returns the sum of value for each sensor.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the Reading struct and the function signature.",
+                "Start from reduce(into: [String: Int]()).",
+                "The closure receives the growing dictionary and one reading.",
+                "Use a default of zero on the sensor subscript before adding."
+            ],
+            "language": "swift",
+            "files": [
+                {
+                    "path": "main.swift",
+                    "content": "struct Reading {\n    let sensor: String\n    let value: Int\n}\n\nfunc totalsBySensor(_ readings: [Reading]) -> [String: Int] {\n    // TODO: sum values for each sensor\n    return [:]\n}\n\nlet readings = [\n    Reading(sensor: \"wheel\", value: 3),\n    Reading(sensor: \"wheel\", value: 2),\n    Reading(sensor: \"camera\", value: 4),\n]\nprint(totalsBySensor(readings))\n",
+                    "editable": true,
+                    "language": "swift"
+                }
+            ],
+            "entry": "main.swift",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "swiftc main.swift -o main && ./main",
+                "description": "Compiles the file with swiftc and runs the resulting executable."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the struct and array signature.",
+                    "file": "main.swift",
+                    "includes": [
+                        "struct Reading {",
+                        "func totalsBySensor(_ readings: [Reading]) -> [String: Int]"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The totals accumulate per sensor with a default of zero.",
+                    "file": "main.swift",
+                    "includes": [
+                        "readings.reduce(into: [String: Int]()) { totals, reading in",
+                        "totals[reading.sensor, default: 0] += reading.value"
+                    ],
+                    "excludes": [
+                        "TODO",
+                        "return [:]"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.swift",
+                    "includes": [
+                        "func totalsBySensor"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The report changes order",
+            "prompt": "The lab notebook needs a stable sensor order. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The totals are correct; only the presentation moves.",
+                "A Dictionary does not promise insertion order.",
+                "Iterate over sorted entries instead of the dictionary itself.",
+                "Sort by key before printing each row."
+            ],
+            "instructions": [
+                {
+                    "id": "report",
+                    "label": "let report = totalsBySensor(readings)"
+                },
+                {
+                    "id": "loop",
+                    "label": "for (sensor, total) in report {"
+                },
+                {
+                    "id": "print",
+                    "label": "    print(\"\\(sensor): \\(total)\")"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "loop",
+            "fixes": [
+                {
+                    "id": "sort",
+                    "label": "Iterate over report.sorted { $0.key < $1.key } instead."
+                },
+                {
+                    "id": "array",
+                    "label": "Replace the dictionary with an array of readings."
+                },
+                {
+                    "id": "keys",
+                    "label": "Iterate over report.keys.sorted() and print only keys."
+                }
+            ],
+            "correctFixId": "sort",
+            "explanation": "The dictionary contents are correct, but its iteration order is unspecified. Sorting the entries by key produces a stable report without losing the totals."
+        },
+        {
+            "kind": "quiz",
+            "id": "copy",
+            "title": "Copy a reading",
+            "prompt": "A Reading value is passed to a function that builds a corrected record with a new initializer. What does the caller's original value show?",
+            "evidence": "transfer",
+            "hints": [
+                "A struct is a value type in Swift.",
+                "Passing it copies the stored properties.",
+                "The copy has its own storage.",
+                "The original keeps its old value."
+            ],
+            "quiz": {
+                "prompt": "A Reading value is passed to a function that builds a corrected record with a new initializer. What does the caller's original value show?",
+                "options": [
+                    {
+                        "id": "unchanged",
+                        "label": "Its original values, unchanged."
+                    },
+                    {
+                        "id": "shared",
+                        "label": "The corrected values, because both names share one object."
+                    },
+                    {
+                        "id": "compile",
+                        "label": "A compile error, because structs are immutable."
+                    },
+                    {
+                        "id": "nil",
+                        "label": "nil, because the value was moved into the function."
+                    }
+                ],
+                "correctId": "unchanged",
+                "explanation": "A Swift struct has value semantics. The function receives a copy, and returning a different record does not modify the caller's value."
+            }
+        }
+    ]
+}
