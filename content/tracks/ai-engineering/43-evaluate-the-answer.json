@@ -42,15 +42,18 @@
     "misconceptions": [
         {
             "id": "sounds-specific",
-            "description": "Trusting specific-sounding invented details.",
+            "description": "Accepting a confident, detailed answer without source support.",
             "stepId": "evaluate-answer",
-            "feedback": "Specific numbers are not evidence. Every material claim needs support in the provided sources."
+            "answer": "accept:exception,immediate,thirty,software",
+            "feedback": "Specific wording is not evidence. The exception claim has no cited support, so the answer must be rejected or corrected.",
+            "followUpSkill": "ai.evaluation"
         },
         {
             "id": "fluent",
-            "description": "Treating fluent writing as proof of accuracy.",
+            "description": "Treating fluent prose as proof of correctness.",
             "stepId": "evaluation-check",
-            "feedback": "Fluency measures presentation, not truth. Evaluation compares claims with evidence."
+            "answer": "fluent",
+            "feedback": "Fluency measures style. Correctness needs source support, tests, or an explicit rubric."
         }
     ],
     "lesson": {
@@ -135,7 +138,13 @@
                 }
             ],
             "correctVerdict": "reject",
-            "explanation": "Two supported facts are correct, but the exception and immediate approval are invented. Confidence is not evidence."
+            "explanation": "Two supported facts are correct, but the exception and immediate approval are invented. Confidence is not evidence.",
+            "hints": [
+                "Check each claim against the cited source, not the tone of the answer.",
+                "Look for a claim the sources do not support.",
+                "A confident answer can still be wrong.",
+                "Reject the answer: the unsupported exception claim remains, whatever its style."
+            ]
         },
         {
             "kind": "explain",
@@ -165,7 +174,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Evaluation compares output with evidence and explicit criteria. Style is not correctness."
+            "explanation": "Evaluation compares output with evidence and explicit criteria. Style is not correctness.",
+            "hints": [
+                "Evaluation needs a source of truth.",
+                "A rubric makes criteria explicit and repeatable.",
+                "Fluency is not evidence of correctness.",
+                "Select source support, tests, and rubric; reject fluency as proof."
+            ]
         }
     ],
     "evaluation": {
