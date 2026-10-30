@@ -141,26 +141,17 @@ function writeTable(coverage) {
             entry === undefined
                 ? "-"
                 : `${String(entry.pass)} pass, ${String(entry.fail)} fail, ${String(entry.skip)} skip`;
-        console.log(`${id.padEnd(6)} ${name.padEnd(58)} ${level.padEnd(5)} ${status.padEnd(14)} ${tests}`);
+        console.log(
+            `${id.padEnd(6)} ${name.padEnd(58)} ${level.padEnd(5)} ${status.padEnd(14)} ${tests}`,
+        );
     }
 }
 
-const outputFile = join(
-    tmpdir(),
-    `praxbit-wcag-${String(process.pid)}-${String(Date.now())}.json`,
-);
+const outputFile = join(tmpdir(), `praxbit-wcag-${String(process.pid)}-${String(Date.now())}.json`);
 const forwardedArgs = process.argv.slice(2);
 const result = spawnSync(
     "pnpm",
-    [
-        "exec",
-        "playwright",
-        "test",
-        "--grep",
-        "@wcag22",
-        "--reporter=json",
-        ...forwardedArgs,
-    ],
+    ["exec", "playwright", "test", "--grep", "@wcag22", "--reporter=json", ...forwardedArgs],
     {
         cwd: process.cwd(),
         encoding: "utf8",
@@ -200,9 +191,7 @@ walkSuites(report.suites, coverage);
 
 console.log("WCAG 2.2 A/AA internal audit evidence");
 console.log("Project: praxbit");
-console.log(
-    `Command: pnpm exec playwright test --grep @wcag22 ${forwardedArgs.join(" ")}`.trim(),
-);
+console.log(`Command: pnpm exec playwright test --grep @wcag22 ${forwardedArgs.join(" ")}`.trim());
 console.log("This table is internal, automated evidence. It is not third-party certification.");
 console.log("");
 writeTable(coverage);
@@ -226,7 +215,9 @@ console.log(
         counts.skip,
     )} skip, ${String(counts.notAutomated)} not automated.`,
 );
-console.log("Criteria marked NOT AUTOMATED need the manual evidence recorded in docs/product/wcag-2.2-aa-audit.md.");
+console.log(
+    "Criteria marked NOT AUTOMATED need the manual evidence recorded in docs/product/wcag-2.2-aa-audit.md.",
+);
 
 const failures = [];
 for (const [id, entry] of coverage) {
