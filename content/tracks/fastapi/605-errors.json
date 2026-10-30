@@ -1,0 +1,375 @@
+{
+    "id": "fastapi.errors",
+    "version": 1,
+    "sequence": 168,
+    "courseId": "fastapi",
+    "title": "One exception shape for the API",
+    "summary": "Register an exception handler for a domain failure and test that clients receive a stable 409 body.",
+    "skills": [
+        "fastapi.validation",
+        "fastapi.testing"
+    ],
+    "prerequisites": [
+        "fastapi.validation",
+        "api.validation"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "errors",
+        "briefing": "A duplicate item name escapes as an unhandled exception, so the client receives a 500 with a traceback and cannot tell a conflict from a server failure. Give the domain error a stable response and test it."
+    },
+    "objectives": [
+        {
+            "id": "objective-handler",
+            "description": "Map a domain exception to a stable JSON response.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-test",
+            "description": "Test the status and body of the failure contract.",
+            "stepIds": [
+                "test"
+            ]
+        },
+        {
+            "id": "objective-cases",
+            "description": "Choose the failure cases an integration suite needs.",
+            "stepIds": [
+                "cases"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:fastapi"
+    ],
+    "hints": [
+        "A domain exception is not an HTTPException until a handler maps it.",
+        "Register the handler with @app.exception_handler.",
+        "Return a JSONResponse with status 409 and a stable code.",
+        "Test both the status and the JSON body."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-handler",
+            "description": "Letting a domain exception escape as a 500.",
+            "stepId": "apply",
+            "testDescription": "A domain failure has its own exception handler.",
+            "feedback": "FastAPI only knows HTTPException. Register a handler for the domain type so the failure becomes a deliberate response.",
+            "followUpSkill": "fastapi.validation"
+        },
+        {
+            "id": "leak-message",
+            "description": "Putting the exception repr or traceback in the response.",
+            "stepId": "apply",
+            "testDescription": "The response does not leak the exception text.",
+            "feedback": "Expose a stable code and the fields the client needs. Log the detail on the server instead of serializing it."
+        },
+        {
+            "id": "wrong-status",
+            "description": "Answering 500 for a duplicate resource.",
+            "stepId": "apply",
+            "testDescription": "The handler returns 409 with a stable code.",
+            "feedback": "A duplicate is a conflict with current state, so 409 is the accurate status. 500 means the server could not handle a valid request."
+        },
+        {
+            "id": "test-500",
+            "description": "Locking the test to the old 500 behavior.",
+            "stepId": "test",
+            "testDescription": "The conflict status is asserted.",
+            "feedback": "The test should assert the contract the API promises: 409 and the stable body.",
+            "followUpSkill": "fastapi.testing"
+        },
+        {
+            "id": "accept-500",
+            "description": "Treating a 500 as an acceptable duplicate response.",
+            "stepId": "cases",
+            "diagnostic": "Selecting the case that expects a 500 for a duplicate item.",
+            "feedback": "A duplicate is an expected domain outcome. It must be tested as 409, not as an internal failure.",
+            "followUpSkill": "fastapi.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Domain errors need a translation",
+                "body": "FastAPI turns HTTPException into a response, but a custom exception such as DuplicateItem has no default mapping. Without a handler it escapes and becomes a 500. @app.exception_handler(DuplicateItem) registers the translation and runs before the generic server error path."
+            },
+            {
+                "title": "The body is part of the contract",
+                "body": "A stable code lets clients branch without parsing prose. Return JSONResponse with status 409 and a small body such as {\"code\": \"item_exists\", \"name\": ...}. Keep tracebacks and driver messages in server logs."
+            },
+            {
+                "title": "Test the failure path on purpose",
+                "body": "A TestClient test should send the duplicate payload, assert 409, and compare the JSON body. raise_server_exceptions defaults to true, so an unhandled exception fails the test instead of silently becoming a response."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Exception handler",
+                "definition": "A function FastAPI calls to turn an exception into a response."
+            },
+            {
+                "term": "Domain exception",
+                "definition": "A failure type that describes a business rule, not an HTTP concern."
+            },
+            {
+                "term": "Conflict",
+                "definition": "The 409 status used when a request conflicts with current resource state."
+            },
+            {
+                "term": "Stable code",
+                "definition": "A machine-readable string that identifies a failure without exposing internals."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Translating domain failures",
+            "prompt": "Read the explanation, then add the handler and test the contract.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Domain errors need a translation",
+                    "body": "FastAPI turns HTTPException into a response, but a custom exception such as DuplicateItem has no default mapping. Without a handler it escapes and becomes a 500. @app.exception_handler(DuplicateItem) registers the translation and runs before the generic server error path."
+                },
+                {
+                    "title": "The body is part of the contract",
+                    "body": "A stable code lets clients branch without parsing prose. Return JSONResponse with status 409 and a small body such as {\"code\": \"item_exists\", \"name\": ...}. Keep tracebacks and driver messages in server logs."
+                },
+                {
+                    "title": "Test the failure path on purpose",
+                    "body": "A TestClient test should send the duplicate payload, assert 409, and compare the JSON body. raise_server_exceptions defaults to true, so an unhandled exception fails the test instead of silently becoming a response."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Exception handler",
+                    "definition": "A function FastAPI calls to turn an exception into a response."
+                },
+                {
+                    "term": "Domain exception",
+                    "definition": "A failure type that describes a business rule, not an HTTP concern."
+                },
+                {
+                    "term": "Conflict",
+                    "definition": "The 409 status used when a request conflicts with current resource state."
+                },
+                {
+                    "term": "Stable code",
+                    "definition": "A machine-readable string that identifies a failure without exposing internals."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Map the duplicate to a conflict",
+            "prompt": "Edit main.py. Register an exception handler for DuplicateItem that returns 409 with a stable code and the item name, and keep the route raising the domain error.",
+            "evidence": "construction",
+            "hints": [
+                "Import JSONResponse from fastapi.responses.",
+                "Decorate a function with @app.exception_handler(DuplicateItem).",
+                "Return status 409 with a code and the name.",
+                "Do not include str(exception) or a traceback."
+            ],
+            "files": [
+                {
+                    "path": "main.py",
+                    "content": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass ItemCreate(BaseModel):\n    name: str\n\n\nclass DuplicateItem(Exception):\n    def __init__(self, name: str) -> None:\n        self.name = name\n\n\n@app.post(\"/items\")\ndef create_item(payload: ItemCreate) -> dict[str, str]:\n    # TODO: map a duplicate name to a stable 409 response\n    raise DuplicateItem(payload.name)\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "main.py",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "pytest",
+                "description": "Run the duplicate-item failure tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "A domain failure has its own exception handler.",
+                    "file": "main.py",
+                    "includes": [
+                        "@app.exception_handler(DuplicateItem)",
+                        "def duplicate_item_handler"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The handler returns 409 with a stable code.",
+                    "file": "main.py",
+                    "includes": [
+                        "status_code=409",
+                        "\"code\": \"item_exists\""
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The route raises the domain error.",
+                    "file": "main.py",
+                    "includes": [
+                        "raise DuplicateItem(payload.name)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The response does not leak the exception text.",
+                    "file": "main.py",
+                    "includes": [
+                        "JSONResponse"
+                    ],
+                    "excludes": [
+                        "str(exception)",
+                        "traceback"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "code",
+            "id": "test",
+            "title": "Assert the conflict contract",
+            "prompt": "Edit test_main.py. Assert that a duplicate item returns 409 and the exact stable JSON body.",
+            "evidence": "testing",
+            "hints": [
+                "Post the same payload the handler raises on.",
+                "Change the expected status from 500 to 409.",
+                "Compare the whole JSON body.",
+                "Use the code item_exists and the submitted name."
+            ],
+            "files": [
+                {
+                    "path": "test_main.py",
+                    "content": "from fastapi.testclient import TestClient\n\nfrom main import app\n\nclient = TestClient(app)\n\n\ndef test_duplicate_item_returns_conflict() -> None:\n    # TODO: assert the stable failure contract\n    response = client.post(\"/items\", json={\"name\": \"Microscope\"})\n    assert response.status_code == 500\n",
+                    "editable": true,
+                    "language": "python"
+                },
+                {
+                    "path": "main.py",
+                    "content": "from fastapi import FastAPI, Request\nfrom fastapi.responses import JSONResponse\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\nclass ItemCreate(BaseModel):\n    name: str\n\n\nclass DuplicateItem(Exception):\n    def __init__(self, name: str) -> None:\n        self.name = name\n\n\n@app.exception_handler(DuplicateItem)\ndef duplicate_item_handler(request: Request, exception: DuplicateItem) -> JSONResponse:\n    return JSONResponse(\n        status_code=409,\n        content={\"code\": \"item_exists\", \"name\": exception.name},\n    )\n\n\n@app.post(\"/items\")\ndef create_item(payload: ItemCreate) -> dict[str, str]:\n    raise DuplicateItem(payload.name)\n",
+                    "editable": false,
+                    "language": "python"
+                }
+            ],
+            "entry": "test_main.py",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "pytest",
+                "description": "Run the conflict response test."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The conflict status is asserted.",
+                    "file": "test_main.py",
+                    "includes": [
+                        "assert response.status_code == 409"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The stable body is asserted.",
+                    "file": "test_main.py",
+                    "includes": [
+                        "assert response.json() == {\"code\": \"item_exists\", \"name\": \"Microscope\"}"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "test-design",
+            "id": "cases",
+            "title": "Choose the failure cases",
+            "prompt": "Select every case that belongs in the integration suite for the duplicate-item contract.",
+            "evidence": "transfer",
+            "hints": [
+                "Keep cases that prove the expected conflict contract.",
+                "Keep cases that protect the response body from leaking internals.",
+                "Do not keep the old buggy 500 expectation.",
+                "Validation still belongs to the FastAPI request path."
+            ],
+            "cases": [
+                {
+                    "id": "duplicate-409",
+                    "label": "Posting a duplicate name returns 409 with code item_exists.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "accepted-500",
+                    "label": "Posting a duplicate name returns 500.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "no-traceback",
+                    "label": "The conflict body contains no traceback or exception string.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "invalid-body",
+                    "label": "Posting a body with no name still returns 422.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "swallow-errors",
+                    "label": "Every exception becomes a 200 so clients never see failures.",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The suite must pin the expected 409 contract, prove internals are not exposed, and keep the existing validation behavior. A 500 or a blanket 200 would lock in the bug."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
