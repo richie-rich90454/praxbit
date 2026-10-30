@@ -5,23 +5,14 @@
     "courseId": "devops-practice",
     "title": "The proxy is part of the contract",
     "summary": "Review a reverse-proxy config for forwarded headers, websocket upgrades, body limits, and bounded timeouts.",
-    "skills": [
-        "devops.networking",
-        "http.basics"
-    ],
-    "prerequisites": [
-        "devops.networking",
-        "http.basics"
-    ],
+    "skills": ["devops.networking", "http.basics"],
+    "prerequisites": ["devops.networking", "http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "review",
             "description": "Identify missing upgrade, forwarded, limit, and timeout settings.",
-            "stepIds": [
-                "proxy-review"
-            ]
+            "stepIds": ["proxy-review"]
         },
         {
             "id": "write",
             "description": "Write a proxy config that preserves the client contract.",
-            "stepIds": [
-                "proxy-config"
-            ]
+            "stepIds": ["proxy-config"]
         },
         {
             "id": "transfer",
             "description": "Explain what a proxy must preserve for the application.",
-            "stepIds": [
-                "proxy-transfer"
-            ]
+            "stepIds": ["proxy-transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:server-room",
-        "icon:network"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:network"],
     "hints": [
         "A websocket needs an HTTP/1.1 upgrade handshake.",
         "Forwarded headers tell the app the original host, scheme, and client.",
@@ -291,34 +271,22 @@
                     "kind": "static",
                     "description": "Uploads match the product limit.",
                     "file": "proxy.conf",
-                    "includes": [
-                        "client_max_body_size 10m;"
-                    ],
-                    "excludes": [
-                        "client_max_body_size 1m;"
-                    ]
+                    "includes": ["client_max_body_size 10m;"],
+                    "excludes": ["client_max_body_size 1m;"]
                 },
                 {
                     "kind": "static",
                     "description": "Bounds the upstream read timeout.",
                     "file": "proxy.conf",
-                    "includes": [
-                        "proxy_read_timeout 30s;"
-                    ],
-                    "excludes": [
-                        "proxy_read_timeout 600s;"
-                    ]
+                    "includes": ["proxy_read_timeout 30s;"],
+                    "excludes": ["proxy_read_timeout 600s;"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "proxy.conf",
-                    "includes": [
-                        "location /health"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["location /health"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -386,9 +354,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional",
-        "web"
-    ]
+    "tags": ["systems", "professional", "web"]
 }
