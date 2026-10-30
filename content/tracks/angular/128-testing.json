@@ -1,18 +1,29 @@
 {
     "id": "angular.testing",
     "version": 1,
-    "sequence": 223,
+    "sequence": 140,
     "courseId": "angular",
     "title": "Test the HTTP boundary",
     "summary": "Map cart responses to explicit success and failure results, then design tests that cover unauthorized, failed, and malformed responses.",
-    "skills": ["concept.testing", "angular.services", "testing.boundaries"],
-    "prerequisites": ["angular.services", "concept.testing"],
+    "skills": [
+        "concept.testing",
+        "angular.services",
+        "testing.boundaries"
+    ],
+    "prerequisites": [
+        "angular.services",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-apply",
             "description": "Map status and body values to explicit results.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-design",
             "description": "Select the HTTP boundary cases that need tests.",
-            "stepIds": ["design"]
+            "stepIds": [
+                "design"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:angular"
+    ],
     "hints": [
         "Check the status before trusting the body.",
         "Map 401 to a sign-in message.",
@@ -160,7 +180,10 @@
                     "kind": "function",
                     "description": "A 401 response asks the user to sign in.",
                     "name": "readCartResponse",
-                    "args": [401, null],
+                    "args": [
+                        401,
+                        null
+                    ],
                     "expected": {
                         "ok": false,
                         "message": "sign_in"
@@ -285,5 +308,7 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
