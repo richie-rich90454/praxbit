@@ -1,0 +1,477 @@
+{
+    "id": "node.routing",
+    "version": 1,
+    "sequence": 69,
+    "courseId": "node-services",
+    "title": "Routing, identity, and input checks",
+    "summary": "Build one request decision function that matches routes, authenticates the caller, authorizes writes, and validates the body.",
+    "skills": [
+        "node.http",
+        "node.middleware"
+    ],
+    "prerequisites": [
+        "node.http",
+        "node.middleware"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": [
+            "source-editing",
+            "browser-typescript",
+            "function-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "routing",
+        "briefing": "The order service sends every request to one handler, accepts anonymous writes, and stores bodies with missing quantities. Build the routing decision that matches the route, authenticates, authorizes, and validates before any write."
+    },
+    "objectives": [
+        {
+            "id": "objective-router",
+            "description": "Implement route matching, authentication, and validation.",
+            "stepIds": [
+                "router"
+            ]
+        },
+        {
+            "id": "objective-cases",
+            "description": "Choose integration cases that cover the failure boundaries.",
+            "stepIds": [
+                "cases"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Move a new ownership rule to the right boundary.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:node"
+    ],
+    "hints": [
+        "Match the collection and detail routes before checking credentials.",
+        "A missing or unknown token is 401; a known token without the role is 403.",
+        "Validate the body only after the caller is allowed to write.",
+        "Use 405 when the path exists but the method does not."
+    ],
+    "misconceptions": [
+        {
+            "id": "auth-before-route",
+            "description": "Authenticating before deciding whether the route exists.",
+            "stepId": "router",
+            "testDescription": "Unknown routes return 404.",
+            "feedback": "Route existence is not a protected resource. Match first so an unknown path is 404 instead of 401.",
+            "followUpSkill": "node.http"
+        },
+        {
+            "id": "member-create",
+            "description": "Allowing a member token to create orders.",
+            "stepId": "router",
+            "testDescription": "Members cannot create an order.",
+            "feedback": "Authentication proves who the caller is; authorization decides the write. Require the admin role for POST."
+        },
+        {
+            "id": "invalid-body",
+            "description": "Accepting a missing or non-positive quantity.",
+            "stepId": "router",
+            "testDescription": "Invalid quantities are rejected with 400.",
+            "feedback": "Validate the body before the write. A missing quantity or a value below 1 is a client error.",
+            "followUpSkill": "node.middleware"
+        },
+        {
+            "id": "test-happy",
+            "description": "Testing only the successful creation path.",
+            "stepId": "cases",
+            "diagnostic": "Selecting only the happy-path creation case for the integration suite.",
+            "feedback": "Routing, authentication, authorization, and validation each need a failing case. A happy path proves none of them.",
+            "followUpSkill": "node.http"
+        },
+        {
+            "id": "owner-app",
+            "description": "Putting an ownership rule in application-wide middleware.",
+            "stepId": "transfer",
+            "answer": "app-middleware",
+            "feedback": "Ownership depends on the order id from the route. Keep it in the route handler after authentication, where the id is available.",
+            "followUpSkill": "node.middleware"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Routing is a decision table",
+                "body": "A request has a method and a path. Match the path first, then the method. An unknown path is 404; a known path with an unsupported method is 405. Authentication does not change whether the route exists."
+            },
+            {
+                "title": "Identity before permission",
+                "body": "Read the token, resolve it to a role, and reject a missing or unknown token with 401. Then compare the role with the route requirement. A known member who may not write gets 403, not 401."
+            },
+            {
+                "title": "Validate at the boundary",
+                "body": "The handler owns the write, so it must validate before touching state. A missing item name or a quantity below 1 is a 400 response. Keeping the decision in one function makes every case testable without a live server."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Route match",
+                "definition": "The method and path pair that selects a handler."
+            },
+            {
+                "term": "Token",
+                "definition": "A credential that identifies the caller and resolves to a role."
+            },
+            {
+                "term": "Authorization",
+                "definition": "The rule that decides whether an identity may perform an action."
+            },
+            {
+                "term": "Validation boundary",
+                "definition": "The point before a write where input is checked and rejected."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "One request, four decisions",
+            "prompt": "Read the explanation, then implement the decision function.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Routing is a decision table",
+                    "body": "A request has a method and a path. Match the path first, then the method. An unknown path is 404; a known path with an unsupported method is 405. Authentication does not change whether the route exists."
+                },
+                {
+                    "title": "Identity before permission",
+                    "body": "Read the token, resolve it to a role, and reject a missing or unknown token with 401. Then compare the role with the route requirement. A known member who may not write gets 403, not 401."
+                },
+                {
+                    "title": "Validate at the boundary",
+                    "body": "The handler owns the write, so it must validate before touching state. A missing item name or a quantity below 1 is a 400 response. Keeping the decision in one function makes every case testable without a live server."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Route match",
+                    "definition": "The method and path pair that selects a handler."
+                },
+                {
+                    "term": "Token",
+                    "definition": "A credential that identifies the caller and resolves to a role."
+                },
+                {
+                    "term": "Authorization",
+                    "definition": "The rule that decides whether an identity may perform an action."
+                },
+                {
+                    "term": "Validation boundary",
+                    "definition": "The point before a write where input is checked and rejected."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "router",
+            "title": "Implement the request decision",
+            "prompt": "Edit router.ts. Match GET /orders/{id} and POST /orders, return 404 and 405 correctly, require a token, allow creation only for admins, and validate the body.",
+            "evidence": "construction",
+            "hints": [
+                "Use a regular expression for the detail path and a string check for the collection.",
+                "Resolve the token through the sessions table.",
+                "Return 401 before 403; missing identity comes first.",
+                "Check item and quantity before returning 201."
+            ],
+            "files": [
+                {
+                    "path": "router.ts",
+                    "content": "type Request = {\n    method: string;\n    path: string;\n    token?: string;\n    body?: unknown;\n};\n\ntype Response = {\n    status: number;\n    body: Record<string, unknown>;\n};\n\nconst sessions: Record<string, \"member\" | \"admin\"> = {\n    \"member-token\": \"member\",\n    \"admin-token\": \"admin\",\n};\n\nfunction routeRequest(request: Request): Response {\n    // TODO: match the route, check the caller's role, and validate a POST body\n    return { status: 200, body: { ok: true } };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "router.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A member reads an order by id.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "GET",
+                            "path": "/orders/42",
+                            "token": "member-token"
+                        }
+                    ],
+                    "expected": {
+                        "status": 200,
+                        "body": {
+                            "id": 42
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An admin creates an order.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "POST",
+                            "path": "/orders",
+                            "token": "admin-token",
+                            "body": {
+                                "item": "pen",
+                                "quantity": 2
+                            }
+                        }
+                    ],
+                    "expected": {
+                        "status": 201,
+                        "body": {
+                            "item": "pen",
+                            "quantity": 2
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Unknown routes return 404.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "GET",
+                            "path": "/missing"
+                        }
+                    ],
+                    "expected": {
+                        "status": 404,
+                        "body": {
+                            "error": "not_found"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A missing token is 401.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "POST",
+                            "path": "/orders",
+                            "body": {
+                                "item": "pen",
+                                "quantity": 2
+                            }
+                        }
+                    ],
+                    "expected": {
+                        "status": 401,
+                        "body": {
+                            "error": "authentication_required"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An unknown token is rejected with 401.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "POST",
+                            "path": "/orders",
+                            "token": "wrong-token",
+                            "body": {
+                                "item": "pen",
+                                "quantity": 2
+                            }
+                        }
+                    ],
+                    "expected": {
+                        "status": 401,
+                        "body": {
+                            "error": "authentication_required"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Members cannot create an order.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "POST",
+                            "path": "/orders",
+                            "token": "member-token",
+                            "body": {
+                                "item": "pen",
+                                "quantity": 2
+                            }
+                        }
+                    ],
+                    "expected": {
+                        "status": 403,
+                        "body": {
+                            "error": "forbidden"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Invalid quantities are rejected with 400.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "POST",
+                            "path": "/orders",
+                            "token": "admin-token",
+                            "body": {
+                                "item": "pen",
+                                "quantity": 0
+                            }
+                        }
+                    ],
+                    "expected": {
+                        "status": 400,
+                        "body": {
+                            "error": "invalid_body"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A supported path with an unsupported method is 405.",
+                    "name": "routeRequest",
+                    "args": [
+                        {
+                            "method": "PATCH",
+                            "path": "/orders/42",
+                            "token": "member-token"
+                        }
+                    ],
+                    "expected": {
+                        "status": 405,
+                        "body": {
+                            "error": "method_not_allowed"
+                        }
+                    }
+                }
+            ],
+            "language": "typescript"
+        },
+        {
+            "kind": "test-design",
+            "id": "cases",
+            "title": "Choose the integration cases",
+            "prompt": "Select every case that belongs in the integration suite for this routing decision.",
+            "evidence": "testing",
+            "hints": [
+                "Every boundary needs at least one failing case.",
+                "Keep the 404 and 405 cases.",
+                "Keep the missing-token and wrong-role cases.",
+                "Reject the old 201 behavior for members and invalid bodies."
+            ],
+            "cases": [
+                {
+                    "id": "happy-create",
+                    "label": "An admin creates an order and receives 201.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "bad-member-create",
+                    "label": "A member creates an order and receives 201.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "missing-token",
+                    "label": "A create request without a token receives 401.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "unknown-path",
+                    "label": "An unknown path receives 404 before any credential check.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "bad-method",
+                    "label": "PATCH on an order receives 405.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "accept-zero",
+                    "label": "An admin creates an order with quantity 0 and receives 201.",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The suite needs the successful create plus the 401, 403, 404, 405, and 400 boundaries. Accepting a member write or a zero quantity would lock in the original defect."
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to an ownership rule",
+            "prompt": "A new PATCH /orders/{id} route may change an order only when the caller owns it or is an admin. Where should the ownership check go?",
+            "evidence": "transfer",
+            "hints": [
+                "The rule needs the order id from the route.",
+                "Application-wide middleware runs before the route is known.",
+                "Authentication is already handled before this rule.",
+                "Put the check in the route handler after it resolves the order."
+            ],
+            "quiz": {
+                "prompt": "A new PATCH /orders/{id} route may change an order only when the caller owns it or is an admin. Where should the ownership check go?",
+                "options": [
+                    {
+                        "id": "route-handler",
+                        "label": "In the route handler after authentication, using the resolved order."
+                    },
+                    {
+                        "id": "app-middleware",
+                        "label": "In application-wide middleware before the path is parsed."
+                    },
+                    {
+                        "id": "client",
+                        "label": "In the client, so the server can keep accepting every update."
+                    },
+                    {
+                        "id": "auth-only",
+                        "label": "In the authentication step, because ownership is part of the token."
+                    }
+                ],
+                "correctId": "route-handler",
+                "explanation": "Ownership depends on the order the route resolves. Keep the check in the handler after authentication, where both the caller and the order are available. Application-wide middleware does not know the order id."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
