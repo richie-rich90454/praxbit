@@ -1,0 +1,370 @@
+{
+    "id": "native.notifications",
+    "version": 1,
+    "sequence": 424,
+    "courseId": "native",
+    "title": "Notify without leaking",
+    "summary": "Review a push design, build a bounded payload, and handle permission, tokens, and deep links safely.",
+    "skills": ["web.browser-apis", "api.validation"],
+    "prerequisites": ["web.browser-apis", "api.validation"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "delivery",
+        "initialState": "notifications",
+        "briefing": "The campus app asks for notification permission on first launch, sends the entire message body in the push payload, never refreshes device tokens, and opens whatever URL the payload contains. Build a payload that carries a route and a bounded summary, and review the rest of the flow."
+    },
+    "objectives": [
+        {
+            "id": "review",
+            "description": "Identify permission, token, payload, and deep-link risks.",
+            "stepIds": ["notification-review"]
+        },
+        {
+            "id": "payload",
+            "description": "Build a bounded payload with an allowlisted route.",
+            "stepIds": ["payload-code"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain permission timing, token lifecycle, and payload privacy.",
+            "stepIds": ["notification-transfer"]
+        }
+    ],
+    "assets": ["pip:observing", "scene:campus", "system:delivery", "icon:bell"],
+    "hints": [
+        "Ask for notification permission in context, not on first launch.",
+        "A push payload is visible to the push service and the device.",
+        "The payload should carry a route, not a full private message.",
+        "Refresh device tokens and remove them on logout."
+    ],
+    "misconceptions": [
+        {
+            "id": "permission-on-load",
+            "description": "Requesting notification permission before the user understands the value.",
+            "stepId": "notification-review",
+            "answer": "approve:on-load,full-body,no-refresh,raw-url",
+            "feedback": "A permission prompt before context is often denied permanently. Explain the benefit and ask when the user enables notifications.",
+            "followUpSkill": "web.browser-apis"
+        },
+        {
+            "id": "full-body",
+            "description": "Putting the full private message in the push payload.",
+            "stepId": "payload-code",
+            "testDescription": "Truncates a long message.",
+            "feedback": "The payload passes through the push service and sits on the device. Send a short summary and a route; fetch the private content after authentication."
+        },
+        {
+            "id": "raw-url",
+            "description": "Opening the URL from the payload without validation.",
+            "stepId": "notification-transfer",
+            "answer": "raw",
+            "feedback": "A push payload is untrusted input like any other. Map an allowlisted route to an internal screen and require a session."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Permission is a product moment",
+                "body": "Ask for notification permission when the user turns on a notification feature, after explaining the benefit. A prompt on first launch lacks context and is easy to deny permanently."
+            },
+            {
+                "title": "The payload is not private",
+                "body": "Push payloads pass through the push service and are stored on the device. Put a short, non-sensitive summary and a route in the payload, then fetch private content in the app after authentication."
+            },
+            {
+                "title": "Tokens expire and links are inputs",
+                "body": "Device tokens change after reinstall, restore, or rotation. Refresh them and remove them on logout. A deep link in a notification is untrusted input and needs the same host, route, and session checks as any other link."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Push token",
+                "definition": "A device-specific identifier used to route a push message."
+            },
+            {
+                "term": "Payload",
+                "definition": "The data delivered with a notification."
+            },
+            {
+                "term": "Notification channel",
+                "definition": "An Android grouping that controls importance and sound."
+            },
+            {
+                "term": "Deep link",
+                "definition": "A URL that opens a specific screen in the app."
+            },
+            {
+                "term": "Permission prompt",
+                "definition": "The operating system dialog that asks the user to allow notifications."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Notify with data the lock screen can show",
+            "prompt": "Read the explanation, then review the notification flow.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Permission is a product moment",
+                    "body": "Ask for notification permission when the user turns on a notification feature, after explaining the benefit. A prompt on first launch lacks context and is easy to deny permanently."
+                },
+                {
+                    "title": "The payload is not private",
+                    "body": "Push payloads pass through the push service and are stored on the device. Put a short, non-sensitive summary and a route in the payload, then fetch private content in the app after authentication."
+                },
+                {
+                    "title": "Tokens expire and links are inputs",
+                    "body": "Device tokens change after reinstall, restore, or rotation. Refresh them and remove them on logout. A deep link in a notification is untrusted input and needs the same host, route, and session checks as any other link."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Push token",
+                    "definition": "A device-specific identifier used to route a push message."
+                },
+                {
+                    "term": "Payload",
+                    "definition": "The data delivered with a notification."
+                },
+                {
+                    "term": "Notification channel",
+                    "definition": "An Android grouping that controls importance and sound."
+                },
+                {
+                    "term": "Deep link",
+                    "definition": "A URL that opens a specific screen in the app."
+                },
+                {
+                    "term": "Permission prompt",
+                    "definition": "The operating system dialog that asks the user to allow notifications."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "notification-review",
+            "title": "Review the push flow",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "When is permission requested?",
+                "What does the payload contain?",
+                "What happens to the device token over time?",
+                "Revise: permission timing, full body, token refresh, and raw URL all need work."
+            ],
+            "artifact": {
+                "title": "push.ts",
+                "caption": "Registration, payload, and tap handling.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "await PushNotifications.requestPermissions();\n\nawait PushNotifications.addListener(\"pushNotificationReceived\", function (notification) {\n  showBanner(notification.title, notification.body);\n});\n\nawait PushNotifications.addListener(\"pushNotificationActionPerformed\", function (action) {\n  window.location.href = action.notification.data.url;\n});\n\nawait api.registerDevice({ token: await PushNotifications.getToken() });"
+            },
+            "findings": [
+                {
+                    "id": "on-load",
+                    "label": "Notification permission is requested on first launch without context.",
+                    "correct": true
+                },
+                {
+                    "id": "full-body",
+                    "label": "The full message body is shown in the payload and on the lock screen.",
+                    "correct": true
+                },
+                {
+                    "id": "no-refresh",
+                    "label": "The device token is registered once and never refreshed or removed.",
+                    "correct": true
+                },
+                {
+                    "id": "raw-url",
+                    "label": "A tap sends the browser to whatever URL the payload contains.",
+                    "correct": true
+                },
+                {
+                    "id": "encrypted",
+                    "label": "Push payloads are end-to-end encrypted between the sender and the device.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the flow"
+                },
+                {
+                    "id": "revise",
+                    "label": "Revise permission, payload, token lifecycle, and link handling"
+                },
+                {
+                    "id": "mute",
+                    "label": "Only lower the notification importance"
+                }
+            ],
+            "correctVerdict": "revise",
+            "explanation": "The flow asks too early, exposes private text, never refreshes the token, and trusts a raw URL."
+        },
+        {
+            "kind": "code",
+            "id": "payload-code",
+            "title": "Build a bounded payload",
+            "prompt": "Edit payload.js. buildPushPayload(message, deepLink) returns { title, body, data: { route } }. Truncate a message longer than 80 characters to 77 characters plus \"...\". Accept only campus:// links whose path is /orders, /messages, or /settings; otherwise use /home.",
+            "evidence": "construction",
+            "hints": [
+                "Start with a fixed title.",
+                "Shorten long bodies before adding the ellipsis.",
+                "Parse the link and check the scheme and path.",
+                "Return /home for a missing, foreign, or unknown route."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "payload.js",
+                    "content": "function buildPushPayload(message, deepLink) {\n  return {\n    title: \"Campus\",\n    body: message,\n    data: { route: deepLink },\n  };\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "payload.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Builds a valid order payload.",
+                    "name": "buildPushPayload",
+                    "args": ["Order shipped", "campus://orders/17"],
+                    "expected": {
+                        "title": "Campus",
+                        "body": "Order shipped",
+                        "data": {
+                            "route": "/orders/17"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Truncates a long message.",
+                    "name": "buildPushPayload",
+                    "args": [
+                        "Your order has shipped and will arrive on Tuesday between nine and noon at the north entrance",
+                        "campus://orders/17"
+                    ],
+                    "expected": {
+                        "title": "Campus",
+                        "body": "Your order has shipped and will arrive on Tuesday between nine and noon at th...",
+                        "data": {
+                            "route": "/orders/17"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects a foreign scheme.",
+                    "name": "buildPushPayload",
+                    "args": ["Order shipped", "https://evil.test/orders/17"],
+                    "expected": {
+                        "title": "Campus",
+                        "body": "Order shipped",
+                        "data": {
+                            "route": "/home"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects an unknown route.",
+                    "name": "buildPushPayload",
+                    "args": ["Order shipped", "campus://admin"],
+                    "expected": {
+                        "title": "Campus",
+                        "body": "Order shipped",
+                        "data": {
+                            "route": "/home"
+                        }
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles a missing link.",
+                    "name": "buildPushPayload",
+                    "args": ["Order shipped", null],
+                    "expected": {
+                        "title": "Campus",
+                        "body": "Order shipped",
+                        "data": {
+                            "route": "/home"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "notification-transfer",
+            "title": "Notifications are a boundary",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Permission timing affects whether the user can say yes.",
+                "The push service can see the payload.",
+                "Device tokens are not permanent.",
+                "Select contextual permission, minimal payloads, token refresh, and validated routes; reject raw URLs."
+            ],
+            "statements": [
+                {
+                    "id": "context",
+                    "label": "Permission should be requested when the user enables a notification feature.",
+                    "correct": true
+                },
+                {
+                    "id": "minimal",
+                    "label": "The payload should carry a short summary and a route, not private message content.",
+                    "correct": true
+                },
+                {
+                    "id": "refresh",
+                    "label": "Device tokens need refresh and removal on logout.",
+                    "correct": true
+                },
+                {
+                    "id": "validate",
+                    "label": "A notification tap must validate the route and require a session for private screens.",
+                    "correct": true
+                },
+                {
+                    "id": "raw",
+                    "label": "The URL in a push payload is trusted because it came from your server.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Notifications combine permission, payload privacy, token lifecycle, and link validation. The payload is data, not a command."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
