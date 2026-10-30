@@ -1,18 +1,29 @@
 {
     "id": "cpp.raii",
     "version": 1,
-    "sequence": 54,
+    "sequence": 81,
     "courseId": "cpp",
     "title": "RAII and ownership in C++",
     "summary": "Replace manual new and delete with a smart pointer, then review a lifetime bug.",
-    "skills": ["cpp.raii", "cpp.stl", "cpp.templates", "cpp.build"],
-    "prerequisites": ["cpp.syntax", "concept.testing"],
+    "skills": [
+        "cpp.raii",
+        "cpp.stl",
+        "cpp.templates",
+        "cpp.build"
+    ],
+    "prerequisites": [
+        "cpp.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +35,31 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": ["diagnose"]
+            "stepIds": [
+                "diagnose"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:cpp"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:cpp"
+    ],
     "hints": [
         "The return type already promises exclusive ownership.",
         "std::make_unique allocates and constructs in one step.",
@@ -49,13 +71,33 @@
             "id": "raw-new",
             "description": "Using new and returning an empty unique_ptr.",
             "stepId": "apply",
-            "feedback": "The raw allocation leaks because no owner receives it. Return make_unique<int>(value)."
+            "testDescription": "Allocation is owned by make_unique, not a raw new.",
+            "feedback": "The raw allocation leaks because no owner receives it. Return make_unique<int>(value).",
+            "followUpSkill": "cpp.raii"
         },
         {
             "id": "copy",
             "description": "Trying to copy a unique_ptr.",
-            "stepId": "apply",
-            "feedback": "Unique ownership cannot be copied. Move it or return it by value."
+            "stepId": "check",
+            "answer": "copy",
+            "feedback": "Unique ownership cannot be copied. Move it or return it by value.",
+            "followUpSkill": "cpp.raii"
+        },
+        {
+            "id": "dangling-reference",
+            "description": "Returning a reference to a local object.",
+            "stepId": "diagnose",
+            "answer": "static",
+            "feedback": "Making the string static changes one lifetime bug into shared mutable state. Return by value.",
+            "followUpSkill": "cpp.raii"
+        },
+        {
+            "id": "explicit-delete",
+            "description": "Believing every make_unique needs a matching delete.",
+            "stepId": "check",
+            "answer": "delete",
+            "feedback": "RAII releases the allocation automatically when the unique_ptr goes out of scope.",
+            "followUpSkill": "cpp.raii"
         }
     ],
     "lesson": {
@@ -138,24 +180,46 @@
                     "kind": "static",
                     "description": "The factory returns an owning unique_ptr.",
                     "file": "main.cpp",
-                    "includes": ["std::unique_ptr<int> make_reading(int value)"],
+                    "includes": [
+                        "std::unique_ptr<int> make_reading(int value)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Allocation is owned by make_unique, not a raw new.",
                     "file": "main.cpp",
-                    "includes": ["std::make_unique<int>(value)"],
-                    "excludes": ["new int", "std::unique_ptr<int>()"]
+                    "includes": [
+                        "std::make_unique<int>(value)"
+                    ],
+                    "excludes": [
+                        "new int",
+                        "std::unique_ptr<int>()"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.cpp",
-                    "includes": ["std::unique_ptr<int> make_reading(int value)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "std::unique_ptr<int> make_reading(int value)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "The return type already promises exclusive ownership.",
+                "make_unique allocates and constructs in one expression.",
+                "Return the smart pointer by value.",
+                "return std::make_unique<int>(value);"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "c++ -std=c++20 -Wall -Wextra main.cpp -o main",
+                "description": "Compile main.cpp with the C++20 standard using the C++ compiler."
+            }
         },
         {
             "kind": "debug",
@@ -197,7 +261,13 @@
                 }
             ],
             "correctFixId": "value",
-            "explanation": "A reference to a local object dangles after the function returns. Returning by value gives the caller an owned string."
+            "explanation": "A reference to a local object dangles after the function returns. Returning by value gives the caller an owned string.",
+            "hints": [
+                "A reference to a local object is invalid after return.",
+                "The local string is destroyed when the function exits.",
+                "Return ownership or copy the value instead.",
+                "Change the return type to std::string and return by value."
+            ]
         },
         {
             "kind": "explain",
@@ -227,7 +297,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "RAII makes release automatic. unique_ptr expresses exclusive ownership and cannot be copied."
+            "explanation": "RAII makes release automatic. unique_ptr expresses exclusive ownership and cannot be copied.",
+            "hints": [
+                "Two statements are accurate.",
+                "unique_ptr cannot be copied.",
+                "RAII releases the object automatically.",
+                "Select raii and ownership."
+            ]
         }
     ],
     "evaluation": {
@@ -247,5 +323,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "games"]
+    "tags": [
+        "systems",
+        "games"
+    ]
 }
