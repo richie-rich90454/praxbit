@@ -62,7 +62,8 @@ The following describes the implemented service and middleware design. The HTTP 
 
 - Cookie-authenticated mutations use a double-submit token. `GET /api/v1/auth/csrf` sets a readable `praxbit_csrf` cookie and returns the same token.
 - The client sends `x-csrf-token` on every mutation. The server compares it to the cookie in constant time. Missing or mismatched tokens return `403 csrf_invalid`.
-- Safe methods (`GET`, `HEAD`, `OPTIONS`) do not require CSRF. Bearer-authenticated requests are not cookie-authenticated and therefore bypass the double-submit check.
+- Safe methods (`GET`, `HEAD`, `OPTIONS`) do not require CSRF. Bearer-authenticated requests are not cookie-authenticated and therefore bypass the double-submit check. The `x-praxbit-client: native` header never bypasses CSRF for a cookie-authenticated session.
+- `GET /api/v1/capabilities` is public and reports only whether live AI is configured. It never exposes provider URLs, keys, or models.
 - `SameSite=Lax` is a second layer, not a substitute for the token check.
 - The current middleware does not explicitly validate the `Origin` header. If the app is served from multiple origins, add an origin allowlist at the proxy or in middleware and test it.
 
@@ -76,6 +77,7 @@ Default in-process limits:
 | Registration              | 20/hour per address + handle       |
 | Login                     | 15/15 minutes per address + handle |
 | AI hints                  | 10/hour per user                   |
+| Club event submissions    | 20/hour per user                   |
 
 These limits are per Node.js process and reset on restart. They are not a distributed quota. If more than one API process is introduced, move the counters to a shared store or enforce them at the proxy. `TRUST_PROXY=1` must only be set when a trusted proxy overwrites `X-Forwarded-For`; otherwise a client can spoof the address used for rate limiting.
 
@@ -121,7 +123,7 @@ There is no remote learner-code runner. A future runner must be separate infrast
 ## AI gateway
 
 - Provider keys live only in server environment variables: `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`, and optional `AI_TIMEOUT_MS`. They are never sent to the browser, included in a bundle, or logged.
-- AI is disabled unless all three required variables are set. The endpoint returns `503 ai_unavailable` when it is off.
+- AI is disabled unless all three required variables are set. The endpoint returns `503 ai_unavailable` when it is off. The client uses `/api/v1/capabilities` to hide the live tutor and keeps curated hints available.
 - The learner must enable AI tutoring in preferences. If disabled, the endpoint returns `403 ai_disabled`.
 - The gateway sends a bounded context: mission title, step title, step prompt, an optional learner code snippet, and the learner question. It does not send the whole project, account data, other learners' data, or the full mission history.
 - The request uses `temperature: 0.2`, `max_tokens: 500`, a server-side timeout (default 12 seconds), and a per-user hourly quota. Output is truncated to 4,000 characters including a privacy notice.
