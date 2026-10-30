@@ -5,23 +5,14 @@
     "courseId": "css",
     "title": "Responsive design and media queries",
     "summary": "Adapt layout with fluid grids and a mobile-first media query.",
-    "skills": [
-        "web.css"
-    ],
-    "prerequisites": [
-        "web.html",
-        "web.css"
-    ],
+    "skills": ["web.css"],
+    "prerequisites": ["web.html", "web.css"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-css",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "computed-style-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "computed-style-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "fluid-grid",
             "description": "Use a responsive grid.",
-            "stepIds": [
-                "fix-responsive"
-            ]
+            "stepIds": ["fix-responsive"]
         },
         {
             "id": "media-query",
             "description": "Add a max-width media query.",
-            "stepIds": [
-                "fix-responsive"
-            ]
+            "stepIds": ["fix-responsive"]
         },
         {
             "id": "understanding",
             "description": "Explain responsive design.",
-            "stepIds": [
-                "responsive-claims"
-            ]
+            "stepIds": ["responsive-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:layout"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:layout"],
     "hints": [
         "Use display: grid with auto-fit and minmax.",
         "Add a media query for narrow screens.",
@@ -255,7 +235,5 @@
         "screenReaderNotes": "Each test announces selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
