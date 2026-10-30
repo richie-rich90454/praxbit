@@ -42,27 +42,32 @@
     "misconceptions": [
         {
             "id": "stack-queue",
-            "description": "Calling pop on the BFS frontier.",
+            "description": "Using a stack when the problem needs breadth-first order.",
             "stepId": "apply",
-            "feedback": "pop removes the newest node, which makes the traversal depth-first. Use a head index or shift the oldest node."
+            "testDescription": "The search marks the start and processes the queue from its head.",
+            "feedback": "A stack changes traversal to depth-first. Breadth-first shortest paths need a queue.",
+            "followUpSkill": "algorithms.graphs"
         },
         {
             "id": "visited-late",
-            "description": "Marking a node visited when it is dequeued instead of when it is enqueued.",
+            "description": "Marking nodes when they are removed instead of enqueued.",
             "stepId": "apply",
-            "feedback": "A node can be enqueued several times before its first dequeue. Mark it on discovery."
+            "testDescription": "A neighbor is marked before it can be enqueued twice.",
+            "feedback": "Late marking lets the same node enter the frontier many times. Mark it when enqueued."
         },
         {
             "id": "memo-miss",
-            "description": "Recomputing a recurrence without storing results.",
+            "description": "Ignoring overlapping subproblems.",
             "stepId": "review",
-            "feedback": "Overlapping branches repeat the same states, which turns linear recurrences into exponential call trees. Cache each state."
+            "answer": "ship:overlap,exponential,memo",
+            "feedback": "The recursive route count recomputes the same subproblems. Memoize or use bottom-up dynamic programming."
         },
         {
             "id": "greedy-always",
-            "description": "Assuming the locally cheapest choice is globally optimal.",
+            "description": "Assuming a plausible greedy rule is always optimal.",
             "stepId": "review",
-            "feedback": "Greedy needs a proof of the greedy-choice property. Coin change with denominations 1, 3, and 4 is a counterexample for amount 6."
+            "answer": "ship:greedy",
+            "feedback": "A greedy rule needs a proof or a counterexample check. The artifact's rule has neither."
         }
     ],
     "lesson": {
@@ -239,7 +244,18 @@
                     "includes": ["const visited = new Set<string>([start]);"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Choose the frontier structure that matches breadth-first order.",
+                "Mark a node when it enters the frontier, not when it leaves.",
+                "Reconstruct the path by following parent links from the goal.",
+                "Use a queue, mark before enqueue, and return null when the frontier empties."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -296,7 +312,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The recurrence describes the correct number of routes, but it solves the same step counts repeatedly. The call tree doubles at each level, so countRoutes(30) performs an exponential amount of work. Cache each step count or fill a table from the base cases."
+            "explanation": "The recurrence describes the correct number of routes, but it solves the same step counts repeatedly. The call tree doubles at each level, so countRoutes(30) performs an exponential amount of work. Cache each step count or fill a table from the base cases.",
+            "hints": [
+                "Find overlapping subproblems that a cache would reuse.",
+                "Check whether the greedy choice is justified or only plausible.",
+                "Identify the base cases that stop the recursion.",
+                "Block the change: memoization is missing, the greedy rule is unproven, and a base case is wrong."
+            ]
         }
     ],
     "evaluation": {
