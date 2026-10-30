@@ -5,14 +5,23 @@
     "courseId": "python-foundations",
     "title": "Stock totals in Python",
     "summary": "Loop over a list of dictionaries and accumulate a total.",
-    "skills": ["python.functions", "python.control"],
-    "prerequisites": ["python.control"],
+    "skills": [
+        "python.functions",
+        "python.control"
+    ],
+    "prerequisites": [
+        "python.control"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-python",
-        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
+        "capabilities": [
+            "pyodide-wasm",
+            "source-editing",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "total",
             "description": "Sum quantities across a list.",
-            "stepIds": ["stock-total"]
+            "stepIds": [
+                "stock-total"
+            ]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": ["python-loop-check"]
+            "stepIds": [
+                "python-loop-check"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:python"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:python"
+    ],
     "hints": [
         "Initialize total to 0 before the loop.",
         "Use for item in items and add item[\"quantity\"].",
@@ -44,13 +62,25 @@
             "id": "returns-last",
             "description": "Returning the last item instead of the accumulator.",
             "stepId": "stock-total",
-            "feedback": "The loop must add each quantity to a total, then return that total."
+            "testDescription": "Two products are summed.",
+            "feedback": "The loop must add each quantity to a total, then return that total.",
+            "followUpSkill": "python.functions"
         },
         {
             "id": "key-error",
             "description": "Reading a missing dictionary key.",
             "stepId": "stock-total",
-            "feedback": "The provided data uses the key quantity. Access it with item[\"quantity\"]."
+            "testDescription": "A single product is counted.",
+            "feedback": "The provided data uses the key quantity. Access it with item[\"quantity\"].",
+            "followUpSkill": "python.functions"
+        },
+        {
+            "id": "empty-loop",
+            "description": "Assuming a loop over an empty list runs once.",
+            "stepId": "python-loop-check",
+            "answer": "empty",
+            "feedback": "A loop over an empty iterable runs zero times; the body never executes.",
+            "followUpSkill": "python.control"
         }
     ],
     "lesson": {
@@ -120,7 +150,9 @@
                     "kind": "function",
                     "description": "An empty list totals zero.",
                     "name": "total_stock",
-                    "args": [[]],
+                    "args": [
+                        []
+                    ],
                     "expected": 0
                 },
                 {
@@ -159,6 +191,12 @@
                     ],
                     "expected": 6
                 }
+            ],
+            "hints": [
+                "Start the total at zero before the loop.",
+                "Add each item's quantity instead of replacing the total.",
+                "Return after the loop finishes.",
+                "total += item[\"quantity\"] inside the loop, then return total."
             ]
         },
         {
@@ -189,7 +227,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Indentation defines the loop body. Returning early or resetting the accumulator changes the result."
+            "explanation": "Indentation defines the loop body. Returning early or resetting the accumulator changes the result.",
+            "hints": [
+                "Think about what the indented block repeats.",
+                "A loop over an empty list runs zero times.",
+                "Return exits the function immediately.",
+                "Select indent, return, and accumulate."
+            ]
         }
     ],
     "evaluation": {
@@ -209,5 +253,8 @@
         "screenReaderNotes": "Tests announce the list contents, expected total, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "ai"]
+    "tags": [
+        "professional",
+        "ai"
+    ]
 }
