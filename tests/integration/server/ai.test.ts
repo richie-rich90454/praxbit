@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { AiHintResponseSchema } from "../../../packages/contracts/src/index.ts";
+import { AiHintResponseSchema, CapabilitiesSchema } from "../../../packages/contracts/src/index.ts";
 import { createApplication } from "../../../apps/server/src/app.ts";
 import type { ServerConfig } from "../../../apps/server/src/config.ts";
 import type { ContentCatalog } from "../../../apps/server/src/content/catalog.ts";
@@ -171,6 +171,10 @@ describe("AI hint gateway", function aiSuite(): void {
         const auth = await register(client, "ai_hint_user");
         await setAiTutor(auth.user.id, true);
 
+        const capabilities = await client.get("/api/v1/capabilities");
+        expect(capabilities.status).toBe(200);
+        expect(CapabilitiesSchema.parse(await readJson(capabilities)).aiTutor).toBe(true);
+
         const response = await client.post("/api/v1/ai/hints", {
             missionId: "before-code.make-it-respond",
             stepId: "stamp",
@@ -227,5 +231,35 @@ describe("AI hint gateway", function aiSuite(): void {
         expect(response.status).toBe(403);
         expectApiError(await readJson(response), "ai_disabled");
         expect(providerRequests.length).toBe(requestsBefore);
+    });
+
+    it("stays optional: unconfigured servers return 503 and keep other routes working", async function testUnconfigured(): Promise<void> {
+        const unconfiguredApp = createApplication({
+            config: buildTestConfig(requireDatabaseUrl()),
+            pool,
+            content,
+        });
+        const client = new TestClient(unconfiguredApp);
+        const auth = await register(client, "ai_unconfigured_user");
+        await setAiTutor(auth.user.id, true);
+
+        const capabilities = await client.get("/api/v1/capabilities");
+        expect(capabilities.status).toBe(200);
+        expect(CapabilitiesSchema.parse(await readJson(capabilities)).aiTutor).toBe(false);
+
+        const requestsBefore = providerRequests.length;
+        const response = await client.post("/api/v1/ai/hints", {
+            missionId: "before-code.make-it-respond",
+            stepId: "stamp",
+            question: "Is a hint available?",
+        });
+        expect(response.status).toBe(503);
+        expectApiError(await readJson(response), "ai_unavailable");
+        expect(providerRequests.length).toBe(requestsBefore);
+
+        const catalog = await client.get("/api/v1/catalog");
+        expect(catalog.status).toBe(200);
+        const me = await client.get("/api/v1/me");
+        expect(me.status).toBe(200);
     });
 });
