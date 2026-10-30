@@ -4,6 +4,15 @@ import { expect, test, type Page } from "@playwright/test";
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 async function expectNoViolations(page: Page): Promise<void> {
+    await page.evaluate(async function fontsReady(): Promise<void> {
+        await document.fonts.ready;
+    });
+    await page.waitForFunction(function stylesReady(): boolean {
+        return (
+            getComputedStyle(document.documentElement).getPropertyValue("--accent").trim().length >
+            0
+        );
+    });
     const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(
         results.violations,
