@@ -1,3 +1,49 @@
+import type { Mission } from "@praxbit/contracts";
+import type { MissionEvaluation } from "./evaluation.ts";
+
+export const MISSION_MODES = ["practice", "incident", "project", "campaign", "transfer"] as const;
+
+export type MissionMode = (typeof MISSION_MODES)[number];
+
+export interface MissionModeContext {
+    readonly practice?: boolean;
+}
+
+export function resolveMissionMode(
+    mission: Pick<Mission, "mode" | "estimatedMinutes" | "persistence" | "courseId">,
+    context?: MissionModeContext,
+): MissionMode {
+    if (context?.practice === true) {
+        return "practice";
+    }
+    if (mission.mode !== undefined) {
+        return mission.mode;
+    }
+    if (mission.persistence.kind === "world-action") {
+        return "incident";
+    }
+    return "campaign";
+}
+
+export type PracticeOutcome = "success" | "failure";
+
+export interface PracticeResult {
+    readonly independent: boolean;
+    readonly outcome: PracticeOutcome;
+}
+
+export function practiceResult(
+    evaluation: Pick<MissionEvaluation, "completed">,
+    hintsByStep: Readonly<Record<string, number>>,
+): PracticeResult {
+    const independent =
+        evaluation.completed &&
+        Object.values(hintsByStep).every(function noHelp(value: number): boolean {
+            return value === 0;
+        });
+    return { independent, outcome: independent ? "success" : "failure" };
+}
+
 export const MISSION_PHASES = [
     "not-started",
     "introducing",
