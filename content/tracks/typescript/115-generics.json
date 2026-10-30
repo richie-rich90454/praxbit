@@ -1,18 +1,27 @@
 {
     "id": "typescript.generics",
     "version": 1,
-    "sequence": 115,
-    "courseId": "typescript-practice",
+    "sequence": 62,
+    "courseId": "typescript",
     "title": "Generics preserve relationships",
     "summary": "Write a generic helper that returns the first item or null without unsafe casts.",
-    "skills": ["ts.generics"],
-    "prerequisites": ["ts.types", "js.functions"],
+    "skills": [
+        "ts.generics"
+    ],
+    "prerequisites": [
+        "ts.types",
+        "js.functions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
+        "capabilities": [
+            "source-editing",
+            "syntax-diagnostics",
+            "transpiled-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:typescript"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:typescript"
+    ],
     "hints": [
         "The return type already permits null.",
         "The first item is items[0], which may be undefined.",
@@ -44,38 +62,50 @@
             "id": "cast",
             "description": "Using as T to silence the empty-array case.",
             "stepId": "apply",
-            "feedback": "A cast does not add a value. Use ?? null to represent absence honestly."
+            "testDescription": "An empty array returns null.",
+            "feedback": "A cast does not add a value. Use ?? null to represent absence honestly.",
+            "followUpSkill": "ts.generics"
         },
         {
             "id": "any",
             "description": "Falling back to any when a generic gets difficult.",
-            "stepId": "apply",
-            "feedback": "any disables the relationship you are trying to preserve. Use a type parameter or a constrained generic."
+            "stepId": "check",
+            "answer": "any",
+            "feedback": "any disables the relationship you are trying to preserve. Use a type parameter or a constrained generic.",
+            "followUpSkill": "ts.generics"
         }
     ],
     "lesson": {
         "sections": [
             {
-                "title": "TypeScript values and decisions",
-                "body": "TypeScript adds static types to JavaScript: const count: number = 3;. A union such as string | number keeps both alternatives visible until a runtime check narrows it. typeof, equality, and property checks narrow a union inside a branch. Arrays and loops keep their element types, so a transform returns a typed result."
+                "title": "Type parameters preserve a relationship",
+                "body": "A generic function declares a type parameter that connects its inputs to its output: function first<T>(items: readonly T[]): T | undefined. The caller supplies the concrete type, or TypeScript infers it from the argument, so the result keeps the element type instead of widening to any or unknown."
             },
             {
-                "title": "TypeScript source files",
-                "body": "The compiler erases types and emits JavaScript. The emitted code is what runs in the browser or Node."
+                "title": "Constraints narrow what T may be",
+                "body": "A constraint limits which types a parameter accepts. <T, K extends keyof T> says that K must be one of T's property names, and the return type T[K] describes the value at that key. Constraints are checked at compile time and disappear from the emitted JavaScript."
+            },
+            {
+                "title": "Generics do not validate runtime data",
+                "body": "A generic signature is a compile-time promise. JSON, localStorage, and network responses arrive as unknown values until a runtime guard checks them. Use a type parameter for relationships inside typed code and an explicit guard at the boundary."
             }
         ],
         "vocabulary": [
             {
-                "term": "Generic",
-                "definition": "A type parameter that preserves a relationship between inputs and outputs."
+                "term": "Type parameter",
+                "definition": "A type placeholder supplied by the caller of a generic function."
             },
             {
                 "term": "Type inference",
                 "definition": "The compiler's deduction of a type from context."
             },
             {
-                "term": "Union",
-                "definition": "A type that permits one of several alternatives."
+                "term": "Constraint",
+                "definition": "A requirement that limits which types a type parameter may accept."
+            },
+            {
+                "term": "Indexed access type",
+                "definition": "A type written T[K] that describes the value at key K of T."
             }
         ]
     },
@@ -83,31 +113,39 @@
         {
             "kind": "lesson",
             "id": "lesson",
-            "title": "TypeScript values and decisions",
+            "title": "Type parameters preserve a relationship",
             "prompt": "Read the explanation, then apply it in the next step.",
             "evidence": "prediction",
             "sections": [
                 {
-                    "title": "TypeScript values and decisions",
-                    "body": "TypeScript adds static types to JavaScript: const count: number = 3;. A union such as string | number keeps both alternatives visible until a runtime check narrows it. typeof, equality, and property checks narrow a union inside a branch. Arrays and loops keep their element types, so a transform returns a typed result."
+                    "title": "Type parameters preserve a relationship",
+                    "body": "A generic function declares a type parameter that connects its inputs to its output: function first<T>(items: readonly T[]): T | undefined. The caller supplies the concrete type, or TypeScript infers it from the argument, so the result keeps the element type instead of widening to any or unknown."
                 },
                 {
-                    "title": "TypeScript source files",
-                    "body": "The compiler erases types and emits JavaScript. The emitted code is what runs in the browser or Node."
+                    "title": "Constraints narrow what T may be",
+                    "body": "A constraint limits which types a parameter accepts. <T, K extends keyof T> says that K must be one of T's property names, and the return type T[K] describes the value at that key. Constraints are checked at compile time and disappear from the emitted JavaScript."
+                },
+                {
+                    "title": "Generics do not validate runtime data",
+                    "body": "A generic signature is a compile-time promise. JSON, localStorage, and network responses arrive as unknown values until a runtime guard checks them. Use a type parameter for relationships inside typed code and an explicit guard at the boundary."
                 }
             ],
             "vocabulary": [
                 {
-                    "term": "Generic",
-                    "definition": "A type parameter that preserves a relationship between inputs and outputs."
+                    "term": "Type parameter",
+                    "definition": "A type placeholder supplied by the caller of a generic function."
                 },
                 {
                     "term": "Type inference",
                     "definition": "The compiler's deduction of a type from context."
                 },
                 {
-                    "term": "Union",
-                    "definition": "A type that permits one of several alternatives."
+                    "term": "Constraint",
+                    "definition": "A requirement that limits which types a type parameter may accept."
+                },
+                {
+                    "term": "Indexed access type",
+                    "definition": "A type written T[K] that describes the value at key K of T."
                 }
             ]
         },
@@ -133,23 +171,41 @@
                     "kind": "function",
                     "description": "An empty array returns null.",
                     "name": "firstOrNull",
-                    "args": [[]],
+                    "args": [
+                        []
+                    ],
                     "expected": null
                 },
                 {
                     "kind": "function",
                     "description": "The first number is preserved.",
                     "name": "firstOrNull",
-                    "args": [[4, 5]],
+                    "args": [
+                        [
+                            4,
+                            5
+                        ]
+                    ],
                     "expected": 4
                 },
                 {
                     "kind": "function",
                     "description": "The first string is preserved.",
                     "name": "firstOrNull",
-                    "args": [["a", "b"]],
+                    "args": [
+                        [
+                            "a",
+                            "b"
+                        ]
+                    ],
                     "expected": "a"
                 }
+            ],
+            "hints": [
+                "The return type already allows null.",
+                "items[0] is undefined for an empty array.",
+                "Use ?? to turn undefined into null.",
+                "return items[0] ?? null;"
             ]
         },
         {
@@ -180,7 +236,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Generics carry the element type from input to output. A cast only tells the compiler to trust the author; it does not check the value."
+            "explanation": "Generics carry the element type from input to output. A cast only tells the compiler to trust the author; it does not check the value.",
+            "hints": [
+                "Two statements are accurate.",
+                "A cast does not check a runtime value.",
+                "any discards the relationship between input and output.",
+                "Select generic and null."
+            ]
         }
     ],
     "evaluation": {
@@ -195,10 +257,13 @@
         "kind": "none"
     },
     "accessibility": {
-        "summary": "The TypeScript workspace is keyboard accessible. Checks verify source structure; they do not compile or run TypeScript.",
-        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
-        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+        "summary": "The TypeScript editor and tests are keyboard accessible. Tests are transpiled and run in the browser runtime.",
+        "keyboardNotes": "Ctrl+Enter runs tests. Diagnostic messages are focusable.",
+        "screenReaderNotes": "Tests announce arguments, expected output, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
