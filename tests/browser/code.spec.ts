@@ -150,7 +150,7 @@ test.describe("real programming environments", function codeSuite(): void {
         await expect(page.getByText("That works")).toBeVisible();
     });
 
-    test("the world screen presents an accessible system list and records recovery", async function worldMission({
+    test("the world screen presents an accessible system list and guards recovery", async function worldMission({
         page,
     }: {
         page: Page;
@@ -162,8 +162,14 @@ test.describe("real programming environments", function codeSuite(): void {
             .first()
             .click();
         await expect(page.getByRole("heading", { name: "Campus storefront" })).toBeVisible();
-        await page.getByRole("button", { name: "Restart service" }).click();
-        await expect(page.getByText(/storefront service restarts/i)).toBeVisible();
+        const restart = page.getByRole("button", { name: "Restart service" });
+        await expect(restart).toBeDisabled();
+        await expect(page.getByText(/not a restartable service/i)).toBeVisible();
+
+        await page.getByRole("button", { name: /Orders API/i }).click();
+        await expect(page.getByRole("heading", { name: "Orders API" })).toBeVisible();
+        await expect(page.getByText(/This system is healthy, so no restart action/i)).toBeVisible();
+        await expect(page.getByRole("button", { name: "Restart service" })).toHaveCount(0);
     });
 
     test("a project stage runs real HTML and CSS checks", async function projectStage({
