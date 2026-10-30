@@ -1,0 +1,341 @@
+{
+    "id": "cargo.publishing",
+    "version": 1,
+    "sequence": 180,
+    "courseId": "cargo",
+    "title": "Publishable metadata and a clean package",
+    "summary": "Add the identity metadata crates.io requires, exclude local secrets, and use cargo package to inspect the result.",
+    "skills": [
+        "cargo.packages",
+        "cargo.workspace"
+    ],
+    "prerequisites": [
+        "cargo.packages",
+        "git.basics"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "publishing",
+        "briefing": "The campus CLI has no description or license, and its package would include a local .env file. Add publishable metadata, exclude local secrets, and prepare a dry run."
+    },
+    "objectives": [
+        {
+            "id": "objective-metadata",
+            "description": "Declare publish metadata and package exclusions.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-package",
+            "description": "Explain what cargo package includes and publishes.",
+            "stepIds": [
+                "check"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Resolve a path-only dependency before publishing.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:server-room",
+        "icon:cargo"
+    ],
+    "hints": [
+        "crates.io requires a description and a license expression.",
+        "Add repository, keywords, and categories for discoverability.",
+        "exclude keeps local files out of the packaged archive.",
+        "Use cargo package --list and cargo publish --dry-run before publishing."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-metadata",
+            "description": "Publishing without a description or license.",
+            "stepId": "apply",
+            "testDescription": "Publishable identity metadata is present.",
+            "feedback": "crates.io rejects a package without the required identity fields. Add description and license at minimum.",
+            "followUpSkill": "cargo.packages"
+        },
+        {
+            "id": "leak-env",
+            "description": "Shipping local secrets in the package archive.",
+            "stepId": "apply",
+            "testDescription": "The package excludes local secrets.",
+            "feedback": "The package includes files by default. Use exclude to keep .env and private fixtures out of the archive."
+        },
+        {
+            "id": "wildcard-dependency",
+            "description": "Publishing a dependency with a wildcard requirement.",
+            "stepId": "apply",
+            "testDescription": "Dependency versions are concrete.",
+            "feedback": "A wildcard lets every future resolve pick a different release. Publish a real version requirement."
+        },
+        {
+            "id": "target-published",
+            "description": "Believing target/ is included in the crate archive.",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that target/ is published with the crate.",
+            "feedback": "Cargo excludes target/ and VCS metadata by default. The manifest still controls other local files."
+        },
+        {
+            "id": "path-only",
+            "description": "Publishing a path dependency without a version.",
+            "stepId": "transfer",
+            "answer": "path-works",
+            "feedback": "A path is local to the workspace. crates.io consumers need a version requirement next to the path.",
+            "followUpSkill": "cargo.workspace"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Publishing is a manifest contract",
+                "body": "crates.io requires a name, version, description, and license. repository, keywords, and categories help consumers find the crate. The license field uses an SPDX expression such as MIT OR Apache-2.0."
+            },
+            {
+                "title": "The package is a file subset",
+                "body": "cargo package builds the archive that cargo publish uploads. Cargo excludes target/ and VCS internals by default, but it does not know which project files are secret. include and exclude decide what else enters the archive."
+            },
+            {
+                "title": "Paths are local; versions are portable",
+                "body": "A path dependency works inside the workspace because the directory exists. A crates.io consumer resolves from the registry, so the dependency also needs a version requirement. workspace.dependencies can carry the shared version."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "SPDX expression",
+                "definition": "A standardized license identifier, optionally combined with AND or OR."
+            },
+            {
+                "term": "Package archive",
+                "definition": "The file set cargo package builds and cargo publish uploads."
+            },
+            {
+                "term": "exclude",
+                "definition": "A manifest list of paths that must not enter the package archive."
+            },
+            {
+                "term": "Path dependency",
+                "definition": "A dependency resolved from a local directory instead of a registry."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Metadata, archive contents, and path dependencies",
+            "prompt": "Read the explanation, then prepare the manifest.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Publishing is a manifest contract",
+                    "body": "crates.io requires a name, version, description, and license. repository, keywords, and categories help consumers find the crate. The license field uses an SPDX expression such as MIT OR Apache-2.0."
+                },
+                {
+                    "title": "The package is a file subset",
+                    "body": "cargo package builds the archive that cargo publish uploads. Cargo excludes target/ and VCS internals by default, but it does not know which project files are secret. include and exclude decide what else enters the archive."
+                },
+                {
+                    "title": "Paths are local; versions are portable",
+                    "body": "A path dependency works inside the workspace because the directory exists. A crates.io consumer resolves from the registry, so the dependency also needs a version requirement. workspace.dependencies can carry the shared version."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "SPDX expression",
+                    "definition": "A standardized license identifier, optionally combined with AND or OR."
+                },
+                {
+                    "term": "Package archive",
+                    "definition": "The file set cargo package builds and cargo publish uploads."
+                },
+                {
+                    "term": "exclude",
+                    "definition": "A manifest list of paths that must not enter the package archive."
+                },
+                {
+                    "term": "Path dependency",
+                    "definition": "A dependency resolved from a local directory instead of a registry."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Make the manifest publishable",
+            "prompt": "Edit Cargo.toml. Add a description, an SPDX license, a repository, keywords, and categories, and exclude local secrets from the package.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the name, version, and edition.",
+                "Put description and license in [package].",
+                "Add keywords and categories as arrays.",
+                "Use exclude for .env and private fixtures."
+            ],
+            "files": [
+                {
+                    "path": "Cargo.toml",
+                    "content": "[package]\nname = \"campus-cli\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\nserde = { version = \"1.0.203\", features = [\"derive\"] }\n\n# TODO: add publish metadata and keep local secrets out of the package\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "Cargo.toml",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Verify the manifest still builds and tests the crate."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Publishable identity metadata is present.",
+                    "file": "Cargo.toml",
+                    "includes": [
+                        "description = \"Campus inventory command-line tool\"",
+                        "license = \"MIT OR Apache-2.0\"",
+                        "repository = \"https://github.com/praxbit/campus-cli\""
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The package excludes local secrets.",
+                    "file": "Cargo.toml",
+                    "includes": [
+                        "exclude = [\".env\", \"fixtures/private/*\"]"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Dependency versions are concrete.",
+                    "file": "Cargo.toml",
+                    "includes": [
+                        "serde = { version = \"1.0.203\", features = [\"derive\"] }"
+                    ],
+                    "excludes": [
+                        "version = \"*\"",
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "What the package contains",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Separate what Cargo excludes by default from what the manifest adds.",
+                "Path dependencies are resolved locally.",
+                "dev-dependencies are for tests and examples.",
+                "A dry run exercises packaging and verification."
+            ],
+            "statements": [
+                {
+                    "id": "required-fields",
+                    "label": "crates.io requires a description and a license expression.",
+                    "correct": true
+                },
+                {
+                    "id": "exclude",
+                    "label": "exclude removes matching paths from the package archive.",
+                    "correct": true
+                },
+                {
+                    "id": "path-version",
+                    "label": "A published path dependency also needs a version requirement.",
+                    "correct": true
+                },
+                {
+                    "id": "target-published",
+                    "label": "target/ is included in the published crate by default.",
+                    "correct": false
+                },
+                {
+                    "id": "dev-published",
+                    "label": "dev-dependencies are installed by consumers of the published crate.",
+                    "correct": false
+                }
+            ],
+            "explanation": "The manifest must identify the crate and its license. exclude controls extra local files, and path dependencies need versions for registry consumers. target/ and dev-dependencies are not part of a consumer's normal build."
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a workspace publish",
+            "prompt": "A workspace member depends on another member with only path = \"../core\". What must be added before publishing?",
+            "evidence": "transfer",
+            "hints": [
+                "The registry does not know the local directory layout.",
+                "A version requirement lets Cargo resolve from crates.io.",
+                "Keep the path for local development and add the version.",
+                "workspace.dependencies can centralize the version."
+            ],
+            "quiz": {
+                "prompt": "A workspace member depends on another member with only path = \"../core\". What must be added before publishing?",
+                "options": [
+                    {
+                        "id": "add-version",
+                        "label": "A version requirement next to the path so registry consumers can resolve it."
+                    },
+                    {
+                        "id": "path-works",
+                        "label": "Nothing; the path is uploaded and recreated on the consumer's machine."
+                    },
+                    {
+                        "id": "remove-path",
+                        "label": "Remove the dependency entirely because published crates cannot depend on each other."
+                    },
+                    {
+                        "id": "dev-only",
+                        "label": "Move the dependency to dev-dependencies so it is not published."
+                    }
+                ],
+                "correctId": "add-version",
+                "explanation": "The path keeps the local workspace working, and the version tells crates.io how to resolve the dependency for consumers. Both belong on the dependency entry."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
