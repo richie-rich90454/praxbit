@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "catalog.module.ts": "import { Module } from \"@nestjs/common\";\nimport { CatalogController } from \"./catalog.controller\";\nimport { CATALOG_REPOSITORY, CatalogRepository } from \"./catalog.repository\";\n\nexport const catalogProviders = [\n  CatalogRepository,\n  { provide: CATALOG_REPOSITORY, useExisting: CatalogRepository },\n];\nexport const catalogExports = [CATALOG_REPOSITORY];\n\n@Module({\n  controllers: [CatalogController],\n  providers: catalogProviders,\n  exports: catalogExports,\n})\nexport class CatalogModule {}\n"
+            }
+        }
+    }
+}
