@@ -1,0 +1,317 @@
+{
+    "id": "security.cryptography",
+    "version": 1,
+    "sequence": 402,
+    "courseId": "security",
+    "title": "Hash, encrypt, or throw away",
+    "summary": "Choose the right cryptographic tool for passwords and reset tokens, and review a token flow that chose wrong.",
+    "skills": ["security.auth", "concept.security"],
+    "prerequisites": ["security.auth", "http.basics"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["configuration-review", "no-execution"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "cryptography",
+        "briefing": "The campus portal added password reset. A review found tokens generated with Math.random, stored exactly as sent, and never expiring. Before fixing it, decide which cryptographic tool belongs to each secret."
+    },
+    "objectives": [
+        {
+            "id": "choose-tool",
+            "description": "Match passwords and tokens to the right cryptographic operation.",
+            "stepIds": ["hash-choice"]
+        },
+        {
+            "id": "review-flow",
+            "description": "Identify weak token generation, storage, and expiry.",
+            "stepIds": ["token-review"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain password, token, and transport protections.",
+            "stepIds": ["crypto-transfer"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:lock"],
+    "hints": [
+        "Passwords need a slow, salted, one-way function.",
+        "Reset tokens need unpredictable randomness and hashed storage.",
+        "Encryption is reversible; hashing is not.",
+        "Use Argon2id or scrypt for passwords and a CSPRNG plus hashing for tokens."
+    ],
+    "misconceptions": [
+        {
+            "id": "encrypt-passwords",
+            "description": "Encrypting passwords so they can be recovered.",
+            "stepId": "hash-choice",
+            "answer": "encrypt",
+            "feedback": "Password verification never needs the original. A slow salted hash makes a stolen database expensive to attack and avoids a recoverable master key.",
+            "followUpSkill": "security.auth"
+        },
+        {
+            "id": "random-is-enough",
+            "description": "Believing a random token needs no storage protection.",
+            "stepId": "token-review",
+            "answer": "accept:weak-random,raw-store,no-expiry,hashed-store",
+            "feedback": "Random tokens still leak through database reads and logs. Store only a hash, use a CSPRNG, and expire the token."
+        },
+        {
+            "id": "md5-salt",
+            "description": "Treating MD5 with a salt as adequate password storage.",
+            "stepId": "crypto-transfer",
+            "answer": "md5",
+            "feedback": "MD5 is fast by design, which helps an attacker. Use a memory-hard password hash such as Argon2id or scrypt."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Three jobs, three tools",
+                "body": "Password storage needs a slow, salted, one-way hash. Reset and session tokens need unpredictable randomness and hashed storage so a database leak does not hand over live credentials. Encryption is for data you must read again, and it depends on key management."
+            },
+            {
+                "title": "Randomness has grades",
+                "body": "Math.random is designed for simulations and games, not secrets. Use the platform's cryptographically secure generator. A token that looks long can still be predictable if its source is not a CSPRNG."
+            },
+            {
+                "title": "Transport and storage are separate",
+                "body": "TLS protects bytes in transit. It does not protect a token stored in plaintext or a password hashed with a fast function. Each layer needs its own control."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Password hash",
+                "definition": "A slow, salted, one-way transformation used to verify a password."
+            },
+            {
+                "term": "Salt",
+                "definition": "Unique random data added before hashing so equal passwords do not collide."
+            },
+            {
+                "term": "CSPRNG",
+                "definition": "A cryptographically secure pseudorandom number generator."
+            },
+            {
+                "term": "Key management",
+                "definition": "Creating, storing, rotating, and restricting access to encryption keys."
+            },
+            {
+                "term": "Token hash",
+                "definition": "A one-way digest of a bearer token, stored instead of the token itself."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Choose the operation before the library",
+            "prompt": "Read the explanation, then answer the tool-choice question.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Three jobs, three tools",
+                    "body": "Password storage needs a slow, salted, one-way hash. Reset and session tokens need unpredictable randomness and hashed storage so a database leak does not hand over live credentials. Encryption is for data you must read again, and it depends on key management."
+                },
+                {
+                    "title": "Randomness has grades",
+                    "body": "Math.random is designed for simulations and games, not secrets. Use the platform's cryptographically secure generator. A token that looks long can still be predictable if its source is not a CSPRNG."
+                },
+                {
+                    "title": "Transport and storage are separate",
+                    "body": "TLS protects bytes in transit. It does not protect a token stored in plaintext or a password hashed with a fast function. Each layer needs its own control."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Password hash",
+                    "definition": "A slow, salted, one-way transformation used to verify a password."
+                },
+                {
+                    "term": "Salt",
+                    "definition": "Unique random data added before hashing so equal passwords do not collide."
+                },
+                {
+                    "term": "CSPRNG",
+                    "definition": "A cryptographically secure pseudorandom number generator."
+                },
+                {
+                    "term": "Key management",
+                    "definition": "Creating, storing, rotating, and restricting access to encryption keys."
+                },
+                {
+                    "term": "Token hash",
+                    "definition": "A one-way digest of a bearer token, stored instead of the token itself."
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "hash-choice",
+            "title": "Store a password",
+            "prompt": "The database stores password verifiers. Which operation belongs there?",
+            "evidence": "prediction",
+            "hints": [
+                "Verification only needs to compare, not recover.",
+                "A fast hash helps an attacker guess quickly.",
+                "A unique salt prevents one guess from testing every account.",
+                "Choose a slow, salted hash such as Argon2id or scrypt."
+            ],
+            "quiz": {
+                "prompt": "Which operation should produce the stored password verifier?",
+                "options": [
+                    {
+                        "id": "slow-hash",
+                        "label": "A slow, salted hash such as Argon2id or scrypt"
+                    },
+                    {
+                        "id": "encrypt",
+                        "label": "Reversible encryption with a server key"
+                    },
+                    {
+                        "id": "md5",
+                        "label": "A single round of MD5"
+                    },
+                    {
+                        "id": "plain",
+                        "label": "Plain text with file permissions"
+                    }
+                ],
+                "correctId": "slow-hash",
+                "explanation": "Password verification is a one-way comparison. A slow, memory-hard hash with a unique salt raises the cost of offline guessing."
+            }
+        },
+        {
+            "kind": "review",
+            "id": "token-review",
+            "title": "Review the reset token flow",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Look at how the token is generated.",
+                "Check what the database stores and how long it lives.",
+                "Ask what a leaked database row would let an attacker do.",
+                "Reject the flow: weak randomness, raw storage, and no expiry all need repair."
+            ],
+            "artifact": {
+                "title": "Password reset token",
+                "caption": "The token is emailed, stored, and compared with strict equality.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "function createResetToken(userId) {\n  const token = Math.random().toString(36).slice(2);\n  await db.resetToken.create({ data: { userId, token, createdAt: new Date() } });\n  return token;\n}\n\nasync function consumeResetToken(token) {\n  const row = await db.resetToken.findFirst({ where: { token } });\n  return row !== null;\n}"
+            },
+            "findings": [
+                {
+                    "id": "weak-random",
+                    "label": "Math.random is not a cryptographically secure token source.",
+                    "correct": true
+                },
+                {
+                    "id": "raw-store",
+                    "label": "The database stores the live token instead of a hash.",
+                    "correct": true
+                },
+                {
+                    "id": "no-expiry",
+                    "label": "The token has no expiry or single-use condition.",
+                    "correct": true
+                },
+                {
+                    "id": "hashed-store",
+                    "label": "Storing only a hash would limit the damage of a database leak.",
+                    "correct": true
+                },
+                {
+                    "id": "random-safe",
+                    "label": "A random string never needs to be hashed at rest.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the flow"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until generation, storage, and expiry are fixed"
+                },
+                {
+                    "id": "shorten",
+                    "label": "Only make the token shorter"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "A reset token is a bearer credential. Generate it with a CSPRNG, store a hash, expire it, and consume it once."
+        },
+        {
+            "kind": "explain",
+            "id": "crypto-transfer",
+            "title": "Match the protection to the threat",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Ask whether the system ever needs the original value back.",
+                "Separate transit, storage, and key access.",
+                "A fast hash is a liability for passwords.",
+                "Select slow hashing, hashed tokens, TLS, and key management; reject MD5 and recoverable passwords."
+            ],
+            "statements": [
+                {
+                    "id": "argon",
+                    "label": "Argon2id and scrypt are designed to make password guessing expensive.",
+                    "correct": true
+                },
+                {
+                    "id": "token-hash",
+                    "label": "A reset token should be stored as a hash so a database leak does not expose it.",
+                    "correct": true
+                },
+                {
+                    "id": "tls",
+                    "label": "TLS protects credentials in transit but not a plaintext token at rest.",
+                    "correct": true
+                },
+                {
+                    "id": "keys",
+                    "label": "Encryption is only as strong as the key management around it.",
+                    "correct": true
+                },
+                {
+                    "id": "md5",
+                    "label": "MD5 with a salt is adequate for password storage.",
+                    "correct": false
+                },
+                {
+                    "id": "recover",
+                    "label": "Passwords should be encrypted so support staff can recover them.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Use one-way, slow hashing for passwords, CSPRNG tokens stored as hashes, TLS for transit, and explicit key management for reversible encryption."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional", "web"]
+}
