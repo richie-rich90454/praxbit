@@ -1,0 +1,337 @@
+{
+    "id": "go.modules-packages",
+    "version": 1,
+    "sequence": 93,
+    "courseId": "go",
+    "title": "Split a module into packages",
+    "summary": "Fix a module path and import an internal package from the main program.",
+    "skills": [
+        "go.modules"
+    ],
+    "prerequisites": [
+        "go.interfaces"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "go-modules",
+        "briefing": "A service still uses the placeholder module path example, and its import does not match the module. Set the real module path and import the internal pricing package correctly."
+    },
+    "objectives": [
+        {
+            "id": "fix-module",
+            "description": "Set the module path and import the internal package.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-boundary",
+            "description": "Choose who may import an internal package.",
+            "stepIds": [
+                "module-transfer"
+            ]
+        },
+        {
+            "id": "explain-modules",
+            "description": "Explain module paths, checksums, and internal packages accurately.",
+            "stepIds": [
+                "module-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:go"
+    ],
+    "hints": [
+        "The module path is the prefix of every internal import.",
+        "Choose campus.example/service as the module path.",
+        "Update main.go to import campus.example/service/internal/pricing.",
+        "Keep the package name pricing and call pricing.Total."
+    ],
+    "misconceptions": [
+        {
+            "id": "placeholder-module",
+            "description": "Leaving the placeholder module path.",
+            "stepId": "apply",
+            "testDescription": "The module path matches the import path.",
+            "feedback": "The module path and the import prefix must agree. A placeholder module breaks resolution outside the current directory.",
+            "followUpSkill": "go.modules"
+        },
+        {
+            "id": "any-module",
+            "description": "Believing any module can import an internal package.",
+            "stepId": "module-transfer",
+            "answer": "any-module",
+            "feedback": "internal restricts imports to code rooted at the parent of the internal directory. Other modules cannot import it.",
+            "followUpSkill": "go.modules"
+        },
+        {
+            "id": "gosum-lock",
+            "description": "Believing go.sum replaces go.mod.",
+            "stepId": "module-check",
+            "answer": "gosum-lock",
+            "feedback": "go.mod declares requirements; go.sum records checksums. Both are needed for reproducible builds.",
+            "followUpSkill": "go.modules"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A module is the unit of versioning",
+                "body": "go.mod declares the module path and the Go version. Import paths inside the module begin with that prefix. The module path is also the identity that other modules use to require a version, so it must match the repository location."
+            },
+            {
+                "title": "go.sum records integrity",
+                "body": "go.sum stores cryptographic hashes of module content. It is not a lock file that replaces go.mod; the two work together. go mod tidy adds missing requirements and removes unused ones, then updates both files."
+            },
+            {
+                "title": "Internal packages enforce boundaries",
+                "body": "A package under an internal directory can be imported only by code rooted at the parent of internal. This lets a module share implementation details across its own packages without exposing them to other modules."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Module",
+                "definition": "A collection of packages versioned and distributed together."
+            },
+            {
+                "term": "Module path",
+                "definition": "The import prefix that identifies a module."
+            },
+            {
+                "term": "go.sum",
+                "definition": "A file of checksums for module content."
+            },
+            {
+                "term": "Internal package",
+                "definition": "A package importable only within its parent module subtree."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A module is the unit of versioning",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A module is the unit of versioning",
+                    "body": "go.mod declares the module path and the Go version. Import paths inside the module begin with that prefix. The module path is also the identity that other modules use to require a version, so it must match the repository location."
+                },
+                {
+                    "title": "go.sum records integrity",
+                    "body": "go.sum stores cryptographic hashes of module content. It is not a lock file that replaces go.mod; the two work together. go mod tidy adds missing requirements and removes unused ones, then updates both files."
+                },
+                {
+                    "title": "Internal packages enforce boundaries",
+                    "body": "A package under an internal directory can be imported only by code rooted at the parent of internal. This lets a module share implementation details across its own packages without exposing them to other modules."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Module",
+                    "definition": "A collection of packages versioned and distributed together."
+                },
+                {
+                    "term": "Module path",
+                    "definition": "The import prefix that identifies a module."
+                },
+                {
+                    "term": "go.sum",
+                    "definition": "A file of checksums for module content."
+                },
+                {
+                    "term": "Internal package",
+                    "definition": "A package importable only within its parent module subtree."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Fix the module and import",
+            "prompt": "Edit go.mod and main.go. Use campus.example/service as the module path and import its internal pricing package.",
+            "evidence": "construction",
+            "language": "go",
+            "files": [
+                {
+                    "path": "go.mod",
+                    "content": "module example\n\ngo 1.23\n",
+                    "editable": true,
+                    "language": "go"
+                },
+                {
+                    "path": "main.go",
+                    "content": "package main\n\nimport (\n    \"fmt\"\n\n    \"example/internal/pricing\"\n)\n\nfunc main() {\n    fmt.Println(pricing.Total([]int{1200, 800}))\n}\n",
+                    "editable": true,
+                    "language": "go"
+                },
+                {
+                    "path": "internal/pricing/pricing.go",
+                    "content": "package pricing\n\nfunc Total(values []int) int {\n    total := 0\n    for _, value := range values {\n        total += value\n    }\n    return total\n}\n",
+                    "editable": false,
+                    "language": "go"
+                }
+            ],
+            "entry": "main.go",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "go test ./...",
+                "description": "Compile and test every package in the module."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The module path matches the import path.",
+                    "file": "go.mod",
+                    "includes": [
+                        "module campus.example/service"
+                    ],
+                    "excludes": [
+                        "module example"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The service imports the internal pricing package.",
+                    "file": "main.go",
+                    "includes": [
+                        "\"campus.example/service/internal/pricing\"",
+                        "pricing.Total("
+                    ],
+                    "excludes": [
+                        "\"example/internal/pricing\""
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The pricing package exposes Total.",
+                    "file": "internal/pricing/pricing.go",
+                    "includes": [
+                        "package pricing",
+                        "func Total("
+                    ],
+                    "excludes": []
+                }
+            ],
+            "hints": [
+                "The module line currently says example.",
+                "Every internal import starts with the module path.",
+                "Change both the module line and the import.",
+                "Use campus.example/service/internal/pricing in main.go."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "module-transfer",
+            "title": "Respect the internal boundary",
+            "prompt": "A package lives at campus.example/service/internal/pricing. Which code may import it?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the allowed importer.",
+                "options": [
+                    {
+                        "id": "parent-module",
+                        "label": "Code inside the campus.example/service module subtree"
+                    },
+                    {
+                        "id": "any-module",
+                        "label": "Any module that knows the import path"
+                    },
+                    {
+                        "id": "main-only",
+                        "label": "Only package main in any module"
+                    },
+                    {
+                        "id": "tests-only",
+                        "label": "Only test files in any module"
+                    }
+                ],
+                "correctId": "parent-module",
+                "explanation": "internal restricts imports to code rooted at the parent of the internal directory. Other modules cannot import it, even if they know the path."
+            },
+            "hints": [
+                "The directory name internal is meaningful to the Go tool.",
+                "It limits imports to the parent module subtree.",
+                "Being outside the module is enough to be rejected.",
+                "Choose code inside campus.example/service."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "module-check",
+            "title": "Modules and checksums",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "module-path",
+                    "label": "The module path is the prefix for imports within the module.",
+                    "correct": true
+                },
+                {
+                    "id": "gosum",
+                    "label": "go.sum records checksums of module content.",
+                    "correct": true
+                },
+                {
+                    "id": "gosum-lock",
+                    "label": "go.sum replaces go.mod as the source of requirements.",
+                    "correct": false
+                },
+                {
+                    "id": "internal",
+                    "label": "An internal package can be imported only within its parent module subtree.",
+                    "correct": true
+                }
+            ],
+            "explanation": "The module path anchors imports, go.mod and go.sum serve different roles, and internal enforces an import boundary.",
+            "hints": [
+                "Three statements are accurate.",
+                "go.mod declares requirements.",
+                "go.sum stores hashes for verification.",
+                "Select module-path, gosum, and internal."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": [
+            "go.http-service"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
