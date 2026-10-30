@@ -49,7 +49,11 @@ export async function validateRepository(repositoryRoot: string): Promise<Reposi
 }
 
 export { loadContent } from "./loader.ts";
-export { validateContentDocuments } from "./validate.ts";
+export {
+    inferCodeVerification,
+    TRACK_MINIMUM_MISSIONS,
+    validateContentDocuments,
+} from "./validate.ts";
 export {
     loadReferenceSolutions,
     parseMissionSolution,
