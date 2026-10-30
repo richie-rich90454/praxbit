@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Program.cs": "using Microsoft.AspNetCore.Builder;\nusing Microsoft.AspNetCore.Http;\nusing Microsoft.Extensions.DependencyInjection;\n\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddSingleton<IOrderStore, InMemoryOrderStore>();\nvar app = builder.Build();\n\napp.MapGet(\"/orders/{id}\", (string id, IOrderStore store) =>\n{\n    var order = store.Find(id);\n    return order is null\n        ? Results.NotFound()\n        : Results.Ok(new { id, name = order });\n});\n\napp.Run();\n\ninterface IOrderStore\n{\n    string? Find(string id);\n}\n\nclass InMemoryOrderStore : IOrderStore\n{\n    public string? Find(string id) => id == \"o1\" ? \"campus\" : null;\n}\n"
+            }
+        }
+    }
+}
