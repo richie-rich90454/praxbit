@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "cart-response.ts": "type CartLine = { sku: string; quantity: number };\ntype CartResult =\n  | { ok: true; lines: CartLine[] }\n  | { ok: false; message: string };\n\nfunction readCartResponse(status: number, body: unknown): CartResult {\n  if (status === 401) {\n    return { ok: false, message: \"sign_in\" };\n  }\n  if (status >= 400) {\n    return { ok: false, message: \"request_failed\" };\n  }\n  if (!Array.isArray(body)) {\n    return { ok: false, message: \"invalid_body\" };\n  }\n  return { ok: true, lines: body as CartLine[] };\n}\n"
+            }
+        }
+    }
+}
