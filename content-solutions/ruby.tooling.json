@@ -1,0 +1,10 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Gemfile": "source \"https://rubygems.org\"\n\ngem \"minitest\", \"~> 5.25\"\n",
+                "Rakefile": "require \"rake/testtask\"\n\nRake::TestTask.new(:test) do |t|\n  t.libs << \"test\"\n  t.pattern = \"test/**/*_test.rb\"\nend\n\ntask default: :test\n"
+            }
+        }
+    }
+}
