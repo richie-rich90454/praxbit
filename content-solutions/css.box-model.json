@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-box": {
+            "files": {
+                "styles.css": "* { box-sizing: border-box; }\n.card { width: 100%; padding: 16px; margin-bottom: 16px; background: #fff; border: 1px solid #D6D6D6; }\n"
+            }
+        }
+    }
+}
