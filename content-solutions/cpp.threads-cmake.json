@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "CMakeLists.txt": "cmake_minimum_required(VERSION 3.24)\nproject(campus_worker CXX)\n\nset(CMAKE_CXX_STANDARD 20)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\n\nfind_package(Threads REQUIRED)\nadd_executable(campus_worker main.cpp)\ntarget_link_libraries(campus_worker PRIVATE Threads::Threads)\n"
+            }
+        }
+    }
+}
