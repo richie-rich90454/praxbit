@@ -20,9 +20,7 @@
                 "before-code.break-it-into-parts",
                 "before-code.can-we-trust-the-result"
             ],
-            "interests": [
-                "everything"
-            ]
+            "interests": ["everything"]
         },
         {
             "id": "campus",
@@ -49,12 +47,7 @@
                 "campus.nothing-works-together",
                 "campus.the-campus-incident"
             ],
-            "interests": [
-                "web",
-                "professional",
-                "systems",
-                "ai"
-            ]
+            "interests": ["web", "professional", "systems", "ai"]
         },
         {
             "id": "python-foundations",
@@ -68,10 +61,7 @@
                 "python.collections",
                 "python.testing"
             ],
-            "interests": [
-                "ai",
-                "professional"
-            ]
+            "interests": ["ai", "professional"]
         },
         {
             "id": "sql-data",
@@ -85,10 +75,7 @@
                 "sql.indexes-performance",
                 "sql.transactions-isolation"
             ],
-            "interests": [
-                "professional",
-                "web"
-            ]
+            "interests": ["professional", "web"]
         },
         {
             "id": "algorithms",
@@ -102,10 +89,7 @@
                 "algorithms.sorting",
                 "algorithms.recursion"
             ],
-            "interests": [
-                "professional",
-                "systems"
-            ]
+            "interests": ["professional", "systems"]
         },
         {
             "id": "security",
@@ -119,11 +103,7 @@
                 "security.cryptography",
                 "security.supply-chain-incident"
             ],
-            "interests": [
-                "systems",
-                "professional",
-                "web"
-            ]
+            "interests": ["systems", "professional", "web"]
         },
         {
             "id": "ai-engineering",
@@ -137,10 +117,7 @@
                 "ai.tool-calling",
                 "ai.cost-privacy"
             ],
-            "interests": [
-                "ai",
-                "professional"
-            ]
+            "interests": ["ai", "professional"]
         },
         {
             "id": "devops",
@@ -154,10 +131,7 @@
                 "devops.backups",
                 "devops.infrastructure-security"
             ],
-            "interests": [
-                "systems",
-                "professional"
-            ]
+            "interests": ["systems", "professional"]
         },
         {
             "id": "typescript",
@@ -171,26 +145,15 @@
                 "typescript.generic-constraints",
                 "typescript.exhaustive-unions"
             ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "interests": ["web", "professional"]
         },
         {
             "id": "node-services",
             "title": "Node services",
             "summary": "Middleware order, validation, and error boundaries in Hono services.",
             "kind": "framework",
-            "missionIds": [
-                "node.middleware-order",
-                "node.http",
-                "node.errors",
-                "node.routing"
-            ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "missionIds": ["node.middleware-order", "node.http", "node.errors", "node.routing"],
+            "interests": ["web", "professional"]
         },
         {
             "id": "java",
@@ -204,25 +167,15 @@
                 "java.concurrency-executors",
                 "java.maven-build"
             ],
-            "interests": [
-                "professional"
-            ]
+            "interests": ["professional"]
         },
         {
             "id": "c",
             "title": "C",
             "summary": "Typed values, pointers, memory, and the compiler warnings that keep C honest.",
             "kind": "language",
-            "missionIds": [
-                "c.values",
-                "c.memory",
-                "c.dynamic-memory",
-                "c.sockets",
-                "c.make-build"
-            ],
-            "interests": [
-                "systems"
-            ]
+            "missionIds": ["c.values", "c.memory", "c.dynamic-memory", "c.sockets", "c.make-build"],
+            "interests": ["systems"]
         },
         {
             "id": "cpp",
@@ -236,10 +189,7 @@
                 "cpp.templates",
                 "cpp.threads-cmake"
             ],
-            "interests": [
-                "systems",
-                "games"
-            ]
+            "interests": ["systems", "games"]
         },
         {
             "id": "csharp",
@@ -253,10 +203,7 @@
                 "csharp.dependency-injection",
                 "csharp.aspnet-core"
             ],
-            "interests": [
-                "professional",
-                "games"
-            ]
+            "interests": ["professional", "games"]
         },
         {
             "id": "go",
@@ -270,10 +217,7 @@
                 "go.modules-packages",
                 "go.http-service"
             ],
-            "interests": [
-                "systems",
-                "professional"
-            ]
+            "interests": ["systems", "professional"]
         },
         {
             "id": "rust",
@@ -287,9 +231,7 @@
                 "rust.lifetimes",
                 "rust.async-tokio"
             ],
-            "interests": [
-                "systems"
-            ]
+            "interests": ["systems"]
         },
         {
             "id": "kotlin",
@@ -303,9 +245,7 @@
                 "kotlin.testing",
                 "kotlin.flow"
             ],
-            "interests": [
-                "professional"
-            ]
+            "interests": ["professional"]
         },
         {
             "id": "swift",
@@ -319,9 +259,7 @@
                 "swift.errors",
                 "swift.packages"
             ],
-            "interests": [
-                "professional"
-            ]
+            "interests": ["professional"]
         },
         {
             "id": "ruby",
@@ -335,26 +273,15 @@
                 "ruby.errors",
                 "ruby.tooling"
             ],
-            "interests": [
-                "professional",
-                "web"
-            ]
+            "interests": ["professional", "web"]
         },
         {
             "id": "zig",
             "title": "Zig",
             "summary": "Explicit types, slices, allocators, and the build steps a Zig program needs.",
             "kind": "language",
-            "missionIds": [
-                "zig.values",
-                "zig.memory",
-                "zig.errors",
-                "zig.build",
-                "zig.testing"
-            ],
-            "interests": [
-                "systems"
-            ]
+            "missionIds": ["zig.values", "zig.memory", "zig.errors", "zig.build", "zig.testing"],
+            "interests": ["systems"]
         },
         {
             "id": "lua",
@@ -368,40 +295,23 @@
                 "lua.modules",
                 "lua.metatables"
             ],
-            "interests": [
-                "games",
-                "systems"
-            ]
+            "interests": ["games", "systems"]
         },
         {
             "id": "react",
             "title": "React interfaces",
             "summary": "Build typed React components and load remote data without leaking requests.",
             "kind": "framework",
-            "missionIds": [
-                "react.components",
-                "react.data",
-                "react.routing",
-                "react.testing"
-            ],
-            "interests": [
-                "web"
-            ]
+            "missionIds": ["react.components", "react.data", "react.routing", "react.testing"],
+            "interests": ["web"]
         },
         {
             "id": "vue",
             "title": "Vue interfaces",
             "summary": "Build Vue single-file components and keep shared cart state derived and guarded.",
             "kind": "framework",
-            "missionIds": [
-                "vue.components",
-                "vue.reactivity",
-                "vue.routing",
-                "vue.testing"
-            ],
-            "interests": [
-                "web"
-            ]
+            "missionIds": ["vue.components", "vue.reactivity", "vue.routing", "vue.testing"],
+            "interests": ["web"]
         },
         {
             "id": "solidjs",
@@ -414,9 +324,7 @@
                 "solidjs.control-flow",
                 "solidjs.testing"
             ],
-            "interests": [
-                "web"
-            ]
+            "interests": ["web"]
         },
         {
             "id": "angular",
@@ -429,10 +337,7 @@
                 "angular.routing",
                 "angular.testing"
             ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "interests": ["web", "professional"]
         },
         {
             "id": "svelte",
@@ -445,9 +350,7 @@
                 "svelte.routing",
                 "svelte.testing"
             ],
-            "interests": [
-                "web"
-            ]
+            "interests": ["web"]
         },
         {
             "id": "express",
@@ -460,42 +363,23 @@
                 "express.validation",
                 "express.auth"
             ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "interests": ["web", "professional"]
         },
         {
             "id": "fastify",
             "title": "Fastify",
             "summary": "Fastify routes with typed parameters, JSON schemas that reject extra fields, and encapsulated plugins.",
             "kind": "framework",
-            "missionIds": [
-                "fastify.routing",
-                "fastify.schemas",
-                "fastify.plugins",
-                "fastify.auth"
-            ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "missionIds": ["fastify.routing", "fastify.schemas", "fastify.plugins", "fastify.auth"],
+            "interests": ["web", "professional"]
         },
         {
             "id": "nestjs",
             "title": "NestJS",
             "summary": "NestJS feature modules, constructor-injected providers, and guards that decide before a handler runs.",
             "kind": "framework",
-            "missionIds": [
-                "nestjs.modules",
-                "nestjs.guards",
-                "nestjs.providers",
-                "nestjs.testing"
-            ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "missionIds": ["nestjs.modules", "nestjs.guards", "nestjs.providers", "nestjs.testing"],
+            "interests": ["web", "professional"]
         },
         {
             "id": "spring-boot",
@@ -508,9 +392,7 @@
                 "spring-boot.validation",
                 "spring-boot.security"
             ],
-            "interests": [
-                "professional"
-            ]
+            "interests": ["professional"]
         },
         {
             "id": "aspnet-core",
@@ -523,10 +405,7 @@
                 "aspnet-core.validation",
                 "aspnet-core.auth"
             ],
-            "interests": [
-                "professional",
-                "web"
-            ]
+            "interests": ["professional", "web"]
         },
         {
             "id": "fastapi",
@@ -539,41 +418,23 @@
                 "fastapi.security",
                 "fastapi.errors"
             ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "interests": ["web", "professional"]
         },
         {
             "id": "django",
             "title": "Django",
             "summary": "Django models, migrations, and JSON views that keep queries and response fields explicit.",
             "kind": "framework",
-            "missionIds": [
-                "django.models",
-                "django.views",
-                "django.auth",
-                "django.testing"
-            ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "missionIds": ["django.models", "django.views", "django.auth", "django.testing"],
+            "interests": ["web", "professional"]
         },
         {
             "id": "cmake",
             "title": "CMake",
             "summary": "Targets, packages, installs, and the build graph a C++ project needs.",
             "kind": "framework",
-            "missionIds": [
-                "cmake.targets",
-                "cmake.packages",
-                "cmake.testing",
-                "cmake.install"
-            ],
-            "interests": [
-                "systems"
-            ]
+            "missionIds": ["cmake.targets", "cmake.packages", "cmake.testing", "cmake.install"],
+            "interests": ["systems"]
         },
         {
             "id": "cargo",
@@ -586,9 +447,7 @@
                 "cargo.testing",
                 "cargo.publishing"
             ],
-            "interests": [
-                "systems"
-            ]
+            "interests": ["systems"]
         },
         {
             "id": "database-engineering",
@@ -602,11 +461,7 @@
                 "database-engineering.redis",
                 "database-engineering.query-performance"
             ],
-            "interests": [
-                "professional",
-                "systems",
-                "web"
-            ]
+            "interests": ["professional", "systems", "web"]
         },
         {
             "id": "algorithms-advanced",
@@ -620,10 +475,7 @@
                 "algorithms-advanced.dynamic-programming",
                 "algorithms-advanced.greedy"
             ],
-            "interests": [
-                "professional",
-                "systems"
-            ]
+            "interests": ["professional", "systems"]
         },
         {
             "id": "devops-practice",
@@ -637,10 +489,7 @@
                 "devops-practice.tls",
                 "devops-practice.proxy"
             ],
-            "interests": [
-                "systems",
-                "professional"
-            ]
+            "interests": ["systems", "professional"]
         },
         {
             "id": "ai-practice",
@@ -654,10 +503,7 @@
                 "ai-practice.cost",
                 "ai-practice.privacy"
             ],
-            "interests": [
-                "ai",
-                "professional"
-            ]
+            "interests": ["ai", "professional"]
         },
         {
             "id": "systems-architecture",
@@ -671,10 +517,7 @@
                 "systems-architecture.parallelism",
                 "systems-architecture.observability"
             ],
-            "interests": [
-                "systems",
-                "professional"
-            ]
+            "interests": ["systems", "professional"]
         },
         {
             "id": "native",
@@ -688,19 +531,14 @@
                 "native.deep-links",
                 "native.notifications"
             ],
-            "interests": [
-                "web",
-                "professional"
-            ]
+            "interests": ["web", "professional"]
         },
         {
             "id": "html",
             "title": "HTML foundations",
             "summary": "Build semantic, accessible documents with real browser checks.",
             "kind": "language",
-            "interests": [
-                "web"
-            ],
+            "interests": ["web"],
             "missionIds": [
                 "html.document-structure",
                 "html.semantic-structure",
@@ -714,9 +552,7 @@
             "title": "CSS foundations",
             "summary": "Master the cascade, layout, responsive design, and accessible color.",
             "kind": "language",
-            "interests": [
-                "web"
-            ],
+            "interests": ["web"],
             "missionIds": [
                 "css.cascade-layers",
                 "css.box-model",
@@ -730,9 +566,7 @@
             "title": "JavaScript foundations",
             "summary": "Write, test, and debug real browser programs.",
             "kind": "language",
-            "interests": [
-                "web"
-            ],
+            "interests": ["web"],
             "missionIds": [
                 "javascript.functions",
                 "javascript.control-flow",
