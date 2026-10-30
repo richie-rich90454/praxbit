@@ -1,6 +1,6 @@
 {
     "id": "campus.the-button-does-nothing",
-    "version": 1,
+    "version": 2,
     "sequence": 15,
     "courseId": "campus",
     "title": "The button does nothing",
@@ -44,13 +44,17 @@
             "id": "forgets-state",
             "description": "Updating the label without changing stored count.",
             "stepId": "wire-button",
-            "feedback": "The visible label must reflect the stored count. If the count never changes, every click shows the same value."
+            "testDescription": "Three clicks show three items.",
+            "feedback": "The visible label must reflect the stored count. If the count never changes, every click shows the same value.",
+            "followUpSkill": "js.events"
         },
         {
             "id": "listener-is-state",
             "description": "Believing registering a listener performs the action.",
             "stepId": "event-check",
-            "feedback": "Registering a listener tells the browser what to call later. The handler performs the action when the event occurs."
+            "answer": "register",
+            "feedback": "Registering a listener tells the browser what to call later. The handler performs the action when the event occurs.",
+            "followUpSkill": "js.functions"
         }
     ],
     "lesson": {
@@ -83,6 +87,12 @@
         {
             "kind": "code",
             "id": "wire-button",
+            "hints": [
+                "Make each click increment the cart and update both the count and status text.",
+                "The handler changes state first, then renders that state into the page.",
+                "If count starts at 0, one click makes it 1 and the label shows 1; three clicks show 3.",
+                "Inside addItem, increment count, set countLabel.textContent, and choose singular or plural before setting status."
+            ],
             "title": "Make the button respond",
             "prompt": "Edit script.js so each click adds one item. The count and status must update, including singular and plural wording. Run the browser tests.",
             "evidence": "construction",
@@ -150,6 +160,12 @@
         {
             "kind": "explain",
             "id": "event-check",
+            "hints": [
+                "Select statements about what a listener does and when the page changes.",
+                "Registering a listener waits for an event; the handler performs the action.",
+                "A doorbell button is wired once, but the bell only rings when someone presses it.",
+                "Three statements are accurate; reject the claim that registering the listener itself adds an item."
+            ],
             "title": "What happens on click?",
             "prompt": "Select every accurate statement about the cart.",
             "evidence": "explanation",
