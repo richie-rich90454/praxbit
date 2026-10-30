@@ -1,6 +1,6 @@
 {
     "id": "campus.changes-nobody-can-find",
-    "version": 1,
+    "version": 2,
     "sequence": 21,
     "courseId": "campus",
     "title": "Changes nobody can find",
@@ -49,13 +49,24 @@
             "id": "hard-reset",
             "description": "Resetting the whole repository to fix one file.",
             "stepId": "restore-file",
-            "feedback": "A hard reset discards unrelated work. Restore only the affected file unless the evidence justifies a broader change."
+            "diagnostic": "Runs git reset --hard instead of restoring only src/store.js, discarding unrelated work.",
+            "feedback": "A hard reset discards unrelated work. Restore only the affected file unless the evidence justifies a broader change.",
+            "followUpSkill": "git.basics"
         },
         {
             "id": "history-is-optional",
-            "description": "Believing version control only stores the latest version.",
+            "description": "Believing a file restore rewrites or removes repository history.",
             "stepId": "git-check",
-            "feedback": "Git commits form history. Earlier versions can be inspected and restored."
+            "answer": "delete",
+            "feedback": "git checkout with a path copies one file from the chosen commit. The commit graph and every other file remain intact.",
+            "followUpSkill": "git.basics"
+        },
+        {
+            "id": "reset-always-safest",
+            "description": "Believing a hard reset is always the safest repair.",
+            "stepId": "git-claims",
+            "answer": "reset",
+            "feedback": "A hard reset discards uncommitted work across the repository. The narrowest correct operation is usually a file-level restore."
         }
     ],
     "lesson": {
@@ -88,6 +99,12 @@
         {
             "kind": "git",
             "id": "restore-file",
+            "hints": [
+                "Inspect the log, restore only the broken file from the earlier commit, and confirm status.",
+                "git checkout <commit> -- <path> replaces one file without moving the branch.",
+                "To recover one recipe from yesterday's notebook, copy that page rather than erasing the whole notebook.",
+                "Find the commit \"Add storefront status\", then check out src/store.js from it and run git status."
+            ],
             "title": "Restore the known-good file",
             "prompt": "Use the terminal. Inspect history, restore src/store.js from the previous commit, and check status.",
             "evidence": "construction",
@@ -146,15 +163,21 @@
                 "explanation": "The -- path form checks out that file from the specified commit and leaves the branch and other files alone."
             },
             "hints": [
-                "The command names a file after the double dash.",
-                "Only that path is affected.",
-                "The branch does not move.",
-                "src/store.js is restored from HEAD~1."
+                "Decide the scope of git checkout HEAD~1 -- src/store.js.",
+                "The -- path form limits the operation to that file; the branch and other files stay put.",
+                "Restoring one page from a previous draft does not rewind the whole document.",
+                "Only src/store.js changes; history and the rest of the working tree remain."
             ]
         },
         {
             "kind": "explain",
             "id": "git-claims",
+            "hints": [
+                "Select statements about commits, history, and narrow recovery.",
+                "Commits form a history of snapshots; a single file can be restored without discarding unrelated changes.",
+                "A commit is like a labeled save point for the whole project.",
+                "Three statements are accurate; reject the claim that a hard reset is always safest."
+            ],
             "title": "History and recovery",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
