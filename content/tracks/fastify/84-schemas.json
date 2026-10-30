@@ -5,23 +5,14 @@
     "courseId": "fastify",
     "title": "Strict schemas and plugin scope",
     "summary": "Reject unknown fields with additionalProperties: false and register routes inside an encapsulated plugin.",
-    "skills": [
-        "fastify.schemas",
-        "fastify.plugins"
-    ],
-    "prerequisites": [
-        "fastify.routing",
-        "api.validation"
-    ],
+    "skills": ["fastify.schemas", "fastify.plugins"],
+    "prerequisites": ["fastify.routing", "api.validation"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:fastify"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
     "hints": [
         "Add additionalProperties: false to both object schemas.",
         "Type the plugin parameter as FastifyInstance instead of any.",
@@ -181,44 +163,29 @@
                     "kind": "static",
                     "description": "Body and params schemas reject unknown fields.",
                     "file": "server.ts",
-                    "includes": [
-                        "additionalProperties: false",
-                        "body: {",
-                        "params: {"
-                    ],
+                    "includes": ["additionalProperties: false", "body: {", "params: {"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The create route reads only the validated body fields.",
                     "file": "server.ts",
-                    "includes": [
-                        "request.body.name",
-                        "request.body.price"
-                    ],
-                    "excludes": [
-                        "request.body.role"
-                    ]
+                    "includes": ["request.body.name", "request.body.price"],
+                    "excludes": ["request.body.role"]
                 },
                 {
                     "kind": "static",
                     "description": "The created product answers with 201.",
                     "file": "server.ts",
-                    "includes": [
-                        "reply.status(201).send(product)"
-                    ],
+                    "includes": ["reply.status(201).send(product)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "server.ts",
-                    "includes": [
-                        "async function catalog(app: FastifyInstance)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["async function catalog(app: FastifyInstance)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -309,8 +276,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
