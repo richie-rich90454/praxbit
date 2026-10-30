@@ -1,0 +1,351 @@
+{
+    "version": 1,
+    "courseId": "lua",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "inventory-module",
+        "briefing": "A game inventory is splitting into a module and a runner. The module must keep its state explicit and load from any working directory."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "games",
+        "systems"
+    ],
+    "accessibility": {
+        "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "lua.modules",
+    "sequence": 214,
+    "title": "Modules, require, and load paths",
+    "summary": "Return an inventory module from its own file, require it from a script, and fix a load path that is set too late.",
+    "skills": [
+        "lua.modules",
+        "lua.tables"
+    ],
+    "prerequisites": [
+        "lua.tables",
+        "git.basics"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Build and require a table-based module.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find a require that runs before the load path is ready.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Explain what two require calls share.",
+            "stepIds": [
+                "cache"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:lua"
+    ],
+    "hints": [
+        "A module is a table returned from its file.",
+        "require searches package.path for a matching name.",
+        "require caches the returned value in package.loaded.",
+        "Set package.path before the first require."
+    ],
+    "misconceptions": [
+        {
+            "id": "require-cache",
+            "description": "Expecting require to return a fresh copy each time.",
+            "stepId": "cache",
+            "answer": "fresh-copy",
+            "feedback": "require stores the module table in package.loaded and returns the same table on later calls. Shared mutation is visible to every requirer.",
+            "followUpSkill": "lua.modules"
+        },
+        {
+            "id": "search-order",
+            "description": "Changing package.path after the failing require.",
+            "stepId": "diagnose",
+            "answer": "loaded-nil",
+            "feedback": "require searches package.path at the moment it runs. Extend the path before the call, or set it in the launcher.",
+            "followUpSkill": "lua.modules"
+        },
+        {
+            "id": "missing-default",
+            "description": "Adding to a missing item count.",
+            "stepId": "apply",
+            "testDescription": "The module defaults missing counts to zero.",
+            "feedback": "A missing table key is nil, and nil + count raises an error. Default the read with or 0 before adding.",
+            "followUpSkill": "lua.tables"
+        },
+        {
+            "id": "global-module",
+            "description": "Exporting through a global instead of returning the table.",
+            "stepId": "apply",
+            "diagnostic": "Assigning Inventory as a global and returning nothing, so require yields true instead of the module.",
+            "feedback": "Return the module table so require can cache and provide it. Globals hide dependencies and collide between scripts.",
+            "followUpSkill": "lua.modules"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A module returns a table",
+                "body": "A Lua module is usually a local table with functions, ending in return Inventory. The caller writes local Inventory = require(\"inventory\"). Because the file returns the table, the caller receives exactly that value. Functions can close over private locals, or operate on state passed as an argument."
+            },
+            {
+                "title": "require searches and caches",
+                "body": "require turns a module name into a path using package.path, loads the file, and stores the result in package.loaded. Later require calls return the cached table without running the file again. Two scripts that require the same module share one table, including any mutable state it holds."
+            },
+            {
+                "title": "Make the load explicit",
+                "body": "The working directory is not a stable contract. Extend package.path before requiring, or launch the script with a known root. For a game, the host often sets package.path once at startup. Avoid relying on dofile or a global module table, because neither participates cleanly in require caching."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "require",
+                "definition": "The standard loader that finds, runs, caches, and returns a module."
+            },
+            {
+                "term": "package.path",
+                "definition": "The search pattern list that require uses to locate Lua files."
+            },
+            {
+                "term": "package.loaded",
+                "definition": "The cache of modules that have already been required."
+            },
+            {
+                "term": "Module table",
+                "definition": "The table a module file returns to its callers."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "How require works",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A module returns a table",
+                    "body": "A Lua module is usually a local table with functions, ending in return Inventory. The caller writes local Inventory = require(\"inventory\"). Because the file returns the table, the caller receives exactly that value. Functions can close over private locals, or operate on state passed as an argument."
+                },
+                {
+                    "title": "require searches and caches",
+                    "body": "require turns a module name into a path using package.path, loads the file, and stores the result in package.loaded. Later require calls return the cached table without running the file again. Two scripts that require the same module share one table, including any mutable state it holds."
+                },
+                {
+                    "title": "Make the load explicit",
+                    "body": "The working directory is not a stable contract. Extend package.path before requiring, or launch the script with a known root. For a game, the host often sets package.path once at startup. Avoid relying on dofile or a global module table, because neither participates cleanly in require caching."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "require",
+                    "definition": "The standard loader that finds, runs, caches, and returns a module."
+                },
+                {
+                    "term": "package.path",
+                    "definition": "The search pattern list that require uses to locate Lua files."
+                },
+                {
+                    "term": "package.loaded",
+                    "definition": "The cache of modules that have already been required."
+                },
+                {
+                    "term": "Module table",
+                    "definition": "The table a module file returns to its callers."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Split inventory into a module",
+            "prompt": "Edit inventory.lua and main.lua. The module adds counts to a caller-supplied table and totals them; main requires it by name.",
+            "evidence": "construction",
+            "hints": [
+                "Keep inventory.lua returning its local table.",
+                "Default a missing count with (items[name] or 0).",
+                "Add the incoming count instead of replacing the old one.",
+                "Require inventory from main.lua and use the returned table."
+            ],
+            "language": "lua",
+            "files": [
+                {
+                    "path": "inventory.lua",
+                    "content": "local Inventory = {}\n\nfunction Inventory.add(items, name, count)\n  items[name] = 0 -- TODO: add to the current count\nend\n\nreturn Inventory\n",
+                    "editable": true,
+                    "language": "lua"
+                },
+                {
+                    "path": "main.lua",
+                    "content": "local Inventory = require(\"inventory\")\n\nlocal items = {}\nInventory.add(items, \"bolts\", 3)\nInventory.add(items, \"bolts\", 2)\nprint(Inventory.total(items)) -- TODO: total is not defined yet\n",
+                    "editable": true,
+                    "language": "lua"
+                }
+            ],
+            "entry": "main.lua",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "lua main.lua",
+                "description": "Runs main.lua, which loads inventory through require and prints the total."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The module defaults missing counts to zero.",
+                    "file": "inventory.lua",
+                    "includes": [
+                        "(items[name] or 0) + count"
+                    ],
+                    "excludes": [
+                        "items[name] = 0",
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The module exposes a total and returns its table.",
+                    "file": "inventory.lua",
+                    "includes": [
+                        "function Inventory.total(items)",
+                        "return Inventory"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Main requires the module by name.",
+                    "file": "main.lua",
+                    "includes": [
+                        "local Inventory = require(\"inventory\")"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The module that cannot be found",
+            "prompt": "The script fails with module 'inventory' not found even though inventory.lua sits beside it. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The file exists; the loader is looking in the wrong places.",
+                "package.path is read when require runs.",
+                "The path is extended after the failing call.",
+                "Move the path update above require."
+            ],
+            "instructions": [
+                {
+                    "id": "require",
+                    "label": "local Inventory = require(\"inventory\")"
+                },
+                {
+                    "id": "note",
+                    "label": "-- run from the project root"
+                },
+                {
+                    "id": "path",
+                    "label": "package.path = package.path .. \";./?.lua\""
+                },
+                {
+                    "id": "use",
+                    "label": "print(Inventory.total({}))"
+                }
+            ],
+            "buggyId": "require",
+            "fixes": [
+                {
+                    "id": "path-first",
+                    "label": "Extend package.path before the first require call."
+                },
+                {
+                    "id": "loaded-nil",
+                    "label": "Set package.loaded[\"inventory\"] = nil before requiring."
+                },
+                {
+                    "id": "dofile",
+                    "label": "Replace require with dofile and ignore the return value."
+                }
+            ],
+            "correctFixId": "path-first",
+            "explanation": "require searches package.path when it executes. Extending the path afterward cannot help the call that already failed, and clearing package.loaded only changes the module cache."
+        },
+        {
+            "kind": "quiz",
+            "id": "cache",
+            "title": "Two scripts, one module",
+            "prompt": "Two scripts require inventory.lua and one script calls a function that changes the returned table. What does the other script see?",
+            "evidence": "transfer",
+            "hints": [
+                "require stores the module result.",
+                "The cache key is the module name.",
+                "Later calls do not rerun the file.",
+                "Both callers share the same table."
+            ],
+            "quiz": {
+                "prompt": "Two scripts require inventory.lua and one script calls a function that changes the returned table. What does the other script see?",
+                "options": [
+                    {
+                        "id": "shared",
+                        "label": "The same module table, including the change, from package.loaded."
+                    },
+                    {
+                        "id": "fresh-copy",
+                        "label": "A fresh copy, because require reloads the file."
+                    },
+                    {
+                        "id": "nothing",
+                        "label": "Nothing, because modules cannot hold mutable state."
+                    },
+                    {
+                        "id": "functions",
+                        "label": "Only the functions, because tables are copied by value."
+                    }
+                ],
+                "correctId": "shared",
+                "explanation": "require caches the returned table in package.loaded. Every later require of the same name returns that table, so mutations are shared."
+            }
+        }
+    ]
+}
