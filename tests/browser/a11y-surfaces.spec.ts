@@ -1,15 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-async function expectNoViolations(
-    page: Page,
-    disabledRules: readonly string[] = [],
-): Promise<void> {
-    let builder = new AxeBuilder({ page });
-    if (disabledRules.length > 0) {
-        builder = builder.disableRules([...disabledRules]);
-    }
-    const results = await builder.analyze();
+const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+
+async function expectNoViolations(page: Page): Promise<void> {
+    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(
         results.violations,
         results.violations
@@ -65,10 +60,17 @@ async function completeOpeningMission(page: Page): Promise<void> {
     await page.getByRole("radio", { name: "4 marks" }).check();
     await page.getByRole("radio", { name: "CAMPUS", exact: true }).check();
     await page.getByRole("button", { name: /check prediction/i }).click();
+    await expect(page.locator(".feedback[role='status']")).toContainText("That works");
+    // Step evidence is recorded asynchronously; wait for the step to settle before advancing.
+    await page.waitForTimeout(500);
     await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.locator("h1").first()).toHaveText("Name the three parts");
     await page.getByRole("button", { name: "Continue" }).click();
+    await expect(page.locator("h1").first()).toHaveText("Which part processes?");
     await page.getByRole("radio", { name: /controller/i }).check();
     await page.getByRole("button", { name: /check answer/i }).click();
+    await expect(page.locator(".feedback[role='status']")).toContainText("That works");
+    await page.waitForTimeout(500);
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByRole("heading", { name: "Mission complete" })).toBeVisible();
 }
@@ -141,7 +143,7 @@ test.describe("accessibility surfaces", function accessibilitySurfacesSuite(): v
         await expect(page.getByRole("heading", { name: "Brief", exact: true })).toBeVisible();
         await expectPageStructure(page);
         // The preview is a separate document with its own header and main landmarks.
-        await expectNoViolations(page, ["landmark-unique"]);
+        await expectNoViolations(page);
     });
 
     test("@a11y the Club signed-out gate passes automated checks", async function clubA11y({
@@ -181,6 +183,86 @@ test.describe("accessibility surfaces", function accessibilitySurfacesSuite(): v
 
         await completeOpeningMission(page);
         await expectPageStructure(page);
+        await expectNoViolations(page);
+    });
+
+    test("@a11y Placement results pass automated checks", async function placementResultsA11y({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await page.goto("/placement");
+        const groups = page.locator("fieldset");
+        const count = await groups.count();
+        for (let index = 0; index < count; index += 1) {
+            await groups.nth(index).getByRole("radio").first().check();
+        }
+        await page.getByRole("button", { name: /see suggested start/i }).click();
+        await expect(page.getByRole("heading", { name: "Suggested start" })).toBeVisible();
+        await expectNoViolations(page);
+    });
+
+    test("@a11y code and project tabs expose complete tab semantics", async function tabsSemantics({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await page.goto("/missions/campus.the-button-does-nothing");
+        await page.getByRole("button", { name: /start mission/i }).click();
+        const codeTabs = page.getByRole("tablist", { name: "Project files" });
+        const tabCount = await codeTabs.getByRole("tab").count();
+        expect(tabCount).toBeGreaterThan(1);
+        for (let index = 0; index < tabCount; index += 1) {
+            const tab = codeTabs.getByRole("tab").nth(index);
+            const controls = await tab.getAttribute("aria-controls");
+            expect(controls).not.toBeNull();
+            if (controls !== null) {
+                await expect(page.locator(`[id="${controls}"]`)).toHaveCount(1);
+                await expect(page.locator(`[id="${controls}"]`)).toHaveAttribute(
+                    "role",
+                    "tabpanel",
+                );
+            }
+        }
+        await expectNoViolations(page);
+
+        await page.goto("/projects/projects.campus-status-board");
+        const stageTabs = page.getByRole("tablist", { name: "Project stages" });
+        await expect(stageTabs.getByRole("tab").first()).toHaveAttribute("tabindex", "0");
+        await expect(stageTabs.getByRole("tab").nth(1)).toHaveAttribute("tabindex", "-1");
+        const stageControls = await stageTabs
+            .getByRole("tab")
+            .first()
+            .getAttribute("aria-controls");
+        expect(stageControls).not.toBeNull();
+        if (stageControls !== null) {
+            await expect(page.locator(`[id="${stageControls}"]`)).toHaveAttribute(
+                "role",
+                "tabpanel",
+            );
+        }
+        await expectNoViolations(page);
+    });
+
+    test("@a11y CodeView and BinaryView tables have captions", async function tableCaptions({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await page.goto("/missions/campus.inventory-went-negative");
+        await page.getByRole("button", { name: /start mission/i }).click();
+        await page.getByRole("button", { name: /run tests/i }).click();
+        await expect(page.getByRole("heading", { name: "Test results" })).toBeVisible();
+        await expect(
+            page.locator("table").filter({ hasText: "Test results" }).locator("caption"),
+        ).toHaveCount(1);
+        await expectNoViolations(page);
+
+        await page.goto("/missions/before-code.everything-is-information");
+        await page.getByRole("button", { name: /start mission/i }).click();
+        await expect(
+            page.locator("table caption", { hasText: "Binary reference values" }),
+        ).toHaveCount(1);
         await expectNoViolations(page);
     });
 });
