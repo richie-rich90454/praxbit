@@ -1,0 +1,278 @@
+{
+    "id": "javascript.arrays-objects",
+    "version": 1,
+    "sequence": 223,
+    "courseId": "javascript",
+    "title": "Arrays and objects",
+    "summary": "Read and update arrays and objects without surprising mutations.",
+    "skills": [
+        "js.arrays",
+        "js.objects",
+        "js.functions"
+    ],
+    "prerequisites": [
+        "js.functions"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "shared-state",
+        "briefing": "Two widgets share the same student object and overwrite each other's changes. Write a function that returns a new object with an updated field."
+    },
+    "objectives": [
+        {
+            "id": "immutable-update",
+            "description": "Return a new object with an updated field.",
+            "stepIds": [
+                "implement-update"
+            ]
+        },
+        {
+            "id": "arrays",
+            "description": "Work with array length and indices.",
+            "stepIds": [
+                "implement-update"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain arrays and objects.",
+            "stepIds": [
+                "collection-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:data"
+    ],
+    "hints": [
+        "Spread the original object into a new one.",
+        "Override the requested key.",
+        "Do not mutate the input.",
+        "return { ...student, [key]: value };"
+    ],
+    "misconceptions": [
+        {
+            "id": "mutate-object",
+            "description": "Mutating the input object instead of copying.",
+            "stepId": "implement-update",
+            "testDescription": "Does not mutate the original object.",
+            "feedback": "Mutating shared state causes bugs. Return a new object.",
+            "followUpSkill": "js.objects"
+        },
+        {
+            "id": "reference-equality",
+            "description": "Believing two object literals are equal by value.",
+            "stepId": "collection-claims",
+            "answer": "object-equal",
+            "feedback": "Objects are compared by reference, not deep value.",
+            "followUpSkill": "js.objects"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Arrays",
+                "body": "Arrays are ordered, zero-indexed collections. Use length, indices, and methods like push and map. Arrays are objects, so mutating one reference affects all aliases."
+            },
+            {
+                "title": "Objects",
+                "body": "Objects store key-value pairs. Destructuring and spread create shallow copies. Mutating a shared object affects every reference to it."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Spread",
+                "definition": "Syntax that copies enumerable properties into a new object or array."
+            },
+            {
+                "term": "Reference",
+                "definition": "A pointer to an object in memory."
+            },
+            {
+                "term": "Shallow copy",
+                "definition": "A new container with the same top-level values."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Arrays and objects",
+            "prompt": "Read the explanation, then implement the update.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Arrays",
+                    "body": "Arrays are ordered, zero-indexed collections. Use length, indices, and methods like push and map. Arrays are objects, so mutating one reference affects all aliases."
+                },
+                {
+                    "title": "Objects",
+                    "body": "Objects store key-value pairs. Destructuring and spread create shallow copies. Mutating a shared object affects every reference to it."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Spread",
+                    "definition": "Syntax that copies enumerable properties into a new object or array."
+                },
+                {
+                    "term": "Reference",
+                    "definition": "A pointer to an object in memory."
+                },
+                {
+                    "term": "Shallow copy",
+                    "definition": "A new container with the same top-level values."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "implement-update",
+            "title": "Update without mutation",
+            "prompt": "Edit main.js. Implement updateField(student, key, value) returning a new object.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "main.js",
+                    "content": "function updateField(student, key, value) {\n  // TODO: return a new object with the updated field\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "main.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Returns an object with the updated field.",
+                    "name": "updateField",
+                    "args": [
+                        {
+                            "name": "Ada",
+                            "score": 10
+                        },
+                        "score",
+                        20
+                    ],
+                    "expected": {
+                        "name": "Ada",
+                        "score": 20
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Adds a new field when the key is missing.",
+                    "name": "updateField",
+                    "args": [
+                        {
+                            "name": "Ada"
+                        },
+                        "grade",
+                        "A"
+                    ],
+                    "expected": {
+                        "name": "Ada",
+                        "grade": "A"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Does not mutate the original object.",
+                    "name": "updateField",
+                    "args": [
+                        {
+                            "name": "Ada",
+                            "score": 10
+                        },
+                        "score",
+                        20
+                    ],
+                    "expected": {
+                        "name": "Ada",
+                        "score": 20
+                    }
+                }
+            ],
+            "hints": [
+                "Create a new object.",
+                "Copy all existing properties.",
+                "Override the requested key.",
+                "return { ...student, [key]: value };"
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "collection-claims",
+            "title": "Collection claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Check reference equality.",
+                "Spread creates a shallow copy.",
+                "Arrays are zero-indexed.",
+                "Select spread, zero-index, and mutation aliasing; reject object equality."
+            ],
+            "statements": [
+                {
+                    "id": "spread",
+                    "label": "Spread creates a shallow copy of an object.",
+                    "correct": true
+                },
+                {
+                    "id": "zero-index",
+                    "label": "Array indices start at zero.",
+                    "correct": true
+                },
+                {
+                    "id": "object-equal",
+                    "label": "Two different object literals with the same contents are ===.",
+                    "correct": false
+                },
+                {
+                    "id": "alias",
+                    "label": "Mutating a shared object affects all references.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Arrays and objects are reference types; copies and careful updates prevent shared-state bugs."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor is keyboard accessible, and function tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its description and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
