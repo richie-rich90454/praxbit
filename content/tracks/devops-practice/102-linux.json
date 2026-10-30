@@ -5,23 +5,14 @@
     "courseId": "devops-practice",
     "title": "Diagnose a failing service before restarting it",
     "summary": "Inspect the process, unit, logs, and file modes, then fix access with least privilege and verify the restart.",
-    "skills": [
-        "devops.linux",
-        "ops.permissions"
-    ],
-    "prerequisites": [
-        "ops.processes",
-        "ops.permissions"
-    ],
+    "skills": ["devops.linux", "ops.permissions"],
+    "prerequisites": ["ops.processes", "ops.permissions"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:devops"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:devops"],
     "hints": [
         "Start with systemctl status and the ExecStart line from systemctl cat.",
         "Read the last 50 journal lines before you touch permissions.",
@@ -202,10 +184,7 @@
                         "chown -R ingest:ingest /var/lib/ingest",
                         "chmod 2770 /var/lib/ingest"
                     ],
-                    "excludes": [
-                        "chmod 777",
-                        "chmod -R 777"
-                    ]
+                    "excludes": ["chmod 777", "chmod -R 777"]
                 },
                 {
                     "kind": "static",
@@ -222,12 +201,8 @@
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "server.md",
-                    "includes": [
-                        "systemctl status ingest-worker --no-pager"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["systemctl status ingest-worker --no-pager"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -301,8 +276,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
