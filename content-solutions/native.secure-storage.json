@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "storage-code": {
+            "files": {
+                "storage.ts": "import { SecureStorage } from \"./secure-storage\";\n\nconst KEY = \"refreshToken\";\n\nexport async function saveToken(token: string): Promise<void> {\n    await SecureStorage.set({\n        key: KEY,\n        value: token,\n        accessControl: \"biometric\",\n    });\n}\n\nexport async function readToken(): Promise<string | null> {\n    const { value } = await SecureStorage.get({\n        key: KEY,\n        accessControl: \"biometric\",\n    });\n    return value ?? null;\n}\n\nexport async function clearToken(): Promise<void> {\n    await SecureStorage.remove({ key: KEY });\n}\n"
+            }
+        }
+    }
+}
