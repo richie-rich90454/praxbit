@@ -730,4 +730,99 @@ test.describe("WCAG 2.2 AA internal audit", function wcag22Suite(): void {
         await page.getByRole("tab").nth(1).click();
         await expectNoWcagViolations(page);
     });
+
+    test("@wcag22 @2.4.11 focused controls stay visible and are not obscured", async function focusNotObscured({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await gotoAuditedPage(page, "/learn");
+        for (let index = 0; index < 24; index += 1) {
+            await page.keyboard.press("Tab");
+            const result = await page.evaluate(function inspectFocused(): {
+                readonly checked: boolean;
+                readonly contains: boolean;
+            } {
+                const element = document.activeElement;
+                if (element === null || element === document.body) {
+                    return { checked: false, contains: true };
+                }
+                if ((element.textContent ?? "").includes("Skip to main content")) {
+                    return { checked: false, contains: true };
+                }
+                element.scrollIntoView({ block: "center", inline: "nearest" });
+                const rectangle = element.getBoundingClientRect();
+                if (
+                    rectangle.width === 0 ||
+                    rectangle.height === 0 ||
+                    rectangle.bottom <= 0 ||
+                    rectangle.top >= window.innerHeight
+                ) {
+                    return { checked: false, contains: true };
+                }
+                const top = document.elementFromPoint(
+                    rectangle.left + rectangle.width / 2,
+                    rectangle.top + rectangle.height / 2,
+                );
+                return {
+                    checked: true,
+                    contains:
+                        top === element || element.contains(top) || top?.contains(element) === true,
+                };
+            });
+            if (result.checked) {
+                expect(result.contains, `Focused control ${String(index + 1)} is obscured`).toBe(
+                    true,
+                );
+            }
+        }
+    });
+
+    test("@wcag22 @3.3.8 password fields allow paste and password managers", async function accessibleAuthentication({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await page.goto("/settings");
+        await page.getByRole("tab", { name: "Create account", exact: true }).click();
+        const password = page.locator('input[type="password"]');
+        await expect(password).toHaveAttribute("autocomplete", "new-password");
+        await expect(password).not.toHaveAttribute("readonly", "");
+        const registerPaste = await password.evaluate(function pasteAllowed(element): boolean {
+            return element.onpaste === null && !element.hasAttribute("readonly");
+        });
+        expect(registerPaste).toBe(true);
+
+        await page.getByRole("tab", { name: "Sign in", exact: true }).click();
+        await expect(password).toHaveAttribute("autocomplete", "current-password");
+        const loginPaste = await password.evaluate(function pasteAllowed(element): boolean {
+            return element.onpaste === null && !element.hasAttribute("readonly");
+        });
+        expect(loginPaste).toBe(true);
+    });
+
+    test("@wcag22 @4.1.2 Settings account tabs expose a tab panel and arrow keys", async function settingsTabs({
+        page,
+    }: {
+        page: Page;
+    }): Promise<void> {
+        await page.goto("/settings");
+        const register = page.getByRole("tab", { name: "Create account", exact: true });
+        const login = page.getByRole("tab", { name: "Sign in", exact: true });
+        const panel = page.getByRole("tabpanel");
+        await expect(register).toHaveAttribute("aria-selected", "true");
+        await expect(register).toHaveAttribute("aria-controls", "account-panel");
+        await expect(panel).toBeVisible();
+        await expect(panel).toHaveAttribute("aria-labelledby", "account-tab-register");
+
+        await register.focus();
+        await page.keyboard.press("ArrowRight");
+        await expect(login).toBeFocused();
+        await expect(login).toHaveAttribute("aria-selected", "true");
+        await expect(panel).toHaveAttribute("aria-labelledby", "account-tab-login");
+
+        await page.keyboard.press("Home");
+        await expect(register).toBeFocused();
+        await expect(register).toHaveAttribute("aria-selected", "true");
+    });
 });
