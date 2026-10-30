@@ -1,0 +1,365 @@
+{
+    "id": "fastapi.security",
+    "version": 1,
+    "sequence": 167,
+    "courseId": "fastapi",
+    "title": "Dependency-based authentication",
+    "summary": "Protect a router with a dependency that reads the Authorization header and distinguishes 401 from 403.",
+    "skills": [
+        "fastapi.routes",
+        "fastapi.validation"
+    ],
+    "prerequisites": [
+        "fastapi.routes",
+        "security.auth"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "security",
+        "briefing": "The member orders router is open because every handler is expected to remember its own check. Move the check into one dependency and prove with TestClient that missing credentials are rejected."
+    },
+    "objectives": [
+        {
+            "id": "objective-dependency",
+            "description": "Implement a dependency that authenticates the request.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-test",
+            "description": "Test the protected router with and without credentials.",
+            "stepIds": [
+                "test"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Choose the right scope for a role-specific dependency.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:fastapi"
+    ],
+    "hints": [
+        "A dependency can read request data through its own parameters.",
+        "Header() binds the Authorization header without manual request parsing.",
+        "Raise 401 when the header is missing and 403 when the token is not a member token.",
+        "Register the router with include_router so its dependencies apply."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-header",
+            "description": "Treating a missing Authorization header as a server error.",
+            "stepId": "apply",
+            "testDescription": "Missing credentials are rejected with 401.",
+            "feedback": "A missing credential is an authentication failure, so raise HTTPException with status 401.",
+            "followUpSkill": "fastapi.routes"
+        },
+        {
+            "id": "router-scope",
+            "description": "Applying the dependency to one handler and leaving the router open.",
+            "stepId": "apply",
+            "testDescription": "The router applies the dependency to every route.",
+            "feedback": "Dependencies at APIRouter construction apply to every route added to that router. Put the check there instead of duplicating it."
+        },
+        {
+            "id": "test-success",
+            "description": "Asserting 200 for a request with no credentials.",
+            "stepId": "test",
+            "testDescription": "Missing credentials are tested as 401.",
+            "feedback": "The test must assert the rejection status, not the happy path. A passing 200 assertion hides a missing boundary.",
+            "followUpSkill": "fastapi.testing"
+        },
+        {
+            "id": "admin-router",
+            "description": "Applying the admin role to the whole member router.",
+            "stepId": "transfer",
+            "answer": "router-wide",
+            "feedback": "A router dependency applies to every route. The member router already authenticates; attach the admin dependency only to the POST route.",
+            "followUpSkill": "fastapi.routes"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Dependencies run before the handler",
+                "body": "A FastAPI dependency is a callable that the framework resolves for each request. It can declare its own parameters, such as a Header, and can raise HTTPException to stop the request before the route body runs. The same dependency can be attached to a router so every route inherits it."
+            },
+            {
+                "title": "Router dependencies cover a group",
+                "body": "APIRouter(prefix=\"/members\", dependencies=[Depends(require_member)]) applies the check to every route registered on that router. The alternative, adding Depends to each handler, is easy to forget on a new route."
+            },
+            {
+                "title": "401 and 403 describe different failures",
+                "body": "401 says the request did not authenticate. 403 says the identity is known but lacks permission. A missing header is 401; a valid token for the wrong role is 403."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Dependency",
+                "definition": "A callable FastAPI resolves and injects before a handler runs."
+            },
+            {
+                "term": "Router",
+                "definition": "A group of routes with shared prefix and dependencies."
+            },
+            {
+                "term": "Header parameter",
+                "definition": "A dependency parameter bound from an HTTP request header."
+            },
+            {
+                "term": "TestClient",
+                "definition": "A test harness that sends requests to the FastAPI app in process."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Dependencies, routers, and status codes",
+            "prompt": "Read the explanation, then implement and test the boundary.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Dependencies run before the handler",
+                    "body": "A FastAPI dependency is a callable that the framework resolves for each request. It can declare its own parameters, such as a Header, and can raise HTTPException to stop the request before the route body runs. The same dependency can be attached to a router so every route inherits it."
+                },
+                {
+                    "title": "Router dependencies cover a group",
+                    "body": "APIRouter(prefix=\"/members\", dependencies=[Depends(require_member)]) applies the check to every route registered on that router. The alternative, adding Depends to each handler, is easy to forget on a new route."
+                },
+                {
+                    "title": "401 and 403 describe different failures",
+                    "body": "401 says the request did not authenticate. 403 says the identity is known but lacks permission. A missing header is 401; a valid token for the wrong role is 403."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Dependency",
+                    "definition": "A callable FastAPI resolves and injects before a handler runs."
+                },
+                {
+                    "term": "Router",
+                    "definition": "A group of routes with shared prefix and dependencies."
+                },
+                {
+                    "term": "Header parameter",
+                    "definition": "A dependency parameter bound from an HTTP request header."
+                },
+                {
+                    "term": "TestClient",
+                    "definition": "A test harness that sends requests to the FastAPI app in process."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Authenticate the member router",
+            "prompt": "Edit main.py. Implement require_member with a Header parameter, return 401 for a missing header and 403 for a non-member token, and register the router.",
+            "evidence": "construction",
+            "hints": [
+                "Use Annotated with Header() to bind the Authorization header.",
+                "Partition the header into a scheme and a token.",
+                "Raise HTTPException with status 401 when the header is absent.",
+                "Call app.include_router(members) after the routes are declared."
+            ],
+            "files": [
+                {
+                    "path": "main.py",
+                    "content": "from typing import Annotated\n\nfrom fastapi import APIRouter, Depends, FastAPI, Header, HTTPException\n\napp = FastAPI()\n\n\ndef require_member() -> str:\n    # TODO: read the Authorization header and reject missing credentials\n    return \"member\"\n\n\nmembers = APIRouter(prefix=\"/members\", dependencies=[Depends(require_member)])\n\n\n@members.get(\"/orders\")\ndef list_orders() -> list[dict[str, int]]:\n    return [{\"id\": 1}]\n",
+                    "editable": true,
+                    "language": "python"
+                }
+            ],
+            "entry": "main.py",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "pytest",
+                "description": "Run the FastAPI authentication tests with TestClient."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The dependency reads the Authorization header.",
+                    "file": "main.py",
+                    "includes": [
+                        "def require_member(authorization: Annotated[str | None, Header()] = None)",
+                        "authorization.partition(\" \")"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Missing credentials are rejected with 401.",
+                    "file": "main.py",
+                    "includes": [
+                        "if authorization is None:",
+                        "raise HTTPException(status_code=401"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A valid header must carry the member token.",
+                    "file": "main.py",
+                    "includes": [
+                        "scheme.lower() != \"bearer\"",
+                        "token != \"member-token\"",
+                        "status_code=403"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The router applies the dependency to every route.",
+                    "file": "main.py",
+                    "includes": [
+                        "dependencies=[Depends(require_member)]",
+                        "app.include_router(members)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "code",
+            "id": "test",
+            "title": "Test both sides of the boundary",
+            "prompt": "Edit test_main.py. Assert that a missing token returns 401 and a member token returns 200.",
+            "evidence": "testing",
+            "hints": [
+                "The missing-token test already exists.",
+                "Change its expected status from 200 to 401.",
+                "Add a member-token test with an Authorization header.",
+                "Use the exact value Bearer member-token."
+            ],
+            "files": [
+                {
+                    "path": "test_main.py",
+                    "content": "from fastapi.testclient import TestClient\n\nfrom main import app\n\nclient = TestClient(app)\n\n\ndef test_missing_token_is_rejected() -> None:\n    # TODO: assert the authentication boundary\n    response = client.get(\"/members/orders\")\n    assert response.status_code == 200\n",
+                    "editable": true,
+                    "language": "python"
+                },
+                {
+                    "path": "main.py",
+                    "content": "from typing import Annotated\n\nfrom fastapi import APIRouter, Depends, FastAPI, Header, HTTPException\n\napp = FastAPI()\n\n\ndef require_member(authorization: Annotated[str | None, Header()] = None) -> str:\n    if authorization is None:\n        raise HTTPException(status_code=401, detail=\"Missing bearer token\")\n    scheme, _, token = authorization.partition(\" \")\n    if scheme.lower() != \"bearer\" or token != \"member-token\":\n        raise HTTPException(status_code=403, detail=\"Member role required\")\n    return token\n\n\nmembers = APIRouter(prefix=\"/members\", dependencies=[Depends(require_member)])\n\n\n@members.get(\"/orders\")\ndef list_orders() -> list[dict[str, int]]:\n    return [{\"id\": 1}]\n\n\napp.include_router(members)\n",
+                    "editable": false,
+                    "language": "python"
+                }
+            ],
+            "entry": "test_main.py",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "pytest",
+                "description": "Run the protected-route tests through TestClient."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Missing credentials are tested as 401.",
+                    "file": "test_main.py",
+                    "includes": [
+                        "response = client.get(\"/members/orders\")",
+                        "assert response.status_code == 401"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "A member token is accepted.",
+                    "file": "test_main.py",
+                    "includes": [
+                        "headers={\"Authorization\": \"Bearer member-token\"}",
+                        "assert response.status_code == 200"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to an admin-only write",
+            "prompt": "GET routes should allow members, but POST /members/orders should allow only admins. Where should the admin dependency go?",
+            "evidence": "transfer",
+            "hints": [
+                "A router dependency applies to every route on the router.",
+                "A per-route dependency applies only to that route.",
+                "Do not put admin on the whole member router.",
+                "Attach the admin dependency to the POST route."
+            ],
+            "quiz": {
+                "prompt": "GET routes should allow members, but POST /members/orders should allow only admins. Where should the admin dependency go?",
+                "options": [
+                    {
+                        "id": "route-only",
+                        "label": "On the POST route, so the broader member router stays unchanged."
+                    },
+                    {
+                        "id": "router-wide",
+                        "label": "On the whole member router, because every route needs a token."
+                    },
+                    {
+                        "id": "app-wide",
+                        "label": "On the FastAPI app, so every route in the service requires an admin."
+                    },
+                    {
+                        "id": "handler-body",
+                        "label": "Inside the handler body after the response is created."
+                    }
+                ],
+                "correctId": "route-only",
+                "explanation": "Dependencies compose at the narrowest scope that matches the rule. The member router already authenticates; adding an admin dependency to the POST route enforces the extra role only where it is needed."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
