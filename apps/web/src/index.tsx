@@ -2,7 +2,11 @@ import { render } from "solid-js/web";
 import { registerSW } from "virtual:pwa-register";
 import { App } from "./app/App.tsx";
 import { installDeepLinkHandler, navigateToPath } from "./platform/deep-link-handler.ts";
-import { restoreNativeToken, resumeSavedReminders, platformCapabilities } from "./platform/services.ts";
+import {
+    restoreNativeToken,
+    resumeSavedReminders,
+    platformCapabilities,
+} from "./platform/services.ts";
 import "./styles/global.css";
 
 async function start(): Promise<void> {
