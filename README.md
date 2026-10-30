@@ -8,7 +8,7 @@ Praxbit is a local-first learning application for computer science and software 
 
 ## Status
 
-Praxbit is a pre-release implementation. The repository contains a working learning engine, 225 authored missions across 44 tracks, three projects, a SolidJS web client, a Hono/PostgreSQL account platform, a browser execution layer, a deterministic world simulation, and a TypeScript companion CLI. Production hosting, native store builds, and a live AI provider require external provisioning and are not verified by this repository alone.
+Praxbit is a pre-release implementation. The repository contains a working learning engine, 225 authored missions across 44 tracks, three projects, a SolidJS web client, a Hono/PostgreSQL account platform, a browser execution layer, a deterministic world simulation, Android and iOS Capacitor projects, and a TypeScript companion CLI. Production hosting, native store signing, and a live AI provider require external accounts and are not verified by this repository alone.
 
 The honest current limits are listed in [Known limitations](#known-limitations). Do not treat a feature listed as implemented below as production-verified unless the verification column or the operations documentation says so.
 
@@ -23,7 +23,7 @@ The honest current limits are listed in [Known limitations](#known-limitations).
 | World | Deterministic campus state with nine systems, versioned actions, recovery flags, PixiJS rendering plus an accessible system list | Domain tests and browser rendering |
 | Accounts and sync | Hono service layer, PostgreSQL migrations, opaque session tokens, CSRF, idempotent sync operations, world version conflicts, export and deletion | Integration tests require PostgreSQL 16+ |
 | Offline | IndexedDB persistence through Dexie, queued sync outbox, local guest progress, conflict reporting | Implemented; multi-device behavior requires a running server |
-| PWA | Vite PWA manifest and service worker, installable shell | Build output; not store-published |
+| PWA and native shells | Vite PWA manifest and service worker, Capacitor Android and iOS projects, platform adapters, deep links, and local notifications | CI builds a debug APK and an unsigned simulator app; not store-signed |
 | Companion | `praxbit doctor`, `open`, `test`, `export`; local path confinement and consent | Typecheck, build, unit tests, and manual `doctor`/`open`/`test` runs |
 | AI tutor | Optional server-side OpenAI-compatible gateway with quotas, preference gate, timeout, and bounded context | Requires an external provider key; not verified against a live provider here |
 | Clubs | Club UI, service and repository code, invite codes, weekly event submissions, and leaderboard | Implemented; integration coverage requires PostgreSQL; no live club-scale verification |
@@ -97,7 +97,7 @@ The server reads environment variables directly; it does not use a separate depl
 | `CONTENT_DIR` | no | Directory containing `skills.json`; otherwise resolved from the repository |
 | `WEB_DIST` | no | Built web directory; otherwise `apps/web/dist` |
 | `PUBLIC_ORIGIN` | production | Primary canonical origin for absolute links, for example `https://praxbit.bisz.dev`; it does not restrict incoming `Host` names |
-| `CORS_ORIGINS` | no | Comma-separated allowed origins; leave empty for same-origin deployment |
+| `CORS_ORIGINS` | no | Comma-separated allowed origins; leave empty for web-only hosting, or include `https://localhost,capacitor://localhost` for native clients |
 | `ADMIN_HANDLES` | no | Comma-separated lowercase handles promoted to admin at startup |
 | `COOKIE_SECURE` | production | `1` behind HTTPS; `0` for direct HTTP development |
 | `TRUST_PROXY` | behind proxy | `1` to trust `X-Forwarded-For`; only when a trusted proxy sets it |
@@ -208,16 +208,18 @@ pnpm content:validate
 
 The validator loads every mission, project, track, skill, placement question, achievement, and club event; checks schemas, unique ids, prerequisites, asset references, evaluator requirements, and safe paths; and runs reference solutions where a runtime is available. CSS computed-style checks that cannot be faithfully evaluated outside a browser are reported as deferred, not as passes. See [docs/curriculum/authoring.md](docs/curriculum/authoring.md).
 
-## PWA and Capacitor
+## PWA and native shells
 
-The web app is installable as a PWA. `apps/web/vite.config.ts` configures the manifest and service worker; `apps/web/capacitor.config.ts` configures the native shell. No Android or iOS platform directories are committed, and no store signing or device verification has been performed.
+The web app is installable as a PWA. `apps/web/vite.config.ts` configures the manifest and service worker; `apps/web/capacitor.config.ts` configures the native shell. The Capacitor Android and iOS projects are committed under `apps/web/android` and `apps/web/ios`. CI assembles a debug APK and an unsigned iOS simulator app. Store signing, store metadata, and physical-device testing still require Android Studio or Xcode and store accounts.
 
 ```bash
 pnpm --filter @praxbit/web build
-pnpm cap:sync
+pnpm --filter @praxbit/web cap:sync
+pnpm --filter @praxbit/web cap:open:android
+pnpm --filter @praxbit/web cap:open:ios
 ```
 
-`cap:sync` requires an existing Capacitor platform. Add one with the Capacitor CLI if you are intentionally building a native client. Do not claim a store build from a synced web directory alone. Offline API behavior, deep links, and native secure storage still need device testing.
+A native build that targets a different API origin sets `VITE_API_BASE_URL` at build time. Without it, native shells use `https://praxbit.bisz.dev/api/v1`. The server's `CORS_ORIGINS` must include `https://localhost` for Android and `capacitor://localhost` for iOS; `.env.production.example` already does. Do not claim a store build from a synced web directory alone; offline API behavior, deep links, notifications, and secure storage still need device testing.
 
 ## Local companion
 
@@ -294,9 +296,9 @@ These are real constraints, not a backlog disguised as a feature list.
 - **Production verification is incomplete.** The PostgreSQL integration suite, a direct-clone deployment smoke test, and the full-stack browser suite pass locally, including `pnpm start`, dotted SPA routes, the API, Pyodide MIME types, authenticated sync, projects, clubs, and account deletion. Multi-host Caddy and Nginx configurations for `praxbit.biszweb.club` and `praxbit.bisz.dev` are included and locally verified with Host headers. A public host with live DNS, TLS, production credentials, real traffic, and real data volumes has not been provisioned from this working copy.
 - **No server-side learner code execution.** JavaScript runs in a Web Worker, HTML/CSS in sandboxed iframes, Python in Pyodide, SQL in sql.js, and Git in isomorphic-git. These are best-effort browser isolation, not a hardened multi-tenant sandbox. The server never executes arbitrary learner programs.
 - **AI is optional.** The gateway is covered by a PostgreSQL integration test against a local OpenAI-compatible mock, including success, malformed upstream responses, and the disabled-preference boundary. No live provider key is committed, so provider-specific behavior, cost, latency, and output quality must be tested with your own account. The AI is not the authoritative grader.
-- **Native store builds are not shipped.** The installable PWA, Capacitor configuration, secure credential fallback, deep-link handler, local notification scheduler, and platform capability adapters exist. Android/iOS project generation, signing, store metadata, and device testing require Android Studio/Xcode and store accounts.
+- **Native store builds are not signed or store-published.** Android and iOS Capacitor projects are committed, and CI builds a debug APK and an unsigned simulator app. Signing keys, provisioning profiles, store metadata, and physical-device testing require external accounts and hardware. The secure-storage fallback, deep-link handlers, and local notification scheduler are covered by browser and unit tests, not device tests.
 - **Curriculum depth is assessed, not exhaustive.** Every language and framework named in the plan now has a five- or four-mission progression with a transfer step, and HTML, CSS, and JavaScript have dedicated tracks. Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and the framework/server packs use AST, structural, and companion-verified local toolchain checks rather than browser execution. They are assessed foundations, not complete reference manuals. TypeScript, JavaScript, HTML, CSS, Python through Pyodide, SQL through SQLite, and Git use their real runtimes. The interface labels each runtime truthfully, and structural checks declare a local verification command.
-- **Twenty-one CSS checks run in the browser, not the Node validator.** `pnpm content:validate` passes with zero errors after executing 796 checks. The remaining 21 computed-style checks are deferred because jsdom cannot compute cascade and layout faithfully; `tests/browser/css-checks.spec.ts` executes all of them against real rendered pages in Chromium, Firefox, and WebKit, so a deferred check is never treated as a pass and none is left unverified.
+- **Twenty-one CSS checks run in the browser, not the Node validator.** `pnpm content:validate` passes with zero errors after executing 797 checks. The remaining 21 computed-style checks are deferred because jsdom cannot compute cascade and layout faithfully; `tests/browser/css-checks.spec.ts` executes all of them against real rendered pages in Chromium, Firefox, and WebKit, so a deferred check is never treated as a pass and none is left unverified.
 - **Projects are small.** Three projects exist with executable stage checks. They are not a substitute for a full project-based curriculum.
 - **Club and competition flows depend on the API.** The UI and service code exist, and the PostgreSQL integration suite covers club membership and verified events. No live club-scale verification has been performed. Local results are not trusted for ranked competition.
 - **Accessibility has an internal WCAG 2.2 AA audit, not third-party certification.** Automated axe checks cover every primary route, the project workspace, mission briefing and completion, keyboard focus, landmarks, heading order, zoom, reflow, text spacing, target size, forced colors, and reduced motion in Chromium, Firefox, and WebKit. The per-criterion audit is in [docs/product/wcag-2.2-aa-audit.md](docs/product/wcag-2.2-aa-audit.md). A vendor screen-reader matrix and formal certification remain external.
