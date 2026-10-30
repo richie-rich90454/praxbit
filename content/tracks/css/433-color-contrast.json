@@ -5,23 +5,14 @@
     "courseId": "css",
     "title": "Color, contrast, and theming",
     "summary": "Choose text and background colors that meet contrast needs and use CSS variables.",
-    "skills": [
-        "web.css",
-        "web.accessibility"
-    ],
-    "prerequisites": [
-        "web.css"
-    ],
+    "skills": ["web.css", "web.accessibility"],
+    "prerequisites": ["web.css"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-css",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "computed-style-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "computed-style-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "contrast",
             "description": "Use a readable text color.",
-            "stepIds": [
-                "fix-color"
-            ]
+            "stepIds": ["fix-color"]
         },
         {
             "id": "tokens",
             "description": "Use CSS variables for colors.",
-            "stepIds": [
-                "fix-color"
-            ]
+            "stepIds": ["fix-color"]
         },
         {
             "id": "understanding",
             "description": "Explain contrast and theming.",
-            "stepIds": [
-                "color-claims"
-            ]
+            "stepIds": ["color-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:palette"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:palette"],
     "hints": [
         "Use a dark text color on white, such as #000 or #222.",
         "Define colors as CSS variables in :root.",
@@ -189,9 +169,7 @@
                     "kind": "static",
                     "description": "Colors are defined as CSS variables.",
                     "file": "styles.css",
-                    "includes": [
-                        "--"
-                    ],
+                    "includes": ["--"],
                     "excludes": []
                 }
             ],
@@ -257,7 +235,5 @@
         "screenReaderNotes": "Each test announces selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
