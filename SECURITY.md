@@ -62,7 +62,7 @@ The following describes the implemented service and middleware design. The HTTP 
 
 - Cookie-authenticated mutations use a double-submit token. `GET /api/v1/auth/csrf` sets a readable `praxbit_csrf` cookie and returns the same token.
 - The client sends `x-csrf-token` on every mutation. The server compares it to the cookie in constant time. Missing or mismatched tokens return `403 csrf_invalid`.
-- Safe methods (`GET`, `HEAD`, `OPTIONS`) do not require CSRF. Bearer-authenticated requests are not cookie-authenticated and therefore bypass the double-submit check. The `x-praxbit-client: native` header never bypasses CSRF for a cookie-authenticated session.
+- Safe methods (`GET`, `HEAD`, `OPTIONS`) do not require CSRF. Bearer-authenticated requests are not cookie-authenticated and therefore bypass the double-submit check. Native token establishment is also exempt when no session cookie is present; the `x-praxbit-client: native` header forces a CORS preflight and the origin allowlist is the gate. A cookie-authenticated session still requires CSRF even when the native header is present.
 - `GET /api/v1/capabilities` is public and reports only whether live AI is configured. It never exposes provider URLs, keys, or models.
 - `SameSite=Lax` is a second layer, not a substitute for the token check.
 - The current middleware does not explicitly validate the `Origin` header. If the app is served from multiple origins, add an origin allowlist at the proxy or in middleware and test it.
