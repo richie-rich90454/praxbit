@@ -5,24 +5,14 @@
     "courseId": "systems-architecture",
     "title": "Two workers, one counter",
     "summary": "Reproduce a lost update in asynchronous code, serialize the critical section, and reason about races and deadlock.",
-    "skills": [
-        "ops.processes",
-        "architecture.distributed"
-    ],
-    "prerequisites": [
-        "concept.state",
-        "architecture.distributed"
-    ],
+    "skills": ["ops.processes", "architecture.distributed"],
+    "prerequisites": ["concept.state", "architecture.distributed"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "fix",
             "description": "Serialize read-modify-write updates in asynchronous code.",
-            "stepIds": [
-                "counter-code"
-            ]
+            "stepIds": ["counter-code"]
         },
         {
             "id": "review",
             "description": "Identify the race in a concurrent balance update.",
-            "stepIds": [
-                "race-review"
-            ]
+            "stepIds": ["race-review"]
         },
         {
             "id": "transfer",
             "description": "Explain critical sections, locking order, and atomic operations.",
-            "stepIds": [
-                "parallel-transfer"
-            ]
+            "stepIds": ["parallel-transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:parallel"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:parallel"],
     "hints": [
         "A read followed by an await can be interleaved with another read.",
         "The read and write must form one critical section.",
@@ -379,8 +358,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
