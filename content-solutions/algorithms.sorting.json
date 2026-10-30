@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "merge-sort": {
+            "files": {
+                "sorting.js": "function sortRecords(records) {\n  function mergeSort(items) {\n    if (items.length <= 1) return items;\n    const middle = Math.floor(items.length / 2);\n    const left = mergeSort(items.slice(0, middle));\n    const right = mergeSort(items.slice(middle));\n    const merged = [];\n    let leftIndex = 0;\n    let rightIndex = 0;\n    while (leftIndex < left.length && rightIndex < right.length) {\n      const leftItem = left[leftIndex];\n      const rightItem = right[rightIndex];\n      const leftFirst =\n        leftItem.score > rightItem.score ||\n        (leftItem.score === rightItem.score && leftItem.name <= rightItem.name);\n      if (leftFirst) {\n        merged.push(leftItem);\n        leftIndex += 1;\n      } else {\n        merged.push(rightItem);\n        rightIndex += 1;\n      }\n    }\n    while (leftIndex < left.length) {\n      merged.push(left[leftIndex]);\n      leftIndex += 1;\n    }\n    while (rightIndex < right.length) {\n      merged.push(right[rightIndex]);\n      rightIndex += 1;\n    }\n    return merged;\n  }\n  return mergeSort(records);\n}\n"
+            }
+        }
+    }
+}
