@@ -5,22 +5,14 @@
     "courseId": "svelte",
     "title": "Svelte components with exported props",
     "summary": "Build a product card that receives its data through export let and scopes its own styles.",
-    "skills": [
-        "svelte.components"
-    ],
-    "prerequisites": [
-        "web.html",
-        "js.functions"
-    ],
+    "skills": ["svelte.components"],
+    "prerequisites": ["web.html", "js.functions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:svelte"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:svelte"],
     "hints": [
         "Declare price with export let and the number type.",
         "Put the name and price inside the article element.",
@@ -169,44 +152,29 @@
                     "kind": "static",
                     "description": "The component exports both props.",
                     "file": "ProductCard.svelte",
-                    "includes": [
-                        "export let name: string;",
-                        "export let price: number;"
-                    ],
+                    "includes": ["export let name: string;", "export let price: number;"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The markup renders the name and a two-decimal price.",
                     "file": "ProductCard.svelte",
-                    "includes": [
-                        "<h3>{name}</h3>",
-                        "{price.toFixed(2)}"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["<h3>{name}</h3>", "{price.toFixed(2)}"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The component owns its styles.",
                     "file": "ProductCard.svelte",
-                    "includes": [
-                        "<style>",
-                        "padding: 1rem;"
-                    ],
+                    "includes": ["<style>", "padding: 1rem;"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductCard.svelte",
-                    "includes": [
-                        "export let name: string;"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["export let name: string;"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -275,7 +243,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
