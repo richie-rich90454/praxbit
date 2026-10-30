@@ -96,7 +96,7 @@ describe("world reducer", function worldReducer(): void {
         const healthyButUnverified = {
             ...initial,
             systems: initial.systems.map(function healthy(system) {
-                return { ...system, status: "healthy" as const };
+                return Object.assign({}, system, { status: "healthy" as const });
             }),
         };
         expect(isWorldRecovered(healthyButUnverified)).toBe(false);
