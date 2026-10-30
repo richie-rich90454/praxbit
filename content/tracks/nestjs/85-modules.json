@@ -44,13 +44,25 @@
             "id": "manual-new",
             "description": "Creating the service with new inside the controller.",
             "stepId": "apply",
-            "feedback": "That bypasses the container. Register the provider and ask for it in the constructor."
+            "feedback": "That bypasses the container. Register the provider and ask for it in the constructor.",
+            "testDescription": "The controller receives its service through constructor injection.",
+            "followUpSkill": "nestjs.providers"
         },
         {
             "id": "provider-missing",
             "description": "Adding a controller without its provider.",
             "stepId": "apply",
-            "feedback": "Nest cannot resolve a constructor dependency that no module provides. Register the provider or import the module that exports it."
+            "feedback": "Nest cannot resolve a constructor dependency that no module provides. Register the provider or import the module that exports it.",
+            "testDescription": "The service is registered as a provider in the module.",
+            "followUpSkill": "nestjs.modules"
+        },
+        {
+            "id": "new-testable",
+            "description": "Believing new makes a controller easier to test.",
+            "stepId": "check",
+            "answer": "new",
+            "feedback": "Constructing the service by hand bypasses the injector and hides the dependency from test overrides. Inject it through the constructor.",
+            "followUpSkill": "nestjs.providers"
         }
     ],
     "lesson": {
@@ -172,7 +184,18 @@
                     "includes": ["@Controller(\"products\")"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Add products: ProductsService as a constructor parameter.",
+                "Register ProductsService in the module providers array.",
+                "Return this.products.findAll() from the GET handler.",
+                "Remove any new ProductsService() construction."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the NestJS unit tests with Jest or Vitest."
+            }
         },
         {
             "kind": "explain",
@@ -202,7 +225,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "The module owns the provider registry, and Nest injects constructor parameters from it. A hand-built service bypasses the container and hides the dependency from tests."
+            "explanation": "The module owns the provider registry, and Nest injects constructor parameters from it. A hand-built service bypasses the container and hides the dependency from tests.",
+            "hints": [
+                "Check each statement against Nest's module provider registry.",
+                "Reject the claim that new keeps a controller testable.",
+                "Confirm that providers are private to a module unless exported.",
+                "Select statements about module boundaries and constructor injection."
+            ]
         }
     ],
     "evaluation": {
