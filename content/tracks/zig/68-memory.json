@@ -44,13 +44,33 @@
             "id": "leak",
             "description": "Dropping a pointer without freeing it.",
             "stepId": "review",
-            "feedback": "Every create, alloc, and dupe needs a matching destroy or free. Put defer next to the allocation so error paths clean up too."
+            "answer": "process",
+            "feedback": "Every create, alloc, and dupe needs a matching destroy or free. Process exit hides the leak from tests and long-running services.",
+            "followUpSkill": "zig.memory"
         },
         {
             "id": "ignore-error",
             "description": "Discarding an allocation error with catch unreachable.",
             "stepId": "apply",
-            "feedback": "Out-of-memory is a recoverable error. Use try to return it to the caller or handle it explicitly."
+            "testDescription": "The allocation is propagated with try and assigned to a pointer.",
+            "feedback": "Out-of-memory is a recoverable error. Use try to return it to the caller or handle it explicitly.",
+            "followUpSkill": "zig.memory"
+        },
+        {
+            "id": "double-free",
+            "description": "Freeing the same allocation in two scopes.",
+            "stepId": "apply",
+            "diagnostic": "Calling destroy inside makePoint and again through defer in main.",
+            "feedback": "One allocation needs one owner and one free. A defer in the owning scope is enough; freeing earlier leaves a dangling pointer.",
+            "followUpSkill": "zig.memory"
+        },
+        {
+            "id": "ship-leak",
+            "description": "Accepting a leak because main exits immediately.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "The leak still matters for tests, libraries, and long-running services. Pair the allocation with cleanup at the owner.",
+            "followUpSkill": "zig.memory"
         }
     ],
     "lesson": {
@@ -125,6 +145,12 @@
             "title": "Allocate a point and release it",
             "prompt": "Edit main.zig. makePoint allocates a Point with allocator.create; main releases it with defer.",
             "evidence": "construction",
+            "hints": [
+                "makePoint returns a pointer, so the allocation result has type *Point.",
+                "allocator.create(Point) returns an error union; bind it with try.",
+                "Assign point.* = .{ .x = x, .y = y }; after the allocation.",
+                "In main, defer allocator.destroy(point) immediately after the successful call."
+            ],
             "language": "zig",
             "files": [
                 {
@@ -136,6 +162,11 @@
             ],
             "entry": "main.zig",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "zig run main.zig",
+                "description": "Compiles and runs the program; the GPA reports leaked allocations in its debug output."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -177,6 +208,12 @@
             "title": "Review the allocation",
             "prompt": "Review the allocation code and select every real problem.",
             "evidence": "review",
+            "hints": [
+                "Find every allocation and its matching release.",
+                "The returned buffer outlives makeBuffer.",
+                "main only prints the length.",
+                "GeneralPurposeAllocator reports leaks at deinit."
+            ],
             "artifact": {
                 "title": "buffer.zig",
                 "caption": "makeBuffer returns owned memory, but main never releases it.",
