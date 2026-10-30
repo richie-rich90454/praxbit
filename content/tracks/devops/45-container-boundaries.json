@@ -42,15 +42,18 @@
     "misconceptions": [
         {
             "id": "latest-tag",
-            "description": "Assuming latest is a stable version.",
+            "description": "Accepting a floating base image tag.",
             "stepId": "container-review",
-            "feedback": "latest moves. Pin a specific version or digest so builds are reproducible."
+            "answer": "accept:latest,root,install,health",
+            "feedback": "A floating tag makes the build non-reproducible. Pin a version or digest and rebuild deliberately.",
+            "followUpSkill": "devops.containers"
         },
         {
             "id": "host-limits",
-            "description": "Assuming a container cannot exhaust the host.",
+            "description": "Treating container limits as a complete isolation boundary.",
             "stepId": "container-check",
-            "feedback": "Without limits, a container can consume host CPU and memory. Set bounded resources and monitor them."
+            "answer": "isolation",
+            "feedback": "Limits control resource use; the container still shares the host kernel. Pinning, non-root users, and least privilege remain necessary."
         }
     ],
     "lesson": {
@@ -135,7 +138,13 @@
                 }
             ],
             "correctVerdict": "reject",
-            "explanation": "Reproducibility, privilege, install command, health, and resources are all unaddressed. A container still consumes the shared host."
+            "explanation": "Reproducibility, privilege, install command, health, and resources are all unaddressed. A container still consumes the shared host.",
+            "hints": [
+                "Read the base image tag, the user, and the install step.",
+                "Check whether the runtime needs a compiler and package manager.",
+                "Check the health probe and what it actually proves.",
+                "Reject until the base is pinned, the process is non-root, build tools are absent, and the probe checks the app."
+            ]
         },
         {
             "kind": "explain",
@@ -165,7 +174,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Containers improve packaging and deployment; they do not remove the need for privilege, resource, and image controls."
+            "explanation": "Containers improve packaging and deployment; they do not remove the need for privilege, resource, and image controls.",
+            "hints": [
+                "A tag is a moving pointer unless it is a digest or exact version.",
+                "The container user is the process user.",
+                "Limits bound blast radius but do not replace isolation.",
+                "Select pinning, non-root, and limits; reject the claim that containers are isolated by default."
+            ]
         }
     ],
     "evaluation": {
