@@ -1,0 +1,337 @@
+{
+    "id": "algorithms-advanced.dynamic-programming",
+    "version": 1,
+    "sequence": 417,
+    "courseId": "algorithms-advanced",
+    "title": "Remember the subproblem",
+    "summary": "Replace a failing greedy choice with bottom-up dynamic programming and identify overlapping subproblems.",
+    "skills": ["algorithms.dp", "algorithms.complexity"],
+    "prerequisites": ["algorithms.recursion", "algorithms.complexity"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "dynamic-programming",
+        "briefing": "The vending machine needs the fewest coins for an amount. The current code always takes the largest coin that fits, which is wrong for some denominations. Replace it with a solution that considers every coin and remembers each smaller amount."
+    },
+    "objectives": [
+        {
+            "id": "solve",
+            "description": "Solve coin change with bottom-up dynamic programming.",
+            "stepIds": ["coins-code"]
+        },
+        {
+            "id": "review",
+            "description": "Identify overlapping subproblems and missing memoization.",
+            "stepIds": ["dp-review"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain optimal substructure and when greedy is safe.",
+            "stepIds": ["dp-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:grid"],
+    "hints": [
+        "A greedy choice is not automatically optimal.",
+        "Define the best answer for every amount from zero to the target.",
+        "The answer for amount a uses the answer for a minus a coin.",
+        "Fill a table from 0 upward and take the minimum over all coins."
+    ],
+    "misconceptions": [
+        {
+            "id": "greedy-coins",
+            "description": "Taking the largest coin first for every denomination.",
+            "stepId": "coins-code",
+            "testDescription": "Finds the optimum when a greedy choice is wrong.",
+            "feedback": "With coins 1, 3, and 4, greedy takes 4+1+1 for 6 while 3+3 is better. Dynamic programming compares every choice.",
+            "followUpSkill": "algorithms.dp"
+        },
+        {
+            "id": "recompute",
+            "description": "Recursing without caching repeated amounts.",
+            "stepId": "dp-review",
+            "answer": "accept:overlap,exponential,memo",
+            "feedback": "The same smaller amounts are recomputed. Memoize or fill a table so each amount is solved once."
+        },
+        {
+            "id": "greedy-proof-missing",
+            "description": "Assuming a greedy rule is optimal without a proof or counterexample.",
+            "stepId": "dp-transfer",
+            "answer": "obvious",
+            "feedback": "A greedy rule needs an exchange argument or a counterexample check. Coin systems differ, so the rule is not universal."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Optimal substructure",
+                "body": "The best way to make amount a ends with some coin c, so it contains a best way to make a - c. If the smaller solution were not optimal, replacing it would improve the larger one. That is the structure dynamic programming exploits."
+            },
+            {
+                "title": "Overlap makes caching pay",
+                "body": "A plain recursion solves the same smaller amounts many times. A table filled from zero upward solves each amount once, turning exponential branching into O(amount × coins) work."
+            },
+            {
+                "title": "Greedy needs its own proof",
+                "body": "Taking the largest coin works for some currency systems and fails for others. Greedy is a claim about the problem, not a shortcut you can assume. Test a counterexample before trusting it."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Dynamic programming",
+                "definition": "Solving a problem by combining cached solutions to overlapping subproblems."
+            },
+            {
+                "term": "Optimal substructure",
+                "definition": "A property where an optimal solution contains optimal subsolutions."
+            },
+            {
+                "term": "Overlapping subproblems",
+                "definition": "The same smaller problem appears in more than one branch."
+            },
+            {
+                "term": "Memoization",
+                "definition": "Caching a subproblem result so repeated calls reuse it."
+            },
+            {
+                "term": "Greedy algorithm",
+                "definition": "An algorithm that commits to the locally best choice at each step."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Cache the smaller answers",
+            "prompt": "Read the explanation, then implement coin change.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Optimal substructure",
+                    "body": "The best way to make amount a ends with some coin c, so it contains a best way to make a - c. If the smaller solution were not optimal, replacing it would improve the larger one. That is the structure dynamic programming exploits."
+                },
+                {
+                    "title": "Overlap makes caching pay",
+                    "body": "A plain recursion solves the same smaller amounts many times. A table filled from zero upward solves each amount once, turning exponential branching into O(amount × coins) work."
+                },
+                {
+                    "title": "Greedy needs its own proof",
+                    "body": "Taking the largest coin works for some currency systems and fails for others. Greedy is a claim about the problem, not a shortcut you can assume. Test a counterexample before trusting it."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Dynamic programming",
+                    "definition": "Solving a problem by combining cached solutions to overlapping subproblems."
+                },
+                {
+                    "term": "Optimal substructure",
+                    "definition": "A property where an optimal solution contains optimal subsolutions."
+                },
+                {
+                    "term": "Overlapping subproblems",
+                    "definition": "The same smaller problem appears in more than one branch."
+                },
+                {
+                    "term": "Memoization",
+                    "definition": "Caching a subproblem result so repeated calls reuse it."
+                },
+                {
+                    "term": "Greedy algorithm",
+                    "definition": "An algorithm that commits to the locally best choice at each step."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "coins-code",
+            "title": "Fewest coins",
+            "prompt": "Edit coins.js. fewestCoins(coins, amount) returns the minimum number of coins that sum to amount, or -1 when it is impossible. Use a table from 0 to amount; do not pick the largest coin greedily.",
+            "evidence": "construction",
+            "hints": [
+                "The answer for amount 0 is zero coins.",
+                "For each amount, try every coin that fits.",
+                "Take one plus the best answer for the remainder.",
+                "Mark unreachable amounts and return -1 if the target remains unreachable."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "coins.js",
+                    "content": "function fewestCoins(coins, amount) {\n  const sorted = [...coins].sort(function descending(left, right) {\n    return right - left;\n  });\n  let left = amount;\n  let count = 0;\n  for (const coin of sorted) {\n    while (left >= coin) {\n      left -= coin;\n      count += 1;\n    }\n  }\n  return left === 0 ? count : -1;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "coins.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Finds the minimum with common coins.",
+                    "name": "fewestCoins",
+                    "args": [[1, 2, 5], 11],
+                    "expected": 3
+                },
+                {
+                    "kind": "function",
+                    "description": "Finds the optimum when a greedy choice is wrong.",
+                    "name": "fewestCoins",
+                    "args": [[1, 3, 4], 6],
+                    "expected": 2
+                },
+                {
+                    "kind": "function",
+                    "description": "Returns -1 when the amount cannot be made.",
+                    "name": "fewestCoins",
+                    "args": [[2], 3],
+                    "expected": -1
+                },
+                {
+                    "kind": "function",
+                    "description": "Returns zero for amount zero.",
+                    "name": "fewestCoins",
+                    "args": [[5], 0],
+                    "expected": 0
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles a single coin that fits exactly.",
+                    "name": "fewestCoins",
+                    "args": [[7], 7],
+                    "expected": 1
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "dp-review",
+            "title": "Review the route counter",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Look for the same recursive call made more than once.",
+                "Check whether a cache exists.",
+                "Check the base case for the destination.",
+                "Block the change: it recomputes overlapping routes and has no memoization."
+            ],
+            "artifact": {
+                "title": "countRoutes.ts",
+                "caption": "Counts paths through a grid from the top left to the bottom right.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "function countRoutes(row: number, column: number): number {\n  if (row === 0 || column === 0) return 1;\n  return countRoutes(row - 1, column) + countRoutes(row, column - 1);\n}"
+            },
+            "findings": [
+                {
+                    "id": "overlap",
+                    "label": "The same (row, column) states are computed repeatedly.",
+                    "correct": true
+                },
+                {
+                    "id": "exponential",
+                    "label": "Without a cache, the call tree grows exponentially.",
+                    "correct": true
+                },
+                {
+                    "id": "memo",
+                    "label": "A memo table keyed by row and column would solve each state once.",
+                    "correct": true
+                },
+                {
+                    "id": "base-ok",
+                    "label": "The first-row and first-column base cases are correct for this count.",
+                    "correct": true
+                },
+                {
+                    "id": "greedy",
+                    "label": "A greedy choice of the shorter direction is equivalent.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the function"
+                },
+                {
+                    "id": "block",
+                    "label": "Block until the overlapping states are memoized"
+                },
+                {
+                    "id": "style",
+                    "label": "Only rename the parameters"
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The recurrence is correct but repeated states make it exponential. Memoization or a bottom-up table keeps the same logic with one solve per state."
+        },
+        {
+            "kind": "explain",
+            "id": "dp-transfer",
+            "title": "When to remember",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Dynamic programming needs both structure and overlap.",
+                "A table trades memory for repeated work.",
+                "Greedy is a special case, not a default.",
+                "Select substructure, overlap, memoization, and proof for greedy; reject obviousness."
+            ],
+            "statements": [
+                {
+                    "id": "substructure",
+                    "label": "An optimal solution must contain optimal solutions to its subproblems.",
+                    "correct": true
+                },
+                {
+                    "id": "overlap",
+                    "label": "Memoization pays when the same subproblem appears repeatedly.",
+                    "correct": true
+                },
+                {
+                    "id": "table",
+                    "label": "A bottom-up table can replace recursion and avoid stack depth.",
+                    "correct": true
+                },
+                {
+                    "id": "proof",
+                    "label": "A greedy rule needs a proof or counterexample check before it is trusted.",
+                    "correct": true
+                },
+                {
+                    "id": "obvious",
+                    "label": "The locally best choice is always part of a global optimum.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Dynamic programming combines optimal substructure with cached overlap. Greedy is safe only when its choice property is proven."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["professional", "systems"]
+}
