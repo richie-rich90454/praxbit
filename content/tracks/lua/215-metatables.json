@@ -37,7 +37,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "lua.metatables",
-    "sequence": 215,
+    "sequence": 124,
     "title": "Metatables and sortable items",
     "summary": "Teach two tables how to compare and print through metamethods, then repair a sort that has no ordering rule.",
     "skills": [
