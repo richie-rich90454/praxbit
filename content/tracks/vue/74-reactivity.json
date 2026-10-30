@@ -44,13 +44,24 @@
             "id": "watcher-derived",
             "description": "Synchronizing derived state with a watcher.",
             "stepId": "apply",
-            "feedback": "Derived values should be computed from their source. A watcher creates a second source of truth that can drift."
+            "feedback": "Derived values should be computed from their source. A watcher creates a second source of truth that can drift.",
+            "testDescription": "The total is derived with computed instead of a watcher.",
+            "followUpSkill": "vue.reactivity"
         },
         {
             "id": "mutate-prop",
             "description": "Writing to a prop in a child component.",
             "stepId": "apply",
-            "feedback": "Props are read-only. Emit an event and let the owner update the state."
+            "feedback": "Props are read-only. Emit an event and let the owner update the state.",
+            "diagnostic": "Writing to props.quantity warns and the parent never receives the new value."
+        },
+        {
+            "id": "ship-watcher",
+            "description": "Shipping a watcher that mirrors derived state.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "The watcher creates a second source of truth that can drift. Block the change and derive the total with computed.",
+            "followUpSkill": "vue.reactivity"
         }
     ],
     "lesson": {
@@ -162,7 +173,18 @@
                     "includes": ["const total = computed("],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Import computed and drop watch from the imports.",
+                "Keep items at module scope and replace total with computed.",
+                "Sum item.price * item.quantity inside the computed callback.",
+                "Call router.beforeEach, check to.meta.requiresCart, and return the catalog route when items is empty."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Vue Test Utils suite with Vitest."
+            }
         },
         {
             "kind": "review",
@@ -209,7 +231,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The child writes to props.quantity, which Vue treats as read-only and the parent never sees. The watcher also mirrors price times quantity into a second ref, creating two sources of truth that can drift."
+            "explanation": "The child writes to props.quantity, which Vue treats as read-only and the parent never sees. The watcher also mirrors price times quantity into a second ref, creating two sources of truth that can drift.",
+            "hints": [
+                "Check every assignment that targets props.",
+                "Decide whether total is derived or stored twice.",
+                "Ignore findings that describe behavior the artifact does not have.",
+                "Block the change when both a prop write and duplicated derived state are present."
+            ]
         }
     ],
     "evaluation": {
