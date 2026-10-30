@@ -1,0 +1,346 @@
+{
+    "id": "systems-architecture.observability",
+    "version": 1,
+    "sequence": 421,
+    "courseId": "systems-architecture",
+    "title": "Follow one request across services",
+    "summary": "Instrument a span with bounded attributes, review a broken trace, and use traces and metrics together.",
+    "skills": ["api.observability", "architecture.distributed"],
+    "prerequisites": ["architecture.distributed", "api.observability"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "observability",
+        "briefing": "A checkout request touches the web app, orders API, and payment worker. When it is slow, the logs have no shared id, each service uses its own timestamp format, errors are swallowed, and metrics are labeled by user id. Instrument one span correctly before fixing the rest."
+    },
+    "objectives": [
+        {
+            "id": "instrument",
+            "description": "Create a span with bounded attributes and guaranteed end.",
+            "stepIds": ["span-code"]
+        },
+        {
+            "id": "review",
+            "description": "Identify missing correlation and unsafe labels.",
+            "stepIds": ["trace-review"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain traces, metrics, logs, and sampling.",
+            "stepIds": ["observability-transfer"]
+        }
+    ],
+    "assets": ["pip:observing", "scene:campus", "system:api", "icon:trace"],
+    "hints": [
+        "A trace needs a shared identifier across service boundaries.",
+        "Span attributes should be bounded and low-cardinality.",
+        "Record errors on the span and end it in a finally block.",
+        "Use request id, route, status, and duration; never email or user id as metric labels."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-correlation",
+            "description": "Logging events without a shared request id.",
+            "stepId": "span-code",
+            "testDescription": "Sets the request id on the span.",
+            "feedback": "Without a shared id, the three services cannot be joined into one trace. Set it on the span and propagate it.",
+            "followUpSkill": "api.observability"
+        },
+        {
+            "id": "user-label",
+            "description": "Using a user id as a metric label.",
+            "stepId": "trace-review",
+            "answer": "approve:no-request-id,local-time,swallowed-error,user-label",
+            "feedback": "User id is unbounded, so it multiplies series and cost. Keep high-cardinality values in traces or logs, not metric labels."
+        },
+        {
+            "id": "logs-are-traces",
+            "description": "Treating plain logs as a distributed trace.",
+            "stepId": "observability-transfer",
+            "answer": "logs",
+            "feedback": "Logs are events. A trace records parent-child timing across services, and metrics aggregate bounded measurements. They answer different questions."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "One request, many spans",
+                "body": "A trace follows one request across services. Each span records an operation, its parent, its duration, and a few bounded attributes. A shared trace id and request id let you join logs and spans without guessing."
+            },
+            {
+                "title": "Attributes have a budget",
+                "body": "Route, status, and service name are bounded. User id, email, and raw URLs are not. High-cardinality labels explode metric series and storage. Keep identifiers in logs or span events with a retention policy."
+            },
+            {
+                "title": "Three signals, three questions",
+                "body": "Metrics answer whether a trend is healthy. Traces answer where time went in one request. Logs answer what happened in one event. Sampling keeps trace cost bounded, but error traces should usually be kept."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Trace",
+                "definition": "The record of one request across multiple services and spans."
+            },
+            {
+                "term": "Span",
+                "definition": "One timed operation inside a trace, with a parent and attributes."
+            },
+            {
+                "term": "Correlation id",
+                "definition": "A shared identifier that joins logs and spans for one request."
+            },
+            {
+                "term": "Cardinality",
+                "definition": "The number of distinct values or label combinations."
+            },
+            {
+                "term": "Sampling",
+                "definition": "Keeping a fraction of traces to bound observability cost."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Instrument the boundary",
+            "prompt": "Read the explanation, then instrument the handler.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "One request, many spans",
+                    "body": "A trace follows one request across services. Each span records an operation, its parent, its duration, and a few bounded attributes. A shared trace id and request id let you join logs and spans without guessing."
+                },
+                {
+                    "title": "Attributes have a budget",
+                    "body": "Route, status, and service name are bounded. User id, email, and raw URLs are not. High-cardinality labels explode metric series and storage. Keep identifiers in logs or span events with a retention policy."
+                },
+                {
+                    "title": "Three signals, three questions",
+                    "body": "Metrics answer whether a trend is healthy. Traces answer where time went in one request. Logs answer what happened in one event. Sampling keeps trace cost bounded, but error traces should usually be kept."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Trace",
+                    "definition": "The record of one request across multiple services and spans."
+                },
+                {
+                    "term": "Span",
+                    "definition": "One timed operation inside a trace, with a parent and attributes."
+                },
+                {
+                    "term": "Correlation id",
+                    "definition": "A shared identifier that joins logs and spans for one request."
+                },
+                {
+                    "term": "Cardinality",
+                    "definition": "The number of distinct values or label combinations."
+                },
+                {
+                    "term": "Sampling",
+                    "definition": "Keeping a fraction of traces to bound observability cost."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "span-code",
+            "title": "Instrument the checkout span",
+            "prompt": "Edit instrument.ts. handleCheckout should start a span named checkout, set service, route, and requestId attributes, record any error on the span, and end the span in a finally block. Do not add email or user id as span attributes.",
+            "evidence": "construction",
+            "hints": [
+                "Start the span before the work and keep a reference.",
+                "Set bounded attributes as soon as the span exists.",
+                "Record the error and rethrow it so the caller still sees failure.",
+                "End the span in finally so it closes on every path."
+            ],
+            "language": "text",
+            "files": [
+                {
+                    "path": "instrument.ts",
+                    "content": "import { tracer } from \"./tracing\";\n\nexport async function handleCheckout(request: Request): Promise<Response> {\n  // TODO: start a span and record bounded attributes.\n  return processCheckout(request);\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "instrument.ts",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the structural checks that exercise this instrumentation step."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Starts a named checkout span.",
+                    "file": "instrument.ts",
+                    "includes": ["tracer.startSpan(\"checkout\")"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Sets the request id on the span.",
+                    "file": "instrument.ts",
+                    "includes": [
+                        "setAttribute(\"requestId\"",
+                        "setAttribute(\"route\"",
+                        "setAttribute(\"service\""
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Records errors and still ends the span.",
+                    "file": "instrument.ts",
+                    "includes": ["recordException", "finally", "span.end()"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Keeps high-cardinality identifiers out of span attributes.",
+                    "file": "instrument.ts",
+                    "includes": ["requestId"],
+                    "excludes": ["setAttribute(\"email\"", "setAttribute(\"userId\""]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "instrument.ts",
+                    "includes": ["try {"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "trace-review",
+            "title": "Review the trace setup",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Look for a shared request id in the logs.",
+                "Check the timestamp format and error handling.",
+                "Check the metric labels for unbounded values.",
+                "Revise: there is no correlation id, local times differ, errors disappear, and user id explodes cardinality."
+            ],
+            "artifact": {
+                "title": "Checkout observability",
+                "caption": "Logging and metrics from the three services.",
+                "kind": "report",
+                "language": "text",
+                "content": "web:     [10:00:01] request received\norders:  [2026-10-01T14:00:01Z] handler start\npayment: [10:00:02] charge attempt\n\ncatch (error) {\n  return response.status(500).end();\n}\n\nmetric http_requests_total labels: service, route, status, user_id"
+            },
+            "findings": [
+                {
+                    "id": "no-request-id",
+                    "label": "The three services log without a shared request id.",
+                    "correct": true
+                },
+                {
+                    "id": "local-time",
+                    "label": "The timestamps use different zones and formats.",
+                    "correct": true
+                },
+                {
+                    "id": "swallowed-error",
+                    "label": "The catch block discards the error without recording it.",
+                    "correct": true
+                },
+                {
+                    "id": "user-label",
+                    "label": "user_id as a metric label creates unbounded cardinality.",
+                    "correct": true
+                },
+                {
+                    "id": "metric-count",
+                    "label": "Adding more metrics fixes missing trace context.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the setup"
+                },
+                {
+                    "id": "revise",
+                    "label": "Revise correlation, timestamps, error capture, and labels"
+                },
+                {
+                    "id": "sample",
+                    "label": "Only lower the sampling rate"
+                }
+            ],
+            "correctVerdict": "revise",
+            "explanation": "Sampling does not create correlation. Add a request id, use one timestamp format, record errors, and remove unbounded labels."
+        },
+        {
+            "kind": "explain",
+            "id": "observability-transfer",
+            "title": "Use the right signal",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Metrics answer trends; traces answer where time went.",
+                "A trace id joins spans across services.",
+                "Unbounded labels multiply series.",
+                "Select correlation, bounded labels, trace timing, and error retention; reject logs as traces."
+            ],
+            "statements": [
+                {
+                    "id": "trace",
+                    "label": "A trace records parent-child timing for one request across services.",
+                    "correct": true
+                },
+                {
+                    "id": "metrics",
+                    "label": "Metrics are best for bounded aggregate trends such as error rate and latency.",
+                    "correct": true
+                },
+                {
+                    "id": "labels",
+                    "label": "Metric labels should be bounded; user id belongs in logs or span events.",
+                    "correct": true
+                },
+                {
+                    "id": "errors",
+                    "label": "Error traces are usually worth keeping even when sampling normal traffic.",
+                    "correct": true
+                },
+                {
+                    "id": "logs",
+                    "label": "Plain logs are a complete replacement for distributed traces.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Traces show request flow, metrics show trends, and logs show events. Correlation and bounded labels make all three usable."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
