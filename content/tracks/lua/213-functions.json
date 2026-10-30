@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,10 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "games",
-        "systems"
-    ],
+    "tags": ["games", "systems"],
     "accessibility": {
         "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -40,45 +34,28 @@
     "sequence": 122,
     "title": "Varargs and multiple returns",
     "summary": "Count and sum variadic arguments, then repair a summary that loses values after the first nil.",
-    "skills": [
-        "lua.functions",
-        "lua.syntax"
-    ],
-    "prerequisites": [
-        "lua.syntax",
-        "concept.iteration"
-    ],
+    "skills": ["lua.functions", "lua.syntax"],
+    "prerequisites": ["lua.syntax", "concept.iteration"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Use select to count and read variadic arguments.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find a table pack that drops values after nil.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Select one variadic argument by position.",
-            "stepIds": [
-                "position"
-            ]
+            "stepIds": ["position"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:lua"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:lua"],
     "hints": [
         "select(\"#\", ...) counts every variadic argument.",
         "select(index, ...) returns the values starting at that position.",
@@ -224,36 +201,22 @@
                     "kind": "static",
                     "description": "The function returns both a count and a total.",
                     "file": "main.lua",
-                    "includes": [
-                        "local function stats(...)",
-                        "return count, total"
-                    ],
+                    "includes": ["local function stats(...)", "return count, total"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The function counts and sums every argument.",
                     "file": "main.lua",
-                    "includes": [
-                        "select(\"#\", ...)",
-                        "select(index, ...)",
-                        "or 0"
-                    ],
-                    "excludes": [
-                        "ipairs({ ... })",
-                        "local count = 0"
-                    ]
+                    "includes": ["select(\"#\", ...)", "select(index, ...)", "or 0"],
+                    "excludes": ["ipairs({ ... })", "local count = 0"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.lua",
-                    "includes": [
-                        "local function stats"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["local function stats"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
