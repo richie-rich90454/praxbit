@@ -58,6 +58,85 @@ function responseFor(step: MissionStep, answer: string): StepResponse | undefine
             return { kind: "filesystem", path: answer.split("/") };
         case "network":
             return { kind: "network", path: answer.split(">") };
+        case "state": {
+            try {
+                const values = JSON.parse(answer) as Readonly<Record<string, string>>;
+                return { kind: "state", values };
+            } catch {
+                return undefined;
+            }
+        }
+        case "trace": {
+            try {
+                const values = JSON.parse(answer) as Readonly<Record<string, string>>;
+                return { kind: "trace", values };
+            } catch {
+                return undefined;
+            }
+        }
+        case "loop": {
+            const separator = answer.indexOf(":");
+            if (separator < 0) {
+                return undefined;
+            }
+            const repeat = Number.parseInt(answer.slice(0, separator), 10);
+            if (!Number.isInteger(repeat)) {
+                return undefined;
+            }
+            return {
+                kind: "loop",
+                repeat,
+                body: answer
+                    .slice(separator + 1)
+                    .split(",")
+                    .filter(function present(item): boolean {
+                        return item.length > 0;
+                    }),
+            };
+        }
+        case "review": {
+            const separator = answer.indexOf(":");
+            if (separator >= 0) {
+                return {
+                    kind: "review",
+                    verdict: answer.slice(0, separator),
+                    findings: answer
+                        .slice(separator + 1)
+                        .split(",")
+                        .filter(function present(item): boolean {
+                            return item.length > 0;
+                        }),
+                };
+            }
+            return {
+                kind: "review",
+                verdict: step.correctVerdict,
+                findings: answer.split(",").filter(function present(item): boolean {
+                    return item.length > 0;
+                }),
+            };
+        }
+        case "test-design":
+            return {
+                kind: "test-design",
+                selected: answer.split(",").filter(function present(item): boolean {
+                    return item.length > 0;
+                }),
+            };
+        case "explain":
+            return {
+                kind: "explain",
+                selected: answer.split(",").filter(function present(item): boolean {
+                    return item.length > 0;
+                }),
+            };
+        case "code":
+            return {
+                kind: "code",
+                passedTests: [],
+                failedTests: [answer],
+                totalTests: 1,
+            };
         default:
             return undefined;
     }
