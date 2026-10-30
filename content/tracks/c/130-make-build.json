@@ -5,21 +5,14 @@
     "courseId": "c",
     "title": "Build with Make",
     "summary": "Write a Makefile with warnings, a clean target, and correct dependencies.",
-    "skills": [
-        "c.toolchain"
-    ],
-    "prerequisites": [
-        "c.syntax"
-    ],
+    "skills": ["c.toolchain"],
+    "prerequisites": ["c.syntax"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,31 +24,20 @@
         {
             "id": "write-makefile",
             "description": "Write a Makefile with warnings and a phony clean target.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "predict-rebuild",
             "description": "Predict what make rebuilds after one file changes.",
-            "stepIds": [
-                "make-transfer"
-            ]
+            "stepIds": ["make-transfer"]
         },
         {
             "id": "explain-make",
             "description": "Explain Make dependencies and flags accurately.",
-            "stepIds": [
-                "make-check"
-            ]
+            "stepIds": ["make-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:c"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:c"],
     "hints": [
         "Declare the compiler and flags as variables.",
         "Add -Wall -Wextra -Werror to CFLAGS.",
@@ -195,32 +177,21 @@
                     "kind": "static",
                     "description": "Warnings are part of every compile.",
                     "file": "Makefile",
-                    "includes": [
-                        "CFLAGS = -std=c17 -Wall -Wextra -Werror"
-                    ],
-                    "excludes": [
-                        "CFLAGS = -std=c17\n"
-                    ]
+                    "includes": ["CFLAGS = -std=c17 -Wall -Wextra -Werror"],
+                    "excludes": ["CFLAGS = -std=c17\n"]
                 },
                 {
                     "kind": "static",
                     "description": "The clean target is declared phony.",
                     "file": "Makefile",
-                    "includes": [
-                        ".PHONY: clean"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": [".PHONY: clean"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The app target builds from main.c.",
                     "file": "Makefile",
-                    "includes": [
-                        "app: main.c",
-                        "$(CC) $(CFLAGS) main.c -o $(TARGET)"
-                    ],
+                    "includes": ["app: main.c", "$(CC) $(CFLAGS) main.c -o $(TARGET)"],
                     "excludes": []
                 }
             ],
@@ -321,8 +292,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
