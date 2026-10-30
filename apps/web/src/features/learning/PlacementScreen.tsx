@@ -1,15 +1,30 @@
 import { A, useNavigate } from "@solidjs/router";
-import { For, Show, createSignal, type JSX } from "solid-js";
+import { For, Show, createEffect, createSignal, type JSX } from "solid-js";
 import { gradePlacement, type PlacementResult } from "@praxbit/domain";
+import { announce } from "../../app/AppShell.tsx";
 import { placement, missions } from "../../content/index.ts";
 import { useLearning } from "../learning/learning-store.tsx";
 
 export function PlacementScreen(): JSX.Element {
     const learning = useLearning();
     const navigate = useNavigate();
+    let resultHeadingRef: HTMLHeadingElement | undefined;
     const [answers, setAnswers] = createSignal<Readonly<Record<string, string>>>({});
     const [result, setResult] = createSignal<PlacementResult | undefined>(undefined);
     const [saving, setSaving] = createSignal(false);
+
+    createEffect(function focusResult(): void {
+        const graded = result();
+        if (graded === undefined) {
+            return;
+        }
+        announce(
+            `Placement complete. ${graded.correct} of ${graded.total} correct. Review the suggested start.`,
+        );
+        queueMicrotask(function focus(): void {
+            resultHeadingRef?.focus();
+        });
+    });
 
     const allAnswered = function allAnswered(): boolean {
         return placement.questions.every(function answered(question): boolean {
@@ -64,7 +79,9 @@ export function PlacementScreen(): JSX.Element {
                 fallback={
                     <div class="stack stack--wide">
                         <div class="surface stack">
-                            <h2>Suggested start</h2>
+                            <h2 ref={resultHeadingRef} tabindex="-1">
+                                Suggested start
+                            </h2>
                             <p>
                                 {result()?.correct} of {result()?.total} correct. The recommendation
                                 is a starting point, not a permanent placement.
