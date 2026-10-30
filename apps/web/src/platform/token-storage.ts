@@ -62,7 +62,11 @@ export function createBearerTokenStore(): BearerTokenStore {
 
     async function save(token: string): Promise<void> {
         if (secure) {
-            await SecureStorage.set(TOKEN_KEY, token);
+            try {
+                await SecureStorage.set(TOKEN_KEY, token);
+            } catch {
+                warn(NATIVE_WARNING);
+            }
             return;
         }
         if (native) {
