@@ -1,18 +1,27 @@
 {
     "id": "cmake.targets",
     "version": 1,
-    "sequence": 95,
+    "sequence": 173,
     "courseId": "cmake",
     "title": "Targets carry their own requirements",
     "summary": "Declare an executable and attach its language standard and include path to the target.",
-    "skills": ["cmake.targets", "cpp.build"],
-    "prerequisites": ["cpp.build", "cpp.templates"],
+    "skills": [
+        "cmake.targets",
+        "cpp.build"
+    ],
+    "prerequisites": [
+        "cpp.build",
+        "cpp.templates"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cmake"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:cmake"
+    ],
     "hints": [
         "Call project() once, right after cmake_minimum_required.",
         "add_executable already names the target inventory.",
@@ -44,13 +62,24 @@
             "id": "global-include-dirs",
             "description": "Using include_directories for a path only one target needs.",
             "stepId": "apply",
-            "feedback": "Global include paths apply to every target in the directory and hide which target actually needs the headers. Attach the path with target_include_directories."
+            "testDescription": "The project is declared after the minimum version.",
+            "feedback": "Global include paths apply to every target in the directory and hide which target needs the headers. Attach the path with target_include_directories.",
+            "followUpSkill": "cmake.targets"
         },
         {
             "id": "global-standard",
             "description": "Setting CMAKE_CXX_STANDARD globally because it is shorter.",
             "stepId": "apply",
+            "testDescription": "The standard and include path belong to the target.",
             "feedback": "A global standard forces every target in the tree, including third-party code, onto one mode. target_compile_features states the requirement per target."
+        },
+        {
+            "id": "project-order",
+            "description": "Calling add_executable before project().",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that add_executable must run before project().",
+            "feedback": "project() declares the build and enables languages. Targets are created after it, not before.",
+            "followUpSkill": "cmake.targets"
         }
     ],
     "lesson": {
@@ -137,13 +166,17 @@
                         "cmake_minimum_required(VERSION 3.24)",
                         "project(campus_inventory LANGUAGES CXX)"
                     ],
-                    "excludes": ["include_directories(include)"]
+                    "excludes": [
+                        "include_directories(include)"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The executable target is created once with its source.",
                     "file": "CMakeLists.txt",
-                    "includes": ["add_executable(inventory src/main.cpp)"],
+                    "includes": [
+                        "add_executable(inventory src/main.cpp)"
+                    ],
                     "excludes": []
                 },
                 {
@@ -154,16 +187,33 @@
                         "target_compile_features(inventory PRIVATE cxx_std_20)",
                         "target_include_directories(inventory PRIVATE include)"
                     ],
-                    "excludes": ["CMAKE_CXX_STANDARD"]
+                    "excludes": [
+                        "CMAKE_CXX_STANDARD"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "CMakeLists.txt",
-                    "includes": ["cmake_minimum_required(VERSION 3.24)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "cmake_minimum_required(VERSION 3.24)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Call project() after cmake_minimum_required.",
+                "Keep add_executable as the target definition.",
+                "Attach the standard with target_compile_features(inventory PRIVATE cxx_std_20).",
+                "Attach the include path with target_include_directories(inventory PRIVATE include)."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "cmake --build build",
+                "description": "Build the configured CMake project in the build directory."
+            }
         },
         {
             "kind": "explain",
@@ -203,7 +253,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "A CMake build is a graph of targets. The minimum version and project declare the policy baseline and enabled languages; add_executable creates a build product; target_compile_features and target_include_directories attach requirements to that product only. Global commands like include_directories leak flags into unrelated targets, which makes builds fragile."
+            "explanation": "A CMake build is a graph of targets. The minimum version and project declare the policy baseline and enabled languages; add_executable creates a build product; target_compile_features and target_include_directories attach requirements to that product only. Global commands like include_directories leak flags into unrelated targets, which makes builds fragile.",
+            "hints": [
+                "Check which commands attach requirements to a target instead of a directory.",
+                "A target is the unit that carries usage requirements.",
+                "Global include paths affect every target in the directory.",
+                "PRIVATE requirements are not published to consumers."
+            ]
         }
     ],
     "evaluation": {
@@ -223,5 +279,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems"]
+    "tags": [
+        "systems"
+    ]
 }
