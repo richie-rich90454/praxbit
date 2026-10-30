@@ -426,6 +426,7 @@ export function BinaryView(props: { readonly step: BinaryStep } & InteractionPro
             <div class="surface surface--quiet stack stack--tight">
                 <h3>Reference</h3>
                 <table class="data-table">
+                    <caption class="meta">Binary reference values</caption>
                     <thead>
                         <tr>
                             <th scope="col">Character</th>
