@@ -1,18 +1,27 @@
 {
     "id": "systems-architecture.processes",
     "version": 1,
-    "sequence": 106,
+    "sequence": 201,
     "courseId": "systems-architecture",
     "title": "Processes, descriptors, and signals",
     "summary": "Supervise worker processes with a bounded pool, private descriptors, signal forwarding, and checked exit codes.",
-    "skills": ["devops.linux", "concept.state"],
-    "prerequisites": ["devops.linux", "concept.filesystems"],
+    "skills": [
+        "devops.linux",
+        "concept.state"
+    ],
+    "prerequisites": [
+        "devops.linux",
+        "concept.filesystems"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:systems"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:systems"
+    ],
     "hints": [
         "Keep a counter of running jobs and call wait -n before starting another when it reaches MAX_PARALLEL.",
         "Open jobs.txt with exec 3< and read with read -r job_id <&3; close descriptor 3 for the worker with 3<&-.",
@@ -212,13 +230,19 @@
                         "while [ \"$running\" -ge \"$MAX_PARALLEL\" ]",
                         "run_job \"$job_id\" &"
                     ],
-                    "excludes": ["for job_id in $(cat"]
+                    "excludes": [
+                        "for job_id in $(cat"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The job list is read on a private descriptor and closed for workers.",
                     "file": "processes.md",
-                    "includes": ["exec 3<\"$JOBS_FILE\"", "read -r job_id <&3", "exec 3<&-"],
+                    "includes": [
+                        "exec 3<\"$JOBS_FILE\"",
+                        "read -r job_id <&3",
+                        "exec 3<&-"
+                    ],
                     "excludes": []
                 },
                 {
@@ -235,22 +259,35 @@
                     "kind": "static",
                     "description": "Termination is forwarded to every running job.",
                     "file": "processes.md",
-                    "includes": ["trap cleanup TERM INT", "kill -TERM \"$pid\""],
+                    "includes": [
+                        "trap cleanup TERM INT",
+                        "kill -TERM \"$pid\""
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Every child is reaped and any failure makes the supervisor exit nonzero.",
                     "file": "processes.md",
-                    "includes": ["if ! wait -n; then", "status=1", "exit \"$status\""],
-                    "excludes": ["echo \"all jobs started\""]
+                    "includes": [
+                        "if ! wait -n; then",
+                        "status=1",
+                        "exit \"$status\""
+                    ],
+                    "excludes": [
+                        "echo \"all jobs started\""
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "processes.md",
-                    "includes": ["readonly MAX_PARALLEL=4"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "readonly MAX_PARALLEL=4"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -329,5 +366,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
