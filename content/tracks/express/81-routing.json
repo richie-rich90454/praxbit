@@ -44,13 +44,24 @@
             "id": "return-value",
             "description": "Returning a product instead of sending it.",
             "stepId": "apply",
-            "feedback": "Express does not serialize a returned value. Call response.json and let the handler finish."
+            "feedback": "Express does not serialize a returned value. Call response.json and let the handler finish.",
+            "testDescription": "A found product is serialized as JSON.",
+            "followUpSkill": "express.routing"
         },
         {
             "id": "route-order",
             "description": "Registering a broad route before a specific one.",
             "stepId": "apply",
-            "feedback": "The first matching route wins. Put the specific path first or make the broad handler account for the detail path."
+            "feedback": "The first matching route wins. Put the specific path first or make the broad handler account for the detail path.",
+            "diagnostic": "Registering /products before /products/:id makes the broad handler answer first."
+        },
+        {
+            "id": "return-sends",
+            "description": "Believing a returned value is sent to the client.",
+            "stepId": "check",
+            "answer": "return",
+            "feedback": "Express ignores the return value of a route handler. The handler must call response.json or response.send.",
+            "followUpSkill": "express.routing"
         }
     ],
     "lesson": {
@@ -172,7 +183,18 @@
                     "includes": ["export const app = express();"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Register app.get(\"/products/:id\", ...) after the app is created.",
+                "Read request.params.id and find the product by id.",
+                "When find returns undefined, send status 404 and a JSON error.",
+                "Otherwise send the product with response.json(product)."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Express API tests with Vitest and Supertest."
+            }
         },
         {
             "kind": "explain",
@@ -202,7 +224,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Express matches routes in the order they were registered and exposes path segments through request.params. The handler must write the response; a returned value is ignored."
+            "explanation": "Express matches routes in the order they were registered and exposes path segments through request.params. The handler must write the response; a returned value is ignored.",
+            "hints": [
+                "Check each statement against Express's request and response model.",
+                "Reject the claim that a returned value is sent automatically.",
+                "Confirm that route order determines which handler matches.",
+                "Select statements about params, JSON, and registration order."
+            ]
         }
     ],
     "evaluation": {
