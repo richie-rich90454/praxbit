@@ -2,6 +2,18 @@
 
 All routes below are under `/api/v1` unless marked otherwise. Cookie-authenticated mutations require `x-csrf-token`. Bearer-authenticated requests use `authorization: Bearer <token>`. “Auth” means a valid session is required; “optional auth” means the route returns public data when signed out and personal data when signed in.
 
+## Capabilities
+
+### `GET /capabilities`
+
+Public. Reports runtime features that the client must not assume:
+
+```json
+{ "aiTutor": false }
+```
+
+`aiTutor` is true only when a complete AI provider configuration is present. It never exposes the provider URL, key, or model. The web client hides the live tutor and keeps curated hints when it is false.
+
 ## Auth
 
 ### `GET /auth/csrf`
