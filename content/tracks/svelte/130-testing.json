@@ -5,25 +5,14 @@
     "courseId": "svelte",
     "title": "Test store updates through actions",
     "summary": "Implement cart actions as pure transitions, then design tests for duplicate adds, zero quantities, clearing, and mutation bugs.",
-    "skills": [
-        "concept.testing",
-        "svelte.stores",
-        "svelte.reactivity"
-    ],
-    "prerequisites": [
-        "svelte.stores",
-        "concept.testing"
-    ],
+    "skills": ["concept.testing", "svelte.stores", "svelte.reactivity"],
+    "prerequisites": ["svelte.stores", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "execution",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "execution", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -35,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Implement store actions without mutating the current array.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-design",
             "description": "Select the store tests that cover real behavior.",
-            "stepIds": [
-                "design"
-            ]
+            "stepIds": ["design"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:svelte"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:svelte"],
     "hints": [
         "Merge an add when the SKU already exists.",
         "A quantity of zero or less removes the line.",
@@ -358,7 +338,5 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
