@@ -1,0 +1,392 @@
+{
+    "id": "ai-practice.evaluation",
+    "version": 1,
+    "sequence": 406,
+    "courseId": "ai-practice",
+    "title": "Measure the answer, not the vibe",
+    "summary": "Score a fixed evaluation set, separate regressions from noise, and analyze failures by category.",
+    "skills": ["ai.evaluation", "concept.testing"],
+    "prerequisites": ["ai.evaluation", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "evaluation",
+        "briefing": "The advising assistant ships prompt changes weekly. Reviews rely on a few impressive examples, and a regression reached students because nobody compared the new prompt with a fixed set. Build the scorer and choose an evaluation set that can catch the next regression."
+    },
+    "objectives": [
+        {
+            "id": "score",
+            "description": "Score a fixed set with exact, reproducible comparisons.",
+            "stepIds": ["score-cases"]
+        },
+        {
+            "id": "design-set",
+            "description": "Choose an evaluation set with coverage and regressions.",
+            "stepIds": ["eval-set"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain error analysis and threshold decisions.",
+            "stepIds": ["eval-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:chart"],
+    "hints": [
+        "An evaluation needs fixed inputs and expected outputs.",
+        "Compare structured values canonically, not by display text.",
+        "Report which cases failed, not only the pass rate.",
+        "Keep representative, adversarial, and regression cases; never tune on the same set you report."
+    ],
+    "misconceptions": [
+        {
+            "id": "happy-path-set",
+            "description": "Evaluating only easy, representative examples.",
+            "stepId": "score-cases",
+            "testDescription": "Reports every failing case id.",
+            "feedback": "A set of easy examples cannot reveal regressions. Add adversarial, boundary, and previously failing cases.",
+            "followUpSkill": "ai.evaluation"
+        },
+        {
+            "id": "single-example",
+            "description": "Treating one impressive answer as proof of quality.",
+            "stepId": "eval-set",
+            "answer": "demo",
+            "feedback": "One answer is an anecdote. Quality claims need a fixed set, a threshold, and repeated runs."
+        },
+        {
+            "id": "tune-on-test",
+            "description": "Tuning the prompt on the same cases used for the reported score.",
+            "stepId": "eval-transfer",
+            "answer": "tune",
+            "feedback": "Tuning on the reported set overfits it. Hold out cases or refresh the set after changes."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "An evaluation is a test suite",
+                "body": "Fix the inputs, expected outputs, and comparison rule. Run the same set for every prompt or model change so differences measure the change rather than the sample."
+            },
+            {
+                "title": "Coverage beats volume",
+                "body": "A useful set includes ordinary cases, boundaries, adversarial inputs, and cases that failed before. Random volume without coverage hides the failures that matter."
+            },
+            {
+                "title": "Analyze errors by category",
+                "body": "A pass rate alone does not say what to fix. Group failures by retrieval, instruction following, formatting, or refusal, then inspect examples in each group. Keep a held-out set for the final claim."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Evaluation set",
+                "definition": "Fixed inputs and expected outputs used to compare model or prompt versions."
+            },
+            {
+                "term": "Regression case",
+                "definition": "A case that failed before and must keep passing."
+            },
+            {
+                "term": "Pass threshold",
+                "definition": "The score a change must reach before it ships."
+            },
+            {
+                "term": "Error analysis",
+                "definition": "Grouping failures by cause to choose the next fix."
+            },
+            {
+                "term": "Held-out set",
+                "definition": "Cases not used for tuning, reserved for the final estimate."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Make quality measurable",
+            "prompt": "Read the explanation, then implement the scorer.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "An evaluation is a test suite",
+                    "body": "Fix the inputs, expected outputs, and comparison rule. Run the same set for every prompt or model change so differences measure the change rather than the sample."
+                },
+                {
+                    "title": "Coverage beats volume",
+                    "body": "A useful set includes ordinary cases, boundaries, adversarial inputs, and cases that failed before. Random volume without coverage hides the failures that matter."
+                },
+                {
+                    "title": "Analyze errors by category",
+                    "body": "A pass rate alone does not say what to fix. Group failures by retrieval, instruction following, formatting, or refusal, then inspect examples in each group. Keep a held-out set for the final claim."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Evaluation set",
+                    "definition": "Fixed inputs and expected outputs used to compare model or prompt versions."
+                },
+                {
+                    "term": "Regression case",
+                    "definition": "A case that failed before and must keep passing."
+                },
+                {
+                    "term": "Pass threshold",
+                    "definition": "The score a change must reach before it ships."
+                },
+                {
+                    "term": "Error analysis",
+                    "definition": "Grouping failures by cause to choose the next fix."
+                },
+                {
+                    "term": "Held-out set",
+                    "definition": "Cases not used for tuning, reserved for the final estimate."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "score-cases",
+            "title": "Score the evaluation set",
+            "prompt": "Edit evaluate.js. scoreCases(cases) returns { total, passed, failed } where a case passes when its actual value equals its expected value structurally, regardless of object key order. failed keeps the input order of ids.",
+            "evidence": "construction",
+            "hints": [
+                "Count every case, including failures.",
+                "Compare structured values with a canonical serialization.",
+                "Sort object keys before comparing so key order does not matter.",
+                "Push each failing id in input order and return the counts."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "evaluate.js",
+                    "content": "function scoreCases(cases) {\n  return { total: cases.length, passed: cases.length, failed: [] };\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "evaluate.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Counts all passing cases.",
+                    "name": "scoreCases",
+                    "args": [
+                        [
+                            {
+                                "id": "a",
+                                "expected": "yes",
+                                "actual": "yes"
+                            },
+                            {
+                                "id": "b",
+                                "expected": 3,
+                                "actual": 3
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "total": 2,
+                        "passed": 2,
+                        "failed": []
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Reports every failing case id.",
+                    "name": "scoreCases",
+                    "args": [
+                        [
+                            {
+                                "id": "a",
+                                "expected": "yes",
+                                "actual": "yes"
+                            },
+                            {
+                                "id": "b",
+                                "expected": "no",
+                                "actual": "yes"
+                            },
+                            {
+                                "id": "c",
+                                "expected": 2,
+                                "actual": 3
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "total": 3,
+                        "passed": 1,
+                        "failed": ["b", "c"]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Compares nested objects regardless of key order.",
+                    "name": "scoreCases",
+                    "args": [
+                        [
+                            {
+                                "id": "nested",
+                                "expected": {
+                                    "a": 1,
+                                    "b": {
+                                        "c": 2,
+                                        "d": 3
+                                    }
+                                },
+                                "actual": {
+                                    "b": {
+                                        "d": 3,
+                                        "c": 2
+                                    },
+                                    "a": 1
+                                }
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "total": 1,
+                        "passed": 1,
+                        "failed": []
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles an empty set.",
+                    "name": "scoreCases",
+                    "args": [[]],
+                    "expected": {
+                        "total": 0,
+                        "passed": 0,
+                        "failed": []
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Distinguishes arrays from objects.",
+                    "name": "scoreCases",
+                    "args": [
+                        [
+                            {
+                                "id": "shape",
+                                "expected": [1, 2],
+                                "actual": {
+                                    "0": 1,
+                                    "1": 2
+                                }
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "total": 1,
+                        "passed": 0,
+                        "failed": ["shape"]
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "eval-set",
+            "title": "Choose the evaluation set",
+            "prompt": "Which set gives the most useful signal for a prompt change?",
+            "evidence": "prediction",
+            "hints": [
+                "A set should cover more than easy examples.",
+                "Previously failing cases protect against regressions.",
+                "Held-out cases keep the final score honest.",
+                "Choose representative, adversarial, boundary, and regression cases."
+            ],
+            "quiz": {
+                "prompt": "Select the evaluation set you would keep.",
+                "options": [
+                    {
+                        "id": "mix",
+                        "label": "Representative cases, boundaries, adversarial inputs, and prior failures, with a held-out subset"
+                    },
+                    {
+                        "id": "demo",
+                        "label": "The one demo that impressed the team"
+                    },
+                    {
+                        "id": "latest",
+                        "label": "The five most recent user questions"
+                    },
+                    {
+                        "id": "generated",
+                        "label": "Only cases generated by the same model"
+                    }
+                ],
+                "correctId": "mix",
+                "explanation": "Coverage plus held-out cases measures both regressions and generalization. A demo or the latest questions overfit the moment."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "eval-transfer",
+            "title": "Report and improve",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "A pass rate is a summary, not a diagnosis.",
+                "Group failures before choosing a fix.",
+                "Tuning and reporting should not use the same cases.",
+                "Select error categories, thresholds, held-out sets, and reruns; reject tuning on the reported set."
+            ],
+            "statements": [
+                {
+                    "id": "categories",
+                    "label": "Grouping failures by cause points to the next engineering change.",
+                    "correct": true
+                },
+                {
+                    "id": "threshold",
+                    "label": "A change should meet a pass threshold before it ships.",
+                    "correct": true
+                },
+                {
+                    "id": "holdout",
+                    "label": "Held-out cases keep the reported score from being optimistically biased.",
+                    "correct": true
+                },
+                {
+                    "id": "rerun",
+                    "label": "The same set should be rerun for every prompt or model change.",
+                    "correct": true
+                },
+                {
+                    "id": "tune",
+                    "label": "Tuning on the reported set is fine because it improves the score.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Evaluation supports decisions when the set is stable, covered, held out from tuning, and analyzed by failure category."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["ai", "professional"]
+}
