@@ -1,6 +1,6 @@
 {
     "id": "campus.the-campus-incident",
-    "version": 1,
+    "version": 2,
     "sequence": 30,
     "courseId": "campus",
     "title": "The campus incident",
@@ -61,19 +61,32 @@
             "id": "restart-api-first",
             "description": "Starting the API before its database dependency.",
             "stepId": "recover-services",
-            "feedback": "The API depends on the inventory database. Restore the dependency first, then the API."
+            "diagnostic": "Restarts orders-api before inventory-db, so the API still cannot connect.",
+            "feedback": "The API depends on the inventory database. Restore the dependency first, then the API.",
+            "followUpSkill": "engineering.incident"
         },
         {
             "id": "dedupe-after",
             "description": "Applying events before checking whether they were already seen.",
             "stepId": "repair-replay",
-            "feedback": "A duplicate event must be ignored before its items are applied. Checking afterwards still corrupts stock."
+            "testDescription": "A duplicated event is ignored.",
+            "feedback": "A duplicate event must be ignored before its items are applied. Checking afterwards still corrupts stock.",
+            "followUpSkill": "engineering.incident"
         },
         {
             "id": "blame-report",
             "description": "Accepting a report that names a person but no systemic cause.",
             "stepId": "review-postmortem",
-            "feedback": "Blame is not a prevention mechanism. A trustworthy report identifies the faulty state, the missing guard, and the verification that will prevent recurrence."
+            "answer": "trust",
+            "feedback": "Blame is not a prevention mechanism. A trustworthy report identifies the faulty state, the missing guard, and the verification that will prevent recurrence.",
+            "followUpSkill": "engineering.incident"
+        },
+        {
+            "id": "blame-is-root-cause",
+            "description": "Believing naming a person is a complete root-cause analysis.",
+            "stepId": "incident-practice",
+            "answer": "blame",
+            "feedback": "A person's action is an event, not a system condition. Prevention must change the guard or verification that allowed the failure."
         }
     ],
     "lesson": {
@@ -106,6 +119,12 @@
         {
             "kind": "terminal",
             "id": "recover-services",
+            "hints": [
+                "Restore both services in dependency order and confirm the combined health endpoint.",
+                "The database must be running before the API can connect; recovery follows the dependency chain.",
+                "A lamp that needs a power strip should be plugged into the strip before the wall switch is tested.",
+                "Start the service that others depend on, then the API that needs it, then request the combined health endpoint."
+            ],
             "title": "Restore the campus services",
             "prompt": "Inspect both failed services, restart the database before the API, and verify the combined health endpoint.",
             "evidence": "debugging",
@@ -189,6 +208,12 @@
         {
             "kind": "code",
             "id": "repair-replay",
+            "hints": [
+                "Ignore duplicate ids and unknown products, apply sales and returns, clamp at zero, and return a new object.",
+                "Track seen event ids before applying items and build from a copy of the input.",
+                "If e1 appears twice, the second occurrence must change nothing.",
+                "Create a seen set, copy initial, check each event id and item id, clamp sales with Math.max(0, ...), and return the copy."
+            ],
             "title": "Repair inventory replay",
             "prompt": "Edit replay.js. reconcileInventory(initial, events) must ignore duplicate event ids, ignore unknown product ids, apply sales and returns, and never go below zero. It must return a new inventory object.",
             "evidence": "debugging",
@@ -371,6 +396,12 @@
         {
             "kind": "review",
             "id": "review-postmortem",
+            "hints": [
+                "Check whether the report identifies a systemic cause and a prevention that can be verified.",
+                "A useful postmortem names the faulty condition, the missing guard, and the regression evidence.",
+                "Replacing \"be more careful\" with \"add a replay dedupe test and a deploy check\" turns blame into prevention.",
+                "Select the blame, missing guard, and missing tests findings, then reject until systemic fixes and regression evidence exist."
+            ],
             "title": "Review the postmortem",
             "prompt": "Select every supported finding and choose a verdict.",
             "evidence": "review",
@@ -428,6 +459,12 @@
         {
             "kind": "explain",
             "id": "incident-practice",
+            "hints": [
+                "Select statements that describe sound incident response.",
+                "Restore dependencies first, fix system conditions, and verify recovery.",
+                "Asking people to try harder is not a control; a guard or a test is.",
+                "Three statements are accurate; reject the claim that naming a person is a complete root-cause analysis."
+            ],
             "title": "Incident response principles",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
