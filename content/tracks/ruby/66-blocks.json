@@ -41,16 +41,36 @@
     ],
     "misconceptions": [
         {
-            "id": "bare-rescue",
-            "description": "Using rescue without an exception class.",
-            "stepId": "review",
-            "feedback": "A bare rescue catches StandardError, including mistakes you wanted to see. Name the exception you can handle."
-        },
-        {
             "id": "each-return",
             "description": "Expecting each to return the accumulated value.",
             "stepId": "apply",
-            "feedback": "each returns the original collection. Use reduce or inject when you need an accumulated result."
+            "testDescription": "The collection is reduced with an explicit seed and block.",
+            "feedback": "each returns the original collection. Use reduce or inject when you need an accumulated result.",
+            "followUpSkill": "ruby.blocks"
+        },
+        {
+            "id": "no-seed",
+            "description": "Reducing without a seed on an empty collection.",
+            "stepId": "apply",
+            "diagnostic": "Calling values.reduce { |sum, value| sum + value } without 0, so empty input returns nil.",
+            "feedback": "Without a seed, reduce uses the first element as the initial accumulator and returns nil for an empty collection. Pass 0 when zero is the correct empty result.",
+            "followUpSkill": "ruby.syntax"
+        },
+        {
+            "id": "bare-rescue",
+            "description": "Using rescue without an exception class.",
+            "stepId": "review",
+            "answer": "fine",
+            "feedback": "A bare rescue catches StandardError, including mistakes you wanted to see. Name the exception you can handle.",
+            "followUpSkill": "ruby.tooling"
+        },
+        {
+            "id": "ship-default",
+            "description": "Accepting a silent zero as a safe fallback.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Returning zero for malformed input hides the failure from the caller. Report or raise, and narrow the rescue class.",
+            "followUpSkill": "ruby.tooling"
         }
     ],
     "lesson": {
@@ -125,6 +145,12 @@
             "title": "Total a collection with reduce",
             "prompt": "Edit main.rb. total uses reduce with an initial value of zero.",
             "evidence": "construction",
+            "hints": [
+                "Start with values.reduce(0).",
+                "The block receives the accumulator and the current value.",
+                "Return sum + value from the block.",
+                "Use values.reduce(0) { |sum, value| sum + value }."
+            ],
             "language": "ruby",
             "files": [
                 {
@@ -136,6 +162,11 @@
             ],
             "entry": "main.rb",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "ruby main.rb",
+                "description": "Runs the file with Ruby and prints the reduced total, including the empty-input path when checked locally."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -166,6 +197,12 @@
             "title": "Review the rescue",
             "prompt": "Review the error handler and select every real problem.",
             "evidence": "review",
+            "hints": [
+                "Look at what the rescue clause actually catches.",
+                "A broad rescue also catches programming mistakes.",
+                "The caller cannot tell invalid text from a real zero.",
+                "Rescue ArgumentError for invalid text."
+            ],
             "artifact": {
                 "title": "parse_count.rb",
                 "caption": "The rescue swallows every failure and reports zero.",
