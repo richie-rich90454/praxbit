@@ -1,47 +1,71 @@
-# Replace praxbit.example with the real hostname only after DNS and TLS work.
-# This block serves the static Vite build and forwards /api to the single Hono
-# process. It does not manage any other site on the host.
-
-praxbit.example {
-    encode zstd gzip
-
-    handle /api/* {
-        reverse_proxy 127.0.0.1:8787 {
-            header_up X-Forwarded-Proto {scheme}
-            header_up X-Forwarded-Host {host}
-            header_up X-Real-IP {remote_host}
-        }
-    }
-
-    handle {
-        root * /opt/praxbit/current/apps/web/dist
-        try_files {path} /index.html
-        file_server
-    }
-
-    header {
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        Referrer-Policy "strict-origin-when-cross-origin"
-        Permissions-Policy "camera=(), microphone=(), geolocation=()"
-        -Server
-    }
-
-    @immutable path /assets/*
-    header @immutable Cache-Control "public, max-age=31536000, immutable"
-
-    @html path /index.html
-    header @html Cache-Control "no-cache"
-
-    log {
-        output file /var/log/caddy/praxbit-access.log {
-            roll_size 20mb
-            roll_keep 5
-        }
-        format console
-    }
+# Praxbit behind Caddy.
+# Both hostnames serve the same Node process. Caddy obtains and renews the
+# certificate automatically once DNS points at this host and ports 80/443 are
+# reachable. Copy this file to /etc/caddy/Caddyfile, or append the site block
+# to an existing Caddyfile. Do not add a static file_server block: the Hono
+# process serves the web build, its CSP, and its security headers.
+{
+	servers {
+		# Global server timeouts. The reverse proxy has its own upstream
+		# timeouts below.
+		timeouts {
+			read_header 10s
+			write 5m
+			idle 2m
+		}
+	}
 }
 
-# Content-Security-Policy is intentionally not set here until the built bundle,
-# Pyodide worker, and sandboxed previews have been tested against the policy.
-# Add it as a header only after verifying runtimes, workers, and iframes.
+praxbit.biszweb.club, praxbit.bisz.dev {
+	encode zstd gzip
+
+	# Keep the proxy limit aligned with BODY_LIMIT_BYTES in .env.
+	request_body {
+		max_size 1MB
+	}
+
+	reverse_proxy 127.0.0.1:8787 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		# This is the client address for a single edge proxy. If another
+		# trusted proxy is in front of Caddy, preserve its X-Forwarded-For
+		# chain instead of overwriting it with {remote_host}.
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 120s
+			keepalive 30s
+		}
+	}
+
+	# The application already sets CSP, X-Content-Type-Options, X-Frame-Options,
+	# Referrer-Policy, Cross-Origin-Opener-Policy, and Permissions-Policy.
+	# Do not set them here; a second copy can break CSP or weaken a policy.
+	# Only HSTS and headers the application does not set are added here.
+	header {
+		defer
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Permitted-Cross-Domain-Policies "none"
+		X-DNS-Prefetch-Control "off"
+		-Server
+	}
+
+	log {
+		output file /var/log/caddy/praxbit-access.log {
+			roll_size 20mb
+			roll_keep 5
+			roll_keep_for 720h
+		}
+		format filter {
+			wrap json
+			fields {
+				# Keep cookies, authorization, and CSRF tokens out of the log.
+				request>headers delete
+				resp_headers delete
+			}
+		}
+	}
+}
