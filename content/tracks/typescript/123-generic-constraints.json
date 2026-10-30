@@ -5,23 +5,14 @@
     "courseId": "typescript",
     "title": "Constrain a generic key",
     "summary": "Group typed records by a key while keeping the key and value types connected.",
-    "skills": [
-        "ts.generics"
-    ],
-    "prerequisites": [
-        "ts.types",
-        "js.functions"
-    ],
+    "skills": ["ts.generics"],
+    "prerequisites": ["ts.types", "js.functions"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "syntax-diagnostics",
-            "transpiled-tests"
-        ]
+        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "group-records",
             "description": "Group typed records and accumulate every member.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-signature",
             "description": "Choose a generic signature that preserves the value type.",
-            "stepIds": [
-                "constraint-transfer"
-            ]
+            "stepIds": ["constraint-transfer"]
         },
         {
             "id": "explain-constraints",
             "description": "Explain how constraints and indexed access types work.",
-            "stepIds": [
-                "constraint-check"
-            ]
+            "stepIds": ["constraint-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:typescript"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:typescript"],
     "hints": [
         "The key must be limited to the properties of T.",
         "Use K extends keyof T for the key parameter.",
@@ -248,10 +228,7 @@
                     "kind": "function",
                     "description": "An empty list produces no groups.",
                     "name": "groupBy",
-                    "args": [
-                        [],
-                        "category"
-                    ],
+                    "args": [[], "category"],
                     "expected": {}
                 }
             ],
@@ -341,9 +318,7 @@
     },
     "rewards": {
         "experience": 140,
-        "unlocks": [
-            "typescript.exhaustive-unions"
-        ]
+        "unlocks": ["typescript.exhaustive-unions"]
     },
     "persistence": {
         "kind": "none"
@@ -354,8 +329,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
