@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "group.ts": "function groupBy<T, K extends keyof T>(items: readonly T[], key: K): Record<string, T[]> {\n    const groups: Record<string, T[]> = {};\n    for (const item of items) {\n        const group = String(item[key]);\n        (groups[group] ??= []).push(item);\n    }\n    return groups;\n}\n"
+            }
+        }
+    }
+}
