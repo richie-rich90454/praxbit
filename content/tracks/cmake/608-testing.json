@@ -1,0 +1,340 @@
+{
+    "id": "cmake.testing",
+    "version": 1,
+    "sequence": 175,
+    "courseId": "cmake",
+    "title": "CTest and a failing build that tells you why",
+    "summary": "Enable CTest, register a test executable, and make a printed failure fail the test run.",
+    "skills": [
+        "cmake.targets",
+        "cpp.build"
+    ],
+    "prerequisites": [
+        "cmake.targets",
+        "testing.boundaries"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "ctest",
+        "briefing": "The inventory project builds a test executable but never registers it, so CI runs ctest and reports zero tests. Register the test and make a printed failure fail the run."
+    },
+    "objectives": [
+        {
+            "id": "objective-register",
+            "description": "Register a test executable with CTest.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-ctest",
+            "description": "Explain what ctest executes and reports.",
+            "stepIds": [
+                "check"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Diagnose a test run that discovers no tests.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:server-room",
+        "icon:cmake"
+    ],
+    "hints": [
+        "CTest only sees tests that CMake registered.",
+        "enable_testing belongs in the top-level CMakeLists.",
+        "add_test connects a name to a command.",
+        "Use set_tests_properties to treat a printed failure as a failure."
+    ],
+    "misconceptions": [
+        {
+            "id": "target-is-test",
+            "description": "Assuming add_executable also registers a test.",
+            "stepId": "apply",
+            "testDescription": "The test is registered with a name and command.",
+            "feedback": "A target builds a binary. add_test tells CTest which command to run and what to call the result.",
+            "followUpSkill": "cmake.targets"
+        },
+        {
+            "id": "enable-missing",
+            "description": "Calling add_test without enable_testing.",
+            "stepId": "apply",
+            "testDescription": "CTest is enabled at the top level.",
+            "feedback": "enable_testing activates test discovery for the directory. Without it, add_test has no CTest configuration to write."
+        },
+        {
+            "id": "ctest-builds",
+            "description": "Expecting ctest to compile the test target.",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that ctest compiles the project before running tests.",
+            "feedback": "ctest runs commands that already exist. Build first, then run ctest, or use ctest --build-and-test for a combined flow."
+        },
+        {
+            "id": "no-tests",
+            "description": "Registering tests only in a subdirectory and expecting the top level to discover them.",
+            "stepId": "transfer",
+            "answer": "subdirectory-enough",
+            "feedback": "The top-level project must enable testing so CTest has a configuration. Put enable_testing in the top-level CMakeLists.",
+            "followUpSkill": "cmake.targets"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "CTest is a runner, not a compiler",
+                "body": "CMake writes test metadata when it configures the project. ctest reads that metadata and runs the registered commands. A test executable still has to be built by the normal build step, so CI usually runs cmake --build build and then ctest --test-dir build --output-on-failure."
+            },
+            {
+                "title": "Registration connects a name to a command",
+                "body": "add_test(NAME inventory_tests COMMAND inventory_tests) records a test named inventory_tests that runs the executable. The name is what ctest reports and what -R filters match. A target built in another directory can still be run as a command."
+            },
+            {
+                "title": "A zero exit code is not always enough",
+                "body": "CTest treats a nonzero process exit as a failure. Some test binaries print FAILED and still exit 0. FAIL_REGULAR_EXPRESSION marks the test failed when that text appears, so the runner and the test binary agree."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "CTest",
+                "definition": "The CMake test runner that executes registered test commands."
+            },
+            {
+                "term": "add_test",
+                "definition": "The command that registers a name and command with CTest."
+            },
+            {
+                "term": "enable_testing",
+                "definition": "The command that activates test registration for a directory."
+            },
+            {
+                "term": "FAIL_REGULAR_EXPRESSION",
+                "definition": "A test property that fails the test when matching output appears."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Registering and running tests",
+            "prompt": "Read the explanation, then register the test.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "CTest is a runner, not a compiler",
+                    "body": "CMake writes test metadata when it configures the project. ctest reads that metadata and runs the registered commands. A test executable still has to be built by the normal build step, so CI usually runs cmake --build build and then ctest --test-dir build --output-on-failure."
+                },
+                {
+                    "title": "Registration connects a name to a command",
+                    "body": "add_test(NAME inventory_tests COMMAND inventory_tests) records a test named inventory_tests that runs the executable. The name is what ctest reports and what -R filters match. A target built in another directory can still be run as a command."
+                },
+                {
+                    "title": "A zero exit code is not always enough",
+                    "body": "CTest treats a nonzero process exit as a failure. Some test binaries print FAILED and still exit 0. FAIL_REGULAR_EXPRESSION marks the test failed when that text appears, so the runner and the test binary agree."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "CTest",
+                    "definition": "The CMake test runner that executes registered test commands."
+                },
+                {
+                    "term": "add_test",
+                    "definition": "The command that registers a name and command with CTest."
+                },
+                {
+                    "term": "enable_testing",
+                    "definition": "The command that activates test registration for a directory."
+                },
+                {
+                    "term": "FAIL_REGULAR_EXPRESSION",
+                    "definition": "A test property that fails the test when matching output appears."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Register the CTest case",
+            "prompt": "Edit CMakeLists.txt. Enable testing at the top level, register inventory_tests, and fail the test when its output contains FAILED.",
+            "evidence": "construction",
+            "hints": [
+                "Call enable_testing after project().",
+                "Keep the existing test executable and link.",
+                "Use add_test with NAME and COMMAND both set to inventory_tests.",
+                "Use set_tests_properties with FAIL_REGULAR_EXPRESSION."
+            ],
+            "files": [
+                {
+                    "path": "CMakeLists.txt",
+                    "content": "cmake_minimum_required(VERSION 3.24)\nproject(campus_inventory LANGUAGES CXX)\n\nadd_library(inventory_core STATIC src/inventory.cpp)\ntarget_include_directories(inventory_core PUBLIC include)\n\n# TODO: register the unit test with CTest\nadd_executable(inventory_tests tests/inventory_test.cpp)\ntarget_link_libraries(inventory_tests PRIVATE inventory_core)\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "CMakeLists.txt",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cmake --build build",
+                "description": "Build the configured project, including the CTest executable."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "CTest is enabled at the top level.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "enable_testing()"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The test executable links the library under test.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "target_link_libraries(inventory_tests PRIVATE inventory_core)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The test is registered with a name and command.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "add_test(NAME inventory_tests COMMAND inventory_tests)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Printed failures fail the test run.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "set_tests_properties(inventory_tests PROPERTIES FAIL_REGULAR_EXPRESSION \"FAILED\")"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "What CTest actually does",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Separate configure, build, and test phases.",
+                "CTest reads metadata that CMake wrote.",
+                "The test process exit status is the primary signal.",
+                "FAIL_REGULAR_EXPRESSION adds an output check."
+            ],
+            "statements": [
+                {
+                    "id": "reads-metadata",
+                    "label": "ctest runs commands that CMake registered during configure.",
+                    "correct": true
+                },
+                {
+                    "id": "nonzero",
+                    "label": "A nonzero exit status from a test command is reported as a failure.",
+                    "correct": true
+                },
+                {
+                    "id": "regex",
+                    "label": "FAIL_REGULAR_EXPRESSION can fail a test even when the process exits 0.",
+                    "correct": true
+                },
+                {
+                    "id": "ctest-compiles",
+                    "label": "ctest compiles the project before it runs the tests.",
+                    "correct": false
+                },
+                {
+                    "id": "add-test-builds",
+                    "label": "add_test builds the named target automatically.",
+                    "correct": false
+                }
+            ],
+            "explanation": "ctest is a runner over configured metadata. It does not compile sources or build add_test targets. Exit status and configured output properties decide the result."
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a silent CI run",
+            "prompt": "A project calls add_test in a subdirectory, but the top-level CMakeLists never calls enable_testing. CI runs ctest and reports no tests. What is the cause?",
+            "evidence": "transfer",
+            "hints": [
+                "add_test writes metadata only where testing is enabled.",
+                "The top-level directory controls the CTest configuration.",
+                "A subdirectory call does not retroactively enable the parent.",
+                "Move enable_testing to the top-level file."
+            ],
+            "quiz": {
+                "prompt": "A project calls add_test in a subdirectory, but the top-level CMakeLists never calls enable_testing. CI runs ctest and reports no tests. What is the cause?",
+                "options": [
+                    {
+                        "id": "enable-missing",
+                        "label": "enable_testing is missing at the top level, so CTest has no test configuration."
+                    },
+                    {
+                        "id": "subdirectory-enough",
+                        "label": "The subdirectory registration is enough; ctest just needs a rebuild."
+                    },
+                    {
+                        "id": "ctest-compiles",
+                        "label": "ctest cannot compile the test target, so it hides the test."
+                    },
+                    {
+                        "id": "name-missing",
+                        "label": "add_test requires a TEST_NAME property that the subdirectory omitted."
+                    }
+                ],
+                "correctId": "enable-missing",
+                "explanation": "CTest metadata is generated where testing is enabled. The top-level project needs enable_testing before ctest can discover the registered tests."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
