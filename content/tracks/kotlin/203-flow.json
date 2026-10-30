@@ -1,17 +1,11 @@
 {
     "version": 1,
     "courseId": "kotlin",
-    "prerequisites": [
-        "kotlin.coroutines",
-        "concept.iteration"
-    ],
+    "prerequisites": ["kotlin.coroutines", "concept.iteration"],
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,9 +25,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ],
+    "tags": ["professional"],
     "accessibility": {
         "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -43,41 +35,27 @@
     "sequence": 104,
     "title": "Flows, limits, and cancellation",
     "summary": "Transform a cold Flow, stop after two readings, and repair a loop that ignores cancellation.",
-    "skills": [
-        "kotlin.coroutines",
-        "kotlin.oop"
-    ],
+    "skills": ["kotlin.coroutines", "kotlin.oop"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Transform and limit a cold Flow.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Repair a producer that ignores cancellation.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Identify the terminal operation that starts collection.",
-            "stepIds": [
-                "start"
-            ]
+            "stepIds": ["start"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:kotlin"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:kotlin"],
     "hints": [
         "Flow operators are lazy until a terminal operation collects.",
         "map transforms each emitted value.",
@@ -233,26 +211,15 @@
                     "kind": "static",
                     "description": "The flow is doubled, limited, and collected with Flow operators.",
                     "file": "Main.kt",
-                    "includes": [
-                        "map { it * 2 }",
-                        "take(2)",
-                        "toList()"
-                    ],
-                    "excludes": [
-                        "emptyList()",
-                        "TODO"
-                    ]
+                    "includes": ["map { it * 2 }", "take(2)", "toList()"],
+                    "excludes": ["emptyList()", "TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.kt",
-                    "includes": [
-                        "suspend fun firstDoubled"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["suspend fun firstDoubled"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
