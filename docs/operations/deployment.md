@@ -26,7 +26,7 @@ Do not add Redis, Kafka, Kubernetes, a container runtime requirement, a second J
 
 Cookies are host-only. `praxbit_session` and `praxbit_csrf` are set without a `Domain` attribute, so a session created on `https://praxbit.biszweb.club` is not sent to `https://praxbit.bisz.dev`, and the reverse is also true. A learner signs in separately on each hostname. Do not claim shared sessions or single sign-on across the two names. If shared sessions are required later, design an explicit cross-domain authentication flow; do not casually set a parent-domain cookie.
 
-`CORS_ORIGINS` stays empty. Each hostname serves both the web client and the API, so browser requests are same-origin.
+`CORS_ORIGINS` can stay empty for web-only hosting. Each hostname serves both the web client and the API, so browser requests are same-origin. Native shells call the API cross-origin: set `CORS_ORIGINS=https://localhost,capacitor://localhost` when Android or iOS clients are enabled. The production template includes both native origins.
 
 ## Prerequisites
 
@@ -75,10 +75,10 @@ NODE_ENV=production
 PUBLIC_ORIGIN=https://praxbit.bisz.dev
 COOKIE_SECURE=1
 TRUST_PROXY=1
-CORS_ORIGINS=
+CORS_ORIGINS=https://localhost,capacitor://localhost
 ```
 
-`HOST=127.0.0.1` keeps the Node port off the public interfaces. The proxy is the only public listener. Set `COOKIE_SECURE=1` because the browser reaches both hostnames over HTTPS. Set `TRUST_PROXY=1` because the trusted proxy overwrites `X-Forwarded-For`. Leave `CORS_ORIGINS` empty.
+`HOST=127.0.0.1` keeps the Node port off the public interfaces. The proxy is the only public listener. Set `COOKIE_SECURE=1` because the browser reaches both hostnames over HTTPS. Set `TRUST_PROXY=1` because the trusted proxy overwrites `X-Forwarded-For`. Use the native origins shown when native clients are enabled; leave `CORS_ORIGINS` empty for web-only hosting.
 
 For direct local HTTP development, copy `.env.example` instead and use `COOKIE_SECURE=0`, `TRUST_PROXY=0`, and `PUBLIC_ORIGIN=http://localhost:8787`. That mode does not test the production TLS path.
 
