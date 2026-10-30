@@ -1,18 +1,26 @@
 {
     "id": "sql.filter-orders",
     "version": 1,
-    "sequence": 34,
+    "sequence": 36,
     "courseId": "sql-data",
     "title": "Find high-value orders",
     "summary": "Write a SELECT with a filter, ordering, and explicit columns.",
-    "skills": ["sql.queries"],
-    "prerequisites": ["concept.data"],
+    "skills": [
+        "sql.queries"
+    ],
+    "prerequisites": [
+        "concept.data"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": ["sqlite-wasm", "deterministic-tests", "learning-runtime"]
+        "capabilities": [
+            "sqlite-wasm",
+            "deterministic-tests",
+            "learning-runtime"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +32,31 @@
         {
             "id": "filter",
             "description": "Filter orders at or above the threshold.",
-            "stepIds": ["high-value"]
+            "stepIds": [
+                "high-value"
+            ]
         },
         {
             "id": "order",
             "description": "Order results by total descending.",
-            "stepIds": ["high-value"]
+            "stepIds": [
+                "high-value"
+            ]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": ["sql-check"]
+            "stepIds": [
+                "sql-check"
+            ]
         }
     ],
-    "assets": ["pip:observing", "scene:campus", "system:database", "icon:query"],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:database",
+        "icon:query"
+    ],
     "hints": [
         "SELECT chooses columns, FROM names the table, WHERE filters rows.",
         "total_cents >= 5000 includes the boundary.",
@@ -49,13 +68,25 @@
             "id": "select-star",
             "description": "Returning every column when only two are requested.",
             "stepId": "high-value",
-            "feedback": "SELECT * returns extra columns. Name the two requested columns explicitly."
+            "testDescription": "The query returns the exact expected rows in order.",
+            "feedback": "SELECT * returns extra columns. Name the two requested columns explicitly.",
+            "followUpSkill": "sql.queries"
         },
         {
             "id": "strict-threshold",
             "description": "Excluding the exact threshold.",
             "stepId": "high-value",
-            "feedback": "\"At least 5000\" includes 5000. Use >= rather than >."
+            "diagnostic": "A query with > omits the order at exactly 5000 cents.",
+            "feedback": "\"At least 5000\" includes 5000. Use >= rather than >.",
+            "followUpSkill": "sql.queries"
+        },
+        {
+            "id": "star-contract",
+            "description": "Believing SELECT * satisfies a fixed column contract.",
+            "stepId": "sql-check",
+            "answer": "star",
+            "feedback": "SELECT * returns whatever columns exist, including new ones. A fixed contract names its columns.",
+            "followUpSkill": "sql.queries"
         }
     ],
     "lesson": {
@@ -107,17 +138,35 @@
                     "kind": "sql",
                     "description": "The query returns the exact expected rows in order.",
                     "expectedRows": [
-                        ["o3", 12900],
-                        ["o6", 9900],
-                        ["o2", 7500],
-                        ["o5", 5200]
+                        [
+                            "o3",
+                            12900
+                        ],
+                        [
+                            "o6",
+                            9900
+                        ],
+                        [
+                            "o2",
+                            7500
+                        ],
+                        [
+                            "o5",
+                            5200
+                        ]
                     ]
                 }
             ],
             "database": {
                 "schemaSql": "CREATE TABLE orders (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, total_cents INTEGER NOT NULL, placed_at TEXT NOT NULL);\n",
                 "seedSql": "INSERT INTO orders (id, customer_id, total_cents, placed_at) VALUES ('o1', 'c1', 2500, '2026-10-01'), ('o2', 'c1', 7500, '2026-10-02'), ('o3', 'c2', 12900, '2026-10-03'), ('o4', 'c3', 4000, '2026-10-04'), ('o5', 'c2', 5200, '2026-10-05'), ('o6', 'c1', 9900, '2026-10-06');\n"
-            }
+            },
+            "hints": [
+                "Name only id and total_cents.",
+                "Filter with total_cents >= 5000.",
+                "Sort with ORDER BY total_cents DESC.",
+                "SELECT id, total_cents FROM orders WHERE total_cents >= 5000 ORDER BY total_cents DESC;"
+            ]
         },
         {
             "kind": "explain",
@@ -147,7 +196,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Explicit columns, filters, and ordering make a query's contract clear."
+            "explanation": "Explicit columns, filters, and ordering make a query's contract clear.",
+            "hints": [
+                "Check each claim against SQL clause behavior.",
+                "Three statements are accurate.",
+                "SELECT * returns every column, not a fixed two-column contract.",
+                "Select where, order, and inclusive."
+            ]
         }
     ],
     "evaluation": {
@@ -156,7 +211,9 @@
     },
     "rewards": {
         "experience": 100,
-        "unlocks": ["sql.join-customers"]
+        "unlocks": [
+            "sql.join-customers"
+        ]
     },
     "persistence": {
         "kind": "none"
@@ -167,5 +224,8 @@
         "screenReaderNotes": "The result table announces column names and row count. The test compares rows and reports the first mismatch."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "web"]
+    "tags": [
+        "professional",
+        "web"
+    ]
 }
