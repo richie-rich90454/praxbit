@@ -8,7 +8,7 @@ Praxbit is a local-first learning application for computer science and software 
 
 ## Status
 
-Praxbit is a pre-release implementation. The repository contains a working learning engine, 120 authored missions across 41 tracks, three projects, a SolidJS web client, a Hono/PostgreSQL account platform, a browser execution layer, a deterministic world simulation, and a TypeScript companion CLI. Production hosting, native store builds, and a live AI provider require external provisioning and are not verified by this repository alone.
+Praxbit is a pre-release implementation. The repository contains a working learning engine, 225 authored missions across 44 tracks, three projects, a SolidJS web client, a Hono/PostgreSQL account platform, a browser execution layer, a deterministic world simulation, and a TypeScript companion CLI. Production hosting, native store builds, and a live AI provider require external provisioning and are not verified by this repository alone.
 
 The honest current limits are listed in [Known limitations](#known-limitations). Do not treat a feature listed as implemented below as production-verified unless the verification column or the operations documentation says so.
 
@@ -17,7 +17,7 @@ The honest current limits are listed in [Known limitations](#known-limitations).
 | Area | Current implementation | Verification |
 | --- | --- | --- |
 | Learning engine | Skill graph with prerequisite validation, mission state machine, deterministic step evaluators, evidence model, mastery estimator, spaced review, placement, recommendations | Portable TypeScript in `packages/domain`; unit tests |
-| Curriculum | 30 launch missions (12 before-code, 18 campus) plus 90 applied and advanced track missions across 41 tracks; three projects; one weekly club event | Schema, references, and executable reference solutions validated with zero warnings; deferred checks listed in Known limitations |
+| Curriculum | 30 launch missions (12 before-code, 18 campus) plus 195 applied and advanced track missions across 44 tracks; three projects; one weekly club event | Schema, references, AST checks, negative starters, and executable reference solutions validated with zero errors |
 | Web client | SolidJS screens for Learn, World, Practice, Projects, Club, Settings, Placement, and mission play | Typecheck and Playwright suites when the database and API are running |
 | Code execution | Browser JavaScript worker, sandboxed HTML/CSS preview, Pyodide Python, SQLite via sql.js, isomorphic-git, deterministic Linux/terminal simulation, static analysis | Implemented as browser adapters; not a server-side security boundary |
 | World | Deterministic campus state with nine systems, versioned actions, recovery flags, PixiJS rendering plus an accessible system list | Domain tests and browser rendering |
@@ -178,15 +178,19 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm test:integration     # PostgreSQL required
-pnpm test:e2e             # built web app + Playwright browsers
+pnpm test:e2e             # builds, migrates a disposable schema, and runs all browsers
+pnpm test:e2e:no-ai       # same suite with AI environment variables removed
 pnpm test:a11y            # Playwright @a11y
+pnpm test:wcag            # Playwright @wcag22
 pnpm test:visual          # Playwright @visual
 pnpm test:security
 pnpm content:validate
+pnpm content:report
+pnpm verify:hosting -- --base http://127.0.0.1:8787
 pnpm build
 ```
 
-`pnpm test` runs the unit, content, and security projects. `pnpm test:integration`, `test:e2e`, `test:a11y`, `test:visual`, and `test:security` have their own prerequisites described in `CONTRIBUTING.md`. The load test is separate:
+`pnpm test` runs the unit, content, and security projects. `pnpm test:integration`, `test:e2e`, `test:a11y`, `test:wcag`, `test:visual`, and `test:security` have their own prerequisites described in `CONTRIBUTING.md`. The load test is separate:
 
 ```bash
 pnpm --filter @praxbit/server start   # with PostgreSQL and env set
@@ -286,15 +290,15 @@ This repository does not claim to have received legal review. Confirm jurisdicti
 
 These are real constraints, not a backlog disguised as a feature list.
 
-- **Production verification is incomplete.** The PostgreSQL integration suite and a direct-clone deployment smoke test passed locally, including `pnpm start`, the static web shell, dotted SPA mission routes, the API, Pyodide assets with the correct MIME type, and a Python mission end to end in Chromium. A public host behind a proxy with TLS, production credentials, real traffic, and real data volumes remains unverified.
+- **Production verification is incomplete.** The PostgreSQL integration suite, a direct-clone deployment smoke test, and the full-stack browser suite pass locally, including `pnpm start`, dotted SPA routes, the API, Pyodide MIME types, authenticated sync, projects, clubs, and account deletion. Multi-host Caddy and Nginx configurations for `praxbit.biszweb.club` and `praxbit.bisz.dev` are included and locally verified with Host headers. A public host with live DNS, TLS, production credentials, real traffic, and real data volumes has not been provisioned from this working copy.
 - **No server-side learner code execution.** JavaScript runs in a Web Worker, HTML/CSS in sandboxed iframes, Python in Pyodide, SQL in sql.js, and Git in isomorphic-git. These are best-effort browser isolation, not a hardened multi-tenant sandbox. The server never executes arbitrary learner programs.
 - **AI is optional.** The gateway is covered by a PostgreSQL integration test against a local OpenAI-compatible mock, including success, malformed upstream responses, and the disabled-preference boundary. No live provider key is committed, so provider-specific behavior, cost, latency, and output quality must be tested with your own account. The AI is not the authoritative grader.
-- **Native applications are not shipped.** Capacitor configuration exists; Android/iOS projects, signing, store metadata, push notifications, deep-link verification, and device testing do not.
-- **Curriculum depth varies, and many advanced tracks use static analysis.** Every language and framework named in the plan now has an assessed track, but each language or framework pack is a focused two- or three-mission foundation, not a complete reference course. Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and the framework/server packs validate source structure with static checks; they are not compiled or executed in the browser. TypeScript, JavaScript, HTML, CSS, Python through Pyodide, SQL through SQLite, and Git use their real runtimes. The interface labels each runtime truthfully, and the validator never counts a deferred check as a pass.
-- **Ten CSS checks run in the browser, not the Node validator.** `pnpm content:validate` passes with zero errors and zero warnings after executing 420 checks. The remaining ten computed-style checks are deferred because jsdom cannot compute cascade and layout faithfully; `tests/browser/css-checks.spec.ts` executes all ten against real rendered pages in Chromium, Firefox, and WebKit, so a deferred check is never treated as a pass and none is left unverified.
+- **Native store builds are not shipped.** The installable PWA, Capacitor configuration, secure credential fallback, deep-link handler, local notification scheduler, and platform capability adapters exist. Android/iOS project generation, signing, store metadata, and device testing require Android Studio/Xcode and store accounts.
+- **Curriculum depth is assessed, not exhaustive.** Every language and framework named in the plan now has a five- or four-mission progression with a transfer step, and HTML, CSS, and JavaScript have dedicated tracks. Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and the framework/server packs use AST, structural, and companion-verified local toolchain checks rather than browser execution. They are assessed foundations, not complete reference manuals. TypeScript, JavaScript, HTML, CSS, Python through Pyodide, SQL through SQLite, and Git use their real runtimes. The interface labels each runtime truthfully, and structural checks declare a local verification command.
+- **Twenty-one CSS checks run in the browser, not the Node validator.** `pnpm content:validate` passes with zero errors after executing 796 checks. The remaining 21 computed-style checks are deferred because jsdom cannot compute cascade and layout faithfully; `tests/browser/css-checks.spec.ts` executes all of them against real rendered pages in Chromium, Firefox, and WebKit, so a deferred check is never treated as a pass and none is left unverified.
 - **Projects are small.** Three projects exist with executable stage checks. They are not a substitute for a full project-based curriculum.
 - **Club and competition flows depend on the API.** The UI and service code exist, and the PostgreSQL integration suite covers club membership and verified events. No live club-scale verification has been performed. Local results are not trusted for ranked competition.
-- **Accessibility is implemented, not certified.** Automated axe checks cover every primary route, the project workspace, mission briefing and completion, keyboard focus, landmarks, and heading order in Chromium, Firefox, and WebKit. Semantic landmarks, keyboard paths, focus styles, reduced motion, text scaling, and screen-reader notes exist. A formal WCAG audit and assistive-technology matrix have not been completed.
+- **Accessibility has an internal WCAG 2.2 AA audit, not third-party certification.** Automated axe checks cover every primary route, the project workspace, mission briefing and completion, keyboard focus, landmarks, heading order, zoom, reflow, text spacing, target size, forced colors, and reduced motion in Chromium, Firefox, and WebKit. The per-criterion audit is in [docs/product/wcag-2.2-aa-audit.md](docs/product/wcag-2.2-aa-audit.md). A vendor screen-reader matrix and formal certification remain external.
 - **Performance is measured locally, not on production hardware.** On the Windows development host (Node 24, local PostgreSQL), `/healthz` handled 20 concurrent learners for 10 seconds: 760 requests, 75.8 requests/second, p50 5.0 ms, p95 11.7 ms, p99 44.5 ms, 0 errors, about 67 MB resident. Treat this as a local baseline, not a capacity guarantee; measure your host alongside existing services.
 - **Browser coverage has limits.** Functional, runtime, offline, and accessibility suites run in Chromium, Firefox, and WebKit. Pixel regression covers the three Chromium viewport projects; Firefox and WebKit are verified functionally and through axe, not through per-engine screenshot baselines. iOS Pyodide memory limits and low-end Android performance are not verified.
 - **No email, password reset, OAuth, or parental-consent flow.** Accounts use handles and passwords. There is no email verification or recovery channel. Do not collect personal information from children without the required safeguards.
@@ -310,5 +314,6 @@ These are real constraints, not a backlog disguised as a feature list.
 - [docs/architecture](docs/architecture/overview.md) — components, execution, world, sync, decisions.
 - [docs/api](docs/api/README.md) — versioned API reference.
 - [docs/operations](docs/operations/deployment.md) — deployment, backups, monitoring, incidents.
-- [docs/product](docs/product/onboarding.md) — onboarding, navigation, progression, ethics.
+- [docs/product](docs/product/onboarding.md) — onboarding, navigation, progression, ethics, and accessibility.
+- [WCAG 2.2 AA internal audit](docs/product/wcag-2.2-aa-audit.md) — per-criterion evidence and external boundaries.
 - [docs/curriculum](docs/curriculum/authoring.md) — authoring and review.
