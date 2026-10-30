@@ -5,23 +5,14 @@
     "courseId": "fastapi",
     "title": "One exception shape for the API",
     "summary": "Register an exception handler for a domain failure and test that clients receive a stable 409 body.",
-    "skills": [
-        "fastapi.validation",
-        "fastapi.testing"
-    ],
-    "prerequisites": [
-        "fastapi.validation",
-        "api.validation"
-    ],
+    "skills": ["fastapi.validation", "fastapi.testing"],
+    "prerequisites": ["fastapi.validation", "api.validation"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-handler",
             "description": "Map a domain exception to a stable JSON response.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-test",
             "description": "Test the status and body of the failure contract.",
-            "stepIds": [
-                "test"
-            ]
+            "stepIds": ["test"]
         },
         {
             "id": "objective-cases",
             "description": "Choose the failure cases an integration suite needs.",
-            "stepIds": [
-                "cases"
-            ]
+            "stepIds": ["cases"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:api",
-        "icon:fastapi"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:fastapi"],
     "hints": [
         "A domain exception is not an HTTPException until a handler maps it.",
         "Register the handler with @app.exception_handler.",
@@ -220,34 +200,22 @@
                     "kind": "static",
                     "description": "The handler returns 409 with a stable code.",
                     "file": "main.py",
-                    "includes": [
-                        "status_code=409",
-                        "\"code\": \"item_exists\""
-                    ],
+                    "includes": ["status_code=409", "\"code\": \"item_exists\""],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The route raises the domain error.",
                     "file": "main.py",
-                    "includes": [
-                        "raise DuplicateItem(payload.name)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["raise DuplicateItem(payload.name)"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The response does not leak the exception text.",
                     "file": "main.py",
-                    "includes": [
-                        "JSONResponse"
-                    ],
-                    "excludes": [
-                        "str(exception)",
-                        "traceback"
-                    ]
+                    "includes": ["JSONResponse"],
+                    "excludes": ["str(exception)", "traceback"]
                 }
             ],
             "language": "text"
@@ -290,12 +258,8 @@
                     "kind": "static",
                     "description": "The conflict status is asserted.",
                     "file": "test_main.py",
-                    "includes": [
-                        "assert response.status_code == 409"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["assert response.status_code == 409"],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -368,8 +332,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
