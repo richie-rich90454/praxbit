@@ -74,12 +74,15 @@ describe("native bearer token headers", function nativeTokenSuite(): void {
         });
 
         await api.login({ handle: "learner", password: "correct horse battery" });
-        expect(headersOf(calls[1]).get("x-praxbit-client")).toBe("native");
-        expect(headersOf(calls[1]).get("authorization")).toBeNull();
+        expect(calls).toHaveLength(1);
+        expect(headersOf(calls[0]).get("x-praxbit-client")).toBe("native");
+        expect(headersOf(calls[0]).get("authorization")).toBeNull();
+        expect(headersOf(calls[0]).get("x-csrf-token")).toBeNull();
+        expect(calls[0]?.init.credentials).toBe("omit");
         expect(tokens).toEqual(["token-123"]);
 
         await api.logout();
-        const logout = calls[2];
+        const logout = calls[1];
         expect(headersOf(logout).get("authorization")).toBe("Bearer token-123");
         expect(headersOf(logout).get("x-praxbit-client")).toBe("native");
         expect(headersOf(logout).get("x-csrf-token")).toBeNull();
