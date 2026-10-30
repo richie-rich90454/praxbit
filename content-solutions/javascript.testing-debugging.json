@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-sum": {
+            "files": {
+                "main.js": "function sumEven(numbers) {\n  let total = 0;\n  for (const n of numbers) {\n    if (n % 2 === 0) {\n      total += n;\n    }\n  }\n  return total;\n}\n"
+            }
+        }
+    }
+}
