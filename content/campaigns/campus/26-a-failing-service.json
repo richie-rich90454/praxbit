@@ -1,6 +1,6 @@
 {
     "id": "campus.a-failing-service",
-    "version": 1,
+    "version": 2,
     "sequence": 26,
     "courseId": "campus",
     "title": "A failing service",
@@ -54,13 +54,24 @@
             "id": "restart-only",
             "description": "Restarting without clearing the conflicting process.",
             "stepId": "recover-service",
-            "feedback": "A restart repeats the bind attempt while the port is still occupied. Remove the conflicting process first."
+            "diagnostic": "Restarts orders-api without stopping the process holding port 8080.",
+            "feedback": "A restart repeats the bind attempt while the port is still occupied. Remove the conflicting process first.",
+            "followUpSkill": "ops.processes"
         },
         {
             "id": "assumes-health",
             "description": "Treating a restart command as proof of health.",
             "stepId": "recover-service",
-            "feedback": "A service can start and still fail readiness. Check its health endpoint after restarting."
+            "diagnostic": "Stops after restarting and never requests the health endpoint.",
+            "feedback": "A service can start and still fail readiness. Check its health endpoint after restarting.",
+            "followUpSkill": "ops.processes"
+        },
+        {
+            "id": "restart-fixes-port-conflict",
+            "description": "Believing a restart always resolves a port conflict.",
+            "stepId": "process-check",
+            "answer": "restart",
+            "feedback": "The conflicting process still owns the port, so the restart fails again. The evidence must be cleared first."
         }
     ],
     "lesson": {
@@ -93,6 +104,12 @@
         {
             "kind": "terminal",
             "id": "recover-service",
+            "hints": [
+                "Find why orders-api failed, free the port, restart it, and confirm health.",
+                "Read the log, identify the process holding 8080, stop it, then start the service.",
+                "A printer error caused by a stuck job needs the job cleared before the printer can accept new work.",
+                "Check the log for EADDRINUSE, list processes to find the old worker, stop it, restart orders-api, then request health."
+            ],
             "title": "Recover the orders API",
             "prompt": "Use the simulated Linux terminal. Inspect the service, find and stop the conflicting process, restart orders-api, and request its health endpoint.",
             "evidence": "debugging",
@@ -172,6 +189,12 @@
         {
             "kind": "explain",
             "id": "process-check",
+            "hints": [
+                "Select statements about diagnosis and recovery evidence.",
+                "Logs narrow the failure; a restart can repeat it; health confirms readiness.",
+                "An orphan process can hold a port long after its original task ended.",
+                "Three statements are accurate; reject the claim that a restart always resolves a port conflict."
+            ],
             "title": "Recovery evidence",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
