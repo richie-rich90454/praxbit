@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "src/main.rs": "async fn total(id: &str) -> i32 {\n    match id {\n        \"o1\" => 2500,\n        \"o2\" => 7500,\n        _ => 0,\n    }\n}\n\n#[tokio::main]\nasync fn main() {\n    let left = tokio::spawn(total(\"o1\"));\n    let right = tokio::spawn(total(\"o2\"));\n    let local = total(\"o3\").await;\n    let (first, second) = tokio::join!(left, right);\n    println!(\"{}\", local + first.unwrap() + second.unwrap());\n}\n"
+            }
+        }
+    }
+}
