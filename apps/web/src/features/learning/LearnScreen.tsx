@@ -1,12 +1,65 @@
 import { A } from "@solidjs/router";
 import { For, Show, createMemo, createSignal, type JSX } from "solid-js";
+import type { AchievementDefinition } from "@praxbit/contracts";
+import {
+    achievementProgress,
+    demonstratedLanguages,
+    isWorldRecovered,
+    type AchievementContext,
+} from "@praxbit/domain";
 import { Pip } from "../../design/Pip.tsx";
-import { missions, skillName, tracks } from "../../content/index.ts";
+import { achievements, missions, skillName, tracks } from "../../content/index.ts";
 import { useLearning } from "./learning-store.tsx";
 import { LearningMap } from "./LearningMap.tsx";
 
 export function LearnScreen(): JSX.Element {
     const learning = useLearning();
+
+    const achievementContext = createMemo<AchievementContext>(
+        function buildAchievementContext(): AchievementContext {
+            const evidence = learning.evidence();
+            return {
+                evidence,
+                completedMissionIds: [...learning.completedMissionIds()],
+                projectsCompleted: learning.completedProjectIds().length,
+                clubEventsCompleted: 0,
+                cooperativeChallengeCompleted: false,
+                worldRecovered:
+                    isWorldRecovered(learning.world()) ||
+                    learning.world().flags["incidentResolved"] === true,
+                languagesDemonstrated: demonstratedLanguages(evidence),
+                hiddenBoundaryFound: evidence.some(function boundary(record): boolean {
+                    return record.category === "testing" && record.outcome === "success";
+                }),
+                difficultDebuggingRecovered: evidence.some(function debugging(record): boolean {
+                    return record.category === "debugging" && record.outcome === "success";
+                }),
+                teammateHelped: false,
+            };
+        },
+    );
+
+    const earnedAchievementIds = createMemo(function earnedIds(): ReadonlySet<string> {
+        return new Set(
+            learning.progress().achievements.map(function idOf(record): string {
+                return record.achievementId;
+            }),
+        );
+    });
+
+    const earnedAchievementDates = createMemo(function earnedDates(): ReadonlyMap<string, string> {
+        return new Map(
+            learning.progress().achievements.map(function entry(record): [string, string] {
+                return [record.achievementId, record.earnedAt];
+            }),
+        );
+    });
+
+    function achievementState(
+        definition: AchievementDefinition,
+    ): ReturnType<typeof achievementProgress> {
+        return achievementProgress(definition, achievementContext());
+    }
 
     const recommended = function recommended() {
         return missions.find(function match(mission): boolean {
@@ -151,6 +204,110 @@ export function LearnScreen(): JSX.Element {
                         </ul>
                     </section>
                 </Show>
+
+                <section class="surface stack" aria-labelledby="streak-heading">
+                    <div class="row row--between">
+                        <div>
+                            <h2 id="streak-heading">Practice streak</h2>
+                            <p class="meta">
+                                A record of practice, not a requirement. Missed days never remove
+                                progress.
+                            </p>
+                        </div>
+                        <span class="meta">Gentle and optional</span>
+                    </div>
+                    <div class="grid grid--two">
+                        <div class="stack stack--tight">
+                            <span class="meta">Current streak</span>
+                            <p class="lede">
+                                {learning.progress().streakDays}{" "}
+                                {learning.progress().streakDays === 1 ? "day" : "days"}
+                            </p>
+                            <p class="small muted">
+                                {learning.progress().streakDays === 0
+                                    ? "No current streak. Any short practice starts one."
+                                    : "Practice today keeps the current run going."}
+                            </p>
+                        </div>
+                        <div class="stack stack--tight">
+                            <span class="meta">Longest streak</span>
+                            <p class="lede">
+                                {learning.progress().longestStreak}{" "}
+                                {learning.progress().longestStreak === 1 ? "day" : "days"}
+                            </p>
+                            <p class="small muted">
+                                The longest run is kept even when the current streak pauses.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section
+                    class="surface stack"
+                    aria-labelledby="achievements-heading"
+                    data-testid="achievements-gallery"
+                >
+                    <div class="surface__header">
+                        <div>
+                            <h2 id="achievements-heading">Achievements</h2>
+                            <p class="meta">
+                                Earned from evidence and completed work, not from time spent
+                                clicking.
+                            </p>
+                        </div>
+                        <span class="meta">
+                            {earnedAchievementIds().size} of {achievements.length} earned
+                        </span>
+                    </div>
+                    <ul class="achievement-gallery" aria-label="Achievements">
+                        <For each={achievements}>
+                            {function achievementCard(definition): JSX.Element {
+                                const earned = function earned(): boolean {
+                                    return earnedAchievementIds().has(definition.id);
+                                };
+                                const state = function state() {
+                                    return achievementState(definition);
+                                };
+                                const earnedOn = function earnedOn(): string {
+                                    const value = earnedAchievementDates().get(definition.id);
+                                    return value === undefined
+                                        ? "on this device"
+                                        : new Date(value).toLocaleDateString();
+                                };
+                                return (
+                                    <li
+                                        class="achievement-card"
+                                        data-achievement-id={definition.id}
+                                        data-earned={earned() ? "true" : "false"}
+                                        aria-label={`${definition.title}: ${earned() ? "earned" : "not earned yet"}`}
+                                    >
+                                        <div class="row row--between">
+                                            <strong>{definition.title}</strong>
+                                            <span class="meta">
+                                                {earned() ? "Earned" : "Not earned yet"}
+                                            </span>
+                                        </div>
+                                        <p class="small muted">{definition.description}</p>
+                                        <Show
+                                            when={!earned()}
+                                            fallback={<p class="meta">Earned {earnedOn()}</p>}
+                                        >
+                                            <progress
+                                                class="achievement-progress"
+                                                max={state().target}
+                                                value={state().current}
+                                                aria-label={`${definition.title} progress`}
+                                            />
+                                            <p class="meta">
+                                                {state().current} of {state().target} recorded
+                                            </p>
+                                        </Show>
+                                    </li>
+                                );
+                            }}
+                        </For>
+                    </ul>
+                </section>
 
                 <section class="stack" aria-labelledby="map-heading">
                     <div class="page-header">
