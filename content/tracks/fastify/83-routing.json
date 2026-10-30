@@ -44,13 +44,25 @@
             "id": "return-status",
             "description": "Returning an error object without setting the status.",
             "stepId": "apply",
-            "feedback": "A returned object is serialized as 200. Set the status through reply when the resource is missing."
+            "feedback": "A returned object is serialized as 200. Set the status through reply when the resource is missing.",
+            "testDescription": "A missing product answers 404 through the reply object.",
+            "followUpSkill": "fastify.routing"
         },
         {
             "id": "runtime-types",
             "description": "Assuming TypeScript generics also validate the request.",
             "stepId": "apply",
-            "feedback": "Generics disappear at runtime. Add request schemas when untrusted input must be checked."
+            "feedback": "Generics disappear at runtime. Add request schemas when untrusted input must be checked.",
+            "diagnostic": "TypeScript generics are erased, so they do not validate params at runtime.",
+            "followUpSkill": "fastify.schemas"
+        },
+        {
+            "id": "params-untyped",
+            "description": "Believing Fastify infers params without a generic or schema.",
+            "stepId": "check",
+            "answer": "params",
+            "feedback": "Fastify does not infer route params from the path. Add the route generic or a params schema.",
+            "followUpSkill": "fastify.schemas"
         }
     ],
     "lesson": {
@@ -175,7 +187,18 @@
                     "includes": ["Fastify({ logger: false })"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Create the instance with Fastify({ logger: false }).",
+                "Register app.get<{ Params: { id: string }; Reply: Product | { error: string } }>(\"/products/:id\", ...).",
+                "Add params and response schemas to the route options.",
+                "Use reply.status(404).send({ error: \"not_found\" }) when the product is missing."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Fastify route tests with node:test or Vitest."
+            }
         },
         {
             "kind": "explain",
@@ -205,7 +228,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Fastify uses route generics for compile-time types and JSON schemas for runtime validation and serialization. A 404 still needs a declared response shape so its body is consistent."
+            "explanation": "Fastify uses route generics for compile-time types and JSON schemas for runtime validation and serialization. A 404 still needs a declared response shape so its body is consistent.",
+            "hints": [
+                "Check each statement against Fastify's type and schema split.",
+                "Remember that generics are erased at runtime.",
+                "Confirm when a response schema filters fields.",
+                "Select statements about generics, schemas, and reply handling."
+            ]
         }
     ],
     "evaluation": {
