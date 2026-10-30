@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "admin-policy.ts": "type Principal = { role: \"member\" | \"admin\"; suspended: boolean } | null;\n\nfunction canActivateAdmin(principal: Principal): boolean {\n  if (principal === null) {\n    return false;\n  }\n  if (principal.suspended) {\n    return false;\n  }\n  return principal.role === \"admin\";\n}\n"
+            }
+        }
+    }
+}
