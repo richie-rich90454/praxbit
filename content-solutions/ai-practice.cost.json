@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "cost-code": {
+            "files": {
+                "cost.js": "function estimateCost(inputTokens, outputTokens, inputPerMillion, outputPerMillion) {\n  const dollars =\n    (inputTokens * inputPerMillion + outputTokens * outputPerMillion) / 1000000;\n  return Math.round(dollars * 1000000) / 1000000;\n}\n"
+            }
+        }
+    }
+}
