@@ -5,22 +5,14 @@
     "courseId": "algorithms",
     "title": "Complexity claims",
     "summary": "Review a performance claim by reading the loops instead of trusting the comment.",
-    "skills": [
-        "algorithms.complexity",
-        "performance.measure"
-    ],
-    "prerequisites": [
-        "algorithms.arrays"
-    ],
+    "skills": ["algorithms.complexity", "performance.measure"],
+    "prerequisites": ["algorithms.arrays"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "code-review",
-            "no-execution"
-        ]
+        "capabilities": ["code-review", "no-execution"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "read-loops",
             "description": "Determine growth from nested iteration.",
-            "stepIds": [
-                "complexity-review"
-            ]
+            "stepIds": ["complexity-review"]
         },
         {
             "id": "measure",
             "description": "Choose an appropriate way to validate performance claims.",
-            "stepIds": [
-                "complexity-check"
-            ]
+            "stepIds": ["complexity-check"]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": [
-                "performance-claims"
-            ]
+            "stepIds": ["performance-claims"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:chart"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:chart"],
     "hints": [
         "Count how many times the inner loop runs for each outer iteration.",
         "For every element, the inner loop scans the remaining elements.",
@@ -267,7 +248,5 @@
         "screenReaderNotes": "The code block is read with line structure. Findings announce their support after submission."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
