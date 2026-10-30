@@ -1,10 +1,21 @@
+import { readFileSync } from "node:fs";
 import { expect, type APIRequestContext, type Page } from "@playwright/test";
 import { EvidenceResultSchema, SyncResponseSchema } from "../../../packages/contracts/src/index.ts";
 
 export const E2E_PASSWORD = "praxbit-e2e-password";
 export const E2E_BASE_URL = "http://127.0.0.1:4173";
 export const OPENING_MISSION_ID = "before-code.make-it-respond";
-export const OPENING_MISSION_VERSION = 1;
+export const OPENING_MISSION_VERSION = (
+    JSON.parse(
+        readFileSync(
+            new URL(
+                "../../../content/campaigns/before-code/01-make-it-respond.json",
+                import.meta.url,
+            ),
+            "utf8",
+        ),
+    ) as { readonly version: number }
+).version;
 export const STATUS_PROJECT_ID = "projects.campus-status-board";
 
 export interface Parser<T> {
