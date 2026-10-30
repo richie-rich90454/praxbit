@@ -1,6 +1,6 @@
 {
     "id": "before-code.one-step-at-a-time",
-    "version": 1,
+    "version": 2,
     "sequence": 6,
     "courseId": "before-code",
     "title": "One step at a time",
@@ -49,14 +49,24 @@
             "id": "uses-new-price-too-early",
             "description": "Using the reassigned price in the earlier addition.",
             "stepId": "receipt-trace",
-            "feedback": "At line 3 the price is still 4. The assignment price = 7 happens later, so the first addition uses 4."
+            "answer": "{\"total\":\"14\",\"price\":\"7\"}",
+            "feedback": "At line 3 the price is still 4. The assignment price = 7 happens later, so the first addition uses 4 and the total ends at 11.",
+            "followUpSkill": "concept.tracing"
         },
         {
             "id": "final-line-confusion",
             "description": "Believing the assignment line itself adds to total.",
             "stepId": "trace-check",
             "answer": "line4",
-            "feedback": "price = 7 changes price only. total changes on the addition lines."
+            "feedback": "price = 7 changes price only. total changes on the addition lines.",
+            "followUpSkill": "concept.tracing"
+        },
+        {
+            "id": "future-values",
+            "description": "Believing a line can read a value assigned later in the program.",
+            "stepId": "trace-claims",
+            "answer": "future",
+            "feedback": "Execution is ordered. A line can read only values that already exist when it runs, not values assigned on later lines."
         }
     ],
     "lesson": {
@@ -89,6 +99,12 @@
         {
             "kind": "trace",
             "id": "receipt-trace",
+            "hints": [
+                "Advance line by line and record total and price after each change.",
+                "An assignment takes effect only after its line runs; earlier lines cannot see later values.",
+                "If x starts at 1, then y = x, then x = 9, y stays 1 because the copy happened before the change.",
+                "The first addition sees price 4; only the second addition sees 7. Submit both final values."
+            ],
             "title": "Trace the receipt",
             "prompt": "Advance through the program, watching total and price. Then enter both final values.",
             "evidence": "prediction",
@@ -191,15 +207,21 @@
                 "explanation": "The addition assigns 4 to total. The previous lines only initialize values."
             },
             "hints": [
-                "Which line assigns to total using another value?",
-                "Look for total on both sides of the equals sign.",
-                "The expression total + price is stored back into total.",
-                "Line 3: total = total + price."
+                "Find the first line whose execution changes total.",
+                "Initialization sets a starting value; an assignment that adds to total changes it.",
+                "total = 0 creates the cell; total = total + price computes a new value from the old one.",
+                "Look for the first addition, not the line that changes price."
             ]
         },
         {
             "kind": "explain",
             "id": "trace-claims",
+            "hints": [
+                "Select claims that describe what a trace can and cannot prove.",
+                "A trace records the order of state changes; it does not prove compilation correctness or future values.",
+                "A snapshot after each line shows that a value must exist before it can be read.",
+                "Two statements describe tracing accurately; reject the claims about later lines and compiler guarantees."
+            ],
             "title": "What tracing proves",
             "prompt": "Select the accurate statements.",
             "evidence": "explanation",
