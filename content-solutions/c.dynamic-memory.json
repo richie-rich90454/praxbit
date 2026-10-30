@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.c": "#include <stdio.h>\n#include <stdlib.h>\n\nint *copy_positives(const int *values, int length, int *out_length) {\n    int *result = malloc((size_t)length * sizeof(int));\n    if (result == NULL) {\n        *out_length = 0;\n        return NULL;\n    }\n    int count = 0;\n    for (int index = 0; index < length; index += 1) {\n        if (values[index] > 0) {\n            result[count] = values[index];\n            count += 1;\n        }\n    }\n    *out_length = count;\n    return result;\n}\n\nint main(void) {\n    int values[] = { 3, -1, 2, 7 };\n    int count = 0;\n    int *positives = copy_positives(values, 4, &count);\n    if (positives != NULL) {\n        for (int index = 0; index < count; index += 1) {\n            printf(\"%d\\n\", positives[index]);\n        }\n        free(positives);\n    }\n    return 0;\n}\n"
+            }
+        }
+    }
+}
