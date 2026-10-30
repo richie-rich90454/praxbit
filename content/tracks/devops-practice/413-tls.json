@@ -5,23 +5,14 @@
     "courseId": "devops-practice",
     "title": "Trust the certificate, not the padlock",
     "summary": "Review an expired certificate and a disabled verification path, then explain chain, hostname, and transport rules.",
-    "skills": [
-        "devops.networking",
-        "concept.security"
-    ],
-    "prerequisites": [
-        "devops.networking",
-        "http.basics"
-    ],
+    "skills": ["devops.networking", "concept.security"],
+    "prerequisites": ["devops.networking", "http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "configuration-review",
-            "no-execution"
-        ]
+        "capabilities": ["configuration-review", "no-execution"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "review",
             "description": "Identify expired, mismatched, and unverified TLS configuration.",
-            "stepIds": [
-                "tls-review"
-            ]
+            "stepIds": ["tls-review"]
         },
         {
             "id": "check",
             "description": "Choose the check a client performs against a certificate.",
-            "stepIds": [
-                "cert-check"
-            ]
+            "stepIds": ["cert-check"]
         },
         {
             "id": "transfer",
             "description": "Explain trust chains, hostnames, and HSTS.",
-            "stepIds": [
-                "tls-transfer"
-            ]
+            "stepIds": ["tls-transfer"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:server-room",
-        "icon:lock"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:lock"],
     "hints": [
         "A padlock means the connection is encrypted, not that the site is honest.",
         "The client checks the chain, the dates, and the hostname.",
@@ -333,9 +313,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional",
-        "web"
-    ]
+    "tags": ["systems", "professional", "web"]
 }
