@@ -5,22 +5,14 @@
     "courseId": "node-services",
     "title": "Middleware order",
     "summary": "Arrange a Hono middleware pipeline so requests are identified, authenticated, validated, handled, and safely failed.",
-    "skills": [
-        "node.hono",
-        "node.middleware"
-    ],
-    "prerequisites": [
-        "security.auth"
-    ],
+    "skills": ["node.hono", "node.middleware"],
+    "prerequisites": ["security.auth"],
     "difficulty": "advanced",
     "estimatedMinutes": 6,
     "interaction": "order",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "pipeline-simulation",
-            "keyboard"
-        ]
+        "capabilities": ["pipeline-simulation", "keyboard"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "order-middleware",
             "description": "Order middleware by responsibility and dependency.",
-            "stepIds": [
-                "middleware-order"
-            ]
+            "stepIds": ["middleware-order"]
         },
         {
             "id": "middleware-reasoning",
             "description": "Explain why order changes behavior.",
-            "stepIds": [
-                "middleware-check"
-            ]
+            "stepIds": ["middleware-check"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:middleware"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:middleware"],
     "hints": [
         "Request identity should exist before anything logs or fails.",
         "Authentication must precede authorization and validation of protected input.",
@@ -133,14 +116,7 @@
                     "label": "Serialize unexpected errors into the stable error shape"
                 }
             ],
-            "correctOrder": [
-                "request-id",
-                "auth",
-                "authorize",
-                "validate",
-                "handler",
-                "errors"
-            ],
+            "correctOrder": ["request-id", "auth", "authorize", "validate", "handler", "errors"],
             "explanation": "Request identity comes first, authentication enables authorization, validation protects the handler, and error formatting wraps the chain.",
             "hints": [
                 "Start with the component that every log and error needs.",
@@ -203,8 +179,5 @@
         "screenReaderNotes": "Each item announces its position after a move. The explanation is read after submission."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
