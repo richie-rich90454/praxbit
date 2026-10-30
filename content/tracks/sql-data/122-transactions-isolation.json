@@ -1,0 +1,313 @@
+{
+    "id": "sql.transactions-isolation",
+    "version": 1,
+    "sequence": 40,
+    "courseId": "sql-data",
+    "title": "Move money atomically",
+    "summary": "Wrap a transfer in a transaction, then reason about isolation and recovery.",
+    "skills": [
+        "sql.transactions"
+    ],
+    "prerequisites": [
+        "sql.queries",
+        "sql.modeling"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-sql",
+        "capabilities": [
+            "sqlite-wasm",
+            "deterministic-tests",
+            "learning-runtime"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "database",
+        "initialState": "sql-transactions",
+        "briefing": "A transfer debits one account and credits another. The current script applies only the debit. Make the pair atomic, then choose the isolation behavior the report needs."
+    },
+    "objectives": [
+        {
+            "id": "atomic-transfer",
+            "description": "Apply both balance changes inside one transaction.",
+            "stepIds": [
+                "transfer"
+            ]
+        },
+        {
+            "id": "identify-anomaly",
+            "description": "Identify a read anomaly from its observed behavior.",
+            "stepIds": [
+                "isolation-quiz"
+            ]
+        },
+        {
+            "id": "explain-atomicity",
+            "description": "Explain transactions, isolation, and recovery accurately.",
+            "stepIds": [
+                "tx-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:database",
+        "icon:transaction"
+    ],
+    "hints": [
+        "Both updates must be inside one unit of work.",
+        "Start with BEGIN IMMEDIATE and finish with COMMIT.",
+        "Debit a1 and credit a2 by the same amount.",
+        "BEGIN IMMEDIATE; UPDATE accounts SET balance_cents = balance_cents - 2500 WHERE id = 'a1'; UPDATE accounts SET balance_cents = balance_cents + 2500 WHERE id = 'a2'; COMMIT;"
+    ],
+    "misconceptions": [
+        {
+            "id": "debit-only",
+            "description": "Applying the debit without the matching credit.",
+            "stepId": "transfer",
+            "testDescription": "Both balances change together.",
+            "feedback": "The seed has equal balances. After the transfer a1 must be 2500 lower and a2 2500 higher in the same committed unit.",
+            "followUpSkill": "sql.transactions"
+        },
+        {
+            "id": "dirty-read",
+            "description": "Confusing a dirty read with a non-repeatable read.",
+            "stepId": "isolation-quiz",
+            "answer": "dirty",
+            "feedback": "A dirty read sees uncommitted data. Here the second read sees a different committed value, which is a non-repeatable read.",
+            "followUpSkill": "sql.transactions"
+        },
+        {
+            "id": "autocommit",
+            "description": "Believing each statement commits immediately inside a transaction.",
+            "stepId": "tx-check",
+            "answer": "autocommit",
+            "feedback": "Inside an explicit transaction, changes become durable at COMMIT or disappear at ROLLBACK.",
+            "followUpSkill": "sql.transactions"
+        },
+        {
+            "id": "backup-replaces",
+            "description": "Believing a recent backup removes the need for transactions.",
+            "stepId": "tx-check",
+            "answer": "backup",
+            "feedback": "A backup restores a past state. It cannot make a multi-statement change atomic while the system is running.",
+            "followUpSkill": "sql.transactions"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A transaction is one unit of change",
+                "body": "A transaction groups statements so the database applies all of them or none of them. BEGIN opens the unit, COMMIT makes the changes durable, and ROLLBACK discards them. A debit without its matching credit is not a completed transfer."
+            },
+            {
+                "title": "Isolation describes concurrent visibility",
+                "body": "READ COMMITTED lets a statement see changes committed by other transactions. REPEATABLE READ keeps a stable snapshot for the transaction. SERIALIZABLE prevents the schedules that produce phantom reads. Higher isolation reduces concurrency, so choose it from the anomalies the application can tolerate."
+            },
+            {
+                "title": "Backups are recovery, not isolation",
+                "body": "A backup or point-in-time recovery protects against lost storage and operator mistakes. It does not make a multi-statement transfer atomic. Test restores regularly, and keep the backup outside the failure domain of the primary database."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Transaction",
+                "definition": "A group of statements that commits or rolls back as one unit."
+            },
+            {
+                "term": "Isolation level",
+                "definition": "The rules for which concurrent changes a transaction can observe."
+            },
+            {
+                "term": "Write-ahead log",
+                "definition": "A durable record of changes used for recovery and replication."
+            },
+            {
+                "term": "Point-in-time recovery",
+                "definition": "Restoring a database to a chosen moment using backups and logs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A transaction is one unit of change",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A transaction is one unit of change",
+                    "body": "A transaction groups statements so the database applies all of them or none of them. BEGIN opens the unit, COMMIT makes the changes durable, and ROLLBACK discards them. A debit without its matching credit is not a completed transfer."
+                },
+                {
+                    "title": "Isolation describes concurrent visibility",
+                    "body": "READ COMMITTED lets a statement see changes committed by other transactions. REPEATABLE READ keeps a stable snapshot for the transaction. SERIALIZABLE prevents the schedules that produce phantom reads. Higher isolation reduces concurrency, so choose it from the anomalies the application can tolerate."
+                },
+                {
+                    "title": "Backups are recovery, not isolation",
+                    "body": "A backup or point-in-time recovery protects against lost storage and operator mistakes. It does not make a multi-statement transfer atomic. Test restores regularly, and keep the backup outside the failure domain of the primary database."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Transaction",
+                    "definition": "A group of statements that commits or rolls back as one unit."
+                },
+                {
+                    "term": "Isolation level",
+                    "definition": "The rules for which concurrent changes a transaction can observe."
+                },
+                {
+                    "term": "Write-ahead log",
+                    "definition": "A durable record of changes used for recovery and replication."
+                },
+                {
+                    "term": "Point-in-time recovery",
+                    "definition": "Restoring a database to a chosen moment using backups and logs."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "transfer",
+            "title": "Make the transfer atomic",
+            "prompt": "Edit transfer.sql. Move 2500 cents from a1 to a2 inside one transaction so both balances change or neither does.",
+            "evidence": "construction",
+            "language": "sql",
+            "files": [
+                {
+                    "path": "transfer.sql",
+                    "content": "UPDATE accounts SET balance_cents = balance_cents - 2500 WHERE id = 'a1';\n",
+                    "editable": true,
+                    "language": "sql"
+                }
+            ],
+            "entry": "transfer.sql",
+            "preview": "sql",
+            "tests": [
+                {
+                    "kind": "sql",
+                    "description": "Both balances change together.",
+                    "verify": "SELECT id, balance_cents FROM accounts ORDER BY id;",
+                    "expectedRows": [
+                        [
+                            "a1",
+                            7500
+                        ],
+                        [
+                            "a2",
+                            12500
+                        ]
+                    ]
+                }
+            ],
+            "hints": [
+                "The debit and credit are two statements that must travel together.",
+                "Open the transaction before the first update.",
+                "Commit only after both updates succeed.",
+                "Use BEGIN IMMEDIATE, both UPDATE statements, then COMMIT."
+            ],
+            "database": {
+                "schemaSql": "CREATE TABLE accounts (id TEXT PRIMARY KEY, balance_cents INTEGER NOT NULL CHECK (balance_cents >= 0));\n",
+                "seedSql": "INSERT INTO accounts (id, balance_cents) VALUES ('a1', 10000), ('a2', 10000);\n"
+            }
+        },
+        {
+            "kind": "quiz",
+            "id": "isolation-quiz",
+            "title": "Name the anomaly",
+            "prompt": "A report reads the same row twice inside one transaction and sees a different committed value. Which anomaly is this?",
+            "evidence": "explanation",
+            "quiz": {
+                "prompt": "Choose the anomaly.",
+                "options": [
+                    {
+                        "id": "non-repeatable",
+                        "label": "Non-repeatable read"
+                    },
+                    {
+                        "id": "dirty",
+                        "label": "Dirty read"
+                    },
+                    {
+                        "id": "phantom",
+                        "label": "Phantom read"
+                    },
+                    {
+                        "id": "lost-update",
+                        "label": "Lost update"
+                    }
+                ],
+                "correctId": "non-repeatable",
+                "explanation": "A non-repeatable read sees a row change between two reads in the same transaction. A phantom read sees new rows appear for the same predicate."
+            },
+            "hints": [
+                "The same row is read twice and changes.",
+                "A dirty read would require uncommitted data.",
+                "A phantom read is about new rows matching a predicate.",
+                "Choose non-repeatable read."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "tx-check",
+            "title": "Transactions, isolation, and backups",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "boundary",
+                    "label": "A transaction needs an explicit COMMIT or ROLLBACK boundary.",
+                    "correct": true
+                },
+                {
+                    "id": "autocommit",
+                    "label": "Every statement commits immediately inside an explicit transaction.",
+                    "correct": false
+                },
+                {
+                    "id": "read-committed",
+                    "label": "READ COMMITTED can see changes committed by other transactions between statements.",
+                    "correct": true
+                },
+                {
+                    "id": "backup",
+                    "label": "A recent backup removes the need for transactions.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Transactions define atomicity. Isolation levels define visibility. Backups provide recovery but do not replace either guarantee.",
+            "hints": [
+                "Two statements are accurate.",
+                "An explicit transaction ends at COMMIT or ROLLBACK.",
+                "READ COMMITTED takes a fresh snapshot for each statement.",
+                "Select boundary and read-committed."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The SQL editor and result table are keyboard accessible. SQLite runs locally in the browser.",
+        "keyboardNotes": "Use Tab to move between the editor and the results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
