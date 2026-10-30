@@ -5,23 +5,14 @@
     "courseId": "django",
     "title": "Tests that isolate the database",
     "summary": "Create test data once, assert the JSON contract, count queries, and cover a missing row with Django's TestCase.",
-    "skills": [
-        "django.testing",
-        "python.testing"
-    ],
-    "prerequisites": [
-        "django.models",
-        "django.views"
-    ],
+    "skills": ["django.testing", "python.testing"],
+    "prerequisites": ["django.models", "django.views"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-data",
             "description": "Create isolated test data for a TestCase.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-isolation",
             "description": "Explain how Django isolates and rolls back each test.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         },
         {
             "id": "objective-transfer",
             "description": "Choose where a per-test login belongs.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:api",
-        "icon:django"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:django"],
     "hints": [
         "Django creates a separate test database from the migrations.",
         "setUpTestData runs once per class; setUp runs before each test.",
@@ -213,21 +193,14 @@
                     "kind": "static",
                     "description": "The JSON contract is asserted.",
                     "file": "tests.py",
-                    "includes": [
-                        "response.json()[\"items\"][0][\"name\"]",
-                        "\"Microscope\""
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["response.json()[\"items\"][0][\"name\"]", "\"Microscope\""],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The query count is bounded.",
                     "file": "tests.py",
-                    "includes": [
-                        "with self.assertNumQueries(1):"
-                    ],
+                    "includes": ["with self.assertNumQueries(1):"],
                     "excludes": []
                 },
                 {
@@ -338,8 +311,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
