@@ -5,23 +5,14 @@
     "courseId": "node-services",
     "title": "One async failure boundary",
     "summary": "Catch rejected promises, map failures to stable codes, and keep stack traces out of responses.",
-    "skills": [
-        "node.errors",
-        "node.middleware"
-    ],
-    "prerequisites": [
-        "node.http",
-        "node.middleware"
-    ],
+    "skills": ["node.errors", "node.middleware"],
+    "prerequisites": ["node.http", "node.middleware"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:node"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:node"],
     "hints": [
         "Attach .catch to the promise returned by the handler.",
         "Read status and code from the thrown error, with safe defaults.",
@@ -191,36 +173,22 @@
                     "kind": "static",
                     "description": "The boundary answers with a code and never a stack trace.",
                     "file": "errors.ts",
-                    "includes": [
-                        "response.writeHead(status",
-                        "error: code",
-                        "application/json"
-                    ],
-                    "excludes": [
-                        "error.stack",
-                        "stack:"
-                    ]
+                    "includes": ["response.writeHead(status", "error: code", "application/json"],
+                    "excludes": ["error.stack", "stack:"]
                 },
                 {
                     "kind": "static",
                     "description": "Invalid JSON is converted into the shared failure path.",
                     "file": "errors.ts",
-                    "includes": [
-                        "try {",
-                        "fail(\"invalid_json\");"
-                    ],
+                    "includes": ["try {", "fail(\"invalid_json\");"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "errors.ts",
-                    "includes": [
-                        "export function handle(handler: Handler)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["export function handle(handler: Handler)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -311,8 +279,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
