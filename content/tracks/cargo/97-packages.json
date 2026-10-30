@@ -5,23 +5,14 @@
     "courseId": "cargo",
     "title": "Package metadata, dependencies, and features",
     "summary": "Declare a Rust package with a pinned edition, versioned dependencies, and an optional feature.",
-    "skills": [
-        "cargo.packages",
-        "rust.cargo"
-    ],
-    "prerequisites": [
-        "rust.cargo",
-        "rust.syntax"
-    ],
+    "skills": ["cargo.packages", "rust.cargo"],
+    "prerequisites": ["rust.cargo", "rust.syntax"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:cargo"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cargo"],
     "hints": [
         "The [package] table needs name, version, and edition.",
         "Write serde as a table with version and features.",
@@ -162,14 +144,8 @@
                     "kind": "static",
                     "description": "The package declares its name and the 2021 edition.",
                     "file": "Cargo.toml",
-                    "includes": [
-                        "[package]",
-                        "name = \"campus-cli\"",
-                        "edition = \"2021\""
-                    ],
-                    "excludes": [
-                        "serde = \"*\""
-                    ]
+                    "includes": ["[package]", "name = \"campus-cli\"", "edition = \"2021\""],
+                    "excludes": ["serde = \"*\""]
                 },
                 {
                     "kind": "static",
@@ -179,33 +155,21 @@
                         "serde = { version = \"1.0.203\", features = [\"derive\"] }",
                         "clap = { version = \"4.5.4\", features = [\"derive\"], optional = true }"
                     ],
-                    "excludes": [
-                        "version = \"*\""
-                    ]
+                    "excludes": ["version = \"*\""]
                 },
                 {
                     "kind": "static",
                     "description": "clap sits behind an explicit feature and the tests run with all features.",
                     "file": "Cargo.toml",
-                    "includes": [
-                        "[features]",
-                        "cli = [\"dep:clap\"]",
-                        "cargo test --all-features"
-                    ],
-                    "excludes": [
-                        "clap = \"*\""
-                    ]
+                    "includes": ["[features]", "cli = [\"dep:clap\"]", "cargo test --all-features"],
+                    "excludes": ["clap = \"*\""]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Cargo.toml",
-                    "includes": [
-                        "[package]"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["[package]"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -284,7 +248,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
