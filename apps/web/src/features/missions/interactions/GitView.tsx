@@ -1,6 +1,7 @@
 import { For, Show, createSignal, onMount, type JSX } from "solid-js";
 import { evaluateStep } from "@praxbit/domain";
 import type { GitStep } from "@praxbit/contracts";
+import { announce } from "../../../app/AppShell.tsx";
 import { CodeEditor } from "../../../components/CodeEditor.tsx";
 import { GitExercise } from "../../../platform/git-runner.ts";
 import type { InteractionProps } from "./types.ts";
@@ -108,7 +109,10 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                 return executeCommand(entry);
             })
             .catch(function report(caught: unknown): void {
-                setError(caught instanceof Error ? caught.message : "The Git command failed.");
+                const message =
+                    caught instanceof Error ? caught.message : "The Git command failed.";
+                setError(message);
+                announce(`Git error. ${message}`);
             });
     }
 
@@ -119,6 +123,14 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
         const result = await exercise.verify();
         setChecks(result.checks);
         setBranch(result.branch ?? "");
+        const failed = Object.values(result.checks).filter(function failed(check): boolean {
+            return !check;
+        }).length;
+        announce(
+            failed === 0
+                ? "All repository checks passed."
+                : `${failed} of ${Object.keys(result.checks).length} repository checks failed.`,
+        );
         props.onResult(
             evaluateStep(props.step, { kind: "git", checks: result.checks, log: result.log }),
             JSON.stringify(result.checks),
@@ -136,11 +148,12 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                 );
                 await refreshFiles();
             } catch (caught) {
-                setError(
+                const message =
                     caught instanceof Error
                         ? caught.message
-                        : "The repository could not be initialized.",
-                );
+                        : "The repository could not be initialized.";
+                setError(message);
+                announce(`Git error. ${message}`);
             } finally {
                 setLoading(false);
                 inputElement?.focus();
@@ -155,7 +168,9 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                 This is a repository in your browser, not a remote copy on the campus server.
             </p>
             <Show when={error().length > 0}>
-                <p class="feedback feedback--error">{error()}</p>
+                <p class="feedback feedback--error" role="alert">
+                    {error()}
+                </p>
             </Show>
             <Show when={loading()}>
                 <p class="muted">Preparing the repository.</p>
@@ -192,6 +207,7 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                             aria-live="polite"
                             aria-busy={busy()}
                             aria-label="Git output"
+                            tabindex="0"
                         >
                             <pre class="terminal__line" style={{ "white-space": "pre-wrap" }}>
                                 {output()}
@@ -204,7 +220,7 @@ export function GitView(props: { readonly step: GitStep } & InteractionProps): J
                                 enqueueCommand();
                             }}
                         >
-                            <label class="visually-hidden" for={`git-command-${props.step.id}`}>
+                            <label class="small" for={`git-command-${props.step.id}`}>
                                 Git command
                             </label>
                             <input
