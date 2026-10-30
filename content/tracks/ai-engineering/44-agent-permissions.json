@@ -42,15 +42,18 @@
     "misconceptions": [
         {
             "id": "autonomy-goal",
-            "description": "Maximizing autonomy as the primary goal.",
+            "description": "Granting broad permissions so the agent can pursue the goal.",
             "stepId": "agent-review",
-            "feedback": "The goal is reliable outcomes, not maximum autonomy. Consequential actions need appropriate control."
+            "answer": "accept:write,root,unapproved,logs",
+            "feedback": "Broad permissions turn a goal-seeking agent into an unbounded operator. Scope tools, require approval for irreversible actions, and keep secrets out of logs.",
+            "followUpSkill": "ai.agents"
         },
         {
             "id": "logs-secret",
-            "description": "Believing log access is harmless.",
+            "description": "Believing audit logs justify writing secrets into them.",
             "stepId": "agent-check",
-            "feedback": "Logs can contain personal data and credentials. Even read access must be scoped and sanitized."
+            "answer": "autonomy",
+            "feedback": "Audit logs should record actions and decisions, not credentials or secret values."
         }
     ],
     "lesson": {
@@ -135,7 +138,13 @@
                 }
             ],
             "correctVerdict": "reject",
-            "explanation": "The plan violates least privilege and removes accountability. A read-only diagnostic agent with scoped access and proposed patches is a safer design."
+            "explanation": "The plan violates least privilege and removes accountability. A read-only diagnostic agent with scoped access and proposed patches is a safer design.",
+            "hints": [
+                "List every permission and every action the agent can take without a person.",
+                "Look for write access and credentials broader than the task.",
+                "Check whether a human approves irreversible actions.",
+                "Reject root writes, unapproved deploys, and secret-bearing logs; keep the agent observing until scoped."
+            ]
         },
         {
             "kind": "explain",
@@ -165,7 +174,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Bounded capabilities, approval, and audit make agent behavior governable."
+            "explanation": "Bounded capabilities, approval, and audit make agent behavior governable.",
+            "hints": [
+                "Least privilege applies to agents as much as to people.",
+                "Approval should sit before irreversible side effects.",
+                "Autonomy is a product decision bounded by permissions.",
+                "Select scope, approval, and audit; reject unbounded autonomy."
+            ]
         }
     ],
     "evaluation": {
