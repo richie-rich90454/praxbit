@@ -1,0 +1,336 @@
+{
+    "id": "c.dynamic-memory",
+    "version": 1,
+    "sequence": 77,
+    "courseId": "c",
+    "title": "Grow a buffer safely",
+    "summary": "Allocate a result buffer, return ownership to the caller, and handle realloc failure.",
+    "skills": [
+        "c.pointers",
+        "c.memory"
+    ],
+    "prerequisites": [
+        "c.memory"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "c-dynamic-memory",
+        "briefing": "A sensor filter returns only positive readings, but the current function returns a pointer to a local array. Allocate a buffer the caller can own and free."
+    },
+    "objectives": [
+        {
+            "id": "allocate-result",
+            "description": "Allocate and return an owned result buffer.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "diagnose-realloc",
+            "description": "Diagnose a lost allocation during realloc.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "explain-heap",
+            "description": "Explain heap lifetime and realloc behavior accurately.",
+            "stepIds": [
+                "memory-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:c"
+    ],
+    "hints": [
+        "A local array cannot be returned from the function.",
+        "Allocate length integers with malloc.",
+        "Check the allocation before writing through it.",
+        "Free the returned buffer in main after printing."
+    ],
+    "misconceptions": [
+        {
+            "id": "stack-return",
+            "description": "Returning a pointer to a local array.",
+            "stepId": "apply",
+            "testDescription": "The result is allocated on the heap.",
+            "feedback": "The local array is destroyed at return. Allocate with malloc so the caller owns storage that outlives the call.",
+            "followUpSkill": "c.pointers"
+        },
+        {
+            "id": "realloc-leak",
+            "description": "Overwriting the only pointer with realloc's result.",
+            "stepId": "diagnose",
+            "answer": "free-first",
+            "feedback": "Freeing first loses the data. Store realloc's result in a temporary, then replace the original pointer only on success.",
+            "followUpSkill": "c.memory"
+        },
+        {
+            "id": "sizeof-param",
+            "description": "Expecting sizeof an array parameter to report the full size.",
+            "stepId": "memory-check",
+            "answer": "sizeof-param",
+            "feedback": "An array parameter decays to a pointer. sizeof reports the pointer size, so pass the element count separately.",
+            "followUpSkill": "c.memory"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Heap memory outlives the call",
+                "body": "A local array is destroyed when its function returns. malloc reserves storage from the heap, and the caller receives a pointer that remains valid until free is called. Every successful allocation needs one clear owner and one matching free."
+            },
+            {
+                "title": "realloc may move the block",
+                "body": "realloc can return a different address when it grows the allocation. Assigning its result directly to the only pointer loses the original block when realloc fails. Store the result in a temporary, check for NULL, then replace the original pointer."
+            },
+            {
+                "title": "Sizes and failure are explicit",
+                "body": "malloc takes a byte count, so multiply the element count by sizeof(element) and check for overflow on large inputs. malloc returns NULL on failure. free(NULL) is safe, but freeing the same block twice or using it after free is undefined behavior."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Heap",
+                "definition": "Storage whose lifetime is controlled by the program rather than a function scope."
+            },
+            {
+                "term": "realloc",
+                "definition": "A function that resizes an existing allocation, possibly moving it."
+            },
+            {
+                "term": "Ownership",
+                "definition": "The responsibility for releasing a resource exactly once."
+            },
+            {
+                "term": "Dangling pointer",
+                "definition": "A pointer that refers to storage that has already been released."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Heap memory outlives the call",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Heap memory outlives the call",
+                    "body": "A local array is destroyed when its function returns. malloc reserves storage from the heap, and the caller receives a pointer that remains valid until free is called. Every successful allocation needs one clear owner and one matching free."
+                },
+                {
+                    "title": "realloc may move the block",
+                    "body": "realloc can return a different address when it grows the allocation. Assigning its result directly to the only pointer loses the original block when realloc fails. Store the result in a temporary, check for NULL, then replace the original pointer."
+                },
+                {
+                    "title": "Sizes and failure are explicit",
+                    "body": "malloc takes a byte count, so multiply the element count by sizeof(element) and check for overflow on large inputs. malloc returns NULL on failure. free(NULL) is safe, but freeing the same block twice or using it after free is undefined behavior."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Heap",
+                    "definition": "Storage whose lifetime is controlled by the program rather than a function scope."
+                },
+                {
+                    "term": "realloc",
+                    "definition": "A function that resizes an existing allocation, possibly moving it."
+                },
+                {
+                    "term": "Ownership",
+                    "definition": "The responsibility for releasing a resource exactly once."
+                },
+                {
+                    "term": "Dangling pointer",
+                    "definition": "A pointer that refers to storage that has already been released."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Return an owned buffer",
+            "prompt": "Edit main.c. copy_positives allocates an int buffer for the positive values, writes the count through out_length, and returns the buffer. main prints and frees it.",
+            "evidence": "construction",
+            "language": "c",
+            "files": [
+                {
+                    "path": "main.c",
+                    "content": "#include <stdio.h>\n#include <stdlib.h>\n\nint *copy_positives(const int *values, int length, int *out_length) {\n    int fixed[8];\n    int count = 0;\n    for (int index = 0; index < length && count < 8; index += 1) {\n        if (values[index] > 0) {\n            fixed[count] = values[index];\n            count += 1;\n        }\n    }\n    *out_length = count;\n    return fixed; /* TODO: allocate a buffer the caller can own */\n}\n\nint main(void) {\n    int values[] = { 3, -1, 2, 7 };\n    int count = 0;\n    int *positives = copy_positives(values, 4, &count);\n    for (int index = 0; index < count; index += 1) {\n        printf(\"%d\\n\", positives[index]);\n    }\n    return 0;\n}\n",
+                    "editable": true,
+                    "language": "c"
+                }
+            ],
+            "entry": "main.c",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cc -std=c17 -Wall -Wextra -Werror main.c -o main",
+                "description": "Compile main.c with warnings treated as errors using the C compiler."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The result is allocated on the heap.",
+                    "file": "main.c",
+                    "includes": [
+                        "malloc(",
+                        "(size_t)length * sizeof(int)"
+                    ],
+                    "excludes": [
+                        "int fixed[8]"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The caller releases the returned buffer.",
+                    "file": "main.c",
+                    "includes": [
+                        "free(positives);"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The function keeps the pointer-and-length contract.",
+                    "file": "main.c",
+                    "includes": [
+                        "int *copy_positives(const int *values, int length, int *out_length)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The fixed array is local to the function.",
+                "malloc needs a byte count, not an element count.",
+                "Check for NULL before writing through the result.",
+                "Free the buffer after the print loop in main."
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The lost realloc",
+            "prompt": "This code overwrites its only pointer with realloc's result. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "allocate",
+                    "label": "int *buffer = malloc(count * sizeof(int));"
+                },
+                {
+                    "id": "grow",
+                    "label": "buffer = realloc(buffer, larger * sizeof(int));"
+                },
+                {
+                    "id": "check",
+                    "label": "if (buffer == NULL) { return 1; }"
+                },
+                {
+                    "id": "release",
+                    "label": "free(buffer);"
+                }
+            ],
+            "buggyId": "grow",
+            "fixes": [
+                {
+                    "id": "temporary",
+                    "label": "Store realloc's result in a temporary and assign it only on success."
+                },
+                {
+                    "id": "free-first",
+                    "label": "Call free(buffer) before calling realloc."
+                },
+                {
+                    "id": "ignore",
+                    "label": "Ignore the return value and keep using the old pointer."
+                }
+            ],
+            "correctFixId": "temporary",
+            "explanation": "If realloc fails it returns NULL and leaves the original block allocated. A temporary preserves the only pointer to that block.",
+            "hints": [
+                "The assignment replaces the original address.",
+                "realloc returns NULL on failure.",
+                "Keep the old pointer until the new one succeeds.",
+                "Choose the temporary-pointer repair."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "memory-check",
+            "title": "Heap lifetime and sizes",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "move",
+                    "label": "realloc may move the block and return a different address.",
+                    "correct": true
+                },
+                {
+                    "id": "null",
+                    "label": "free(NULL) is safe and does nothing.",
+                    "correct": true
+                },
+                {
+                    "id": "sizeof-param",
+                    "label": "sizeof an array parameter gives the full array size.",
+                    "correct": false
+                },
+                {
+                    "id": "uninitialized",
+                    "label": "malloc returns uninitialized storage.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Heap storage lives until freed, realloc can move it, and array parameters decay to pointers. Initialize storage before reading it and release it exactly once.",
+            "hints": [
+                "Three statements are accurate.",
+                "An array parameter is a pointer inside the function.",
+                "malloc does not zero the bytes it returns.",
+                "Select move, null, and uninitialized."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 145,
+        "unlocks": [
+            "c.sockets"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
