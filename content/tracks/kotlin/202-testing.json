@@ -1,17 +1,11 @@
 {
     "version": 1,
     "courseId": "kotlin",
-    "prerequisites": [
-        "kotlin.syntax",
-        "concept.testing"
-    ],
+    "prerequisites": ["kotlin.syntax", "concept.testing"],
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,9 +25,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ],
+    "tags": ["professional"],
     "accessibility": {
         "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -43,41 +35,27 @@
     "sequence": 103,
     "title": "Validate configuration without exceptions",
     "summary": "Turn malformed port text into null instead of an exception, then diagnose a fallback that hides bad configuration.",
-    "skills": [
-        "kotlin.tooling",
-        "kotlin.syntax"
-    ],
+    "skills": ["kotlin.tooling", "kotlin.syntax"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Parse a boundary value without throwing.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose an exception used for ordinary input.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Apply the accepted range to a new config line.",
-            "stepIds": [
-                "boundary"
-            ]
+            "stepIds": ["boundary"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:kotlin"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:kotlin"],
     "hints": [
         "substringAfter with a missing delimiter returns the whole string, so pass a default.",
         "toIntOrNull returns null instead of throwing.",
@@ -223,34 +201,22 @@
                     "kind": "static",
                     "description": "The function keeps a nullable Int result.",
                     "file": "Main.kt",
-                    "includes": [
-                        "fun parsePort(line: String): Int?"
-                    ],
+                    "includes": ["fun parsePort(line: String): Int?"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Invalid text and out-of-range ports become null.",
                     "file": "Main.kt",
-                    "includes": [
-                        "toIntOrNull()",
-                        "in 1..65535",
-                        "?: return null"
-                    ],
-                    "excludes": [
-                        "return raw.toInt()"
-                    ]
+                    "includes": ["toIntOrNull()", "in 1..65535", "?: return null"],
+                    "excludes": ["return raw.toInt()"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.kt",
-                    "includes": [
-                        "fun parsePort"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["fun parsePort"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
