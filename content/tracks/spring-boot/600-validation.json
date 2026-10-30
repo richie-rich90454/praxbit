@@ -5,23 +5,14 @@
     "courseId": "spring-boot",
     "title": "Validation and one error shape",
     "summary": "Validate a JSON body with Bean Validation and turn field failures into ProblemDetail responses.",
-    "skills": [
-        "spring.controllers",
-        "spring.boot"
-    ],
-    "prerequisites": [
-        "spring.controllers",
-        "api.validation"
-    ],
+    "skills": ["spring.controllers", "spring.boot"],
+    "prerequisites": ["spring.controllers", "api.validation"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-validate",
             "description": "Attach constraints to the request contract and trigger them.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-errors",
             "description": "Explain how Bean Validation failures become ProblemDetail responses.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         },
         {
             "id": "objective-transfer",
             "description": "Apply the validation boundary to a new parameter.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:spring"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:spring"],
     "hints": [
         "Bean Validation constraints belong on the request record, not on the entity.",
         "Add @Valid to the @RequestBody parameter so the constraints run.",
@@ -244,23 +224,15 @@
                     "kind": "static",
                     "description": "The response never exposes a stack trace.",
                     "file": "ProductController.java",
-                    "includes": [
-                        "ProblemDetail"
-                    ],
-                    "excludes": [
-                        "\"stack\""
-                    ]
+                    "includes": ["ProblemDetail"],
+                    "excludes": ["\"stack\""]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductController.java",
-                    "includes": [
-                        "@RestController"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["@RestController"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -359,7 +331,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
