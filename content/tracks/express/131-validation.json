@@ -1,18 +1,29 @@
 {
     "id": "express.validation",
     "version": 1,
-    "sequence": 226,
+    "sequence": 147,
     "courseId": "express",
     "title": "Validate request bodies at the boundary",
     "summary": "Build a validation result that cleans valid products and names every invalid field, then review a route that trusts a cast.",
-    "skills": ["express.middleware", "express.errors", "api.validation"],
-    "prerequisites": ["express.middleware", "http.basics"],
+    "skills": [
+        "express.middleware",
+        "express.errors",
+        "api.validation"
+    ],
+    "prerequisites": [
+        "express.middleware",
+        "http.basics"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-apply",
             "description": "Validate and clean an untrusted product body.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review a route for validation and error-contract risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:express"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:express"
+    ],
     "hints": [
         "Reject arrays and null before reading fields.",
         "Trim the name and require it to be non-empty.",
@@ -160,10 +180,14 @@
                     "kind": "function",
                     "description": "Non-object bodies are rejected.",
                     "name": "validateProduct",
-                    "args": ["not a product"],
+                    "args": [
+                        "not a product"
+                    ],
                     "expected": {
                         "ok": false,
-                        "errors": ["body"]
+                        "errors": [
+                            "body"
+                        ]
                     }
                 },
                 {
@@ -178,7 +202,9 @@
                     ],
                     "expected": {
                         "ok": false,
-                        "errors": ["name"]
+                        "errors": [
+                            "name"
+                        ]
                     }
                 },
                 {
@@ -193,7 +219,9 @@
                     ],
                     "expected": {
                         "ok": false,
-                        "errors": ["price"]
+                        "errors": [
+                            "price"
+                        ]
                     }
                 },
                 {
@@ -208,7 +236,10 @@
                     ],
                     "expected": {
                         "ok": false,
-                        "errors": ["name", "price"]
+                        "errors": [
+                            "name",
+                            "price"
+                        ]
                     }
                 },
                 {
@@ -313,5 +344,8 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
