@@ -37,7 +37,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "lua.modules",
-    "sequence": 214,
+    "sequence": 123,
     "title": "Modules, require, and load paths",
     "summary": "Return an inventory module from its own file, require it from a script, and fix a load path that is set too late.",
     "skills": [
