@@ -66,7 +66,13 @@ export class EvidenceService {
         if (inserted) {
             await this.recomputeMastery(executor, userId, affectedSkillIds, now);
             if (submission.category === "review") {
-                await this.advanceReviews(executor, userId, missionSkills, submission.outcome, now);
+                const reviewOutcome =
+                    submission.outcome === "success" &&
+                    submission.assistance === "independent" &&
+                    submission.independence >= 1
+                        ? "success"
+                        : "failure";
+                await this.advanceReviews(executor, userId, missionSkills, reviewOutcome, now);
             }
             earned = await this.achievements.evaluate(executor, userId, now);
         }
