@@ -1,0 +1,344 @@
+{
+    "version": 1,
+    "courseId": "ruby",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "quantity-import",
+        "briefing": "A nightly import converts text quantities. Invalid rows must fail with a clear error instead of becoming zero."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ],
+    "accessibility": {
+        "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "ruby.errors",
+    "sequence": 208,
+    "title": "Rescue narrowly, fail loudly",
+    "summary": "Raise a custom error for bad quantities, then repair a job that logs failures and keeps reporting success.",
+    "skills": [
+        "ruby.syntax",
+        "ruby.tooling"
+    ],
+    "prerequisites": [
+        "ruby.syntax",
+        "concept.testing"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Raise a typed error at the input boundary.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find an error handler that hides failure from the caller.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Select the narrowest rescue clause.",
+            "stepIds": [
+                "rescue"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:ruby"
+    ],
+    "hints": [
+        "A custom error inherits from StandardError.",
+        "Integer(text, 10) raises ArgumentError on malformed text.",
+        "Rescue only the exception you can translate.",
+        "Raise InvalidQuantity for non-positive values."
+    ],
+    "misconceptions": [
+        {
+            "id": "bare-rescue",
+            "description": "Using rescue without a class and returning zero.",
+            "stepId": "apply",
+            "testDescription": "Invalid input raises the custom error instead of returning zero.",
+            "feedback": "A bare rescue catches every StandardError, including programming mistakes, and zero is indistinguishable from a real count.",
+            "followUpSkill": "ruby.tooling"
+        },
+        {
+            "id": "rescue-all",
+            "description": "Logging a failure and letting the job continue.",
+            "stepId": "diagnose",
+            "answer": "return-zero",
+            "feedback": "A rescue that only logs turns a failed import into a successful one. Re-raise or return an explicit failure result.",
+            "followUpSkill": "ruby.tooling"
+        },
+        {
+            "id": "standard-error",
+            "description": "Rescuing StandardError when only the custom error is expected.",
+            "stepId": "rescue",
+            "answer": "standard",
+            "feedback": "Rescue InvalidQuantity by name. A broader class also catches unrelated bugs that should surface.",
+            "followUpSkill": "ruby.syntax"
+        },
+        {
+            "id": "exception-swallow",
+            "description": "Rescuing Exception and continuing.",
+            "stepId": "diagnose",
+            "diagnostic": "Rescuing Exception instead of InvalidQuantity so even interrupts are swallowed.",
+            "feedback": "Exception includes signals and system exits that application code should not handle. StandardError is the usual application boundary."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Raise with meaning",
+                "body": "A custom error such as class InvalidQuantity < StandardError; end names a domain failure. raise InvalidQuantity, \"quantity must be positive\" attaches a message and a class. Ruby's Integer(text, 10) raises ArgumentError for malformed text, so the boundary can translate that into the domain error."
+            },
+            {
+                "title": "Rescue the narrowest class",
+                "body": "A bare rescue is equivalent to rescue StandardError. It catches syntax mistakes, missing methods, and other bugs you usually want to see. Rescue the class you can actually recover from, and use ensure for cleanup that must run. Re-raise unknown failures instead of returning a default."
+            },
+            {
+                "title": "A failure is part of the result",
+                "body": "Returning zero for a bad quantity erases the distinction between an empty order and a typo. Either raise to the caller, return a result object with a failure value, or skip and report the specific row. Tests should assert the error class and message, not only that a value came back."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "StandardError",
+                "definition": "The base class for ordinary application errors that a rescue can handle."
+            },
+            {
+                "term": "raise",
+                "definition": "A statement that stops normal flow and signals an exception."
+            },
+            {
+                "term": "Narrow rescue",
+                "definition": "A rescue clause that names the specific class it can handle."
+            },
+            {
+                "term": "ensure",
+                "definition": "A block that runs whether the method succeeds or raises."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Errors and narrow rescues",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Raise with meaning",
+                    "body": "A custom error such as class InvalidQuantity < StandardError; end names a domain failure. raise InvalidQuantity, \"quantity must be positive\" attaches a message and a class. Ruby's Integer(text, 10) raises ArgumentError for malformed text, so the boundary can translate that into the domain error."
+                },
+                {
+                    "title": "Rescue the narrowest class",
+                    "body": "A bare rescue is equivalent to rescue StandardError. It catches syntax mistakes, missing methods, and other bugs you usually want to see. Rescue the class you can actually recover from, and use ensure for cleanup that must run. Re-raise unknown failures instead of returning a default."
+                },
+                {
+                    "title": "A failure is part of the result",
+                    "body": "Returning zero for a bad quantity erases the distinction between an empty order and a typo. Either raise to the caller, return a result object with a failure value, or skip and report the specific row. Tests should assert the error class and message, not only that a value came back."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "StandardError",
+                    "definition": "The base class for ordinary application errors that a rescue can handle."
+                },
+                {
+                    "term": "raise",
+                    "definition": "A statement that stops normal flow and signals an exception."
+                },
+                {
+                    "term": "Narrow rescue",
+                    "definition": "A rescue clause that names the specific class it can handle."
+                },
+                {
+                    "term": "ensure",
+                    "definition": "A block that runs whether the method succeeds or raises."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Parse a positive quantity",
+            "prompt": "Edit main.rb. parse_quantity returns the integer when it is positive and raises InvalidQuantity otherwise.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the InvalidQuantity class.",
+                "Use Integer(text, 10) to parse the text.",
+                "Raise InvalidQuantity unless the value is positive.",
+                "Translate ArgumentError into InvalidQuantity without catching everything."
+            ],
+            "language": "ruby",
+            "files": [
+                {
+                    "path": "main.rb",
+                    "content": "class InvalidQuantity < StandardError; end\n\ndef parse_quantity(text)\n  Integer(text) # TODO: raise InvalidQuantity for non-positive values\nrescue\n  0\nend\n\nputs parse_quantity(\"12\")\n",
+                    "editable": true,
+                    "language": "ruby"
+                }
+            ],
+            "entry": "main.rb",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "ruby main.rb",
+                "description": "Runs the file with Ruby, so a trapped parse or silent zero is visible immediately."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The custom error type is declared.",
+                    "file": "main.rb",
+                    "includes": [
+                        "class InvalidQuantity < StandardError"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Invalid input raises the custom error instead of returning zero.",
+                    "file": "main.rb",
+                    "includes": [
+                        "raise InvalidQuantity",
+                        "value.positive?",
+                        "rescue ArgumentError"
+                    ],
+                    "excludes": [
+                        "rescue\n  0"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.rb",
+                    "includes": [
+                        "def parse_quantity"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The job that always succeeds",
+            "prompt": "The nightly import reports success while dropping invalid rows. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "A rescue clause decides which failures continue.",
+                "Logging is not the same as recovering.",
+                "The caller needs to know the row failed.",
+                "Log the message and re-raise."
+            ],
+            "instructions": [
+                {
+                    "id": "parse",
+                    "label": "quantity = parse_quantity(text)"
+                },
+                {
+                    "id": "save",
+                    "label": "save(quantity)"
+                },
+                {
+                    "id": "rescue",
+                    "label": "rescue => error"
+                },
+                {
+                    "id": "warn",
+                    "label": "  warn error.message"
+                }
+            ],
+            "buggyId": "rescue",
+            "fixes": [
+                {
+                    "id": "reraise",
+                    "label": "Log the message and re-raise so the caller sees the failure."
+                },
+                {
+                    "id": "return-zero",
+                    "label": "Return zero and continue with the next row."
+                },
+                {
+                    "id": "rescue-exception",
+                    "label": "Rescue Exception instead of StandardError."
+                }
+            ],
+            "correctFixId": "reraise",
+            "explanation": "A rescue that only logs consumes the failure. Re-raising preserves the error for the caller, while rescuing Exception broadens the problem instead of fixing it."
+        },
+        {
+            "kind": "quiz",
+            "id": "rescue",
+            "title": "The narrowest rescue",
+            "prompt": "Only InvalidQuantity should be translated at this boundary. Which rescue clause is correct?",
+            "evidence": "transfer",
+            "hints": [
+                "Name the specific class in the rescue clause.",
+                "A bare rescue catches StandardError.",
+                "Exception is broader still.",
+                "Rescue InvalidQuantity."
+            ],
+            "quiz": {
+                "prompt": "Only InvalidQuantity should be translated at this boundary. Which rescue clause is correct?",
+                "options": [
+                    {
+                        "id": "invalid",
+                        "label": "rescue InvalidQuantity => error"
+                    },
+                    {
+                        "id": "bare",
+                        "label": "rescue"
+                    },
+                    {
+                        "id": "standard",
+                        "label": "rescue StandardError => error"
+                    },
+                    {
+                        "id": "exception",
+                        "label": "rescue Exception => error"
+                    }
+                ],
+                "correctId": "invalid",
+                "explanation": "Naming InvalidQuantity limits the handler to the expected domain failure. The other clauses also catch bugs and system-level exceptions that should reach a higher boundary."
+            }
+        }
+    ]
+}
