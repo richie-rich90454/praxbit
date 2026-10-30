@@ -1,18 +1,27 @@
 {
     "id": "python.testing",
     "version": 1,
-    "sequence": 118,
-    "courseId": "python-practice",
+    "sequence": 35,
+    "courseId": "python-foundations",
     "title": "Test the boundary",
     "summary": "Return None for division by zero and test the ordinary and boundary cases.",
-    "skills": ["python.testing"],
-    "prerequisites": ["python.data", "concept.testing"],
+    "skills": [
+        "python.testing"
+    ],
+    "prerequisites": [
+        "python.data",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-python",
-        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
+        "capabilities": [
+            "pyodide-wasm",
+            "source-editing",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:python"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:python"
+    ],
     "hints": [
         "Check the divisor before dividing.",
         "Return None for the zero case.",
@@ -44,34 +62,46 @@
             "id": "catch",
             "description": "Catching every exception to hide failures.",
             "stepId": "apply",
-            "feedback": "Catch the specific failure you can handle. A broad catch hides programming errors."
+            "testDescription": "Division by zero returns None.",
+            "feedback": "Catch the specific failure you can handle. A broad catch hides programming errors.",
+            "followUpSkill": "python.testing"
         },
         {
-            "id": "none",
-            "description": "Treating None as zero everywhere.",
-            "stepId": "apply",
-            "feedback": "None means absence. Coercing it to zero changes the meaning of the result."
+            "id": "runs-is-pass",
+            "description": "Treating a test that merely runs as a passing test.",
+            "stepId": "check",
+            "answer": "assert",
+            "feedback": "A test must assert the expected result. Running without an exception proves only that no exception was raised.",
+            "followUpSkill": "python.testing"
         }
     ],
     "lesson": {
         "sections": [
             {
-                "title": "Python functions and collections",
-                "body": "Functions are defined with def and return values explicitly: def add(left, right): return left + right. Lists preserve order, dictionaries map keys to values, and comprehensions build a new collection from an iterable."
+                "title": "A test asserts a specific result",
+                "body": "A useful test arranges the input, calls the function, and asserts the exact result. Running code without an assertion proves only that no exception escaped. Name the expected value so a failure shows what changed."
             },
             {
-                "title": "Python errors and tools",
-                "body": "Exceptions signal failure. raise and try/except make failure explicit, and None can represent a deliberate absence. pytest, unittest, ruff, and type hints keep Python projects checkable."
+                "title": "Boundaries reveal defects",
+                "body": "Choose cases at the edges: zero, the exact threshold, an empty collection, and the largest accepted value. Ordinary cases confirm the happy path, while boundary cases catch comparisons that are off by one and formatting that drops a leading zero."
+            },
+            {
+                "title": "Absence is not zero",
+                "body": "None represents a deliberate absence, while zero is a real number. A safe division returns None for a zero divisor and the quotient otherwise. A broad try/except can hide unrelated defects, so catch only the failure the function can handle."
             }
         ],
         "vocabulary": [
             {
-                "term": "Exception",
-                "definition": "An object that represents a failure during execution."
+                "term": "Test case",
+                "definition": "One input plus the expected result."
             },
             {
-                "term": "Fixture",
-                "definition": "Reusable setup data or state for tests."
+                "term": "Boundary",
+                "definition": "An edge value where behavior changes."
+            },
+            {
+                "term": "Exception",
+                "definition": "An object that represents a failure during execution."
             },
             {
                 "term": "None",
@@ -83,27 +113,35 @@
         {
             "kind": "lesson",
             "id": "lesson",
-            "title": "Python functions and tools",
+            "title": "A test asserts a specific result",
             "prompt": "Read the explanation, then apply it in the next step.",
             "evidence": "prediction",
             "sections": [
                 {
-                    "title": "Python functions and collections",
-                    "body": "Functions are defined with def and return values explicitly: def add(left, right): return left + right. Lists preserve order, dictionaries map keys to values, and comprehensions build a new collection from an iterable."
+                    "title": "A test asserts a specific result",
+                    "body": "A useful test arranges the input, calls the function, and asserts the exact result. Running code without an assertion proves only that no exception escaped. Name the expected value so a failure shows what changed."
                 },
                 {
-                    "title": "Python errors and tools",
-                    "body": "Exceptions signal failure. raise and try/except make failure explicit, and None can represent a deliberate absence. pytest, unittest, ruff, and type hints keep Python projects checkable."
+                    "title": "Boundaries reveal defects",
+                    "body": "Choose cases at the edges: zero, the exact threshold, an empty collection, and the largest accepted value. Ordinary cases confirm the happy path, while boundary cases catch comparisons that are off by one and formatting that drops a leading zero."
+                },
+                {
+                    "title": "Absence is not zero",
+                    "body": "None represents a deliberate absence, while zero is a real number. A safe division returns None for a zero divisor and the quotient otherwise. A broad try/except can hide unrelated defects, so catch only the failure the function can handle."
                 }
             ],
             "vocabulary": [
                 {
-                    "term": "Exception",
-                    "definition": "An object that represents a failure during execution."
+                    "term": "Test case",
+                    "definition": "One input plus the expected result."
                 },
                 {
-                    "term": "Fixture",
-                    "definition": "Reusable setup data or state for tests."
+                    "term": "Boundary",
+                    "definition": "An edge value where behavior changes."
+                },
+                {
+                    "term": "Exception",
+                    "definition": "An object that represents a failure during execution."
                 },
                 {
                     "term": "None",
@@ -133,23 +171,38 @@
                     "kind": "function",
                     "description": "An ordinary division returns a float.",
                     "name": "safe_divide",
-                    "args": [10, 2],
+                    "args": [
+                        10,
+                        2
+                    ],
                     "expected": 5
                 },
                 {
                     "kind": "function",
                     "description": "Division by zero returns None.",
                     "name": "safe_divide",
-                    "args": [1, 0],
+                    "args": [
+                        1,
+                        0
+                    ],
                     "expected": null
                 },
                 {
                     "kind": "function",
                     "description": "Zero divided by a nonzero value is zero.",
                     "name": "safe_divide",
-                    "args": [0, 4],
+                    "args": [
+                        0,
+                        4
+                    ],
                     "expected": 0
                 }
+            ],
+            "hints": [
+                "Check the divisor before dividing.",
+                "Return None when right is zero.",
+                "Keep the ordinary division for nonzero divisors.",
+                "if right == 0: return None; return left / right"
             ]
         },
         {
@@ -180,7 +233,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "The boundary is the zero divisor. Returning None makes the absence explicit, and the test asserts both the boundary and ordinary cases."
+            "explanation": "The boundary is the zero divisor. Returning None makes the absence explicit, and the test asserts both the boundary and ordinary cases.",
+            "hints": [
+                "Two statements are accurate.",
+                "None is a value, not an exception.",
+                "A test must assert a result, not just run code.",
+                "Select zero and none."
+            ]
         }
     ],
     "evaluation": {
@@ -195,10 +254,13 @@
         "kind": "none"
     },
     "accessibility": {
-        "summary": "The Python workspace is keyboard accessible. Checks verify source structure; they do not compile or run Python.",
-        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
-        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+        "summary": "The Python editor and tests are keyboard accessible. Pyodide runs the function tests locally in the browser.",
+        "keyboardNotes": "Ctrl+Enter runs tests. The runtime loading state is announced.",
+        "screenReaderNotes": "Each test announces its arguments, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
