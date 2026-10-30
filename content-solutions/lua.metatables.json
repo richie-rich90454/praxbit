@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.lua": "local Item = {}\nItem.__index = Item\n\nfunction Item.new(name, count)\n  return setmetatable({ name = name, count = count }, Item)\nend\n\nfunction Item.__lt(left, right)\n  if left.count == right.count then\n    return left.name < right.name\n  end\n  return left.count < right.count\nend\n\nfunction Item.__tostring(item)\n  return string.format(\"%s:%d\", item.name, item.count)\nend\n\nlocal items = {\n  Item.new(\"nuts\", 2),\n  Item.new(\"bolts\", 2),\n  Item.new(\"washers\", 1),\n}\ntable.sort(items)\nfor _, item in ipairs(items) do\n  print(tostring(item))\nend\n"
+            }
+        }
+    }
+}
