@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-media": {
+            "files": {
+                "index.html": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Campus store</title>\n</head>\n<body>\n  <a href=\"/supplies\">Supplies</a>\n  <img src=\"pencils.svg\" alt=\"Pencil box\">\n  <video src=\"tour.mp4\" controls></video>\n</body>\n</html>\n"
+            }
+        }
+    }
+}
