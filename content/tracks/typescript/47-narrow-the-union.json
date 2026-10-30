@@ -1,18 +1,27 @@
 {
     "id": "typescript.narrowing",
     "version": 1,
-    "sequence": 47,
+    "sequence": 61,
     "courseId": "typescript",
     "title": "Narrow the union",
     "summary": "Use TypeScript narrowing to handle strings and numbers safely.",
-    "skills": ["ts.types"],
-    "prerequisites": ["js.types", "js.objects"],
+    "skills": [
+        "ts.types"
+    ],
+    "prerequisites": [
+        "js.types",
+        "js.objects"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
+        "capabilities": [
+            "source-editing",
+            "syntax-diagnostics",
+            "transpiled-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "narrow",
             "description": "Branch on the runtime type of a union value.",
-            "stepIds": ["fix-narrowing"]
+            "stepIds": [
+                "fix-narrowing"
+            ]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": ["narrowing-check"]
+            "stepIds": [
+                "narrowing-check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:type"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:type"
+    ],
     "hints": [
         "typeof value === \"string\" narrows the union.",
         "Numbers become text with String(value) or template literals.",
@@ -44,13 +62,25 @@
             "id": "type-assertion",
             "description": "Asserting a type instead of checking the value.",
             "stepId": "fix-narrowing",
-            "feedback": "A type assertion does not change the runtime value. Use a typeof check so both branches are safe."
+            "testDescription": "A number is formatted as digits.",
+            "feedback": "A type assertion does not change the runtime value. Use a typeof check so both branches are safe.",
+            "followUpSkill": "ts.types"
         },
         {
             "id": "number-methods",
             "description": "Calling string methods on a union without narrowing.",
             "stepId": "fix-narrowing",
-            "feedback": "trim exists only on strings. Narrow the union before calling string methods."
+            "diagnostic": "Calling trim on a number throws before any branch can format it.",
+            "feedback": "trim exists only on strings. Narrow the union before calling string methods.",
+            "followUpSkill": "ts.types"
+        },
+        {
+            "id": "assertion-runtime",
+            "description": "Believing a type assertion changes the runtime value.",
+            "stepId": "narrowing-check",
+            "answer": "assert",
+            "feedback": "Assertions are erased during compilation. Only runtime checks narrow a value safely.",
+            "followUpSkill": "ts.types"
         }
     ],
     "lesson": {
@@ -102,30 +132,44 @@
                     "kind": "function",
                     "description": "A lowercase string is trimmed and uppercased.",
                     "name": "formatIdentifier",
-                    "args": ["  a1  "],
+                    "args": [
+                        "  a1  "
+                    ],
                     "expected": "ID-A1"
                 },
                 {
                     "kind": "function",
                     "description": "A number is formatted as digits.",
                     "name": "formatIdentifier",
-                    "args": [42],
+                    "args": [
+                        42
+                    ],
                     "expected": "ID-42"
                 },
                 {
                     "kind": "function",
                     "description": "An already clean string is preserved.",
                     "name": "formatIdentifier",
-                    "args": ["B7"],
+                    "args": [
+                        "B7"
+                    ],
                     "expected": "ID-B7"
                 },
                 {
                     "kind": "function",
                     "description": "Zero is a valid id.",
                     "name": "formatIdentifier",
-                    "args": [0],
+                    "args": [
+                        0
+                    ],
                     "expected": "ID-0"
                 }
+            ],
+            "hints": [
+                "Check typeof before calling string methods.",
+                "Numbers do not have trim or toUpperCase.",
+                "Return the numeric branch unchanged with the ID- prefix.",
+                "if (typeof value === \"number\") return `ID-${value}`;"
             ]
         },
         {
@@ -156,7 +200,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Narrowing uses runtime evidence. Assertions do not validate values."
+            "explanation": "Narrowing uses runtime evidence. Assertions do not validate values.",
+            "hints": [
+                "Two statements are accurate.",
+                "Assertions are erased and do not validate runtime data.",
+                "Both branches must use operations valid for their narrowed type.",
+                "Select typeof and safe."
+            ]
         }
     ],
     "evaluation": {
@@ -176,5 +226,8 @@
         "screenReaderNotes": "Tests announce arguments, expected output, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
