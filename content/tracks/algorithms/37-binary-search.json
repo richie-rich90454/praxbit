@@ -1,18 +1,28 @@
 {
     "id": "algorithms.binary-search",
     "version": 1,
-    "sequence": 37,
+    "sequence": 41,
     "courseId": "algorithms",
     "title": "Binary search",
     "summary": "Find a value in sorted data by halving the remaining range.",
-    "skills": ["algorithms.arrays", "algorithms.complexity"],
-    "prerequisites": ["js.arrays", "js.loops"],
+    "skills": [
+        "algorithms.arrays",
+        "algorithms.complexity"
+    ],
+    "prerequisites": [
+        "js.arrays",
+        "js.loops"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "search",
             "description": "Find a target index in sorted data.",
-            "stepIds": ["search-code"]
+            "stepIds": [
+                "search-code"
+            ]
         },
         {
             "id": "halving",
             "description": "Reason about why the search range halves.",
-            "stepIds": ["search-reasoning"]
+            "stepIds": [
+                "search-reasoning"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:search"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:database",
+        "icon:search"
+    ],
     "hints": [
         "Keep low and high bounds and compare the middle value.",
         "If the middle is too small, move low above the middle.",
@@ -105,42 +124,86 @@
                     "kind": "function",
                     "description": "Finds a middle value.",
                     "name": "binarySearch",
-                    "args": [[1, 3, 5, 7, 9], 5],
+                    "args": [
+                        [
+                            1,
+                            3,
+                            5,
+                            7,
+                            9
+                        ],
+                        5
+                    ],
                     "expected": 2
                 },
                 {
                     "kind": "function",
                     "description": "Finds the first element.",
                     "name": "binarySearch",
-                    "args": [[1, 3, 5, 7, 9], 1],
+                    "args": [
+                        [
+                            1,
+                            3,
+                            5,
+                            7,
+                            9
+                        ],
+                        1
+                    ],
                     "expected": 0
                 },
                 {
                     "kind": "function",
                     "description": "Finds the last element.",
                     "name": "binarySearch",
-                    "args": [[1, 3, 5, 7, 9], 9],
+                    "args": [
+                        [
+                            1,
+                            3,
+                            5,
+                            7,
+                            9
+                        ],
+                        9
+                    ],
                     "expected": 4
                 },
                 {
                     "kind": "function",
                     "description": "Returns -1 for a missing value.",
                     "name": "binarySearch",
-                    "args": [[1, 3, 5, 7, 9], 4],
+                    "args": [
+                        [
+                            1,
+                            3,
+                            5,
+                            7,
+                            9
+                        ],
+                        4
+                    ],
                     "expected": -1
                 },
                 {
                     "kind": "function",
                     "description": "Handles an empty array.",
                     "name": "binarySearch",
-                    "args": [[], 5],
+                    "args": [
+                        [],
+                        5
+                    ],
                     "expected": -1
                 },
                 {
                     "kind": "function",
                     "description": "Handles a single matching element.",
                     "name": "binarySearch",
-                    "args": [[7], 7],
+                    "args": [
+                        [
+                            7
+                        ],
+                        7
+                    ],
                     "expected": 0
                 },
                 {
@@ -223,7 +286,9 @@
     },
     "rewards": {
         "experience": 120,
-        "unlocks": ["algorithms.frequency-map"]
+        "unlocks": [
+            "algorithms.frequency-map"
+        ]
     },
     "persistence": {
         "kind": "none"
@@ -234,5 +299,7 @@
         "screenReaderNotes": "Each test announces the array, target, expected index, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional"]
+    "tags": [
+        "professional"
+    ]
 }
