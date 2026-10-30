@@ -90,7 +90,7 @@ These limits are per Node.js process and reset on restart. They are not a distri
 
 ### Verification status
 
-Verified locally: password hashing, token generation/hash comparison, session middleware, CSRF middleware, rate limiter, role checks, and the server integration suite (23 tests across auth, sync, clubs, and catalog). Pending: proxy cookie behavior, CSRF on every mutation route under the real proxy, club/admin authorization at scale, and account deletion cascade under the production database. The integration and security suites remain the gate.
+Verified locally: password hashing, token generation/hash comparison, session middleware, CSRF middleware, rate limiter, role checks, and the server integration suite (46 tests across auth, sync, clubs, catalog, accounts, and metrics) plus the real Hono/PostgreSQL browser suite. Pending: live proxy cookie behavior, club/admin authorization at production scale, and account deletion under the production database. The integration, security, and browser suites remain the gate.
 
 ## Untrusted learner code
 
