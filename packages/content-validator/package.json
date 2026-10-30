@@ -12,6 +12,7 @@
     "dependencies": {
         "@praxbit/contracts": "workspace:*",
         "@praxbit/domain": "workspace:*",
+        "@praxbit/execution": "workspace:*",
         "jsdom": "^30.1.3",
         "pyodide": "^314.0.7",
         "sql.js": "^1.15.2",
