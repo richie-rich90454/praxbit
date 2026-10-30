@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,9 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ],
+    "tags": ["systems"],
     "accessibility": {
         "summary": "The Zig workspace is keyboard accessible. Checks verify source structure; they do not compile or run Zig.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -39,45 +34,28 @@
     "sequence": 119,
     "title": "Assertions that fail for the right reason",
     "summary": "Write value and error assertions with std.testing, then repair a test that swallows every failure.",
-    "skills": [
-        "zig.testing",
-        "zig.syntax"
-    ],
-    "prerequisites": [
-        "zig.syntax",
-        "concept.testing"
-    ],
+    "skills": ["zig.testing", "zig.syntax"],
+    "prerequisites": ["zig.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Write value and error assertions in test blocks.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find a test that ignores the error it should assert.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Predict how a failed expectEqual ends a test.",
-            "stepIds": [
-                "failure"
-            ]
+            "stepIds": ["failure"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:zig"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:zig"],
     "hints": [
         "Test blocks live beside the code they cover.",
         "expectEqual compares a known value with the parser result.",
@@ -223,9 +201,7 @@
                     "kind": "static",
                     "description": "The parser keeps the error union signature.",
                     "file": "main.zig",
-                    "includes": [
-                        "fn parsePort(text: []const u8) !u16"
-                    ],
+                    "includes": ["fn parsePort(text: []const u8) !u16"],
                     "excludes": []
                 },
                 {
@@ -236,9 +212,7 @@
                         "test \"parses a valid port\"",
                         "try std.testing.expectEqual(@as(u16, 8080), try parsePort(\"8080\"));"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -248,20 +222,14 @@
                         "test \"rejects zero\"",
                         "try std.testing.expectError(error.OutOfRange, parsePort(\"0\"));"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.zig",
-                    "includes": [
-                        "fn parsePort"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["fn parsePort"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
