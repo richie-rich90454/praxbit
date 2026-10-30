@@ -1,18 +1,29 @@
 {
     "id": "fastify.auth",
     "version": 1,
-    "sequence": 229,
+    "sequence": 152,
     "courseId": "fastify",
     "title": "Authenticate and authorize writes",
     "summary": "Require both the admin role and the catalog write scope, then review a validated route that still has no caller check.",
-    "skills": ["security.auth", "fastify.plugins", "fastify.schemas"],
-    "prerequisites": ["fastify.plugins", "security.auth"],
+    "skills": [
+        "security.auth",
+        "fastify.plugins",
+        "fastify.schemas"
+    ],
+    "prerequisites": [
+        "fastify.plugins",
+        "security.auth"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-apply",
             "description": "Check role and scope before allowing a write.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review a route for missing authentication and response risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:fastify"
+    ],
     "hints": [
         "Reject a null role first.",
         "Require role === \"admin\" before checking scopes.",
@@ -160,35 +180,61 @@
                     "kind": "function",
                     "description": "Anonymous callers cannot write.",
                     "name": "canWriteCatalog",
-                    "args": [null, ["catalog:write"]],
+                    "args": [
+                        null,
+                        [
+                            "catalog:write"
+                        ]
+                    ],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "Members cannot write.",
                     "name": "canWriteCatalog",
-                    "args": ["member", ["catalog:write"]],
+                    "args": [
+                        "member",
+                        [
+                            "catalog:write"
+                        ]
+                    ],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "An admin without catalog:write is denied.",
                     "name": "canWriteCatalog",
-                    "args": ["admin", ["catalog:read"]],
+                    "args": [
+                        "admin",
+                        [
+                            "catalog:read"
+                        ]
+                    ],
                     "expected": false
                 },
                 {
                     "kind": "function",
                     "description": "An admin with catalog:write is allowed.",
                     "name": "canWriteCatalog",
-                    "args": ["admin", ["catalog:read", "catalog:write"]],
+                    "args": [
+                        "admin",
+                        [
+                            "catalog:read",
+                            "catalog:write"
+                        ]
+                    ],
                     "expected": true
                 },
                 {
                     "kind": "function",
                     "description": "An auditor cannot write.",
                     "name": "canWriteCatalog",
-                    "args": ["auditor", ["catalog:write"]],
+                    "args": [
+                        "auditor",
+                        [
+                            "catalog:write"
+                        ]
+                    ],
                     "expected": false
                 }
             ]
@@ -274,5 +320,8 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
