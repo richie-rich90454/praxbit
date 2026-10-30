@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "cache-truth",
-            "description": "Treating Redis as the source of truth.",
+            "description": "Treating the cache as the source of truth.",
             "stepId": "apply",
-            "feedback": "Redis is a copy. The database owns the data; the cache must be invalidated or expired."
+            "testDescription": "Reads use the cache with an explicit TTL.",
+            "feedback": "A cache is a copy. The database remains authoritative, and the request must still work when the cache is down.",
+            "followUpSkill": "redis.caching"
         },
         {
             "id": "write-through",
-            "description": "Writing a value read before the update into the cache.",
+            "description": "Updating the database after overwriting the cache.",
             "stepId": "review",
-            "feedback": "A stale read becomes a stale cache entry. Delete after the write or cache the write result."
+            "answer": "ship:stale-read,overwrite,ttl",
+            "feedback": "Writing the cache first lets a failed database write leave a fresh-looking stale value. Update the database, then invalidate the cache."
         },
         {
             "id": "ttl-correct",
-            "description": "Assuming a TTL makes the cache correct.",
+            "description": "Relying on a TTL to fix write-order bugs.",
             "stepId": "apply",
-            "feedback": "A TTL bounds staleness; it does not prevent serving an outdated value until expiry."
+            "testDescription": "The write path updates the database before deleting the cached key.",
+            "feedback": "A TTL only bounds staleness. It does not repair an incorrect write order."
         }
     ],
     "lesson": {
@@ -216,7 +220,18 @@
                     "includes": ["const TTL_SECONDS = 300;"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Name the source of truth before adding a cache.",
+                "Set a TTL on every cached value.",
+                "Coalesce concurrent misses and fall back when Redis fails.",
+                "Update the database first, then delete the cached key, and never serve cache data as authoritative."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -273,7 +288,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The cache write happens after the update but stores the row read before it. Delete the key after the update commits, or cache the row returned by the update. A TTL only bounds the damage."
+            "explanation": "The cache write happens after the update but stores the row read before it. Delete the key after the update commits, or cache the row returned by the update. A TTL only bounds the damage.",
+            "hints": [
+                "Find where the cache can outlive the database value.",
+                "Check the write order and the TTL.",
+                "Ask what happens when Redis is unavailable.",
+                "Block the change: stale reads and cache-as-truth are correctness bugs."
+            ]
         }
     ],
     "evaluation": {
