@@ -1,18 +1,26 @@
 {
     "id": "aspnet-core.controllers",
     "version": 1,
-    "sequence": 89,
+    "sequence": 161,
     "courseId": "aspnet-core",
     "title": "Attribute-routed actions with typed results",
     "summary": "Mark an API controller, keep the attribute route, and return a typed result with 404 handling.",
-    "skills": ["aspnet.controllers"],
-    "prerequisites": ["csharp.syntax", "http.basics"],
+    "skills": [
+        "aspnet.controllers"
+    ],
+    "prerequisites": [
+        "csharp.syntax",
+        "http.basics"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:dotnet"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:dotnet"
+    ],
     "hints": [
         "Keep the existing route template and the integer constraint.",
         "Add [ApiController] above the class declaration.",
@@ -44,19 +61,24 @@
             "id": "null-404",
             "description": "Thinking a null return becomes 404.",
             "stepId": "apply",
-            "feedback": "A null body is still a 200 response. Return NotFound() explicitly when the service finds nothing."
-        },
-        {
-            "id": "controller-base",
-            "description": "Treating ControllerBase as the view-aware base class.",
-            "stepId": "check",
-            "feedback": "ControllerBase is the API base class. Controller adds view helpers that an HTTP API does not need."
+            "testDescription": "A missing product becomes a 404.",
+            "feedback": "A null body is still a 200 response. Return NotFound() explicitly when the service finds nothing.",
+            "followUpSkill": "aspnet.controllers"
         },
         {
             "id": "api-controller",
             "description": "Leaving off [ApiController] and expecting validation.",
             "stepId": "apply",
+            "testDescription": "The controller is an API controller with an attribute route.",
             "feedback": "The attribute enables automatic model validation and problem details. Add it to the controller."
+        },
+        {
+            "id": "controller-base",
+            "description": "Treating ControllerBase as the view-aware base class.",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that ControllerBase renders Razor views.",
+            "feedback": "ControllerBase is the API base class. Controller adds view helpers that an HTTP API does not need.",
+            "followUpSkill": "aspnet.middleware"
         }
     ],
     "lesson": {
@@ -155,7 +177,10 @@
                     "kind": "static",
                     "description": "The controller is an API controller with an attribute route.",
                     "file": "ProductsController.cs",
-                    "includes": ["[ApiController]", "[Route(\"api/[controller]\")]"],
+                    "includes": [
+                        "[ApiController]",
+                        "[Route(\"api/[controller]\")]"
+                    ],
                     "excludes": []
                 },
                 {
@@ -172,17 +197,37 @@
                     "kind": "static",
                     "description": "A missing product becomes a 404.",
                     "file": "ProductsController.cs",
-                    "includes": ["return NotFound();", "return product;"],
-                    "excludes": ["return _service.Find(id)!;"]
+                    "includes": [
+                        "return NotFound();",
+                        "return product;"
+                    ],
+                    "excludes": [
+                        "return _service.Find(id)!;"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductsController.cs",
-                    "includes": ["[ApiController]"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "[ApiController]"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Keep the existing route and the {id:int} constraint.",
+                "Add [ApiController] above the class declaration.",
+                "Return ActionResult<Product> instead of Product.",
+                "Return NotFound() when the service returns null, otherwise return the product."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet test",
+                "description": "Restore, build, and run the ASP.NET Core test project."
+            }
         },
         {
             "kind": "explain",
@@ -217,7 +262,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "The API controller attribute turns on API conventions, the attribute route binds the action, and ActionResult<Product> makes success and failure explicit. A null return is still a 200 response with an empty body."
+            "explanation": "The API controller attribute turns on API conventions, the attribute route binds the action, and ActionResult<Product> makes success and failure explicit. A null return is still a 200 response with an empty body.",
+            "hints": [
+                "Review what [ApiController] enables before judging the statements.",
+                "ActionResult<T> can carry either a value or a status result.",
+                "A null return is still a successful response with an empty body.",
+                "ControllerBase is the API base class; Controller adds view support."
+            ]
         }
     ],
     "evaluation": {
@@ -237,5 +288,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "web"]
+    "tags": [
+        "professional",
+        "web"
+    ]
 }
