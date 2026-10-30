@@ -5,22 +5,14 @@
     "courseId": "fastify",
     "title": "Typed routes in Fastify",
     "summary": "Register a route with typed params and a response schema that shapes the payload.",
-    "skills": [
-        "fastify.routing"
-    ],
-    "prerequisites": [
-        "node.hono",
-        "http.basics"
-    ],
+    "skills": ["fastify.routing"],
+    "prerequisites": ["node.hono", "http.basics"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:fastify"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
     "hints": [
         "Pass Params and Reply to app.get as type arguments.",
         "Put the route path first and the options object second.",
@@ -180,41 +163,29 @@
                     "kind": "static",
                     "description": "The route declares params and response schemas.",
                     "file": "server.ts",
-                    "includes": [
-                        "params: {",
-                        "response: {"
-                    ],
+                    "includes": ["params: {", "response: {"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The handler looks up the product by the typed param.",
                     "file": "server.ts",
-                    "includes": [
-                        "request.params.id",
-                        "products.find"
-                    ],
+                    "includes": ["request.params.id", "products.find"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "A missing product answers 404 through the reply object.",
                     "file": "server.ts",
-                    "includes": [
-                        "reply.status(404).send({ error: \"not_found\" })"
-                    ],
+                    "includes": ["reply.status(404).send({ error: \"not_found\" })"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "server.ts",
-                    "includes": [
-                        "Fastify({ logger: false })"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["Fastify({ logger: false })"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -283,8 +254,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
