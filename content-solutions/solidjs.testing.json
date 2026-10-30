@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "cartStore.ts": "type CartLine = { sku: string; quantity: number };\ntype CartAction =\n  | { type: \"add\"; line: CartLine }\n  | { type: \"remove\"; sku: string }\n  | { type: \"clear\" };\n\nfunction reduceCart(lines: CartLine[], action: CartAction): CartLine[] {\n  switch (action.type) {\n    case \"add\": {\n      const existing = lines.find((line) => line.sku === action.line.sku);\n      if (existing === undefined) {\n        return [...lines, action.line];\n      }\n      return lines.map((line) =>\n        line.sku === action.line.sku\n          ? { ...line, quantity: line.quantity + action.line.quantity }\n          : line,\n      );\n    }\n    case \"remove\":\n      return lines.filter((line) => line.sku !== action.sku);\n    case \"clear\":\n      return [];\n    default:\n      return lines;\n  }\n}\n"
+            }
+        }
+    }
+}
