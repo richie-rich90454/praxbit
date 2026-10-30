@@ -1,0 +1,281 @@
+{
+    "id": "express.auth",
+    "version": 1,
+    "sequence": 227,
+    "courseId": "express",
+    "title": "Session checks and role middleware",
+    "summary": "Separate missing identity from a missing role, then review middleware that throws for anonymous requests and hides the difference.",
+    "skills": ["security.auth", "express.middleware", "express.errors"],
+    "prerequisites": ["express.middleware", "security.auth"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "auth",
+        "briefing": "The admin write route returns 403 for every denied request, including anonymous ones. A missing session also crashes the middleware before it can answer."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Return distinct decisions for anonymous and unauthorized users.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review session middleware for identity and role risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:express"],
+    "hints": [
+        "Check for a null session before reading the role.",
+        "An anonymous request gets 401, not 403.",
+        "A signed-in non-admin gets 403.",
+        "Return the user id only on the allowed branch."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-allow",
+            "description": "Allowing a write when the session is missing.",
+            "stepId": "apply",
+            "testDescription": "Anonymous requests receive 401.",
+            "feedback": "A missing session is not an admin. Return 401 so the client knows to sign in instead of retrying the same request.",
+            "followUpSkill": "security.auth"
+        },
+        {
+            "id": "wrong-status",
+            "description": "Using 403 for an anonymous request.",
+            "stepId": "apply",
+            "testDescription": "Signed-in members receive 403.",
+            "feedback": "403 means the caller is known but forbidden. An anonymous caller needs 401 so the client can start sign-in.",
+            "followUpSkill": "express.middleware"
+        },
+        {
+            "id": "ship-no-session",
+            "description": "Shipping role middleware without a session null check.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Reading role from an undefined session throws before the response is written. The missing session check and the wrong status are blocking defects.",
+            "followUpSkill": "express.errors"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Authenticate, then authorize",
+                "body": "Authentication answers who the caller is. Authorization answers whether that caller may perform this action. Missing identity is 401; a known caller without the role is 403."
+            },
+            {
+                "title": "Session middleware runs first",
+                "body": "The session must be loaded before the role check. Reading request.session.user without a session middleware or a null check throws for anonymous requests."
+            },
+            {
+                "title": "Deny by default",
+                "body": "A guard or middleware that calls next() without checking the session protects nothing. The authorized branch should be the explicit exception."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Authentication",
+                "definition": "Establishing which user sent the request."
+            },
+            {
+                "term": "Authorization",
+                "definition": "Deciding whether that user may perform the action."
+            },
+            {
+                "term": "401",
+                "definition": "The request has no valid identity and should sign in."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Identity, roles, and statuses",
+            "prompt": "Read the explanation, then implement the authorization decision.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Authenticate, then authorize",
+                    "body": "Authentication answers who the caller is. Authorization answers whether that caller may perform this action. Missing identity is 401; a known caller without the role is 403."
+                },
+                {
+                    "title": "Session middleware runs first",
+                    "body": "The session must be loaded before the role check. Reading request.session.user without a session middleware or a null check throws for anonymous requests."
+                },
+                {
+                    "title": "Deny by default",
+                    "body": "A guard or middleware that calls next() without checking the session protects nothing. The authorized branch should be the explicit exception."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Authentication",
+                    "definition": "Establishing which user sent the request."
+                },
+                {
+                    "term": "Authorization",
+                    "definition": "Deciding whether that user may perform the action."
+                },
+                {
+                    "term": "401",
+                    "definition": "The request has no valid identity and should sign in."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Decide whether a write is allowed",
+            "prompt": "Edit auth.ts. Return 401 for a null session, 403 for a signed-in non-admin, and 200 with the user id for an admin.",
+            "evidence": "construction",
+            "hints": [
+                "Use user === null as the first branch.",
+                "Check user.role after the null branch.",
+                "Return 403 without a user id for a member.",
+                "Return the admin id only after the role check."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "auth.ts",
+                    "content": "type SessionUser = { id: string; role: \"member\" | \"admin\" } | null;\ntype AuthDecision =\n  | { status: 200; userId: string }\n  | { status: 401 }\n  | { status: 403 };\n\nfunction authorizeWrite(user: SessionUser): AuthDecision {\n  // TODO: return 401 for no session, 403 for a non-admin, and 200 for an admin\n  return { status: 200, userId: user?.id ?? \"anonymous\" };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "auth.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Anonymous requests receive 401.",
+                    "name": "authorizeWrite",
+                    "args": [null],
+                    "expected": {
+                        "status": 401
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Signed-in members receive 403.",
+                    "name": "authorizeWrite",
+                    "args": [
+                        {
+                            "id": "u1",
+                            "role": "member"
+                        }
+                    ],
+                    "expected": {
+                        "status": 403
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Admins receive 200 with their id.",
+                    "name": "authorizeWrite",
+                    "args": [
+                        {
+                            "id": "u2",
+                            "role": "admin"
+                        }
+                    ],
+                    "expected": {
+                        "status": 200,
+                        "userId": "u2"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the admin middleware",
+            "prompt": "Review auth.ts and select every real identity, status, or ordering problem.",
+            "evidence": "transfer",
+            "hints": [
+                "Trace what happens when request.session is undefined.",
+                "Compare 401 and 403 semantics for an anonymous caller.",
+                "Check whether the authorized branch calls next().",
+                "Keep only findings the artifact actually demonstrates."
+            ],
+            "artifact": {
+                "title": "auth.ts",
+                "caption": "The middleware reads role from a possibly missing session and answers 403 for anonymous requests.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import type { NextFunction, Request, Response } from \"express\";\n\nexport function requireAdmin(request: Request, response: Response, next: NextFunction): void {\n  const user = request.session?.user;\n  if (user.role !== \"admin\") {\n    response.status(403).json({ error: \"admin_required\" });\n    return;\n  }\n  next();\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "null-session",
+                    "label": "An anonymous request throws when reading user.role because session.user can be undefined.",
+                    "correct": true
+                },
+                {
+                    "id": "status",
+                    "label": "An anonymous request receives 403 instead of 401, so the client cannot tell sign-in from forbidden.",
+                    "correct": true
+                },
+                {
+                    "id": "next",
+                    "label": "The authorized path calls next() and does not write a response itself.",
+                    "correct": false
+                },
+                {
+                    "id": "body",
+                    "label": "The middleware reads the role from the request body instead of the session.",
+                    "correct": false
+                },
+                {
+                    "id": "session",
+                    "label": "The middleware assumes the session middleware has already populated request.session.",
+                    "correct": true
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The optional chain on request.session stops at undefined, then user.role throws. Anonymous callers should get 401, not 403. The authorized branch does call next(), and the role comes from the session rather than the body."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
