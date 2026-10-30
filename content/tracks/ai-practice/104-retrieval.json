@@ -5,23 +5,14 @@
     "courseId": "ai-practice",
     "title": "Retrieve, rank, and cite before answering",
     "summary": "Chunk with overlap, rank by similarity, keep retrieved text untrusted, and answer only with cited sources.",
-    "skills": [
-        "ai.rag",
-        "ai.evaluation"
-    ],
-    "prerequisites": [
-        "ai.foundations",
-        "concept.data"
-    ],
+    "skills": ["ai.rag", "ai.evaluation"],
+    "prerequisites": ["ai.foundations", "concept.data"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:ai"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:ai"],
     "hints": [
         "Step the chunk window forward by size minus overlap.",
         "Score each chunk with cosine and sort the scores descending.",
@@ -224,22 +206,15 @@
                     "kind": "static",
                     "description": "An answer without a cited retrieved chunk is refused.",
                     "file": "rag.ts",
-                    "includes": [
-                        "I do not have a source for that.",
-                        "text.includes("
-                    ],
+                    "includes": ["I do not have a source for that.", "text.includes("],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "rag.ts",
-                    "includes": [
-                        "overlap >= size"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["overlap >= size"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -318,8 +293,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "ai",
-        "professional"
-    ]
+    "tags": ["ai", "professional"]
 }
