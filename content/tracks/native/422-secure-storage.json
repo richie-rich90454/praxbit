@@ -1,0 +1,335 @@
+{
+    "id": "native.secure-storage",
+    "version": 1,
+    "sequence": 422,
+    "courseId": "native",
+    "title": "Secrets belong in the keychain",
+    "summary": "Move credentials out of web storage, gate access with the platform keystore, and review a native token design.",
+    "skills": ["web.browser-apis", "concept.security"],
+    "prerequisites": ["web.browser-apis", "concept.security"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "secure-storage",
+        "briefing": "The campus app stores its refresh token in localStorage, copies it into Preferences for the native shell, and logs it during sync failures. A lost phone should not hand over a session. Replace the storage path with the platform keystore and clear it on logout."
+    },
+    "objectives": [
+        {
+            "id": "review",
+            "description": "Identify credentials in web storage, logs, and plain preferences.",
+            "stepIds": ["storage-review"]
+        },
+        {
+            "id": "write",
+            "description": "Write a keystore-backed token adapter.",
+            "stepIds": ["storage-code"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain keychain access control and credential lifecycle.",
+            "stepIds": ["storage-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:website", "icon:lock"],
+    "hints": [
+        "localStorage and Preferences are readable by the app and its scripts.",
+        "Use Keychain on iOS and Keystore on Android through a secure storage plugin.",
+        "Require device authentication for sensitive reads when the platform supports it.",
+        "Clear the token on logout and never write it to logs."
+    ],
+    "misconceptions": [
+        {
+            "id": "preferences-secure",
+            "description": "Treating Capacitor Preferences as encrypted storage.",
+            "stepId": "storage-review",
+            "answer": "approve:localstorage,log-token,preferences,no-biometric",
+            "feedback": "Preferences is convenience storage, not a credential vault. Use the platform Keychain or Keystore.",
+            "followUpSkill": "web.browser-apis"
+        },
+        {
+            "id": "log-token",
+            "description": "Logging a token to diagnose a sync failure.",
+            "stepId": "storage-code",
+            "testDescription": "Never logs the token.",
+            "feedback": "Logs are copied, shipped, and retained. A token in a log is a live credential; log an error code instead."
+        },
+        {
+            "id": "encrypted-safe",
+            "description": "Believing encryption at rest makes a credential safe to expose.",
+            "stepId": "storage-transfer",
+            "answer": "encrypted-only",
+            "feedback": "Encryption at rest protects a stolen disk, not a running app or a log. Access control and minimization still matter."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Web storage is not a vault",
+                "body": "localStorage and sessionStorage are readable by any script in the page. Capacitor Preferences is a key-value store, not an encrypted credential store. A refresh token there is exposed to XSS and to anyone with file access."
+            },
+            {
+                "title": "Use the platform keystore",
+                "body": "The iOS Keychain and Android Keystore protect credentials with OS access control. A Capacitor secure-storage plugin exposes them to the app. Request device authentication for high-value reads when the platform supports it."
+            },
+            {
+                "title": "Credentials have a lifecycle",
+                "body": "Store only what the app needs, clear it on logout, rotate after suspicion, and never log it. Biometric gating is an access decision, not a replacement for revocation."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Keychain",
+                "definition": "The iOS credential store with OS access control."
+            },
+            {
+                "term": "Keystore",
+                "definition": "The Android system for protected key material and credentials."
+            },
+            {
+                "term": "Refresh token",
+                "definition": "A long-lived credential used to obtain new access tokens."
+            },
+            {
+                "term": "Access control",
+                "definition": "A rule that decides which process or person may read a secret."
+            },
+            {
+                "term": "Revocation",
+                "definition": "Invalidating a credential so it can no longer be used."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Move the secret to the OS",
+            "prompt": "Read the explanation, then review the storage design.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Web storage is not a vault",
+                    "body": "localStorage and sessionStorage are readable by any script in the page. Capacitor Preferences is a key-value store, not an encrypted credential store. A refresh token there is exposed to XSS and to anyone with file access."
+                },
+                {
+                    "title": "Use the platform keystore",
+                    "body": "The iOS Keychain and Android Keystore protect credentials with OS access control. A Capacitor secure-storage plugin exposes them to the app. Request device authentication for high-value reads when the platform supports it."
+                },
+                {
+                    "title": "Credentials have a lifecycle",
+                    "body": "Store only what the app needs, clear it on logout, rotate after suspicion, and never log it. Biometric gating is an access decision, not a replacement for revocation."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Keychain",
+                    "definition": "The iOS credential store with OS access control."
+                },
+                {
+                    "term": "Keystore",
+                    "definition": "The Android system for protected key material and credentials."
+                },
+                {
+                    "term": "Refresh token",
+                    "definition": "A long-lived credential used to obtain new access tokens."
+                },
+                {
+                    "term": "Access control",
+                    "definition": "A rule that decides which process or person may read a secret."
+                },
+                {
+                    "term": "Revocation",
+                    "definition": "Invalidating a credential so it can no longer be used."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "storage-review",
+            "title": "Review the token storage",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Find every place the token is written.",
+                "Check whether any of those places is encrypted by the OS.",
+                "Look at the sync error path.",
+                "Block the design: localStorage, Preferences, logs, and no biometric gate all expose the token."
+            ],
+            "artifact": {
+                "title": "native.ts",
+                "caption": "Session storage in the Capacitor shell.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "async function saveSession(token: string): Promise<void> {\n  localStorage.setItem(\"refreshToken\", token);\n  await Preferences.set({ key: \"refreshToken\", value: token });\n  await Preferences.set({ key: \"biometricEnabled\", value: \"true\" });\n}\n\nasync function sync(): Promise<void> {\n  try {\n    await api.sync();\n  } catch (error) {\n    console.error(\"sync failed\", { token: localStorage.getItem(\"refreshToken\"), error });\n  }\n}"
+            },
+            "findings": [
+                {
+                    "id": "localstorage",
+                    "label": "The refresh token is stored in localStorage.",
+                    "correct": true
+                },
+                {
+                    "id": "log-token",
+                    "label": "A sync failure logs the refresh token.",
+                    "correct": true
+                },
+                {
+                    "id": "preferences",
+                    "label": "Preferences stores the token in plain app storage, not the OS keystore.",
+                    "correct": true
+                },
+                {
+                    "id": "no-biometric",
+                    "label": "A biometric flag in Preferences does not gate access to the token.",
+                    "correct": true
+                },
+                {
+                    "id": "encrypted",
+                    "label": "Preferences encrypts credentials with the device keystore.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the storage design"
+                },
+                {
+                    "id": "block",
+                    "label": "Block until the token uses the keystore and leaves logs and web storage"
+                },
+                {
+                    "id": "warn",
+                    "label": "Only add a warning banner"
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The token is copied into two plain stores and a log. It belongs in the platform keystore with an access-control policy and no logging."
+        },
+        {
+            "kind": "code",
+            "id": "storage-code",
+            "title": "Write the keystore adapter",
+            "prompt": "Edit storage.ts. saveToken, readToken, and clearToken must use the app's SecureStorage adapter, require device authentication for reads, clear the token on logout, and never log it.",
+            "evidence": "construction",
+            "hints": [
+                "Import the secure storage plugin instead of Preferences or localStorage.",
+                "Set an access-control option that requires device authentication.",
+                "Clear the key on logout.",
+                "Log only an error code, never the token value."
+            ],
+            "language": "text",
+            "files": [
+                {
+                    "path": "storage.ts",
+                    "content": "import { Preferences } from \"@capacitor/preferences\";\n\n// TODO: store credentials in the platform keystore.\nexport async function saveToken(token: string): Promise<void> {\n  await Preferences.set({ key: \"refreshToken\", value: token });\n  console.log(\"saved token\", token);\n}\n\nexport async function readToken(): Promise<string | null> {\n  const { value } = await Preferences.get({ key: \"refreshToken\" });\n  return value;\n}\n\nexport async function clearToken(): Promise<void> {\n  await Preferences.remove({ key: \"refreshToken\" });\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "storage.ts",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the structural checks that exercise this storage adapter."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Uses the platform secure storage plugin.",
+                    "file": "storage.ts",
+                    "includes": ["SecureStorage", "set(", "get(", "remove("],
+                    "excludes": ["localStorage", "Preferences"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Requires device authentication for reads.",
+                    "file": "storage.ts",
+                    "includes": ["accessControl", "biometric"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Never logs the token.",
+                    "file": "storage.ts",
+                    "includes": ["clearToken"],
+                    "excludes": ["console.log(token", "console.error(token", "log(\"saved token\""]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "storage.ts",
+                    "includes": ["SecureStorage"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "storage-transfer",
+            "title": "Protect the credential lifecycle",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "The OS keystore protects secrets better than a web store.",
+                "Logging a secret makes it persistent.",
+                "Biometric access is separate from revocation.",
+                "Select keystore storage, access control, logout clearing, and no logging; reject encryption as total safety."
+            ],
+            "statements": [
+                {
+                    "id": "keystore",
+                    "label": "The Keychain and Keystore provide OS-level access control for credentials.",
+                    "correct": true
+                },
+                {
+                    "id": "logout",
+                    "label": "Logout should clear the stored token and revoke the session when possible.",
+                    "correct": true
+                },
+                {
+                    "id": "logs",
+                    "label": "Tokens must never be written to application logs.",
+                    "correct": true
+                },
+                {
+                    "id": "biometric",
+                    "label": "Device authentication can gate a read but does not replace revocation.",
+                    "correct": true
+                },
+                {
+                    "id": "encrypted-only",
+                    "label": "Encryption at rest makes it safe to expose a token in logs.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Credential safety combines OS-protected storage, access control, clearing on logout, revocation, and keeping secrets out of logs."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
