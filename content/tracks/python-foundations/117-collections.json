@@ -5,23 +5,14 @@
     "courseId": "python-foundations",
     "title": "Shape data with collections",
     "summary": "Summarize a list of order dictionaries into a count and total.",
-    "skills": [
-        "python.data"
-    ],
-    "prerequisites": [
-        "python.control",
-        "python.functions"
-    ],
+    "skills": ["python.data"],
+    "prerequisites": ["python.control", "python.functions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-python",
-        "capabilities": [
-            "pyodide-wasm",
-            "source-editing",
-            "deterministic-tests"
-        ]
+        "capabilities": ["pyodide-wasm", "source-editing", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:python"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:python"],
     "hints": [
         "Initialize count and total before the loop.",
         "Iterate over orders.",
@@ -190,9 +172,7 @@
                     "kind": "function",
                     "description": "An empty list produces zeros.",
                     "name": "summarize",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": {
                         "count": 0,
                         "total": 0
@@ -260,8 +240,5 @@
         "screenReaderNotes": "Each test announces its arguments, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "ai",
-        "professional"
-    ]
+    "tags": ["ai", "professional"]
 }
