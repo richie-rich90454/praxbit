@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.kt": "data class Item(val name: String, val units: Int)\n\nfun restockNeeded(items: List<Item>, threshold: Int): List<String> =\n    items.filter { it.units < threshold }\n        .map { it.name }\n        .sorted()\n\nfun main() {\n    val items = listOf(Item(\"bolts\", 2), Item(\"nuts\", 9), Item(\"washers\", 1))\n    println(restockNeeded(items, 3))\n}\n"
+            }
+        }
+    }
+}
