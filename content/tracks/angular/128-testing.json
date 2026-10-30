@@ -1,0 +1,289 @@
+{
+    "id": "angular.testing",
+    "version": 1,
+    "sequence": 223,
+    "courseId": "angular",
+    "title": "Test the HTTP boundary",
+    "summary": "Map cart responses to explicit success and failure results, then design tests that cover unauthorized, failed, and malformed responses.",
+    "skills": ["concept.testing", "angular.services", "testing.boundaries"],
+    "prerequisites": ["angular.services", "concept.testing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "testing",
+        "briefing": "The cart summary shows an empty cart for every failure. The team wants the response mapping tested before changing the service again."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Map status and body values to explicit results.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-design",
+            "description": "Select the HTTP boundary cases that need tests.",
+            "stepIds": ["design"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
+    "hints": [
+        "Check the status before trusting the body.",
+        "Map 401 to a sign-in message.",
+        "Map every other 4xx and 5xx to a request failure.",
+        "Reject a success body that is not an array."
+    ],
+    "misconceptions": [
+        {
+            "id": "status-ignored",
+            "description": "Returning success without reading the status.",
+            "stepId": "apply",
+            "testDescription": "A 401 response asks the user to sign in.",
+            "feedback": "A response body is only meaningful for a successful status. Check the status first so an error page is not parsed as cart data.",
+            "followUpSkill": "angular.services"
+        },
+        {
+            "id": "invalid-body",
+            "description": "Casting any body to an array.",
+            "stepId": "apply",
+            "testDescription": "A non-array success body is rejected.",
+            "feedback": "TypeScript casts do not validate JSON. Check Array.isArray before returning success or the template will fail on a non-array value.",
+            "followUpSkill": "testing.boundaries"
+        },
+        {
+            "id": "happy-path-only",
+            "description": "Testing only the 200 response.",
+            "stepId": "design",
+            "answer": "happy",
+            "feedback": "The failures are the behavior users report. A suite that only covers 200 never proves the 401, 5xx, or malformed-body branches.",
+            "followUpSkill": "concept.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "HTTP is a boundary",
+                "body": "HttpClient returns an observable, but the status and body still need interpretation. Map 401, 5xx, and malformed payloads to explicit results before the component renders them."
+            },
+            {
+                "title": "Test the mapper, not the network",
+                "body": "A pure response mapper can be tested with status and body values. That covers the failure paths without a TestBed, an interceptor, or a live server."
+            },
+            {
+                "title": "TestBed tests need async care",
+                "body": "A component test that subscribes must await the observable or use a fixture that resolves it. A synchronous assertion often checks the loading state and passes for the wrong reason."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Mapper",
+                "definition": "A function that converts a transport response into a domain result."
+            },
+            {
+                "term": "TestBed",
+                "definition": "Angular's test environment for configuring modules and components."
+            },
+            {
+                "term": "Marble test",
+                "definition": "A test that models observable emissions over virtual time."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Response mapping and boundary tests",
+            "prompt": "Read the explanation, then implement the mapper.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "HTTP is a boundary",
+                    "body": "HttpClient returns an observable, but the status and body still need interpretation. Map 401, 5xx, and malformed payloads to explicit results before the component renders them."
+                },
+                {
+                    "title": "Test the mapper, not the network",
+                    "body": "A pure response mapper can be tested with status and body values. That covers the failure paths without a TestBed, an interceptor, or a live server."
+                },
+                {
+                    "title": "TestBed tests need async care",
+                    "body": "A component test that subscribes must await the observable or use a fixture that resolves it. A synchronous assertion often checks the loading state and passes for the wrong reason."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Mapper",
+                    "definition": "A function that converts a transport response into a domain result."
+                },
+                {
+                    "term": "TestBed",
+                    "definition": "Angular's test environment for configuring modules and components."
+                },
+                {
+                    "term": "Marble test",
+                    "definition": "A test that models observable emissions over virtual time."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Map cart responses",
+            "prompt": "Edit cart-response.ts. Return sign_in for 401, request_failed for other error statuses, invalid_body for a non-array success body, and lines for valid data.",
+            "evidence": "construction",
+            "hints": [
+                "Handle 401 before the general error range.",
+                "Use status >= 400 for the general failure branch.",
+                "Check Array.isArray(body) before returning ok.",
+                "Return the typed union so every branch names its message."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "cart-response.ts",
+                    "content": "type CartLine = { sku: string; quantity: number };\ntype CartResult =\n  | { ok: true; lines: CartLine[] }\n  | { ok: false; message: string };\n\nfunction readCartResponse(status: number, body: unknown): CartResult {\n  // TODO: map 401, other failures, and malformed bodies before returning success\n  return { ok: true, lines: body as CartLine[] };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "cart-response.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "A 401 response asks the user to sign in.",
+                    "name": "readCartResponse",
+                    "args": [401, null],
+                    "expected": {
+                        "ok": false,
+                        "message": "sign_in"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A 500 response reports a request failure.",
+                    "name": "readCartResponse",
+                    "args": [
+                        500,
+                        {
+                            "error": "boom"
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "message": "request_failed"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A non-array success body is rejected.",
+                    "name": "readCartResponse",
+                    "args": [
+                        200,
+                        {
+                            "lines": []
+                        }
+                    ],
+                    "expected": {
+                        "ok": false,
+                        "message": "invalid_body"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A valid success body becomes cart lines.",
+                    "name": "readCartResponse",
+                    "args": [
+                        200,
+                        [
+                            {
+                                "sku": "pen",
+                                "quantity": 2
+                            }
+                        ]
+                    ],
+                    "expected": {
+                        "ok": true,
+                        "lines": [
+                            {
+                                "sku": "pen",
+                                "quantity": 2
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "test-design",
+            "id": "design",
+            "title": "Design the HTTP boundary tests",
+            "prompt": "Select every case the cart response tests need. Leave out cases that avoid the failure paths.",
+            "evidence": "transfer",
+            "hints": [
+                "Cover success, unauthorized, server failure, and malformed success.",
+                "Assert the mapped result, not the transport object.",
+                "Reject a suite that only exercises 200.",
+                "Keep cases that map directly to a branch in the function."
+            ],
+            "cases": [
+                {
+                    "id": "success",
+                    "label": "Returns parsed lines for a 200 response with a valid array.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "unauthorized",
+                    "label": "Maps 401 to a sign-in message.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "server",
+                    "label": "Maps 500 to a request failure message.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "malformed",
+                    "label": "Rejects a 200 response whose body is not an array.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "happy",
+                    "label": "Only tests the 200 path.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "snapshot",
+                    "label": "Asserts the raw HttpResponse object instead of the mapped result.",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The mapper has four observable outcomes: success, unauthorized, general failure, and malformed success. A happy-path-only suite and raw HttpResponse assertions do not prove those branches."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
