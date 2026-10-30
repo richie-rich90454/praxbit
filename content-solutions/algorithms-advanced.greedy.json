@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "meetings-code": {
+            "files": {
+                "meetings.js": "function maxMeetings(intervals) {\n  if (intervals.length === 0) return 0;\n  const sorted = [...intervals].sort(function byFinish(left, right) {\n    return left[1] - right[1] || left[0] - right[0];\n  });\n  let count = 0;\n  let end = -Infinity;\n  for (const interval of sorted) {\n    if (interval[0] >= end) {\n      count += 1;\n      end = interval[1];\n    }\n  }\n  return count;\n}\n"
+            }
+        }
+    }
+}
