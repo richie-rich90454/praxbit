@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "span-code": {
+            "files": {
+                "instrument.ts": "import { tracer } from \"./tracing\";\n\nexport async function handleCheckout(request: Request): Promise<Response> {\n    const span = tracer.startSpan(\"checkout\");\n    span.setAttribute(\"service\", \"orders-api\");\n    span.setAttribute(\"route\", \"/checkout\");\n    span.setAttribute(\"requestId\", request.headers.get(\"x-request-id\") ?? \"unknown\");\n    try {\n        return await processCheckout(request);\n    } catch (error) {\n        span.recordException(error);\n        throw error;\n    } finally {\n        span.end();\n    }\n}\n"
+            }
+        }
+    }
+}
