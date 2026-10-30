@@ -1,18 +1,29 @@
 {
     "id": "react.routing",
     "version": 1,
-    "sequence": 216,
+    "sequence": 127,
     "courseId": "react",
     "title": "Accessible routing and guarded routes",
     "summary": "Model route access as a pure decision, then review a router that lets anonymous visitors reach checkout and loses focus after navigation.",
-    "skills": ["web.routing", "web.accessibility", "react.components"],
-    "prerequisites": ["react.components", "web.html"],
+    "skills": [
+        "web.routing",
+        "web.accessibility",
+        "react.components"
+    ],
+    "prerequisites": [
+        "react.components",
+        "web.html"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-guard",
             "description": "Implement allow, deny, and redirect decisions for routes.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review a router for access and accessibility risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:react"
+    ],
     "hints": [
         "Decide the public route first; it never needs a user.",
         "For protected routes, return false when the user is null.",
@@ -348,5 +368,7 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
