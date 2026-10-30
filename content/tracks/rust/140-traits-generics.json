@@ -1,0 +1,330 @@
+{
+    "id": "rust.traits-generics",
+    "version": 1,
+    "sequence": 97,
+    "courseId": "rust",
+    "title": "Bound a generic with a trait",
+    "summary": "Implement a trait and constrain a generic function to it.",
+    "skills": [
+        "rust.traits"
+    ],
+    "prerequisites": [
+        "rust.syntax",
+        "rust.ownership"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "rust-traits",
+        "briefing": "A telemetry formatter calls describe on a generic type without declaring the requirement. Add the trait bound and implement the trait for the local record type."
+    },
+    "objectives": [
+        {
+            "id": "add-bound",
+            "description": "Constrain a generic function with a trait bound.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-bound",
+            "description": "Choose a standard trait bound for formatted output.",
+            "stepIds": [
+                "trait-transfer"
+            ]
+        },
+        {
+            "id": "explain-traits",
+            "description": "Explain static dispatch, trait objects, and coherence accurately.",
+            "stepIds": [
+                "trait-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:rust"
+    ],
+    "hints": [
+        "The generic function calls a method that T does not guarantee.",
+        "Declare the trait before the function.",
+        "Add T: Describable to the type parameter.",
+        "Use items.iter().map(|item| item.describe()).collect()."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-bound",
+            "description": "Calling a trait method without a trait bound.",
+            "stepId": "apply",
+            "testDescription": "The generic function declares a Describable bound.",
+            "feedback": "A generic T has no methods unless a bound grants them. Add T: Describable so the call is valid.",
+            "followUpSkill": "rust.traits"
+        },
+        {
+            "id": "clone-bound",
+            "description": "Choosing Clone when the function needs formatted output.",
+            "stepId": "trait-transfer",
+            "answer": "clone",
+            "feedback": "Clone copies values but does not provide formatting. std::fmt::Display is the trait for user-facing text.",
+            "followUpSkill": "rust.traits"
+        },
+        {
+            "id": "dyn-free",
+            "description": "Believing dyn Trait has no runtime cost.",
+            "stepId": "trait-check",
+            "answer": "dyn-free",
+            "feedback": "A trait object dispatches through a vtable and cannot be inlined as readily as a monomorphized generic.",
+            "followUpSkill": "rust.traits"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Traits describe shared behavior",
+                "body": "A trait declares methods that types can implement. A generic function can require a trait bound, so it works for every type that provides the behavior while keeping compile-time checks. Monomorphization generates a specialized function for each concrete type."
+            },
+            {
+                "title": "Static and dynamic dispatch are different tools",
+                "body": "A generic bound uses static dispatch and is checked at compile time. dyn Trait uses a vtable and dynamic dispatch when the concrete type is not known at compile time. Dynamic dispatch has a small runtime cost and requires an object-safe trait."
+            },
+            {
+                "title": "Orphan rules keep implementations coherent",
+                "body": "You can implement a trait for a type when either the trait or the type is local to the crate. This prevents two crates from adding conflicting implementations for a foreign type. Default methods let a trait provide behavior that implementers can override."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Trait",
+                "definition": "A set of behavior that a type can implement."
+            },
+            {
+                "term": "Trait bound",
+                "definition": "A requirement that a generic type implement a trait."
+            },
+            {
+                "term": "Monomorphization",
+                "definition": "Generating a specialized function for each concrete generic type."
+            },
+            {
+                "term": "dyn Trait",
+                "definition": "A trait object that dispatches through a vtable at runtime."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Traits describe shared behavior",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Traits describe shared behavior",
+                    "body": "A trait declares methods that types can implement. A generic function can require a trait bound, so it works for every type that provides the behavior while keeping compile-time checks. Monomorphization generates a specialized function for each concrete type."
+                },
+                {
+                    "title": "Static and dynamic dispatch are different tools",
+                    "body": "A generic bound uses static dispatch and is checked at compile time. dyn Trait uses a vtable and dynamic dispatch when the concrete type is not known at compile time. Dynamic dispatch has a small runtime cost and requires an object-safe trait."
+                },
+                {
+                    "title": "Orphan rules keep implementations coherent",
+                    "body": "You can implement a trait for a type when either the trait or the type is local to the crate. This prevents two crates from adding conflicting implementations for a foreign type. Default methods let a trait provide behavior that implementers can override."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Trait",
+                    "definition": "A set of behavior that a type can implement."
+                },
+                {
+                    "term": "Trait bound",
+                    "definition": "A requirement that a generic type implement a trait."
+                },
+                {
+                    "term": "Monomorphization",
+                    "definition": "Generating a specialized function for each concrete generic type."
+                },
+                {
+                    "term": "dyn Trait",
+                    "definition": "A trait object that dispatches through a vtable at runtime."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Add the trait bound",
+            "prompt": "Edit src/main.rs. Implement Describable for Article and constrain describe_all so it can call describe on every item.",
+            "evidence": "construction",
+            "language": "rust",
+            "files": [
+                {
+                    "path": "src/main.rs",
+                    "content": "trait Describable {\n    fn describe(&self) -> String;\n}\n\nstruct Article {\n    title: String,\n}\n\nfn describe_all<T>(items: &[T]) -> Vec<String> {\n    // TODO: require Describable\n    items.iter().map(|item| item.describe()).collect()\n}\n\nfn main() {\n    let article = Article { title: String::from(\"Campus power\") };\n    println!(\"{:?}\", describe_all(&[article]));\n}\n",
+                    "editable": true,
+                    "language": "rust"
+                },
+                {
+                    "path": "Cargo.toml",
+                    "content": "[package]\nname = \"campus-check\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n",
+                    "editable": false,
+                    "language": "toml"
+                }
+            ],
+            "entry": "src/main.rs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile and test the crate with Cargo."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The generic function declares a Describable bound.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "fn describe_all<T: Describable>(items: &[T]) -> Vec<String>"
+                    ],
+                    "excludes": [
+                        "fn describe_all<T>(items: &[T])"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Article implements the trait.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "impl Describable for Article",
+                        "fn describe(&self) -> String"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter TODO is gone.",
+                    "file": "src/main.rs",
+                    "includes": [
+                        "trait Describable"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The compiler cannot call describe on an unconstrained T.",
+                "Add T: Describable to the generic parameter.",
+                "Implement Describable for Article.",
+                "Return the title from describe."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "trait-transfer",
+            "title": "Choose the formatting bound",
+            "prompt": "A function prints any value with {}. Which standard trait bound does it need?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the bound.",
+                "options": [
+                    {
+                        "id": "display",
+                        "label": "T: std::fmt::Display"
+                    },
+                    {
+                        "id": "clone",
+                        "label": "T: Clone"
+                    },
+                    {
+                        "id": "static",
+                        "label": "T: 'static"
+                    },
+                    {
+                        "id": "none",
+                        "label": "No bound; every type can be formatted"
+                    }
+                ],
+                "correctId": "display",
+                "explanation": "Display is the trait for user-facing formatting with {}. Clone and 'static say nothing about formatting."
+            },
+            "hints": [
+                "The {} format specifier uses a specific trait.",
+                "Clone copies values; it does not format them.",
+                "The trait lives in std::fmt.",
+                "Choose T: std::fmt::Display."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "trait-check",
+            "title": "Dispatch and coherence",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "mono",
+                    "label": "A generic function is monomorphized for each concrete type.",
+                    "correct": true
+                },
+                {
+                    "id": "dyn",
+                    "label": "dyn Trait dispatches through a vtable at runtime.",
+                    "correct": true
+                },
+                {
+                    "id": "dyn-free",
+                    "label": "dyn Trait has no runtime cost.",
+                    "correct": false
+                },
+                {
+                    "id": "orphan",
+                    "label": "The orphan rule prevents conflicting foreign implementations.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Generics use static dispatch, trait objects use dynamic dispatch with a cost, and the orphan rule keeps implementations coherent across crates.",
+            "hints": [
+                "Three statements are accurate.",
+                "A vtable lookup is not free.",
+                "The orphan rule is about coherence.",
+                "Select mono, dyn, and orphan."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": [
+            "rust.lifetimes"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
