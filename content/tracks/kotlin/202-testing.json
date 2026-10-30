@@ -1,0 +1,342 @@
+{
+    "version": 1,
+    "courseId": "kotlin",
+    "prerequisites": [
+        "kotlin.syntax",
+        "concept.testing"
+    ],
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "config-parser",
+        "briefing": "A campus service reads port values from small config lines. Bad input must be reported as absent, not crash the process."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ],
+    "accessibility": {
+        "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "kotlin.testing",
+    "sequence": 202,
+    "title": "Validate configuration without exceptions",
+    "summary": "Turn malformed port text into null instead of an exception, then diagnose a fallback that hides bad configuration.",
+    "skills": [
+        "kotlin.tooling",
+        "kotlin.syntax"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Parse a boundary value without throwing.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Diagnose an exception used for ordinary input.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Apply the accepted range to a new config line.",
+            "stepIds": [
+                "boundary"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:kotlin"
+    ],
+    "hints": [
+        "substringAfter with a missing delimiter returns the whole string, so pass a default.",
+        "toIntOrNull returns null instead of throwing.",
+        "Valid TCP ports are 1 through 65535.",
+        "Return the parsed value only when it is in range."
+    ],
+    "misconceptions": [
+        {
+            "id": "exception-input",
+            "description": "Using toInt and letting malformed input throw.",
+            "stepId": "apply",
+            "testDescription": "Invalid text and out-of-range ports become null.",
+            "feedback": "Malformed config is ordinary input, not an exceptional program state. toIntOrNull makes the failure a value the caller must handle.",
+            "followUpSkill": "kotlin.syntax"
+        },
+        {
+            "id": "sentinel-port",
+            "description": "Catching the parse failure and returning a sentinel port.",
+            "stepId": "apply",
+            "diagnostic": "Catching NumberFormatException and returning -1 so the service starts with a bad port.",
+            "feedback": "A sentinel travels through the service and fails later. Return null or a typed result so the caller decides.",
+            "followUpSkill": "kotlin.tooling"
+        },
+        {
+            "id": "zero-fallback",
+            "description": "Treating a parse failure as port zero.",
+            "stepId": "diagnose",
+            "answer": "catch-zero",
+            "feedback": "Port zero is not a valid listening port. A silent fallback moves the failure away from the bad line."
+        },
+        {
+            "id": "accept-zero",
+            "description": "Accepting zero because the integer parsed successfully.",
+            "stepId": "boundary",
+            "answer": "zero",
+            "feedback": "Parsing succeeded, but zero is outside the accepted 1..65535 range. Validate the meaning after parsing the syntax."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Parse, then validate",
+                "body": "String.toInt() throws NumberFormatException when the text is not an integer. String.toIntOrNull() returns Int? instead, which keeps malformed input in the ordinary return path. After parsing, check the meaning: a TCP port is valid only from 1 through 65535. The two failures are different, but both can be represented as null when the caller only needs a usable port."
+            },
+            {
+                "title": "Exceptions are for exceptional boundaries",
+                "body": "Kotlin exceptions are unchecked. require(condition) { message } throws IllegalArgumentException, check throws IllegalStateException, and runCatching wraps a throw in a Result. Use exceptions when the caller cannot continue and a null when absence is an expected answer. Do not catch an exception only to return a magic number."
+            },
+            {
+                "title": "Small functions are testable",
+                "body": "A pure function such as parsePort(line: String): Int? can be tested with kotlin.test assertions and a table of boundary inputs: valid, zero, 65535, 65536, and text. Gradle runs the suite with ./gradlew test, while kotlinc compiles a standalone file for a quick check."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "toIntOrNull",
+                "definition": "A conversion that returns null instead of throwing on malformed text."
+            },
+            {
+                "term": "require",
+                "definition": "A standard-library check that throws IllegalArgumentException when false."
+            },
+            {
+                "term": "kotlin.test",
+                "definition": "The multiplatform assertion library used by Kotlin test suites."
+            },
+            {
+                "term": "Gradle",
+                "definition": "The build tool that compiles, tests, and packages Kotlin JVM projects."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Parsing and validation",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Parse, then validate",
+                    "body": "String.toInt() throws NumberFormatException when the text is not an integer. String.toIntOrNull() returns Int? instead, which keeps malformed input in the ordinary return path. After parsing, check the meaning: a TCP port is valid only from 1 through 65535. The two failures are different, but both can be represented as null when the caller only needs a usable port."
+                },
+                {
+                    "title": "Exceptions are for exceptional boundaries",
+                    "body": "Kotlin exceptions are unchecked. require(condition) { message } throws IllegalArgumentException, check throws IllegalStateException, and runCatching wraps a throw in a Result. Use exceptions when the caller cannot continue and a null when absence is an expected answer. Do not catch an exception only to return a magic number."
+                },
+                {
+                    "title": "Small functions are testable",
+                    "body": "A pure function such as parsePort(line: String): Int? can be tested with kotlin.test assertions and a table of boundary inputs: valid, zero, 65535, 65536, and text. Gradle runs the suite with ./gradlew test, while kotlinc compiles a standalone file for a quick check."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "toIntOrNull",
+                    "definition": "A conversion that returns null instead of throwing on malformed text."
+                },
+                {
+                    "term": "require",
+                    "definition": "A standard-library check that throws IllegalArgumentException when false."
+                },
+                {
+                    "term": "kotlin.test",
+                    "definition": "The multiplatform assertion library used by Kotlin test suites."
+                },
+                {
+                    "term": "Gradle",
+                    "definition": "The build tool that compiles, tests, and packages Kotlin JVM projects."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Parse a port line",
+            "prompt": "Edit Main.kt. parsePort returns the port when the line contains an integer from 1 through 65535, and null otherwise.",
+            "evidence": "construction",
+            "hints": [
+                "Read the value after port= and trim surrounding space.",
+                "Use toIntOrNull rather than toInt.",
+                "Return null when the conversion fails.",
+                "Check the accepted range before returning."
+            ],
+            "language": "kotlin",
+            "files": [
+                {
+                    "path": "Main.kt",
+                    "content": "fun parsePort(line: String): Int? {\n    val raw = line.substringAfter(\"port=\", \"\").trim()\n    return raw.toInt() // TODO: return null for invalid or out-of-range ports\n}\n\nfun main() {\n    println(parsePort(\"port=8080\"))\n    println(parsePort(\"port=nope\"))\n}\n",
+                    "editable": true,
+                    "language": "kotlin"
+                }
+            ],
+            "entry": "Main.kt",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "kotlinc Main.kt -include-runtime -d main.jar && java -jar main.jar",
+                "description": "Compiles the file with kotlinc and runs it, so a malformed line would throw if toInt were still used."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps a nullable Int result.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "fun parsePort(line: String): Int?"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Invalid text and out-of-range ports become null.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "toIntOrNull()",
+                        "in 1..65535",
+                        "?: return null"
+                    ],
+                    "excludes": [
+                        "return raw.toInt()"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "fun parsePort"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The silent sentinel",
+            "prompt": "The service starts on a bad port after a malformed line. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The parse itself is where malformed text becomes an exception.",
+                "A fallback of zero is still a port the service may try to bind.",
+                "The caller needs absence, not a magic value.",
+                "Use toIntOrNull and return null on failure."
+            ],
+            "instructions": [
+                {
+                    "id": "read",
+                    "label": "val raw = line.substringAfter(\"port=\", \"\").trim()"
+                },
+                {
+                    "id": "convert",
+                    "label": "val port = runCatching { raw.toInt() }.getOrDefault(0)"
+                },
+                {
+                    "id": "return",
+                    "label": "return port"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "convert",
+            "fixes": [
+                {
+                    "id": "nullable",
+                    "label": "Use raw.toIntOrNull() and return null when it is null."
+                },
+                {
+                    "id": "catch-zero",
+                    "label": "Catch the exception and return 0."
+                },
+                {
+                    "id": "rethrow",
+                    "label": "Catch NumberFormatException and rethrow it unchanged."
+                }
+            ],
+            "correctFixId": "nullable",
+            "explanation": "runCatching with getOrDefault(0) erases the failure and hands the service an invalid port. toIntOrNull keeps the failure visible, and the range check rejects zero as well."
+        },
+        {
+            "kind": "quiz",
+            "id": "boundary",
+            "title": "The zero boundary",
+            "prompt": "A config line reads port=0. parsePort accepts only 1 through 65535. What should it return?",
+            "evidence": "transfer",
+            "hints": [
+                "The text is a valid integer, so this is not a parse failure.",
+                "The range starts at 1.",
+                "Zero cannot be a listening port here.",
+                "Return null because no valid port exists."
+            ],
+            "quiz": {
+                "prompt": "A config line reads port=0. parsePort accepts only 1 through 65535. What should it return?",
+                "options": [
+                    {
+                        "id": "null",
+                        "label": "null"
+                    },
+                    {
+                        "id": "zero",
+                        "label": "0"
+                    },
+                    {
+                        "id": "max",
+                        "label": "65535"
+                    },
+                    {
+                        "id": "throw",
+                        "label": "Throw NumberFormatException."
+                    }
+                ],
+                "correctId": "null",
+                "explanation": "Zero parses as an integer but is outside the accepted port range. Returning null represents the absence of a usable port, while substituting 65535 invents a value."
+            }
+        }
+    ]
+}
