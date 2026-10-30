@@ -5,25 +5,14 @@
     "courseId": "javascript",
     "title": "DOM events and handlers",
     "summary": "Respond to user input with event listeners and state updates.",
-    "skills": [
-        "js.events",
-        "js.functions",
-        "web.html"
-    ],
-    "prerequisites": [
-        "js.functions",
-        "web.html"
-    ],
+    "skills": ["js.events", "js.functions", "web.html"],
+    "prerequisites": ["js.functions", "web.html"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -35,24 +24,15 @@
         {
             "id": "handler",
             "description": "Implement an event handler that updates state.",
-            "stepIds": [
-                "implement-handler"
-            ]
+            "stepIds": ["implement-handler"]
         },
         {
             "id": "events",
             "description": "Explain event flow and listeners.",
-            "stepIds": [
-                "event-claims"
-            ]
+            "stepIds": ["event-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:event"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:event"],
     "hints": [
         "Keep cart state in a variable.",
         "Increment on each call.",
@@ -157,27 +137,21 @@
                     "kind": "function",
                     "description": "Returns the updated cart count.",
                     "name": "addToCart",
-                    "args": [
-                        0
-                    ],
+                    "args": [0],
                     "expected": 1
                 },
                 {
                     "kind": "function",
                     "description": "Increments an existing count.",
                     "name": "addToCart",
-                    "args": [
-                        3
-                    ],
+                    "args": [3],
                     "expected": 4
                 },
                 {
                     "kind": "function",
                     "description": "Handles a negative starting count.",
                     "name": "addToCart",
-                    "args": [
-                        -1
-                    ],
+                    "args": [-1],
                     "expected": 0
                 }
             ],
@@ -243,7 +217,5 @@
         "screenReaderNotes": "Each test announces its description and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
