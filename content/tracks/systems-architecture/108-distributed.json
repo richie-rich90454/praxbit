@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "timeout-is-failure",
-            "description": "Treating a timeout as proof that the write did not land.",
+            "description": "Treating a timeout as proof the operation did not happen.",
             "stepId": "apply",
-            "feedback": "The write may have committed before the response was lost. Reuse one idempotency key so the retry returns the original result instead of repeating the effect."
+            "testDescription": "Each attempt has a deadline and cancels its request.",
+            "feedback": "A timeout means the result is unknown. Retry with the same idempotency key so a duplicate charge is not created.",
+            "followUpSkill": "architecture.distributed"
         },
         {
             "id": "retry-forever",
-            "description": "Retrying without a cap or delay.",
+            "description": "Retrying without a cap or backoff.",
             "stepId": "review",
-            "feedback": "A failing dependency receives more load from retries exactly when it can handle less. Cap attempts, add backoff with jitter, and honor backpressure."
+            "answer": "ship:no-key,unbounded,http-status,timeout",
+            "feedback": "Unbounded retries amplify an outage. Cap attempts, back off with jitter, and retry only transient failures."
         },
         {
             "id": "at-least-once-once",
-            "description": "Assuming at-least-once delivery means one delivery.",
+            "description": "Assuming at-least-once delivery happens only once.",
             "stepId": "apply",
-            "feedback": "At-least-once permits duplicates. The handler must be idempotent or deduplicate by key so a repeated delivery has one effect."
+            "testDescription": "One idempotency key is reused for every attempt.",
+            "feedback": "At-least-once means duplicates are possible. Reusing one idempotency key lets the receiver collapse them."
         }
     ],
     "lesson": {
@@ -235,7 +239,18 @@
                     "includes": ["const idempotencyKey = crypto.randomUUID();"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Give retries one stable idempotency key.",
+                "Bound every attempt with a deadline and cancel the request.",
+                "Cap attempts and add backoff with jitter.",
+                "State read-your-writes, quorum overlap, and at-least-once delivery explicitly."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -292,7 +307,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "A lost response is indistinguishable from a failed charge, and the retry has no key, so the server cannot deduplicate it. The loop also retries forever, ignores HTTP error statuses because fetch resolves on them, and can wait indefinitely without a deadline."
+            "explanation": "A lost response is indistinguishable from a failed charge, and the retry has no key, so the server cannot deduplicate it. The loop also retries forever, ignores HTTP error statuses because fetch resolves on them, and can wait indefinitely without a deadline.",
+            "hints": [
+                "Find the retry path and the identity it uses.",
+                "Check for an unbounded retry loop.",
+                "Ask which failures are safe to retry.",
+                "Block the charge path: no idempotency key, unbounded retries, and a retryable-looking 4xx."
+            ]
         }
     ],
     "evaluation": {
