@@ -31,13 +31,20 @@ export interface DraftRow {
     readonly updatedAt: string;
 }
 
+export interface OutboxConflict {
+    readonly code: string | undefined;
+    readonly message: string | undefined;
+    readonly at: string;
+}
+
 export interface OutboxRow {
     readonly seq?: number;
     readonly operationId: string;
     readonly operation: SyncOperation;
     readonly queuedAt: string;
     readonly attempts: number;
-    readonly lastError?: string;
+    readonly lastError?: string | undefined;
+    readonly conflict?: OutboxConflict | undefined;
 }
 
 export interface ProjectRow {
