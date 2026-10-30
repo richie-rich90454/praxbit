@@ -1,18 +1,27 @@
 {
     "id": "devops.monitoring",
-    "version": 1,
-    "sequence": 409,
+    "version": 2,
+    "sequence": 58,
     "courseId": "devops",
     "title": "Alert on symptoms, not noise",
     "summary": "Compute availability from request data, review noisy alert rules, and reason about SLOs and error budgets.",
-    "skills": ["api.observability", "ops.deployment"],
-    "prerequisites": ["devops.ci", "api.observability"],
+    "skills": [
+        "api.observability",
+        "ops.deployment"
+    ],
+    "prerequisites": [
+        "devops.ci"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": ["source-editing", "sql-execution", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "sql-execution",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +33,31 @@
         {
             "id": "query",
             "description": "Compute availability and error counts per service.",
-            "stepIds": ["slo-query"]
+            "stepIds": [
+                "slo-query"
+            ]
         },
         {
             "id": "review",
             "description": "Identify noisy and missing alert conditions.",
-            "stepIds": ["alert-review"]
+            "stepIds": [
+                "alert-review"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain symptoms, SLOs, burn rate, and cardinality.",
-            "stepIds": ["monitoring-transfer"]
+            "stepIds": [
+                "monitoring-transfer"
+            ]
         }
     ],
-    "assets": ["pip:observing", "scene:campus", "system:server-room", "icon:chart"],
+    "assets": [
+        "pip:observing",
+        "scene:campus",
+        "system:server-room",
+        "icon:chart"
+    ],
     "hints": [
         "Availability is successful requests divided by all requests.",
         "Treat 5xx responses as errors; 4xx responses are usually client errors.",
@@ -182,9 +202,24 @@
                     "kind": "sql",
                     "description": "Reports availability per service.",
                     "expectedRows": [
-                        ["api", 4, 1, 0.75],
-                        ["web", 2, 1, 0.5],
-                        ["worker", 1, 0, 1]
+                        [
+                            "api",
+                            4,
+                            1,
+                            0.75
+                        ],
+                        [
+                            "web",
+                            2,
+                            1,
+                            0.5
+                        ],
+                        [
+                            "worker",
+                            1,
+                            0,
+                            1
+                        ]
                     ]
                 }
             ]
@@ -311,5 +346,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
