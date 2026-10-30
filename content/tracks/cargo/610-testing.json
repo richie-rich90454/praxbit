@@ -1,0 +1,358 @@
+{
+    "id": "cargo.testing",
+    "version": 1,
+    "sequence": 179,
+    "courseId": "cargo",
+    "title": "Tests, features, and failure cases",
+    "summary": "Return typed errors, cover both failure variants in an integration test, and run the suite with all features.",
+    "skills": [
+        "cargo.packages",
+        "rust.cargo"
+    ],
+    "prerequisites": [
+        "cargo.packages",
+        "rust.syntax"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "cargo-testing",
+        "briefing": "The quantity parser hides every failure behind a default zero, and the test suite only checks the happy path. Return typed errors, cover both variants, and run the suite with every feature."
+    },
+    "objectives": [
+        {
+            "id": "objective-errors",
+            "description": "Return typed errors instead of silently defaulting.",
+            "stepIds": [
+                "lib"
+            ]
+        },
+        {
+            "id": "objective-tests",
+            "description": "Cover success and both failure variants in an integration test.",
+            "stepIds": [
+                "tests"
+            ]
+        },
+        {
+            "id": "objective-features",
+            "description": "Explain which tests a default cargo test run compiles.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:server-room",
+        "icon:cargo"
+    ],
+    "hints": [
+        "Use map_err to turn a parse failure into QuantityError::NotANumber.",
+        "Check for zero after a successful parse.",
+        "Integration tests live under tests/ and use the public API.",
+        "Run cargo test --all-features when code is feature-gated."
+    ],
+    "misconceptions": [
+        {
+            "id": "swallow-error",
+            "description": "Returning a default value instead of the parse error.",
+            "stepId": "lib",
+            "testDescription": "Non-numeric input becomes a typed parse error.",
+            "feedback": "unwrap_or(0) erases the failure and reports a successful zero. Use map_err to preserve the typed error.",
+            "followUpSkill": "rust.cargo"
+        },
+        {
+            "id": "zero-ok",
+            "description": "Treating zero as a valid parsed quantity.",
+            "stepId": "lib",
+            "testDescription": "Zero is rejected with its own error.",
+            "feedback": "The parse succeeds for 0, so the domain check has to reject it explicitly with QuantityError::Zero."
+        },
+        {
+            "id": "happy-only",
+            "description": "Testing only a successful parse.",
+            "stepId": "tests",
+            "testDescription": "Both failure variants are asserted.",
+            "feedback": "A test suite that only proves success cannot catch a swallowed error. Assert NotANumber and Zero.",
+            "followUpSkill": "rust.cargo"
+        },
+        {
+            "id": "default-only",
+            "description": "Assuming cargo test compiles feature-gated tests.",
+            "stepId": "transfer",
+            "answer": "default-run",
+            "feedback": "A cfg-gated test module is not compiled unless the feature is enabled. Use cargo test --all-features or a feature matrix.",
+            "followUpSkill": "cargo.packages"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Errors are part of the API",
+                "body": "A Result<u32, QuantityError> tells the caller that parsing can fail and which failures are possible. Returning a default value with unwrap_or makes invalid input look successful. map_err converts a ParseIntError into the domain error while keeping the ? operator."
+            },
+            {
+                "title": "Unit tests and integration tests",
+                "body": "Tests inside a module can reach private items. Files under tests/ compile as separate crates and can only use the public API, which makes them a good check that the exported surface is usable. Cargo builds and runs both when you run cargo test."
+            },
+            {
+                "title": "Features determine what compiles",
+                "body": "Code behind #[cfg(feature = \"cli\")] is removed from the crate when the feature is off. A default cargo test run never sees those tests. CI should run cargo test --all-features or a matrix that covers each feature."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Result",
+                "definition": "The Rust type that carries either a success value or an error."
+            },
+            {
+                "term": "Integration test",
+                "definition": "A test under tests/ that compiles against the crate's public API."
+            },
+            {
+                "term": "Feature gate",
+                "definition": "A cfg condition that includes code only when a feature is enabled."
+            },
+            {
+                "term": "all-features",
+                "definition": "The Cargo flag that enables every declared feature for a build or test."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Typed errors and feature-gated tests",
+            "prompt": "Read the explanation, then fix the parser and extend the test suite.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Errors are part of the API",
+                    "body": "A Result<u32, QuantityError> tells the caller that parsing can fail and which failures are possible. Returning a default value with unwrap_or makes invalid input look successful. map_err converts a ParseIntError into the domain error while keeping the ? operator."
+                },
+                {
+                    "title": "Unit tests and integration tests",
+                    "body": "Tests inside a module can reach private items. Files under tests/ compile as separate crates and can only use the public API, which makes them a good check that the exported surface is usable. Cargo builds and runs both when you run cargo test."
+                },
+                {
+                    "title": "Features determine what compiles",
+                    "body": "Code behind #[cfg(feature = \"cli\")] is removed from the crate when the feature is off. A default cargo test run never sees those tests. CI should run cargo test --all-features or a matrix that covers each feature."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Result",
+                    "definition": "The Rust type that carries either a success value or an error."
+                },
+                {
+                    "term": "Integration test",
+                    "definition": "A test under tests/ that compiles against the crate's public API."
+                },
+                {
+                    "term": "Feature gate",
+                    "definition": "A cfg condition that includes code only when a feature is enabled."
+                },
+                {
+                    "term": "all-features",
+                    "definition": "The Cargo flag that enables every declared feature for a build or test."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "lib",
+            "title": "Return typed quantity errors",
+            "prompt": "Edit src/lib.rs. Parse the number, convert a parse failure to QuantityError::NotANumber, and reject zero with QuantityError::Zero.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the public Result signature.",
+                "Call input.parse::<u32>() and use ? after map_err.",
+                "Check the parsed value for zero.",
+                "Return the typed error, not a default value."
+            ],
+            "files": [
+                {
+                    "path": "src/lib.rs",
+                    "content": "pub fn parse_quantity(input: &str) -> Result<u32, QuantityError> {\n    // TODO: reject zero and non-numeric input with a typed error\n    Ok(input.parse().unwrap_or(0))\n}\n\n#[derive(Debug, PartialEq)]\npub enum QuantityError {\n    NotANumber,\n    Zero,\n}\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "src/lib.rs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile the crate and run its unit and integration tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Non-numeric input becomes a typed parse error.",
+                    "file": "src/lib.rs",
+                    "includes": [
+                        "input.parse::<u32>()",
+                        "map_err(|_| QuantityError::NotANumber)"
+                    ],
+                    "excludes": [
+                        "unwrap_or(0)"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Zero is rejected with its own error.",
+                    "file": "src/lib.rs",
+                    "includes": [
+                        "if quantity == 0",
+                        "return Err(QuantityError::Zero);"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The public function keeps its Result contract.",
+                    "file": "src/lib.rs",
+                    "includes": [
+                        "pub fn parse_quantity(input: &str) -> Result<u32, QuantityError>"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "code",
+            "id": "tests",
+            "title": "Cover both failure variants",
+            "prompt": "Edit tests/quantity.rs. Keep the success case and add integration tests for zero and non-numeric input.",
+            "evidence": "testing",
+            "hints": [
+                "Import the public error type or qualify it with the crate name.",
+                "Assert that parsing 0 equals Err(QuantityError::Zero).",
+                "Assert that parsing many equals Err(QuantityError::NotANumber).",
+                "Use assert_eq! so a wrong variant is reported clearly."
+            ],
+            "files": [
+                {
+                    "path": "tests/quantity.rs",
+                    "content": "use campus_core::parse_quantity;\n\n#[test]\nfn parses_a_quantity() {\n    // TODO: assert the success and failure cases\n    assert_eq!(parse_quantity(\"4\").unwrap(), 4);\n}\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "tests/quantity.rs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Run the integration tests against the public crate API."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The integration test uses the public crate API.",
+                    "file": "tests/quantity.rs",
+                    "includes": [
+                        "use campus_core::parse_quantity;"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The success case remains covered.",
+                    "file": "tests/quantity.rs",
+                    "includes": [
+                        "assert_eq!(parse_quantity(\"4\").unwrap(), 4);"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Both failure variants are asserted.",
+                    "file": "tests/quantity.rs",
+                    "includes": [
+                        "parse_quantity(\"0\")",
+                        "QuantityError::Zero",
+                        "parse_quantity(\"many\")",
+                        "QuantityError::NotANumber"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a feature-gated suite",
+            "prompt": "The quantity tests are inside #[cfg(all(test, feature = \"cli\"))], and CI runs cargo test with default features. What does CI miss?",
+            "evidence": "transfer",
+            "hints": [
+                "cfg removes code before compilation.",
+                "A test that is not compiled cannot run.",
+                "Default features exclude non-default features.",
+                "Use --all-features or a feature matrix."
+            ],
+            "quiz": {
+                "prompt": "The quantity tests are inside #[cfg(all(test, feature = \"cli\"))], and CI runs cargo test with default features. What does CI miss?",
+                "options": [
+                    {
+                        "id": "feature-tests",
+                        "label": "The gated tests are not compiled; run cargo test --all-features or a feature matrix."
+                    },
+                    {
+                        "id": "default-run",
+                        "label": "Nothing; cargo test always compiles every feature."
+                    },
+                    {
+                        "id": "integration-only",
+                        "label": "Only the integration tests; unit tests always run."
+                    },
+                    {
+                        "id": "lockfile",
+                        "label": "The lockfile update, which is unrelated to features."
+                    }
+                ],
+                "correctId": "feature-tests",
+                "explanation": "cfg(feature = \"cli\") removes the test module when the feature is off. A default cargo test run never compiles or executes it. CI must enable the feature or cover each feature in a matrix."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
