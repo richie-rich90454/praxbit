@@ -1,17 +1,11 @@
 {
     "version": 1,
     "courseId": "kotlin",
-    "prerequisites": [
-        "kotlin.syntax",
-        "concept.data"
-    ],
+    "prerequisites": ["kotlin.syntax", "concept.data"],
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,9 +25,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ],
+    "tags": ["professional"],
     "accessibility": {
         "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -43,41 +35,27 @@
     "sequence": 102,
     "title": "Data classes and report pipelines",
     "summary": "Model stock records with an immutable data class, then build a sorted restock list and diagnose an inclusive boundary.",
-    "skills": [
-        "kotlin.oop",
-        "kotlin.syntax"
-    ],
+    "skills": ["kotlin.oop", "kotlin.syntax"],
     "difficulty": "beginner",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Build a collection pipeline over immutable records.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find an inclusive comparison that overstocks the warehouse.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Transfer the pipeline to a total-units calculation.",
-            "stepIds": [
-                "total"
-            ]
+            "stepIds": ["total"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:kotlin"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:kotlin"],
     "hints": [
         "A data class generates equals, hashCode, toString, and copy from its constructor properties.",
         "filter keeps the items below the threshold.",
@@ -233,26 +211,15 @@
                     "kind": "static",
                     "description": "The pipeline filters low stock, maps names, and sorts them.",
                     "file": "Main.kt",
-                    "includes": [
-                        "filter { it.units < threshold }",
-                        "map { it.name }",
-                        "sorted()"
-                    ],
-                    "excludes": [
-                        "emptyList()",
-                        "TODO"
-                    ]
+                    "includes": ["filter { it.units < threshold }", "map { it.name }", "sorted()"],
+                    "excludes": ["emptyList()", "TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Main.kt",
-                    "includes": [
-                        "fun restockNeeded"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["fun restockNeeded"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
