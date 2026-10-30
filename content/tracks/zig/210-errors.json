@@ -1,0 +1,343 @@
+{
+    "version": 1,
+    "courseId": "zig",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "robotics",
+        "initialState": "port-parser",
+        "briefing": "A rover console reads a port from a maintenance file. Bad text and out-of-range numbers must be distinguishable."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ],
+    "accessibility": {
+        "summary": "The Zig workspace is keyboard accessible. Checks verify source structure; they do not compile or run Zig.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "zig.errors",
+    "sequence": 210,
+    "title": "Error unions at the input boundary",
+    "summary": "Return typed errors from a port parser, then diagnose a catch that reports every failure as out of range.",
+    "skills": [
+        "zig.syntax"
+    ],
+    "prerequisites": [
+        "zig.syntax",
+        "concept.conditions"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Return typed errors from a parser.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Separate a parse failure from a range failure.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Predict how catch handles a parser error.",
+            "stepIds": [
+                "catch"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:zig"
+    ],
+    "hints": [
+        "An error set names each failure the function can return.",
+        "std.fmt.parseInt returns an error union.",
+        "Use catch return to map a parse failure to InvalidNumber.",
+        "Check the range before casting down to u16."
+    ],
+    "misconceptions": [
+        {
+            "id": "catch-unreachable",
+            "description": "Discarding a parse error with catch unreachable.",
+            "stepId": "apply",
+            "testDescription": "Parse failures return InvalidNumber and the range is checked.",
+            "feedback": "Bad input is not unreachable. Return a typed error or handle the failure explicitly so a malformed file cannot crash the rover console.",
+            "followUpSkill": "zig.syntax"
+        },
+        {
+            "id": "silent-zero",
+            "description": "Turning every parse failure into zero.",
+            "stepId": "apply",
+            "diagnostic": "Using catch 0 so malformed port text becomes a valid-looking zero.",
+            "feedback": "A silent zero erases the difference between bad syntax and a real value. Preserve the error in the return type.",
+            "followUpSkill": "zig.syntax"
+        },
+        {
+            "id": "same-error",
+            "description": "Reporting a parse failure as OutOfRange.",
+            "stepId": "diagnose",
+            "answer": "parse-u16",
+            "feedback": "Parsing text and checking a numeric range are different failures. Keep the parse error separate so the console can explain the input problem.",
+            "followUpSkill": "zig.syntax"
+        },
+        {
+            "id": "catch-assign",
+            "description": "Expecting catch to propagate the error unchanged.",
+            "stepId": "catch",
+            "answer": "propagate",
+            "feedback": "catch handles the error at that expression. Use try when the caller should receive it."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Error sets name failure",
+                "body": "A function can return an error union: PortError!u16, where PortError is an error set such as error{ InvalidNumber, OutOfRange }. The caller must handle both possibilities. Zig errors are values, not exceptions, and the compiler checks that every error is handled or propagated with try."
+            },
+            {
+                "title": "try and catch choose a boundary",
+                "body": "try returns the error to the caller and unwraps the success value. catch handles it on the spot: value = parseInt(...) catch return PortError.InvalidNumber. catch unreachable asserts that failure cannot happen and panics in safe builds if it does, so reserve it for states the type system proves impossible."
+            },
+            {
+                "title": "Validate before narrowing",
+                "body": "std.fmt.parseInt(u32, text, 10) can represent values above a port's range. Parse into the wider type, reject zero and values above 65535, then use @intCast(value) in the u16 return context. Casting first can overflow before the range check."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Error set",
+                "definition": "A named collection of errors a function can return."
+            },
+            {
+                "term": "Error union",
+                "definition": "A return type that carries either a value or an error."
+            },
+            {
+                "term": "try",
+                "definition": "An expression that unwraps a success or returns the error to the caller."
+            },
+            {
+                "term": "catch",
+                "definition": "An expression that handles an error union at the current boundary."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Typed failure in Zig",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Error sets name failure",
+                    "body": "A function can return an error union: PortError!u16, where PortError is an error set such as error{ InvalidNumber, OutOfRange }. The caller must handle both possibilities. Zig errors are values, not exceptions, and the compiler checks that every error is handled or propagated with try."
+                },
+                {
+                    "title": "try and catch choose a boundary",
+                    "body": "try returns the error to the caller and unwraps the success value. catch handles it on the spot: value = parseInt(...) catch return PortError.InvalidNumber. catch unreachable asserts that failure cannot happen and panics in safe builds if it does, so reserve it for states the type system proves impossible."
+                },
+                {
+                    "title": "Validate before narrowing",
+                    "body": "std.fmt.parseInt(u32, text, 10) can represent values above a port's range. Parse into the wider type, reject zero and values above 65535, then use @intCast(value) in the u16 return context. Casting first can overflow before the range check."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Error set",
+                    "definition": "A named collection of errors a function can return."
+                },
+                {
+                    "term": "Error union",
+                    "definition": "A return type that carries either a value or an error."
+                },
+                {
+                    "term": "try",
+                    "definition": "An expression that unwraps a success or returns the error to the caller."
+                },
+                {
+                    "term": "catch",
+                    "definition": "An expression that handles an error union at the current boundary."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Parse a rover port",
+            "prompt": "Edit main.zig. parsePort returns InvalidNumber for malformed text and OutOfRange when the number is zero or above 65535.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the PortError set and the !u16 return type.",
+                "Parse into u32 so large values can be checked.",
+                "Map a parseInt failure to InvalidNumber with catch return.",
+                "Reject zero and values above 65535 before the cast."
+            ],
+            "language": "zig",
+            "files": [
+                {
+                    "path": "main.zig",
+                    "content": "const std = @import(\"std\");\n\nconst PortError = error{ InvalidNumber, OutOfRange };\n\nfn parsePort(text: []const u8) PortError!u16 {\n    const value = std.fmt.parseInt(u32, text, 10) catch 0; // TODO: return InvalidNumber instead\n    if (value == 0) return PortError.OutOfRange;\n    return @intCast(value);\n}\n\npub fn main() void {\n    std.debug.print(\"{any}\\n\", .{parsePort(\"8080\")});\n}\n",
+                    "editable": true,
+                    "language": "zig"
+                }
+            ],
+            "entry": "main.zig",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "zig test main.zig",
+                "description": "Compiles the file and runs its test blocks with the Zig compiler."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The parser keeps the error set and error union.",
+                    "file": "main.zig",
+                    "includes": [
+                        "const PortError = error{ InvalidNumber, OutOfRange };",
+                        "fn parsePort(text: []const u8) PortError!u16"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Parse failures return InvalidNumber and the range is checked.",
+                    "file": "main.zig",
+                    "includes": [
+                        "std.fmt.parseInt(u32, text, 10) catch return PortError.InvalidNumber",
+                        "value > 65535"
+                    ],
+                    "excludes": [
+                        "catch 0",
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "main.zig",
+                    "includes": [
+                        "fn parsePort"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "Every bad port looks out of range",
+            "prompt": "The console reports OutOfRange even when the text is not a number. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The parse failure happens before any range check.",
+                "catch currently maps every parseInt error to OutOfRange.",
+                "Return InvalidNumber from the parse failure.",
+                "Keep the range check for parsed numbers separately."
+            ],
+            "instructions": [
+                {
+                    "id": "parse",
+                    "label": "const value = std.fmt.parseInt(u32, text, 10) catch return PortError.OutOfRange;"
+                },
+                {
+                    "id": "zero",
+                    "label": "if (value == 0) return PortError.OutOfRange;"
+                },
+                {
+                    "id": "cast",
+                    "label": "return @intCast(value);"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "parse",
+            "fixes": [
+                {
+                    "id": "separate",
+                    "label": "Return InvalidNumber from the parse failure, then check the range separately."
+                },
+                {
+                    "id": "parse-u16",
+                    "label": "Parse directly as u16 so overflow cannot happen."
+                },
+                {
+                    "id": "unreachable",
+                    "label": "Use catch unreachable for malformed text."
+                }
+            ],
+            "correctFixId": "separate",
+            "explanation": "The catch maps every parseInt error to OutOfRange, so the console cannot tell bad text from a large number. Parse as u32, map parse failures to InvalidNumber, and check the range on the value."
+        },
+        {
+            "kind": "quiz",
+            "id": "catch",
+            "title": "Catch at the call site",
+            "prompt": "A caller writes `const port = parsePort(text) catch 8080;`. What happens when text is not a number?",
+            "evidence": "transfer",
+            "hints": [
+                "catch handles the error union at this expression.",
+                "The fallback value becomes the expression result.",
+                "No error reaches the caller.",
+                "The port becomes 8080."
+            ],
+            "quiz": {
+                "prompt": "A caller writes `const port = parsePort(text) catch 8080;`. What happens when text is not a number?",
+                "options": [
+                    {
+                        "id": "local",
+                        "label": "The error is handled here and port becomes 8080."
+                    },
+                    {
+                        "id": "propagate",
+                        "label": "The error propagates to the caller of this function."
+                    },
+                    {
+                        "id": "panic",
+                        "label": "The program panics in every build mode."
+                    },
+                    {
+                        "id": "compile",
+                        "label": "The code does not compile because catch needs try."
+                    }
+                ],
+                "correctId": "local",
+                "explanation": "catch consumes the error at that expression and substitutes the fallback. Use try instead when the caller should receive the error."
+            }
+        }
+    ]
+}
