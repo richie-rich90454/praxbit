@@ -5,22 +5,14 @@
     "courseId": "rust",
     "title": "Run async work with Tokio",
     "summary": "Await a future and join spawned tasks on a Tokio runtime.",
-    "skills": [
-        "rust.async"
-    ],
-    "prerequisites": [
-        "rust.traits",
-        "concept.iteration"
-    ],
+    "skills": ["rust.async"],
+    "prerequisites": ["rust.traits", "concept.iteration"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "await-future",
             "description": "Await an async function and join spawned tasks.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "explain-lazy",
             "description": "Explain why calling an async function does not run it.",
-            "stepIds": [
-                "async-transfer"
-            ]
+            "stepIds": ["async-transfer"]
         },
         {
             "id": "explain-tokio",
             "description": "Explain futures, spawning, and blocking accurately.",
-            "stepIds": [
-                "async-check"
-            ]
+            "stepIds": ["async-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:rust"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:rust"],
     "hints": [
         "An async function returns a future until it is awaited.",
         "Annotate main with #[tokio::main] and make it async.",
@@ -196,34 +177,22 @@
                     "kind": "static",
                     "description": "The program uses the Tokio runtime.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "#[tokio::main]",
-                        "async fn main()"
-                    ],
+                    "includes": ["#[tokio::main]", "async fn main()"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The async work is awaited before use.",
                     "file": "src/main.rs",
-                    "includes": [
-                        ".await"
-                    ],
-                    "excludes": [
-                        "let value = total(\"o1\");"
-                    ]
+                    "includes": [".await"],
+                    "excludes": ["let value = total(\"o1\");"]
                 },
                 {
                     "kind": "static",
                     "description": "Concurrent tasks are spawned and joined.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "tokio::spawn",
-                        "tokio::join!"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["tokio::spawn", "tokio::join!"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -323,7 +292,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
