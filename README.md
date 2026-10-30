@@ -219,7 +219,7 @@ pnpm --filter @praxbit/web cap:open:android
 pnpm --filter @praxbit/web cap:open:ios
 ```
 
-A native build that targets a different API origin sets `VITE_API_BASE_URL` at build time. Without it, native shells use `https://praxbit.bisz.dev/api/v1`. The server's `CORS_ORIGINS` must include `https://localhost` for Android and `capacitor://localhost` for iOS; `.env.production.example` already does. Do not claim a store build from a synced web directory alone; offline API behavior, deep links, notifications, and secure storage still need device testing.
+A native build that targets a different API origin sets `VITE_API_BASE_URL` at build time. Without it, native shells use `https://praxbit.bisz.dev/api/v1`. The server's `CORS_ORIGINS` must include `https://localhost` for Android and `capacitor://localhost` for iOS; `.env.production.example` already does. Native bearer tokens use the iOS Keychain and Android Keystore through `@aparajita/capacitor-secure-storage`; the Preferences fallback applies only when the plugin is missing. Do not claim a store build from a synced web directory alone; offline API behavior, deep links, notifications, and secure storage still need device testing.
 
 ## Local companion
 
