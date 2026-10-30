@@ -1,18 +1,26 @@
 {
     "id": "cargo.workspace",
     "version": 1,
-    "sequence": 98,
+    "sequence": 178,
     "courseId": "cargo",
     "title": "A workspace with shared dependencies",
     "summary": "Split the build into member crates that inherit versions and profiles from the workspace.",
-    "skills": ["cargo.workspace"],
-    "prerequisites": ["cargo.packages", "architecture.modularity"],
+    "skills": [
+        "cargo.workspace"
+    ],
+    "prerequisites": [
+        "cargo.packages",
+        "architecture.modularity"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cargo"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:cargo"
+    ],
     "hints": [
         "List both crate directories in workspace.members.",
         "Keep one serde and serde_json requirement under workspace.dependencies.",
@@ -44,13 +61,17 @@
             "id": "duplicate-version",
             "description": "Pinning serde in each member.",
             "stepId": "apply",
-            "feedback": "Two pins drift apart and the workspace builds against different major versions in one dependency graph. Declare the version once and inherit it."
+            "testDescription": "Dependency versions live once in the workspace.",
+            "feedback": "Two pins drift apart and the workspace builds against different major versions in one dependency graph. Declare the version once and inherit it.",
+            "followUpSkill": "cargo.workspace"
         },
         {
             "id": "wildcard",
             "description": "Using * to avoid version conflicts.",
             "stepId": "review",
-            "feedback": "A wildcard cannot prevent conflicts; it removes the constraint that would surface them. State a compatible range and let the shared lockfile pin the resolution."
+            "diagnostic": "Approving reqwest = \"*\" because Cargo resolves conflicts automatically.",
+            "feedback": "A wildcard cannot prevent conflicts; it removes the constraint that would surface them. State a compatible range and let the shared lockfile pin the resolution.",
+            "followUpSkill": "cargo.workspace"
         }
     ],
     "lesson": {
@@ -138,7 +159,9 @@
                         "members = [\"crates/core\", \"crates/cli\"]",
                         "resolver = \"2\""
                     ],
-                    "excludes": ["members = [\"crates/core\"]"]
+                    "excludes": [
+                        "members = [\"crates/core\"]"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -148,7 +171,9 @@
                         "serde = { version = \"1.0.203\", features = [\"derive\"] }",
                         "serde_json = \"1.0.117\""
                     ],
-                    "excludes": ["serde = \"1.0.199\""]
+                    "excludes": [
+                        "serde = \"1.0.199\""
+                    ]
                 },
                 {
                     "kind": "static",
@@ -159,23 +184,44 @@
                         "serde.workspace = true",
                         "serde_json.workspace = true"
                     ],
-                    "excludes": ["serde = \"1.0.203\""]
+                    "excludes": [
+                        "serde = \"1.0.203\""
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The release profile is shared by every member.",
                     "file": "Cargo.toml",
-                    "includes": ["[profile.release]", "lto = \"thin\"", "codegen-units = 1"],
+                    "includes": [
+                        "[profile.release]",
+                        "lto = \"thin\"",
+                        "codegen-units = 1"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Cargo.toml",
-                    "includes": ["[workspace]"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "[workspace]"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Add both crate directories to workspace.members.",
+                "Keep one serde requirement under workspace.dependencies.",
+                "Members inherit with serde.workspace = true.",
+                "Declare [profile.release] once at the workspace root."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile and run the Rust unit and integration tests."
+            }
         },
         {
             "kind": "review",
@@ -227,7 +273,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "Versions are declared twice and already disagree, so members can compile against different serde releases. A wildcard adds an unbounded dependency, and a regenerated lockfile can silently move it. Move the versions to workspace.dependencies and inherit them."
+            "explanation": "Versions are declared twice and already disagree, so members can compile against different serde releases. A wildcard adds an unbounded dependency, and a regenerated lockfile can silently move it. Move the versions to workspace.dependencies and inherit them.",
+            "hints": [
+                "Compare the member manifests with the workspace manifest.",
+                "Two serde pins already disagree.",
+                "A wildcard removes the constraint that would surface a conflict.",
+                "Members that restate versions do not inherit the workspace pin."
+            ]
         }
     ],
     "evaluation": {
@@ -247,5 +299,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems"]
+    "tags": [
+        "systems"
+    ]
 }
