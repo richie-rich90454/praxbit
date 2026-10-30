@@ -36,7 +36,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "zig.build",
-    "sequence": 211,
+    "sequence": 118,
     "title": "Wire the Zig build steps",
     "summary": "Add an executable module and a test runner to build.zig, then fix a test step that compiles tests without running them.",
     "skills": [
