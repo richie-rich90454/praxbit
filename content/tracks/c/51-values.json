@@ -5,22 +5,14 @@
     "courseId": "c",
     "title": "Values and loops in C",
     "summary": "Compile a small C program that branches and iterates over an array.",
-    "skills": [
-        "c.syntax"
-    ],
-    "prerequisites": [
-        "concept.state",
-        "concept.conditions"
-    ],
+    "skills": ["c.syntax"],
+    "prerequisites": ["concept.state", "concept.conditions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:c"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:c"],
     "hints": [
         "The loop already has the correct bound.",
         "Test the current element before incrementing.",
@@ -154,33 +137,22 @@
                     "kind": "static",
                     "description": "The function keeps the pointer-and-length signature.",
                     "file": "main.c",
-                    "includes": [
-                        "int count_positive(const int *values, int length)"
-                    ],
+                    "includes": ["int count_positive(const int *values, int length)"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The loop reads each value and counts only positives.",
                     "file": "main.c",
-                    "includes": [
-                        "if (values[index] > 0)",
-                        "count += 1;"
-                    ],
-                    "excludes": [
-                        "count += 0"
-                    ]
+                    "includes": ["if (values[index] > 0)", "count += 1;"],
+                    "excludes": ["count += 0"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.c",
-                    "includes": [
-                        "int count_positive(const int *values, int length)"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["int count_positive(const int *values, int length)"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -249,7 +221,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
