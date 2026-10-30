@@ -1,18 +1,27 @@
 {
     "id": "security.supply-chain-incident",
     "version": 1,
-    "sequence": 403,
+    "sequence": 50,
     "courseId": "security",
     "title": "The dependency that shipped a backdoor",
     "summary": "Read a lockfile change for supply-chain risk, order an incident response, and keep the recovery verifiable.",
-    "skills": ["engineering.incident", "concept.security"],
-    "prerequisites": ["security.injection", "git.basics"],
+    "skills": [
+        "engineering.incident",
+        "concept.security"
+    ],
+    "prerequisites": [
+        "security.injection",
+        "git.basics"
+    ],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["configuration-review", "no-execution"]
+        "capabilities": [
+            "configuration-review",
+            "no-execution"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +33,31 @@
         {
             "id": "review-change",
             "description": "Identify the dependency and build risks in the diff.",
-            "stepIds": ["lockfile-review"]
+            "stepIds": [
+                "lockfile-review"
+            ]
         },
         {
             "id": "order-response",
             "description": "Order containment, eradication, recovery, and learning.",
-            "stepIds": ["incident-order"]
+            "stepIds": [
+                "incident-order"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain controls that reduce future supply-chain risk.",
-            "stepIds": ["supply-transfer"]
+            "stepIds": [
+                "supply-transfer"
+            ]
         }
     ],
-    "assets": ["pip:alert", "scene:campus", "system:dev-team", "icon:package"],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:dev-team",
+        "icon:package"
+    ],
     "hints": [
         "A transitive package is still part of your runtime.",
         "Install scripts run with the build job's permissions.",
@@ -247,7 +267,13 @@
                     "label": "Record the timeline and add dependency review controls"
                 }
             ],
-            "correctOrder": ["detect", "contain", "eradicate", "recover", "learn"],
+            "correctOrder": [
+                "detect",
+                "contain",
+                "eradicate",
+                "recover",
+                "learn"
+            ],
             "explanation": "Detection identifies scope. Containment removes access. Eradication removes the malicious artifact. Recovery verifies a clean state, and the review prevents repetition."
         },
         {
@@ -309,5 +335,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
