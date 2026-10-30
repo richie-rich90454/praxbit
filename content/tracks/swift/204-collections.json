@@ -36,7 +36,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "swift.collections",
-    "sequence": 204,
+    "sequence": 107,
     "title": "Structs, dictionaries, and stable reports",
     "summary": "Aggregate sensor readings with value types, then fix a report whose dictionary order changes between runs.",
     "skills": [
