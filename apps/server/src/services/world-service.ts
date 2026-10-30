@@ -7,6 +7,12 @@ import type { QueryExecutor } from "../db/rows.ts";
 import type { WorldRepository } from "../repositories/world-repository.ts";
 import type { AchievementService } from "./achievement-service.ts";
 
+export interface WorldActionOutcome {
+    readonly world: WorldState;
+    readonly changed: boolean;
+    readonly message: string;
+}
+
 export class WorldService {
     private readonly pool: Pool;
     private readonly worlds: WorldRepository;
@@ -31,7 +37,7 @@ export class WorldService {
         readonly expectedVersion: number;
         readonly action: WorldAction;
         readonly now: Date;
-    }): Promise<WorldState> {
+    }): Promise<WorldActionOutcome> {
         return withTransaction(this.pool, this.applyActionWork.bind(this, input));
     }
 
@@ -43,8 +49,8 @@ export class WorldService {
             readonly now: Date;
         },
         client: QueryExecutor,
-    ): Promise<WorldState> {
-        return this.applyActionWithExecutor(client, input);
+    ): Promise<WorldActionOutcome> {
+        return this.applyActionOutcome(client, input);
     }
 
     public async applyActionWithExecutor(
@@ -56,6 +62,19 @@ export class WorldService {
             readonly now: Date;
         },
     ): Promise<WorldState> {
+        const outcome = await this.applyActionOutcome(executor, input);
+        return outcome.world;
+    }
+
+    private async applyActionOutcome(
+        executor: QueryExecutor,
+        input: {
+            readonly userId: string;
+            readonly expectedVersion: number;
+            readonly action: WorldAction;
+            readonly now: Date;
+        },
+    ): Promise<WorldActionOutcome> {
         const locked = await this.worlds.ensureAndLockWorld(executor, input.userId);
         if (locked.version !== input.expectedVersion) {
             throw new AppError(
@@ -66,6 +85,7 @@ export class WorldService {
             );
         }
         const result = applyWorldAction(locked.state, input.action);
+        const lastEntry = result.state.log[result.state.log.length - 1];
         await this.worlds.saveWorld(executor, input.userId, result.state, input.now);
         await this.worlds.recordAction(executor, {
             id: crypto.randomUUID(),
@@ -75,7 +95,13 @@ export class WorldService {
             systemId: input.action.systemId,
             now: input.now,
         });
-        await this.achievements.evaluate(executor, input.userId, input.now);
-        return result.state;
+        if (result.changed) {
+            await this.achievements.evaluate(executor, input.userId, input.now);
+        }
+        return {
+            world: result.state,
+            changed: result.changed,
+            message: lastEntry?.text ?? "No system state changed.",
+        };
     }
 }
