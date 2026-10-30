@@ -30,6 +30,11 @@
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
             "stepIds": ["check"]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Predict the same counting rule on a new sequence.",
+            "stepIds": ["count"]
         }
     ],
     "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:lua"],
@@ -41,16 +46,35 @@
     ],
     "misconceptions": [
         {
+            "id": "nonpositive",
+            "description": "Counting zero as a positive score change.",
+            "stepId": "apply",
+            "testDescription": "The loop counts only values greater than zero.",
+            "feedback": "The condition is value > 0. Zero and negative values must not increment the count.",
+            "followUpSkill": "lua.syntax"
+        },
+        {
             "id": "global",
             "description": "Assigning without local inside a function.",
             "stepId": "apply",
-            "feedback": "An undeclared assignment creates a global. Declare counters and helpers with local unless sharing is intentional."
+            "diagnostic": "Writing count = count + 1 without a local declaration, creating or changing a global.",
+            "feedback": "An undeclared assignment creates a global. Declare counters and helpers with local unless sharing is intentional.",
+            "followUpSkill": "lua.syntax"
         },
         {
-            "id": "ipairs",
-            "description": "Assuming ipairs visits every key.",
-            "stepId": "apply",
-            "feedback": "ipairs stops at the first nil and ignores non-integer keys. Use pairs for a map and ipairs for a sequence."
+            "id": "zero-index",
+            "description": "Assuming Lua table indexes start at zero.",
+            "stepId": "check",
+            "answer": "index",
+            "feedback": "Lua sequence indexes start at 1. Index zero is an ordinary key and is not visited by ipairs.",
+            "followUpSkill": "lua.syntax"
+        },
+        {
+            "id": "count-everything",
+            "description": "Counting every element instead of the positive ones.",
+            "stepId": "count",
+            "answer": "size",
+            "feedback": "The loop increments only for values greater than zero. The table length includes zero and negative values."
         }
     ],
     "lesson": {
@@ -125,6 +149,12 @@
             "title": "Count positive score changes",
             "prompt": "Edit main.lua. count_positive returns how many values are greater than zero.",
             "evidence": "construction",
+            "hints": [
+                "The loop already visits every score.",
+                "Compare the current value with zero.",
+                "Use an if statement around the increment.",
+                "Add if value > 0 then count = count + 1 end inside the loop."
+            ],
             "language": "lua",
             "files": [
                 {
@@ -136,6 +166,11 @@
             ],
             "entry": "main.lua",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "lua main.lua",
+                "description": "Runs the file with the Lua interpreter and prints the count."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -166,6 +201,12 @@
             "title": "Values and loops",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
+            "hints": [
+                "local controls visibility, not type.",
+                "A Lua variable can hold a new type later.",
+                "ipairs follows consecutive integer keys from 1.",
+                "Sequence indexes start at 1 in Lua."
+            ],
             "statements": [
                 {
                     "id": "local",
@@ -189,6 +230,42 @@
                 }
             ],
             "explanation": "Lua is dynamically typed: a name can hold any value, and local controls scope rather than type. Tables are the single compound structure, sequences start at index 1, and ipairs follows that sequence until a nil."
+        },
+        {
+            "kind": "quiz",
+            "id": "count",
+            "title": "Count a new sequence",
+            "prompt": "count_positive receives { 4, 0, -3, 7 }. What does it return?",
+            "evidence": "transfer",
+            "hints": [
+                "The function counts values strictly greater than zero.",
+                "Zero is not counted.",
+                "The negative value is not counted.",
+                "Two values satisfy the condition."
+            ],
+            "quiz": {
+                "prompt": "count_positive receives { 4, 0, -3, 7 }. What does it return?",
+                "options": [
+                    {
+                        "id": "two",
+                        "label": "2"
+                    },
+                    {
+                        "id": "three",
+                        "label": "3, because zero is counted"
+                    },
+                    {
+                        "id": "size",
+                        "label": "4, because the table length is returned"
+                    },
+                    {
+                        "id": "zero",
+                        "label": "0, because the counter starts at zero"
+                    }
+                ],
+                "correctId": "two",
+                "explanation": "Only 4 and 7 are greater than zero, so the count is two."
+            }
         }
     ],
     "evaluation": {
