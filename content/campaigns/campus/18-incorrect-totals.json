@@ -1,6 +1,6 @@
 {
     "id": "campus.incorrect-totals",
-    "version": 1,
+    "version": 2,
     "sequence": 18,
     "courseId": "campus",
     "title": "Incorrect totals",
@@ -49,13 +49,31 @@
             "id": "string-concatenation",
             "description": "Adding prices without converting them to numbers.",
             "stepId": "repair-total",
-            "feedback": "When one operand is a string, + joins text. Convert prices to numbers before arithmetic."
+            "testDescription": "Two decimal prices add correctly.",
+            "feedback": "When one operand is a string, + joins text. Convert prices to numbers before arithmetic.",
+            "followUpSkill": "js.types"
         },
         {
             "id": "float-cents",
             "description": "Assuming decimal arithmetic is exact.",
             "stepId": "repair-total",
+            "testDescription": "Small decimals do not drift.",
             "feedback": "Binary floating point cannot represent every decimal exactly. For money, work in integer cents or round a carefully computed cent value."
+        },
+        {
+            "id": "plus-always-adds",
+            "description": "Assuming + always performs numeric addition.",
+            "stepId": "type-check",
+            "answer": "five",
+            "feedback": "With a string operand, + concatenates. The expression produces the text 23, not the number 5.",
+            "followUpSkill": "js.types"
+        },
+        {
+            "id": "decimals-are-exact",
+            "description": "Believing every decimal fraction is represented exactly in binary floating point.",
+            "stepId": "type-claims",
+            "answer": "exact",
+            "feedback": "Values such as 0.1 have no exact binary representation. Integer cents avoid accumulating that drift."
         }
     ],
     "lesson": {
@@ -88,6 +106,12 @@
         {
             "kind": "code",
             "id": "repair-total",
+            "hints": [
+                "Convert each string price to an integer number of cents, then add.",
+                "Money needs explicit conversion; + concatenates when either operand is a string.",
+                "\"0.10\" + \"0.20\" becomes \"0.100.20\"; parse each value before adding.",
+                "Parse each price, multiply by 100, round to the nearest cent, and accumulate integers."
+            ],
             "title": "Repair the receipt total",
             "prompt": "Edit receipt.js. orderTotalCents(prices) receives string prices and returns an integer cent total. Run the tests.",
             "evidence": "debugging",
@@ -145,7 +169,7 @@
             "id": "type-check",
             "title": "What does + do?",
             "prompt": "What is the value of \"2\" + 3 in JavaScript?",
-            "evidence": "prediction",
+            "evidence": "transfer",
             "quiz": {
                 "prompt": "Choose the result.",
                 "options": [
@@ -170,15 +194,21 @@
                 "explanation": "One operand is a string, so + concatenates: \"2\" + 3 becomes \"23\"."
             },
             "hints": [
-                "One side is text.",
-                "JavaScript converts the other side to text for +.",
-                "The result is the characters 2 and 3 together.",
-                "The result is the string \"23\"."
+                "Apply the JavaScript rules for + with a string and a number.",
+                "If either operand is a string, + concatenates instead of adding.",
+                "\"7\" + 1 produces \"71\", not 8.",
+                "The left operand is the string \"2\", so the result is text, not the number 5."
             ]
         },
         {
             "kind": "explain",
             "id": "type-claims",
+            "hints": [
+                "Select statements about types, conversion, and money.",
+                "External values arrive as text; arithmetic requires explicit numeric conversion.",
+                "0.1 + 0.2 is not exactly 0.3 in binary floating point, which is why cents are safer.",
+                "Two statements are accurate; reject exact decimal representation and the claim that JavaScript never coerces."
+            ],
             "title": "Types and money",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
