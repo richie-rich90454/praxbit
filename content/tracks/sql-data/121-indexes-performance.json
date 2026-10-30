@@ -5,23 +5,14 @@
     "courseId": "sql-data",
     "title": "Index the customer order lookup",
     "summary": "Create a composite index that serves a filtered, ordered query and reason about its cost.",
-    "skills": [
-        "sql.indexes"
-    ],
-    "prerequisites": [
-        "sql.modeling",
-        "sql.queries"
-    ],
+    "skills": ["sql.indexes"],
+    "prerequisites": ["sql.modeling", "sql.queries"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": [
-            "sqlite-wasm",
-            "deterministic-tests",
-            "learning-runtime"
-        ]
+        "capabilities": ["sqlite-wasm", "deterministic-tests", "learning-runtime"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "build-index",
             "description": "Create a composite index in the order the query needs.",
-            "stepIds": [
-                "build-index"
-            ]
+            "stepIds": ["build-index"]
         },
         {
             "id": "transfer-index",
             "description": "Choose an index shape for a new query.",
-            "stepIds": [
-                "index-transfer"
-            ]
+            "stepIds": ["index-transfer"]
         },
         {
             "id": "explain-index",
             "description": "Explain index cost and query planning accurately.",
-            "stepIds": [
-                "index-check"
-            ]
+            "stepIds": ["index-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:database",
-        "icon:index"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:index"],
     "hints": [
         "Look at the filter column and the ordering column in the query.",
         "The equality column should come first in the composite index.",
@@ -186,14 +166,7 @@
                     "kind": "sql",
                     "description": "The index lists customer_id before placed_at.",
                     "verify": "SELECT name FROM pragma_index_info('idx_orders_customer_placed') ORDER BY seqno;",
-                    "expectedRows": [
-                        [
-                            "customer_id"
-                        ],
-                        [
-                            "placed_at"
-                        ]
-                    ]
+                    "expectedRows": [["customer_id"], ["placed_at"]]
                 }
             ],
             "hints": [
@@ -286,9 +259,7 @@
     },
     "rewards": {
         "experience": 130,
-        "unlocks": [
-            "sql.transactions-isolation"
-        ]
+        "unlocks": ["sql.transactions-isolation"]
     },
     "persistence": {
         "kind": "none"
@@ -299,8 +270,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
