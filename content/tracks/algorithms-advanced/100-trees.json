@@ -5,23 +5,14 @@
     "courseId": "algorithms-advanced",
     "title": "Trees and heaps",
     "summary": "Maintain the heap invariant with array indexes, and explain why insertion order can turn a binary search tree into a linked list.",
-    "skills": [
-        "algorithms.sorting",
-        "algorithms.complexity"
-    ],
-    "prerequisites": [
-        "algorithms.arrays",
-        "algorithms.complexity"
-    ],
+    "skills": ["algorithms.sorting", "algorithms.complexity"],
+    "prerequisites": ["algorithms.arrays", "algorithms.complexity"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:algorithms"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:algorithms"],
     "hints": [
         "A new heap value starts at the end of the array and swaps with its parent while it is smaller.",
         "The parent of index i is Math.floor((i - 1) / 2); its children are 2i + 1 and 2i + 2.",
@@ -198,9 +180,7 @@
                         "this.values.push(value);",
                         "this.bubbleUp(this.values.length - 1);"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -213,9 +193,7 @@
                         "this.bubbleDown(0);",
                         "return min;"
                     ],
-                    "excludes": [
-                        ".shift()"
-                    ]
+                    "excludes": [".shift()"]
                 },
                 {
                     "kind": "static",
@@ -242,12 +220,8 @@
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "trees.ts",
-                    "includes": [
-                        "export class MinHeap {"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["export class MinHeap {"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -343,8 +317,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems"
-    ]
+    "tags": ["professional", "systems"]
 }
