@@ -5,25 +5,14 @@
     "courseId": "angular",
     "title": "Guarded lazy checkout routes",
     "summary": "Implement a functional checkout decision, then review a route table that eagerly loads checkout and never guards or titles it.",
-    "skills": [
-        "angular.routing",
-        "web.accessibility",
-        "angular.services"
-    ],
-    "prerequisites": [
-        "angular.services",
-        "web.routing"
-    ],
+    "skills": ["angular.routing", "web.accessibility", "angular.services"],
+    "prerequisites": ["angular.services", "web.routing"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "execution",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "execution", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -35,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Implement a pure functional guard decision.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review route configuration for access, loading, and accessibility.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:angular"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
     "hints": [
         "Check signedIn before itemCount.",
         "Return login for a signed-out visitor.",
@@ -180,40 +160,28 @@
                     "kind": "function",
                     "description": "Signed-out visitors are sent to login.",
                     "name": "checkoutAccess",
-                    "args": [
-                        false,
-                        2
-                    ],
+                    "args": [false, 2],
                     "expected": "login"
                 },
                 {
                     "kind": "function",
                     "description": "Signed-out visitors with an empty cart still go to login.",
                     "name": "checkoutAccess",
-                    "args": [
-                        false,
-                        0
-                    ],
+                    "args": [false, 0],
                     "expected": "login"
                 },
                 {
                     "kind": "function",
                     "description": "An empty cart is sent to the catalog.",
                     "name": "checkoutAccess",
-                    "args": [
-                        true,
-                        0
-                    ],
+                    "args": [true, 0],
                     "expected": "catalog"
                 },
                 {
                     "kind": "function",
                     "description": "A signed-in visitor with items is allowed.",
                     "name": "checkoutAccess",
-                    "args": [
-                        true,
-                        1
-                    ],
+                    "args": [true, 1],
                     "expected": "allow"
                 }
             ]
@@ -299,7 +267,5 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
