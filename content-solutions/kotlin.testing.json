@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.kt": "fun parsePort(line: String): Int? {\n    val raw = line.substringAfter(\"port=\", \"\").trim()\n    val port = raw.toIntOrNull() ?: return null\n    return port.takeIf { it in 1..65535 }\n}\n\nfun main() {\n    println(parsePort(\"port=8080\"))\n    println(parsePort(\"port=nope\"))\n}\n"
+            }
+        }
+    }
+}
