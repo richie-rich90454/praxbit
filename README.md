@@ -182,6 +182,7 @@ pnpm test:e2e             # builds, migrates a disposable schema, and runs all b
 pnpm test:e2e:no-ai       # same suite with AI environment variables removed
 pnpm test:a11y            # Playwright @a11y
 pnpm test:wcag            # Playwright @wcag22
+pnpm test:wcag:report     # per-criterion WCAG evidence table
 pnpm test:visual          # Playwright @visual
 pnpm test:security
 pnpm content:validate
@@ -300,7 +301,7 @@ These are real constraints, not a backlog disguised as a feature list.
 - **Club and competition flows depend on the API.** The UI and service code exist, and the PostgreSQL integration suite covers club membership and verified events. No live club-scale verification has been performed. Local results are not trusted for ranked competition.
 - **Accessibility has an internal WCAG 2.2 AA audit, not third-party certification.** Automated axe checks cover every primary route, the project workspace, mission briefing and completion, keyboard focus, landmarks, heading order, zoom, reflow, text spacing, target size, forced colors, and reduced motion in Chromium, Firefox, and WebKit. The per-criterion audit is in [docs/product/wcag-2.2-aa-audit.md](docs/product/wcag-2.2-aa-audit.md). A vendor screen-reader matrix and formal certification remain external.
 - **Performance is measured locally, not on production hardware.** On the Windows development host (Node 24, local PostgreSQL), `/healthz` handled 20 concurrent learners for 10 seconds: 760 requests, 75.8 requests/second, p50 5.0 ms, p95 11.7 ms, p99 44.5 ms, 0 errors, about 67 MB resident. Treat this as a local baseline, not a capacity guarantee; measure your host alongside existing services.
-- **Browser coverage has limits.** Functional, runtime, offline, and accessibility suites run in Chromium, Firefox, and WebKit. Pixel regression covers the three Chromium viewport projects; Firefox and WebKit are verified functionally and through axe, not through per-engine screenshot baselines. iOS Pyodide memory limits and low-end Android performance are not verified.
+- **Browser coverage has limits.** Functional, runtime, offline, full-stack, accessibility, WCAG, and visual suites run in Chromium, Firefox, and WebKit across desktop, tablet, and mobile viewports. Pixel regression covers the three Chromium viewport projects with Windows and Linux baselines; Firefox and WebKit are verified functionally and through axe, not through per-engine screenshot baselines. iOS Pyodide memory limits and low-end Android performance are not verified.
 - **No email, password reset, OAuth, or parental-consent flow.** Accounts use handles and passwords. There is no email verification or recovery channel. Do not collect personal information from children without the required safeguards.
 - **No public chat or direct messaging.** Clubs use invite codes and structured weekly events. Moderation tooling is foundational, not a complete trust-and-safety system.
 
