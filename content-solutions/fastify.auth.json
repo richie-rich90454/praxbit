@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "authorize.ts": "type Role = \"member\" | \"admin\" | \"auditor\";\n\nfunction canWriteCatalog(role: Role | null, scopes: string[]): boolean {\n  if (role === null) {\n    return false;\n  }\n  if (role !== \"admin\") {\n    return false;\n  }\n  return scopes.includes(\"catalog:write\");\n}\n"
+            }
+        }
+    }
+}
