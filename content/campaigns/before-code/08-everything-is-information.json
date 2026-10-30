@@ -1,6 +1,6 @@
 {
     "id": "before-code.everything-is-information",
-    "version": 1,
+    "version": 2,
     "sequence": 8,
     "courseId": "before-code",
     "title": "Everything is information",
@@ -50,13 +50,23 @@
             "description": "Reading bits in the wrong order.",
             "stepId": "encode",
             "answer": "0001001000010010",
-            "feedback": "The table reads left to right from the most significant bit. Reversing each byte changes every character."
+            "feedback": "The table reads left to right from the most significant bit. Reversing each byte changes every character.",
+            "followUpSkill": "concept.binary"
         },
         {
             "id": "decimal-equals-bits",
             "description": "Treating a decimal digit as one bit.",
             "stepId": "binary-check",
-            "feedback": "A byte has eight bits. The decimal number 8 is not the same as one bit."
+            "answer": "one-digit",
+            "feedback": "A byte has eight bits. The decimal number 8 is not the same as one bit or one byte."
+        },
+        {
+            "id": "wider-is-faster",
+            "description": "Believing bit width is about transmission speed rather than distinct patterns.",
+            "stepId": "binary-transfer",
+            "answer": "speed",
+            "feedback": "Width changes how many patterns can be represented. Speed depends on the channel and protocol, not on the number of symbols alone.",
+            "followUpSkill": "concept.data"
         }
     ],
     "lesson": {
@@ -89,6 +99,12 @@
         {
             "kind": "binary",
             "id": "encode",
+            "hints": [
+                "Set 16 bits so the first byte is H and the second byte is I.",
+                "Each character maps to eight bits; read the table left to right, most significant bit first.",
+                "A is 01000001: one leading zero followed by 1000001. Copy each character's row exactly.",
+                "Write H as 01001000 and I as 01001001, then check that you did not reverse either byte."
+            ],
             "title": "Encode the control message",
             "prompt": "Set every bit so the two bytes encode the message HI. Use the reference table.",
             "evidence": "construction",
@@ -118,6 +134,12 @@
         {
             "kind": "explain",
             "id": "binary-check",
+            "hints": [
+                "Select statements that are true about bits, bytes, and encoding.",
+                "A bit has two states; an encoding agreement gives patterns meaning.",
+                "The same byte could be a letter in one encoding and part of an image in another.",
+                "Two statements are correct; reject the claims that a decimal digit equals a bit and that a byte is always a letter."
+            ],
             "title": "What do the bits mean?",
             "prompt": "Select every accurate statement about bits and encoding.",
             "evidence": "explanation",
@@ -175,10 +197,10 @@
                 "explanation": "A larger set of patterns can represent more symbols. 256 is enough for ASCII and many control codes, though not every writing system."
             },
             "hints": [
-                "Count the possible patterns from eight bits: two choices each.",
-                "More patterns means more possible symbols.",
-                "256 different patterns is enough for a common character set.",
-                "The number of distinct patterns determines how many symbols the encoding can cover."
+                "Focus on how many distinct patterns eight bits provide.",
+                "Bit width determines the size of the representable set, not transmission speed.",
+                "Two bits give four patterns and three bits give eight; eight bits give 256.",
+                "Choose the option about enough distinct patterns for many symbols, not speed or decimal coincidence."
             ]
         }
     ],
