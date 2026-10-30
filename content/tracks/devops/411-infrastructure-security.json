@@ -5,23 +5,14 @@
     "courseId": "devops",
     "title": "Close the door the deploy left open",
     "summary": "Review an exposed deployment, choose least-privilege network rules, and keep secrets and images under control.",
-    "skills": [
-        "ops.permissions",
-        "ops.deployment"
-    ],
-    "prerequisites": [
-        "devops.containers",
-        "ops.permissions"
-    ],
+    "skills": ["ops.permissions", "ops.deployment"],
+    "prerequisites": ["devops.containers", "ops.permissions"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "configuration-review",
-            "no-execution"
-        ]
+        "capabilities": ["configuration-review", "no-execution"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "review",
             "description": "Identify exposed services, secrets, and excessive privileges.",
-            "stepIds": [
-                "exposure-review"
-            ]
+            "stepIds": ["exposure-review"]
         },
         {
             "id": "rules",
             "description": "Choose least-privilege network rules.",
-            "stepIds": [
-                "firewall-rule"
-            ]
+            "stepIds": ["firewall-rule"]
         },
         {
             "id": "transfer",
             "description": "Explain private networking, secret custody, and image trust.",
-            "stepIds": [
-                "infra-transfer"
-            ]
+            "stepIds": ["infra-transfer"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:server-room",
-        "icon:shield"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:shield"],
     "hints": [
         "A published port is reachable from outside the container network.",
         "The database should only accept traffic from the application.",
@@ -369,8 +349,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
