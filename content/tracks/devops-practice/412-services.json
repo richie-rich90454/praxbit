@@ -5,24 +5,14 @@
     "courseId": "devops-practice",
     "title": "Restart is not a diagnosis",
     "summary": "Use a deterministic Linux shell to read a failed unit, fix permissions, clear a port conflict, and verify recovery.",
-    "skills": [
-        "devops.linux",
-        "ops.processes"
-    ],
-    "prerequisites": [
-        "ops.permissions",
-        "concept.filesystems"
-    ],
+    "skills": ["devops.linux", "ops.processes"],
+    "prerequisites": ["ops.permissions", "concept.filesystems"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "terminal",
     "runtime": {
         "kind": "simulated-linux",
-        "capabilities": [
-            "simulated-shell",
-            "service-state",
-            "deterministic-checks"
-        ]
+        "capabilities": ["simulated-shell", "service-state", "deterministic-checks"]
     },
     "scenario": {
         "world": "campus",
@@ -34,52 +24,35 @@
         {
             "id": "inspect",
             "description": "Find the permission failure in the service log.",
-            "stepIds": [
-                "recover"
-            ]
+            "stepIds": ["recover"]
         },
         {
             "id": "permissions",
             "description": "Give the config file the smallest readable mode.",
-            "stepIds": [
-                "recover"
-            ]
+            "stepIds": ["recover"]
         },
         {
             "id": "conflict",
             "description": "Clear the stale process holding the port.",
-            "stepIds": [
-                "recover"
-            ]
+            "stepIds": ["recover"]
         },
         {
             "id": "database",
             "description": "Start the database dependency.",
-            "stepIds": [
-                "recover"
-            ]
+            "stepIds": ["recover"]
         },
         {
             "id": "service",
             "description": "Restart the API and confirm it is running.",
-            "stepIds": [
-                "recover"
-            ]
+            "stepIds": ["recover"]
         },
         {
             "id": "transfer",
             "description": "Apply the diagnosis discipline to a new incident.",
-            "stepIds": [
-                "services-transfer"
-            ]
+            "stepIds": ["services-transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:server-room",
-        "icon:terminal"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:server-room", "icon:terminal"],
     "hints": [
         "Start with journalctl -u orders-api.",
         "Read the file mode before changing it.",
@@ -244,17 +217,13 @@
                         "id": "inventory-db",
                         "name": "inventory-db",
                         "status": "failed",
-                        "logs": [
-                            "[info] database stopped during maintenance"
-                        ]
+                        "logs": ["[info] database stopped during maintenance"]
                     },
                     {
                         "id": "cache",
                         "name": "cache",
                         "status": "running",
-                        "logs": [
-                            "[info] cache listening on 6379"
-                        ]
+                        "logs": ["[info] cache listening on 6379"]
                     }
                 ],
                 "symlinks": [],
@@ -375,8 +344,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
