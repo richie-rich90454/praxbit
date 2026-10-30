@@ -87,11 +87,8 @@ test.describe("opening experience", function openingSuite(): void {
         const external: string[] = [];
         page.on("request", function record(request): void {
             const url = new URL(request.url());
-            if (
-                url.protocol !== "data:" &&
-                url.protocol !== "blob:" &&
-                url.hostname !== "localhost"
-            ) {
+            const loopback = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+            if (url.protocol !== "data:" && url.protocol !== "blob:" && !loopback) {
                 external.push(request.url());
             }
         });
