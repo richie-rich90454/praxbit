@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.swift": "enum QuantityError: Error {\n    case notANumber\n    case notPositive\n}\n\nfunc parseQuantity(_ text: String) throws -> Int {\n    guard let value = Int(text) else {\n        throw QuantityError.notANumber\n    }\n    guard value > 0 else {\n        throw QuantityError.notPositive\n    }\n    return value\n}\n\nlet value = try? parseQuantity(\"12\")\nprint(value ?? -1)\n"
+            }
+        }
+    }
+}
