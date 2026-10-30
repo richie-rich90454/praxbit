@@ -75,6 +75,8 @@ export type MeResponse = z.infer<typeof MeResponseSchema>;
 
 export const WorldResponseSchema = z.strictObject({
     world: WorldStateSchema,
+    changed: z.boolean().optional(),
+    message: z.string().optional(),
 });
 export type WorldResponse = z.infer<typeof WorldResponseSchema>;
 
@@ -83,6 +85,13 @@ export const WorldActionRequestSchema = z.strictObject({
     expectedVersion: z.number().int().nonnegative(),
 });
 export type WorldActionRequest = z.infer<typeof WorldActionRequestSchema>;
+
+export const WorldActionResponseSchema = z.strictObject({
+    world: WorldStateSchema,
+    changed: z.boolean(),
+    message: z.string(),
+});
+export type WorldActionResponse = z.infer<typeof WorldActionResponseSchema>;
 
 export const ProjectRevisionRequestSchema = z.strictObject({
     baseRevision: z.number().int().nonnegative(),
@@ -177,6 +186,16 @@ export const SyncOperationSchema = z.discriminatedUnion("kind", [
         operationId: z.string().min(8).max(80),
         preferences: PreferencesSchema,
     }),
+    z.strictObject({
+        kind: z.literal("progress"),
+        operationId: z.string().min(8).max(80),
+        experience: z.number().int().nonnegative(),
+        streakDays: z.number().int().nonnegative(),
+        longestStreak: z.number().int().nonnegative(),
+        lastPracticeOn: z.iso.date().optional(),
+        placementSkippedSkills: z.array(SkillIdSchema),
+        achievements: z.array(z.string().min(1).max(80)),
+    }),
 ]);
 export type SyncOperation = z.infer<typeof SyncOperationSchema>;
 
@@ -193,6 +212,7 @@ export const SyncResultSchema = z.strictObject({
         "project-revision",
         "mission-completion",
         "preferences",
+        "progress",
     ]),
     status: z.enum(["accepted", "duplicate", "conflict", "rejected"]),
     code: z.string().optional(),
@@ -240,10 +260,38 @@ export const LeaderboardEntrySchema = z.strictObject({
 });
 export type LeaderboardEntry = z.infer<typeof LeaderboardEntrySchema>;
 
+export const ClubEventSummarySchema = ClubEventSchema.omit({
+    answerHash: true,
+    answerSalt: true,
+}).extend({
+    participationOpen: z.boolean(),
+});
+export type ClubEventSummary = z.infer<typeof ClubEventSummarySchema>;
+
+export const ClubWeekSchema = z.strictObject({
+    activeWeekOf: z.iso.date(),
+    startsAt: IsoDateTimeSchema,
+    endsAt: IsoDateTimeSchema,
+});
+export type ClubWeek = z.infer<typeof ClubWeekSchema>;
+
+export const CooperativeChallengeSchema = z.strictObject({
+    eventId: z.string(),
+    title: z.string(),
+    description: z.string(),
+    requiredMembers: z.number().int().min(2),
+    verifiedMembers: z.number().int().nonnegative(),
+    completed: z.boolean(),
+    participants: z.array(z.string()),
+});
+export type CooperativeChallenge = z.infer<typeof CooperativeChallengeSchema>;
+
 export const ClubDetailSchema = z.strictObject({
     club: ClubSchema,
     members: z.array(ClubMemberSchema),
-    events: z.array(ClubEventSchema.omit({ answerHash: true, answerSalt: true })),
+    events: z.array(ClubEventSummarySchema),
+    week: ClubWeekSchema,
+    cooperativeChallenge: CooperativeChallengeSchema.nullable(),
     leaderboard: z.array(LeaderboardEntrySchema),
     submissions: z.array(
         z.strictObject({
@@ -265,6 +313,49 @@ export const JoinClubRequestSchema = z.strictObject({
 });
 export type JoinClubRequest = z.infer<typeof JoinClubRequestSchema>;
 
+export const ClubInviteSchema = z.strictObject({
+    id: z.uuid(),
+    clubId: z.uuid(),
+    code: z.string().min(6).max(24),
+    maxUses: z.number().int().min(1).max(100),
+    usedCount: z.number().int().nonnegative(),
+    expiresAt: IsoDateTimeSchema,
+    createdAt: IsoDateTimeSchema,
+    revokedAt: IsoDateTimeSchema.optional(),
+    createdBy: z.string().optional(),
+});
+export type ClubInvite = z.infer<typeof ClubInviteSchema>;
+
+export const ClubInvitesResponseSchema = z.strictObject({
+    invites: z.array(ClubInviteSchema),
+});
+export type ClubInvitesResponse = z.infer<typeof ClubInvitesResponseSchema>;
+
+export const CreateClubInviteRequestSchema = z.strictObject({
+    maxUses: z.number().int().min(1).max(100),
+    expiresInHours: z.number().int().min(1).max(720),
+});
+export type CreateClubInviteRequest = z.infer<typeof CreateClubInviteRequestSchema>;
+
+export const UpdateClubMemberRoleRequestSchema = z.strictObject({
+    role: z.enum(["owner", "member"]),
+});
+export type UpdateClubMemberRoleRequest = z.infer<typeof UpdateClubMemberRoleRequestSchema>;
+
+export const ReportClubRequestSchema = z.strictObject({
+    reason: z.string().min(5).max(500),
+    details: z.string().min(5).max(1000).optional(),
+    targetType: z.enum(["club", "member", "event"]).optional(),
+    targetHandle: z.string().min(3).max(24).optional(),
+    targetEventId: z.string().min(1).max(120).optional(),
+});
+export type ReportClubRequest = z.infer<typeof ReportClubRequestSchema>;
+
+export const ReportClubResponseSchema = z.strictObject({
+    reportId: z.uuid(),
+});
+export type ReportClubResponse = z.infer<typeof ReportClubResponseSchema>;
+
 export const EventSubmissionRequestSchema = z.strictObject({
     eventId: z.string().min(1).max(120),
     answer: z.string().min(1).max(300),
@@ -277,6 +368,11 @@ export const EventSubmissionResponseSchema = z.strictObject({
     leaderboard: z.array(LeaderboardEntrySchema),
 });
 export type EventSubmissionResponse = z.infer<typeof EventSubmissionResponseSchema>;
+
+export const CapabilitiesSchema = z.strictObject({
+    aiTutor: z.boolean(),
+});
+export type Capabilities = z.infer<typeof CapabilitiesSchema>;
 
 export const AiHintRequestSchema = z.strictObject({
     missionId: MissionIdSchema,
@@ -293,6 +389,32 @@ export const AiHintResponseSchema = z.strictObject({
 });
 export type AiHintResponse = z.infer<typeof AiHintResponseSchema>;
 
+export const ProjectExportSchema = z.strictObject({
+    projectId: z.string(),
+    currentRevision: z.number().int().nonnegative(),
+    updatedAt: IsoDateTimeSchema.optional(),
+    revisions: z.array(ProjectRevisionSchema),
+});
+export type ProjectExport = z.infer<typeof ProjectExportSchema>;
+
+export const ClubMembershipExportSchema = z.strictObject({
+    clubId: z.uuid(),
+    clubName: z.string(),
+    role: z.enum(["owner", "member"]),
+    joinedAt: IsoDateTimeSchema,
+});
+export type ClubMembershipExport = z.infer<typeof ClubMembershipExportSchema>;
+
+export const ClubReportExportSchema = z.strictObject({
+    id: z.uuid(),
+    clubId: z.uuid(),
+    reason: z.string(),
+    status: z.enum(["open", "reviewed", "dismissed"]),
+    createdAt: IsoDateTimeSchema,
+    resolvedAt: IsoDateTimeSchema.optional(),
+});
+export type ClubReportExport = z.infer<typeof ClubReportExportSchema>;
+
 export const ExportBundleSchema = z.strictObject({
     exportedAt: IsoDateTimeSchema,
     user: UserSchema,
@@ -304,6 +426,9 @@ export const ExportBundleSchema = z.strictObject({
     completions: z.array(CompletionRecordSchema),
     worlds: z.array(WorldStateSchema),
     achievements: z.array(AchievementRecordSchema),
+    projects: z.array(ProjectExportSchema),
+    clubMemberships: z.array(ClubMembershipExportSchema),
+    reports: z.array(ClubReportExportSchema),
 });
 export type ExportBundle = z.infer<typeof ExportBundleSchema>;
 
