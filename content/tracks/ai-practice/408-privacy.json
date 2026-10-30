@@ -1,0 +1,358 @@
+{
+    "id": "ai-practice.privacy",
+    "version": 1,
+    "sequence": 408,
+    "courseId": "ai-practice",
+    "title": "Minimize before you send",
+    "summary": "Redact direct identifiers, review a retention design, and keep prompts and responses inside a defined boundary.",
+    "skills": ["ai.foundations", "concept.responsibility"],
+    "prerequisites": ["ai.foundations", "concept.security"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "privacy",
+        "briefing": "The health-center assistant sends a student's name, email, phone, and card number to a model vendor so it can draft an appointment reminder. Prompts are kept for two years and shared with a analytics tool. Redact the record before the request and decide what the system may retain."
+    },
+    "objectives": [
+        {
+            "id": "redact",
+            "description": "Redact direct identifiers without losing the fields the task needs.",
+            "stepIds": ["redact-code"]
+        },
+        {
+            "id": "review",
+            "description": "Identify retention and sharing problems in the design.",
+            "stepIds": ["retention-review"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain minimization, purpose, retention, and vendor boundaries.",
+            "stepIds": ["privacy-transfer"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:lock"],
+    "hints": [
+        "Name the fields the task actually needs before redacting.",
+        "Replace direct identifiers with a fixed marker.",
+        "Do not mutate the caller's record.",
+        "Keep a purpose, a retention period, and a deletion path for anything stored."
+    ],
+    "misconceptions": [
+        {
+            "id": "redact-name-only",
+            "description": "Removing the name but leaving email, phone, and card data.",
+            "stepId": "redact-code",
+            "testDescription": "Redacts every direct identifier.",
+            "feedback": "Email, phone, and card numbers identify a person too. Redact all direct identifiers the task does not need.",
+            "followUpSkill": "concept.responsibility"
+        },
+        {
+            "id": "keep-forever",
+            "description": "Retaining prompts indefinitely because storage is cheap.",
+            "stepId": "retention-review",
+            "answer": "approve:long-retention,no-purpose,vendor-share,prompt-store",
+            "feedback": "Retention needs a purpose and a limit. Keep only what supports the task or a legal obligation, then delete it."
+        },
+        {
+            "id": "redaction-anonymity",
+            "description": "Treating redaction as a guarantee of anonymity.",
+            "stepId": "privacy-transfer",
+            "answer": "anonymous",
+            "feedback": "Combined fields can re-identify a person even after direct identifiers are removed. Minimize the record and assess re-identification risk."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Purpose decides the fields",
+                "body": "Start with the task: drafting an appointment reminder needs a time, a clinic, and perhaps a first name. It does not need a card number or a home address. Collect and send only what the purpose requires."
+            },
+            {
+                "title": "Redaction is not deletion",
+                "body": "Replacing an email with a marker removes the direct identifier from the prompt but does not remove the original record. The source system still needs access control, and redaction rules must cover every direct identifier."
+            },
+            {
+                "title": "Retention and vendors are part of the design",
+                "body": "Prompts and responses can contain personal data. Define why they are stored, how long, who can read them, and when they are deleted. A vendor is another boundary with its own retention and access."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Direct identifier",
+                "definition": "A value such as a name, email, phone, or card number that identifies a person."
+            },
+            {
+                "term": "Data minimization",
+                "definition": "Collecting and sending only the data the purpose requires."
+            },
+            {
+                "term": "Purpose limitation",
+                "definition": "Using data only for the reason it was collected."
+            },
+            {
+                "term": "Retention",
+                "definition": "How long data is kept and when it is deleted."
+            },
+            {
+                "term": "Re-identification",
+                "definition": "Combining remaining fields to identify a person again."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Send the task, not the person",
+            "prompt": "Read the explanation, then implement redaction.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Purpose decides the fields",
+                    "body": "Start with the task: drafting an appointment reminder needs a time, a clinic, and perhaps a first name. It does not need a card number or a home address. Collect and send only what the purpose requires."
+                },
+                {
+                    "title": "Redaction is not deletion",
+                    "body": "Replacing an email with a marker removes the direct identifier from the prompt but does not remove the original record. The source system still needs access control, and redaction rules must cover every direct identifier."
+                },
+                {
+                    "title": "Retention and vendors are part of the design",
+                    "body": "Prompts and responses can contain personal data. Define why they are stored, how long, who can read them, and when they are deleted. A vendor is another boundary with its own retention and access."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Direct identifier",
+                    "definition": "A value such as a name, email, phone, or card number that identifies a person."
+                },
+                {
+                    "term": "Data minimization",
+                    "definition": "Collecting and sending only the data the purpose requires."
+                },
+                {
+                    "term": "Purpose limitation",
+                    "definition": "Using data only for the reason it was collected."
+                },
+                {
+                    "term": "Retention",
+                    "definition": "How long data is kept and when it is deleted."
+                },
+                {
+                    "term": "Re-identification",
+                    "definition": "Combining remaining fields to identify a person again."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "redact-code",
+            "title": "Redact the appointment record",
+            "prompt": "Edit privacy.js. redactPii(record) returns a new record with email, phone, and card replaced by \"[redacted]\". Keep every other field unchanged and do not mutate the input.",
+            "evidence": "construction",
+            "hints": [
+                "Copy the record instead of editing it in place.",
+                "Replace only the three direct identifiers.",
+                "Leave missing fields missing rather than inventing values.",
+                "Return null for a null record and keep unrelated fields intact."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "privacy.js",
+                    "content": "function redactPii(record) {\n  return record;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "privacy.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Redacts every direct identifier.",
+                    "name": "redactPii",
+                    "args": [
+                        {
+                            "email": "ada@example.edu",
+                            "phone": "+1-555-0100",
+                            "card": "4242424242424242",
+                            "clinic": "North"
+                        }
+                    ],
+                    "expected": {
+                        "email": "[redacted]",
+                        "phone": "[redacted]",
+                        "card": "[redacted]",
+                        "clinic": "North"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Keeps fields the task needs.",
+                    "name": "redactPii",
+                    "args": [
+                        {
+                            "name": "Ada",
+                            "time": "09:30",
+                            "email": "ada@example.edu"
+                        }
+                    ],
+                    "expected": {
+                        "name": "Ada",
+                        "time": "09:30",
+                        "email": "[redacted]"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Leaves missing identifiers missing.",
+                    "name": "redactPii",
+                    "args": [
+                        {
+                            "clinic": "North"
+                        }
+                    ],
+                    "expected": {
+                        "clinic": "North"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Returns null for a null record.",
+                    "name": "redactPii",
+                    "args": [null],
+                    "expected": null
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "retention-review",
+            "title": "Review the retention design",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Ask why each stored field exists.",
+                "Look at the retention period and deletion path.",
+                "Check who else receives the prompts.",
+                "Reject the design: no purpose, long retention, vendor sharing, and no deletion."
+            ],
+            "artifact": {
+                "title": "Assistant data plan",
+                "caption": "The retention section of the launch review.",
+                "kind": "report",
+                "language": "text",
+                "content": "Storage: every prompt and response is kept for 730 days.\nPurpose: \"analytics and future product ideas\".\nAccess: all staff can query the prompt table.\nVendor: prompts are forwarded to an analytics tool with an unlimited retention setting.\nDeletion: no deletion path is implemented; rows are never removed."
+            },
+            "findings": [
+                {
+                    "id": "long-retention",
+                    "label": "Prompts and responses are kept for two years without a task-based limit.",
+                    "correct": true
+                },
+                {
+                    "id": "no-purpose",
+                    "label": "The stated purpose is broad and does not justify storing health-related text.",
+                    "correct": true
+                },
+                {
+                    "id": "vendor-share",
+                    "label": "Prompts are forwarded to a vendor with unlimited retention.",
+                    "correct": true
+                },
+                {
+                    "id": "prompt-store",
+                    "label": "There is no deletion path for stored prompts.",
+                    "correct": true
+                },
+                {
+                    "id": "cheap-storage",
+                    "label": "Cheap storage makes indefinite retention acceptable.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the data plan"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until purpose, access, retention, and deletion are defined"
+                },
+                {
+                    "id": "encrypt",
+                    "label": "Only encrypt the table"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "Encryption does not justify keeping health data forever or sharing it without a purpose. Purpose, access, retention, and deletion all need limits."
+        },
+        {
+            "kind": "explain",
+            "id": "privacy-transfer",
+            "title": "Keep the data boundary honest",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Start from the purpose, then list the fields.",
+                "A vendor is another processor with its own retention.",
+                "Redaction reduces but does not guarantee anonymity.",
+                "Select minimization, purpose, retention, access, and vendor controls; reject redaction as anonymity."
+            ],
+            "statements": [
+                {
+                    "id": "minimize",
+                    "label": "The task purpose determines which fields may be sent.",
+                    "correct": true
+                },
+                {
+                    "id": "retention",
+                    "label": "Stored prompts need a retention period and a deletion path.",
+                    "correct": true
+                },
+                {
+                    "id": "access",
+                    "label": "Only staff who need the data for the stated purpose should be able to read it.",
+                    "correct": true
+                },
+                {
+                    "id": "vendor",
+                    "label": "A model or analytics vendor is another boundary with its own access and retention terms.",
+                    "correct": true
+                },
+                {
+                    "id": "anonymous",
+                    "label": "Redacting direct identifiers guarantees the remaining record is anonymous.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Privacy depends on purpose, minimization, access, retention, deletion, and vendor terms. Redaction is one control, not a guarantee."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["ai", "professional"]
+}
