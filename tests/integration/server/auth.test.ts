@@ -88,7 +88,7 @@ describe("authentication, sessions, and account lifecycle", function authSuite()
 
     it("supports native bearer sessions without CSRF and revokes them", async function testNative(): Promise<void> {
         const client = new TestClient(context.app);
-        const auth = await register(client, "native_user", { native: true, csrf: false });
+        const auth = await register(client, "native_user", { native: true, csrf: true });
         expect(auth.nativeToken).toBeDefined();
         const token = auth.nativeToken ?? "";
 
@@ -173,7 +173,8 @@ describe("authentication, sessions, and account lifecycle", function authSuite()
             evidence: {
                 id: crypto.randomUUID(),
                 missionId: "before-code.make-it-respond",
-                missionVersion: 1,
+                missionVersion:
+                    context.content.getMission("before-code.make-it-respond")?.version ?? 1,
                 category: "prediction",
                 outcome: "success",
                 assistance: "independent",
@@ -250,7 +251,7 @@ describe("authentication, sessions, and account lifecycle", function authSuite()
 
     it("completes a sync round trip for authenticated native clients", async function testNativeSync(): Promise<void> {
         const client = new TestClient(context.app);
-        const auth = await register(client, "native_sync", { native: true, csrf: false });
+        const auth = await register(client, "native_sync", { native: true, csrf: true });
         client.useBearer(auth.nativeToken ?? "", true);
         const snapshot = await postSync(client, []);
         expect(snapshot.world.id).toBe("campus");
