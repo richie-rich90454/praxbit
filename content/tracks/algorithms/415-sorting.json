@@ -5,24 +5,14 @@
     "courseId": "algorithms",
     "title": "Sort with evidence, not vibes",
     "summary": "Implement a stable merge sort, choose the right ordering rule, and reason about comparison lower bounds.",
-    "skills": [
-        "algorithms.sorting",
-        "algorithms.complexity"
-    ],
-    "prerequisites": [
-        "algorithms.arrays",
-        "js.functions"
-    ],
+    "skills": ["algorithms.sorting", "algorithms.complexity"],
+    "prerequisites": ["algorithms.arrays", "js.functions"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "sort",
             "description": "Implement a stable merge sort with a comparator.",
-            "stepIds": [
-                "merge-sort"
-            ]
+            "stepIds": ["merge-sort"]
         },
         {
             "id": "choose",
             "description": "Choose stability when the product requires it.",
-            "stepIds": [
-                "sort-choice"
-            ]
+            "stepIds": ["sort-choice"]
         },
         {
             "id": "transfer",
             "description": "Explain comparison lower bounds and stability trade-offs.",
-            "stepIds": [
-                "sort-transfer"
-            ]
+            "stepIds": ["sort-transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:database",
-        "icon:sort"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:sort"],
     "hints": [
         "Split the array until each piece has zero or one element.",
         "Merge two sorted halves by repeatedly taking the smaller head.",
@@ -303,9 +282,7 @@
                     "kind": "function",
                     "description": "Handles an empty list.",
                     "name": "sortRecords",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": []
                 },
                 {
@@ -481,8 +458,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems"
-    ]
+    "tags": ["professional", "systems"]
 }
