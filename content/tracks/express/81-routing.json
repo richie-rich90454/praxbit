@@ -1,18 +1,26 @@
 {
     "id": "express.routing",
     "version": 1,
-    "sequence": 81,
+    "sequence": 145,
     "courseId": "express",
     "title": "Routes and params in Express",
     "summary": "Register a parameterized route and return JSON for both found and missing products.",
-    "skills": ["express.routing"],
-    "prerequisites": ["node.hono", "http.basics"],
+    "skills": [
+        "express.routing"
+    ],
+    "prerequisites": [
+        "node.hono",
+        "http.basics"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:express"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:express"
+    ],
     "hints": [
         "Declare the detail route with /products/:id.",
         "Use products.find and compare item.id with request.params.id.",
@@ -152,36 +169,50 @@
                     "kind": "static",
                     "description": "The app is created and the parameterized route is registered.",
                     "file": "app.ts",
-                    "includes": ["export const app = express();", "app.get(\"/products/:id\""],
+                    "includes": [
+                        "export const app = express();",
+                        "app.get(\"/products/:id\""
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The handler reads the id from route params and searches the catalog.",
                     "file": "app.ts",
-                    "includes": ["request.params.id", "products.find"],
+                    "includes": [
+                        "request.params.id",
+                        "products.find"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "A missing product answers 404 with a JSON error.",
                     "file": "app.ts",
-                    "includes": ["response.status(404).json({ error: \"not_found\" })"],
+                    "includes": [
+                        "response.status(404).json({ error: \"not_found\" })"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "A found product is serialized as JSON.",
                     "file": "app.ts",
-                    "includes": ["response.json(product)"],
+                    "includes": [
+                        "response.json(product)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "app.ts",
-                    "includes": ["export const app = express();"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "export const app = express();"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -250,5 +281,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
