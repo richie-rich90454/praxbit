@@ -1,0 +1,293 @@
+{
+    "id": "vue.routing",
+    "version": 1,
+    "sequence": 218,
+    "courseId": "vue",
+    "title": "Route guards and accessible checkout",
+    "summary": "Implement an explicit checkout decision, then review a Vue Router setup that allows empty carts and never moves focus after navigation.",
+    "skills": ["vue.routing", "web.accessibility", "web.state-management"],
+    "prerequisites": ["vue.reactivity", "web.routing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "routing",
+        "briefing": "The checkout route opens for anonymous visitors and for signed-in users with an empty cart. Keyboard users also stay focused on the old navigation after the route changes."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Implement a guard decision with distinct redirects.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review routing for access and accessibility risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:vue"],
+    "hints": [
+        "Check the session before the cart so sign-in wins for anonymous users.",
+        "Return catalog when a signed-in user has no items.",
+        "Return allow only after both checks pass.",
+        "In the router, call the guard from beforeEach and read route meta."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-allow",
+            "description": "Letting every navigation through because checkout worked in development.",
+            "stepId": "apply",
+            "testDescription": "Anonymous visitors are sent to login.",
+            "feedback": "A guard that returns allow for everyone protects nothing. Require the session first and deny by default.",
+            "followUpSkill": "vue.routing"
+        },
+        {
+            "id": "empty-cart-allowed",
+            "description": "Treating an empty cart as a valid checkout.",
+            "stepId": "apply",
+            "testDescription": "An empty cart is redirected to the catalog.",
+            "feedback": "Checkout without items cannot complete. Redirect the signed-in user to the catalog and explain why.",
+            "followUpSkill": "web.state-management"
+        },
+        {
+            "id": "ship-without-focus",
+            "description": "Shipping router navigation without focus or announcement.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "A guard that always allows and navigation that strands focus are functional defects. Block the change until both are fixed.",
+            "followUpSkill": "web.accessibility"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Guards belong to the router",
+                "body": "A beforeEnter or beforeEach guard runs before the destination component renders. It returns true to allow navigation, a route location to redirect, or false to cancel."
+            },
+            {
+                "title": "Two denials are not the same",
+                "body": "An anonymous visitor needs sign-in, while a signed-in visitor with an empty cart needs the cart or catalog. A single generic redirect hides which precondition failed."
+            },
+            {
+                "title": "Announce the new view",
+                "body": "After navigation, move focus to the new heading and set a descriptive document title. Vue Router does not do this for you because only the app knows which element is the main heading."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "beforeEach",
+                "definition": "A global router guard that runs before every navigation."
+            },
+            {
+                "term": "Redirect",
+                "definition": "A guard result that sends the user to a different route."
+            },
+            {
+                "term": "Route meta",
+                "definition": "Arbitrary data attached to a route and read by guards."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Guards, redirects, and focus",
+            "prompt": "Read the explanation, then implement the checkout decision.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Guards belong to the router",
+                    "body": "A beforeEnter or beforeEach guard runs before the destination component renders. It returns true to allow navigation, a route location to redirect, or false to cancel."
+                },
+                {
+                    "title": "Two denials are not the same",
+                    "body": "An anonymous visitor needs sign-in, while a signed-in visitor with an empty cart needs the cart or catalog. A single generic redirect hides which precondition failed."
+                },
+                {
+                    "title": "Announce the new view",
+                    "body": "After navigation, move focus to the new heading and set a descriptive document title. Vue Router does not do this for you because only the app knows which element is the main heading."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "beforeEach",
+                    "definition": "A global router guard that runs before every navigation."
+                },
+                {
+                    "term": "Redirect",
+                    "definition": "A guard result that sends the user to a different route."
+                },
+                {
+                    "term": "Route meta",
+                    "definition": "Arbitrary data attached to a route and read by guards."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Decide whether checkout may open",
+            "prompt": "Edit access.ts. Implement canEnterCheckout so anonymous users go to login, signed-in users with an empty cart go to the catalog, and everyone else is allowed.",
+            "evidence": "construction",
+            "hints": [
+                "Check session === null first and return login.",
+                "Then check itemCount <= 0 and return catalog.",
+                "Return allow as the final fallback.",
+                "Keep the return type explicit so a new branch must choose a decision."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "access.ts",
+                    "content": "type Session = { role: \"member\" | \"admin\" } | null;\ntype CheckoutDecision = \"allow\" | \"login\" | \"catalog\";\n\nfunction canEnterCheckout(session: Session, itemCount: number): CheckoutDecision {\n  // TODO: require a session and at least one item before checkout\n  return \"allow\";\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "access.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Anonymous visitors are sent to login.",
+                    "name": "canEnterCheckout",
+                    "args": [null, 2],
+                    "expected": "login"
+                },
+                {
+                    "kind": "function",
+                    "description": "Anonymous visitors are sent to login even with an empty cart.",
+                    "name": "canEnterCheckout",
+                    "args": [null, 0],
+                    "expected": "login"
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty cart is redirected to the catalog.",
+                    "name": "canEnterCheckout",
+                    "args": [
+                        {
+                            "role": "member"
+                        },
+                        0
+                    ],
+                    "expected": "catalog"
+                },
+                {
+                    "kind": "function",
+                    "description": "A member with items may enter checkout.",
+                    "name": "canEnterCheckout",
+                    "args": [
+                        {
+                            "role": "member"
+                        },
+                        2
+                    ],
+                    "expected": "allow"
+                },
+                {
+                    "kind": "function",
+                    "description": "An admin with items may enter checkout.",
+                    "name": "canEnterCheckout",
+                    "args": [
+                        {
+                            "role": "admin"
+                        },
+                        1
+                    ],
+                    "expected": "allow"
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the checkout router",
+            "prompt": "Review router.ts and select every real access or accessibility problem.",
+            "evidence": "transfer",
+            "hints": [
+                "Trace what beforeEach returns for /checkout.",
+                "Check whether the requiresCart metadata is ever read.",
+                "Look for focus or document title updates after navigation.",
+                "Reject findings about behavior the guard or router does not contain."
+            ],
+            "artifact": {
+                "title": "router.ts",
+                "caption": "The global guard returns true for every route and the router never restores focus after navigation.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { createRouter, createWebHistory } from \"vue-router\";\nimport Catalog from \"./Catalog.vue\";\nimport Checkout from \"./Checkout.vue\";\n\nconst router = createRouter({\n  history: createWebHistory(),\n  routes: [\n    { path: \"/\", name: \"catalog\", component: Catalog },\n    {\n      path: \"/checkout\",\n      name: \"checkout\",\n      component: Checkout,\n      meta: { requiresCart: true },\n    },\n  ],\n});\n\nrouter.beforeEach(function allowAll() {\n  return true;\n});\n\nexport default router;\n"
+            },
+            "findings": [
+                {
+                    "id": "no-guard",
+                    "label": "beforeEach returns true for every route, so an empty cart can open checkout.",
+                    "correct": true
+                },
+                {
+                    "id": "no-focus",
+                    "label": "The router never moves focus to the new view or announces the route change.",
+                    "correct": true
+                },
+                {
+                    "id": "meta",
+                    "label": "The guard ignores the requiresCart metadata on the checkout route.",
+                    "correct": true
+                },
+                {
+                    "id": "before",
+                    "label": "The guard runs after Checkout has already rendered its data.",
+                    "correct": false
+                },
+                {
+                    "id": "history",
+                    "label": "History mode requires a server fallback, which this router already configures.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The guard allows every navigation and never reads the checkout metadata. The router also changes the view without moving focus or updating the title. The guard runs before the destination renders, and history mode does not configure a server fallback here."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
