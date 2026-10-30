@@ -5,23 +5,14 @@
     "courseId": "systems-architecture",
     "title": "Follow one request across services",
     "summary": "Instrument a span with bounded attributes, review a broken trace, and use traces and metrics together.",
-    "skills": [
-        "api.observability",
-        "architecture.distributed"
-    ],
-    "prerequisites": [
-        "architecture.distributed",
-        "api.observability"
-    ],
+    "skills": ["api.observability", "architecture.distributed"],
+    "prerequisites": ["architecture.distributed", "api.observability"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "instrument",
             "description": "Create a span with bounded attributes and guaranteed end.",
-            "stepIds": [
-                "span-code"
-            ]
+            "stepIds": ["span-code"]
         },
         {
             "id": "review",
             "description": "Identify missing correlation and unsafe labels.",
-            "stepIds": [
-                "trace-review"
-            ]
+            "stepIds": ["trace-review"]
         },
         {
             "id": "transfer",
             "description": "Explain traces, metrics, logs, and sampling.",
-            "stepIds": [
-                "observability-transfer"
-            ]
+            "stepIds": ["observability-transfer"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:api",
-        "icon:trace"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:api", "icon:trace"],
     "hints": [
         "A trace needs a shared identifier across service boundaries.",
         "Span attributes should be bounded and low-cardinality.",
@@ -203,9 +183,7 @@
                     "kind": "static",
                     "description": "Starts a named checkout span.",
                     "file": "instrument.ts",
-                    "includes": [
-                        "tracer.startSpan(\"checkout\")"
-                    ],
+                    "includes": ["tracer.startSpan(\"checkout\")"],
                     "excludes": []
                 },
                 {
@@ -223,35 +201,22 @@
                     "kind": "static",
                     "description": "Records errors and still ends the span.",
                     "file": "instrument.ts",
-                    "includes": [
-                        "recordException",
-                        "finally",
-                        "span.end()"
-                    ],
+                    "includes": ["recordException", "finally", "span.end()"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Keeps high-cardinality identifiers out of span attributes.",
                     "file": "instrument.ts",
-                    "includes": [
-                        "requestId"
-                    ],
-                    "excludes": [
-                        "setAttribute(\"email\"",
-                        "setAttribute(\"userId\""
-                    ]
+                    "includes": ["requestId"],
+                    "excludes": ["setAttribute(\"email\"", "setAttribute(\"userId\""]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "instrument.ts",
-                    "includes": [
-                        "try {"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["try {"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
@@ -377,8 +342,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
