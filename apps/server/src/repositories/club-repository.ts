@@ -1,4 +1,11 @@
-import type { Club, ClubMember, LeaderboardEntry } from "@praxbit/contracts";
+import type {
+    Club,
+    ClubInvite,
+    ClubMember,
+    ClubMembershipExport,
+    ClubReportExport,
+    LeaderboardEntry,
+} from "@praxbit/contracts";
 import { toIsoString, type QueryExecutor } from "../db/rows.ts";
 
 type ClubRow = {
@@ -50,6 +57,54 @@ export interface StoredSubmission {
     readonly eventId: string;
     readonly points: number;
     readonly verifiedAt: string;
+}
+
+export interface StoredInvite {
+    readonly id: string;
+    readonly clubId: string;
+    readonly maxUses: number;
+    readonly usedCount: number;
+}
+
+export interface VerifiedParticipant {
+    readonly handle: string;
+    readonly displayName: string;
+    readonly verifiedAt: string;
+}
+
+type InviteRow = {
+    id: string;
+    club_id: string;
+    code: string;
+    max_uses: number;
+    used_count: number;
+    expires_at: Date | string;
+    created_at: Date | string;
+    revoked_at: Date | string | null;
+    created_by_handle: string | null;
+};
+
+type ParticipantRow = {
+    handle: string;
+    display_name: string;
+    verified_at: Date | string;
+};
+
+function toInvite(row: InviteRow): ClubInvite {
+    const invite: ClubInvite = {
+        id: row.id,
+        clubId: row.club_id,
+        code: row.code,
+        maxUses: row.max_uses,
+        usedCount: row.used_count,
+        expiresAt: toIsoString(row.expires_at),
+        createdAt: toIsoString(row.created_at),
+    };
+    const withRevoked =
+        row.revoked_at === null ? invite : { ...invite, revokedAt: toIsoString(row.revoked_at) };
+    return row.created_by_handle === null
+        ? withRevoked
+        : { ...withRevoked, createdBy: row.created_by_handle };
 }
 
 function toClub(row: ClubRow): Club {
@@ -203,6 +258,74 @@ export class ClubRepository {
         );
         const row = result.rows[0];
         return row === undefined ? undefined : toClub(row);
+    }
+
+    public async findMembershipByHandle(
+        executor: QueryExecutor,
+        clubId: string,
+        handle: string,
+    ): Promise<ClubMembership | undefined> {
+        const result = await executor.query<{ role: "owner" | "member" }>(
+            `
+                SELECT m.role
+                FROM club_memberships m
+                JOIN users u ON u.id = m.user_id
+                WHERE m.club_id = $1 AND lower(u.handle) = lower($2)
+            `,
+            [clubId, handle],
+        );
+        const row = result.rows[0];
+        return row === undefined ? undefined : { role: row.role };
+    }
+
+    public async countOwners(executor: QueryExecutor, clubId: string): Promise<number> {
+        const result = await executor.query<{ count: string }>(
+            `
+                SELECT count(*)::text AS count
+                FROM club_memberships
+                WHERE club_id = $1 AND role = 'owner'
+            `,
+            [clubId],
+        );
+        return Number(result.rows[0]?.count ?? "0");
+    }
+
+    public async setMemberRole(
+        executor: QueryExecutor,
+        clubId: string,
+        handle: string,
+        role: "owner" | "member",
+    ): Promise<boolean> {
+        const result = await executor.query(
+            `
+                UPDATE club_memberships m
+                SET role = $3
+                FROM users u
+                WHERE m.user_id = u.id
+                    AND m.club_id = $1
+                    AND lower(u.handle) = lower($2)
+            `,
+            [clubId, handle, role],
+        );
+        return (result.rowCount ?? 0) > 0;
+    }
+
+    public async removeMember(
+        executor: QueryExecutor,
+        clubId: string,
+        handle: string,
+    ): Promise<boolean> {
+        const result = await executor.query(
+            `
+                DELETE FROM club_memberships m
+                USING users u
+                WHERE m.user_id = u.id
+                    AND m.club_id = $1
+                    AND lower(u.handle) = lower($2)
+            `,
+            [clubId, handle],
+        );
+        return (result.rowCount ?? 0) > 0;
     }
 
     public async addMember(
@@ -401,6 +524,221 @@ export class ClubRepository {
         };
     }
 
+    public async createInvite(
+        executor: QueryExecutor,
+        input: {
+            readonly id: string;
+            readonly clubId: string;
+            readonly code: string;
+            readonly createdBy: string;
+            readonly maxUses: number;
+            readonly expiresAt: Date;
+            readonly now: Date;
+        },
+    ): Promise<void> {
+        await executor.query(
+            `
+                INSERT INTO club_invites (
+                    id, club_id, code, created_by, max_uses, used_count, expires_at, created_at
+                )
+                VALUES ($1, $2, $3, $4, $5, 0, $6, $7)
+            `,
+            [
+                input.id,
+                input.clubId,
+                input.code,
+                input.createdBy,
+                input.maxUses,
+                input.expiresAt,
+                input.now,
+            ],
+        );
+    }
+
+    public async listInvites(
+        executor: QueryExecutor,
+        clubId: string,
+    ): Promise<readonly ClubInvite[]> {
+        const result = await executor.query<InviteRow>(
+            `
+                SELECT i.id, i.club_id, i.code, i.max_uses, i.used_count, i.expires_at,
+                       i.created_at, i.revoked_at, u.handle AS created_by_handle
+                FROM club_invites i
+                LEFT JOIN users u ON u.id = i.created_by
+                WHERE i.club_id = $1
+                ORDER BY i.created_at DESC, i.id ASC
+            `,
+            [clubId],
+        );
+        return result.rows.map(toInvite);
+    }
+
+    public async findInviteById(
+        executor: QueryExecutor,
+        clubId: string,
+        inviteId: string,
+    ): Promise<ClubInvite | undefined> {
+        const result = await executor.query<InviteRow>(
+            `
+                SELECT i.id, i.club_id, i.code, i.max_uses, i.used_count, i.expires_at,
+                       i.created_at, i.revoked_at, u.handle AS created_by_handle
+                FROM club_invites i
+                LEFT JOIN users u ON u.id = i.created_by
+                WHERE i.club_id = $1 AND i.id = $2
+            `,
+            [clubId, inviteId],
+        );
+        const row = result.rows[0];
+        return row === undefined ? undefined : toInvite(row);
+    }
+
+    public async findInviteByCode(
+        executor: QueryExecutor,
+        code: string,
+    ): Promise<StoredInvite | undefined> {
+        const result = await executor.query<{
+            id: string;
+            club_id: string;
+            max_uses: number;
+            used_count: number;
+        }>(
+            `
+                SELECT id, club_id, max_uses, used_count
+                FROM club_invites
+                WHERE upper(code) = upper($1)
+            `,
+            [code],
+        );
+        const row = result.rows[0];
+        if (row === undefined) {
+            return undefined;
+        }
+        return {
+            id: row.id,
+            clubId: row.club_id,
+            maxUses: row.max_uses,
+            usedCount: row.used_count,
+        };
+    }
+
+    public async findActiveInviteByCode(
+        executor: QueryExecutor,
+        code: string,
+        now: Date,
+    ): Promise<StoredInvite | undefined> {
+        const result = await executor.query<{
+            id: string;
+            club_id: string;
+            max_uses: number;
+            used_count: number;
+        }>(
+            `
+                SELECT id, club_id, max_uses, used_count
+                FROM club_invites
+                WHERE upper(code) = upper($1)
+                    AND revoked_at IS NULL
+                    AND expires_at > $2
+                    AND used_count < max_uses
+            `,
+            [code, now],
+        );
+        const row = result.rows[0];
+        if (row === undefined) {
+            return undefined;
+        }
+        return {
+            id: row.id,
+            clubId: row.club_id,
+            maxUses: row.max_uses,
+            usedCount: row.used_count,
+        };
+    }
+
+    public async consumeInvite(
+        executor: QueryExecutor,
+        inviteId: string,
+        now: Date,
+    ): Promise<boolean> {
+        const result = await executor.query(
+            `
+                UPDATE club_invites
+                SET used_count = used_count + 1
+                WHERE id = $1
+                    AND revoked_at IS NULL
+                    AND expires_at > $2
+                    AND used_count < max_uses
+            `,
+            [inviteId, now],
+        );
+        return (result.rowCount ?? 0) > 0;
+    }
+
+    public async revokeInvite(
+        executor: QueryExecutor,
+        clubId: string,
+        inviteId: string,
+        now: Date,
+    ): Promise<boolean> {
+        const result = await executor.query(
+            `
+                UPDATE club_invites
+                SET revoked_at = $3
+                WHERE id = $1 AND club_id = $2 AND revoked_at IS NULL
+            `,
+            [inviteId, clubId, now],
+        );
+        return (result.rowCount ?? 0) > 0;
+    }
+
+    public async listVerifiedParticipants(
+        executor: QueryExecutor,
+        clubId: string,
+        eventId: string,
+    ): Promise<readonly VerifiedParticipant[]> {
+        const result = await executor.query<ParticipantRow>(
+            `
+                SELECT u.handle, u.display_name, max(es.verified_at) AS verified_at
+                FROM event_submissions es
+                JOIN users u ON u.id = es.user_id
+                WHERE es.club_id = $1 AND es.event_id = $2 AND es.verified = true
+                GROUP BY u.id, u.handle, u.display_name
+                ORDER BY max(es.verified_at) ASC, u.handle ASC
+            `,
+            [clubId, eventId],
+        );
+        return result.rows.map(function participantOf(row: ParticipantRow): VerifiedParticipant {
+            return {
+                handle: row.handle,
+                displayName: row.display_name,
+                verifiedAt: toIsoString(row.verified_at),
+            };
+        });
+    }
+
+    public async hasCooperativeChallenge(
+        executor: QueryExecutor,
+        userId: string,
+    ): Promise<boolean> {
+        const result = await executor.query<{ completed: boolean }>(
+            `
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM event_submissions mine
+                    JOIN club_memberships membership
+                        ON membership.club_id = mine.club_id AND membership.user_id = mine.user_id
+                    JOIN event_submissions teammate
+                        ON teammate.club_id = mine.club_id
+                        AND teammate.event_id = mine.event_id
+                        AND teammate.verified = true
+                        AND teammate.user_id <> mine.user_id
+                    WHERE mine.user_id = $1 AND mine.verified = true
+                ) AS completed
+            `,
+            [userId],
+        );
+        return result.rows[0]?.completed === true;
+    }
+
     public async createReport(
         executor: QueryExecutor,
         input: {
@@ -408,15 +746,32 @@ export class ClubRepository {
             readonly clubId: string;
             readonly reporterUserId: string;
             readonly reason: string;
+            readonly targetType: "club" | "member" | "event";
+            readonly targetHandle: string | undefined;
+            readonly targetEventId: string | undefined;
+            readonly details: string | undefined;
             readonly now: Date;
         },
     ): Promise<void> {
         await executor.query(
             `
-                INSERT INTO club_reports (id, club_id, reporter_user_id, reason, created_at)
-                VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO club_reports (
+                    id, club_id, reporter_user_id, reason, target_type,
+                    target_handle, target_event_id, details, created_at
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             `,
-            [input.id, input.clubId, input.reporterUserId, input.reason, input.now],
+            [
+                input.id,
+                input.clubId,
+                input.reporterUserId,
+                input.reason,
+                input.targetType,
+                input.targetHandle ?? null,
+                input.targetEventId ?? null,
+                input.details ?? null,
+                input.now,
+            ],
         );
     }
 
@@ -433,5 +788,75 @@ export class ClubRepository {
             [userId],
         );
         return Number(result.rows[0]?.count ?? "0");
+    }
+
+    public async listMembershipsForUser(
+        executor: QueryExecutor,
+        userId: string,
+    ): Promise<readonly ClubMembershipExport[]> {
+        const result = await executor.query<{
+            club_id: string;
+            name: string;
+            role: "owner" | "member";
+            joined_at: Date | string;
+        }>(
+            `
+                SELECT m.club_id, c.name, m.role, m.joined_at
+                FROM club_memberships m
+                JOIN clubs c ON c.id = m.club_id
+                WHERE m.user_id = $1
+                ORDER BY m.joined_at ASC, c.name ASC
+            `,
+            [userId],
+        );
+        return result.rows.map(function membershipOf(row): ClubMembershipExport {
+            return {
+                clubId: row.club_id,
+                clubName: row.name,
+                role: row.role,
+                joinedAt: toIsoString(row.joined_at),
+            };
+        });
+    }
+
+    public async listReportsForUser(
+        executor: QueryExecutor,
+        userId: string,
+    ): Promise<readonly ClubReportExport[]> {
+        const result = await executor.query<{
+            id: string;
+            club_id: string;
+            reason: string;
+            status: "open" | "reviewed" | "dismissed";
+            created_at: Date | string;
+            resolved_at: Date | string | null;
+        }>(
+            `
+                SELECT id, club_id, reason, status, created_at, resolved_at
+                FROM club_reports
+                WHERE reporter_user_id = $1
+                ORDER BY created_at ASC, id ASC
+            `,
+            [userId],
+        );
+        return result.rows.map(function reportOf(row): ClubReportExport {
+            if (row.resolved_at === null) {
+                return {
+                    id: row.id,
+                    clubId: row.club_id,
+                    reason: row.reason,
+                    status: row.status,
+                    createdAt: toIsoString(row.created_at),
+                };
+            }
+            return {
+                id: row.id,
+                clubId: row.club_id,
+                reason: row.reason,
+                status: row.status,
+                createdAt: toIsoString(row.created_at),
+                resolvedAt: toIsoString(row.resolved_at),
+            };
+        });
     }
 }
