@@ -30,6 +30,11 @@
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
             "stepIds": ["check"]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Count positives in a new list with a standard operator.",
+            "stepIds": ["count"]
         }
     ],
     "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:kotlin"],
@@ -41,16 +46,34 @@
     ],
     "misconceptions": [
         {
-            "id": "bang",
-            "description": "Using !! to silence a nullable warning.",
+            "id": "nonnegative",
+            "description": "Counting zero as a positive change.",
             "stepId": "apply",
-            "feedback": "!! throws at runtime when the value is null. Use ?. or ?: to handle absence."
+            "testDescription": "The loop counts only positive values.",
+            "feedback": "Zero is neither positive nor negative. The comparison must be value > 0, not value >= 0.",
+            "followUpSkill": "kotlin.syntax"
         },
         {
-            "id": "val",
-            "description": "Trying to reassign a val.",
+            "id": "val-counter",
+            "description": "Declaring the counter with val and trying to increment it.",
             "stepId": "apply",
-            "feedback": "val is immutable. Declare a mutable counter with var."
+            "diagnostic": "Declaring count with val, then assigning count += 1 inside the loop.",
+            "feedback": "val prevents reassignment. A counter that changes needs var, while fixed inputs can stay val.",
+            "followUpSkill": "kotlin.syntax"
+        },
+        {
+            "id": "elvis-throws",
+            "description": "Expecting the Elvis operator to throw on null.",
+            "stepId": "check",
+            "answer": "elvis",
+            "feedback": "The Elvis operator supplies the fallback on the right when the left side is null. It does not throw."
+        },
+        {
+            "id": "count-everything",
+            "description": "Counting every element instead of only positives.",
+            "stepId": "count",
+            "answer": "size",
+            "feedback": "The list size includes zero and negative values. A predicate counts only the values that satisfy it."
         }
     ],
     "lesson": {
@@ -117,6 +140,12 @@
             "title": "Count positive stock changes",
             "prompt": "Edit Main.kt. countPositive returns how many values are greater than zero.",
             "evidence": "construction",
+            "hints": [
+                "Keep the List<Int> parameter and the Int return type.",
+                "Add a branch inside the for loop.",
+                "Compare value with zero.",
+                "Increment count only when value > 0."
+            ],
             "language": "kotlin",
             "files": [
                 {
@@ -128,6 +157,11 @@
             ],
             "entry": "Main.kt",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "kotlinc Main.kt -include-runtime -d main.jar && java -jar main.jar",
+                "description": "Compiles the file with the Kotlin compiler and runs the resulting JVM program."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -158,6 +192,12 @@
             "title": "Check the semantics",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
+            "hints": [
+                "Re-read the difference between val and var.",
+                "The Elvis operator has a fallback on the right.",
+                "A when expression can return a value.",
+                "Nullable types require a check or a safe operation."
+            ],
             "statements": [
                 {
                     "id": "val",
@@ -181,6 +221,42 @@
                 }
             ],
             "explanation": "Kotlin's type system distinguishes nullable from non-null values, and expressions such as when return values."
+        },
+        {
+            "kind": "quiz",
+            "id": "count",
+            "title": "Count positives with an operator",
+            "prompt": "Given val values = listOf(4, 0, -3, 7), what does values.count { it > 0 } return?",
+            "evidence": "transfer",
+            "hints": [
+                "The predicate runs once per element.",
+                "Zero does not satisfy it > 0.",
+                "Negative values do not satisfy it either.",
+                "Two values are strictly positive."
+            ],
+            "quiz": {
+                "prompt": "Given val values = listOf(4, 0, -3, 7), what does values.count { it > 0 } return?",
+                "options": [
+                    {
+                        "id": "two",
+                        "label": "2"
+                    },
+                    {
+                        "id": "three",
+                        "label": "3, because zero is included"
+                    },
+                    {
+                        "id": "size",
+                        "label": "4, because count uses the list size"
+                    },
+                    {
+                        "id": "zero",
+                        "label": "0, because count needs an initial value"
+                    }
+                ],
+                "correctId": "two",
+                "explanation": "count with a predicate increments only for elements that satisfy it. The values 4 and 7 qualify, while 0 and -3 do not."
+            }
         }
     ],
     "evaluation": {
