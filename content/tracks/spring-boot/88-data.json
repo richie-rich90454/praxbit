@@ -1,18 +1,27 @@
 {
     "id": "spring-boot.data",
     "version": 1,
-    "sequence": 88,
+    "sequence": 158,
     "courseId": "spring-boot",
     "title": "Transactions and a stable API boundary",
     "summary": "Read products through a repository inside a read-only transaction and return a response record.",
-    "skills": ["spring.data", "spring.security"],
-    "prerequisites": ["spring.controllers", "sql.queries"],
+    "skills": [
+        "spring.data",
+        "spring.security"
+    ],
+    "prerequisites": [
+        "spring.controllers",
+        "sql.queries"
+    ],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:spring"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:spring"
+    ],
     "hints": [
         "The repository interface is already declared at the bottom of the file.",
         "Declare the repository as a private final field and assign it in the constructor.",
@@ -41,22 +59,27 @@
     ],
     "misconceptions": [
         {
-            "id": "transaction-remote",
-            "description": "Holding a database transaction during a remote call.",
-            "stepId": "review",
-            "feedback": "The transaction keeps a connection checked out. Call remote services before or after the transactional method."
-        },
-        {
             "id": "field-injection",
             "description": "Using @Autowired on a field.",
             "stepId": "apply",
-            "feedback": "Constructor injection makes the dependency final and visible in the constructor signature."
+            "testDescription": "The service receives its repository through the constructor.",
+            "feedback": "Constructor injection makes the dependency final and visible in the constructor signature.",
+            "followUpSkill": "spring.data"
         },
         {
             "id": "entity-return",
             "description": "Returning the entity from the service.",
             "stepId": "apply",
+            "testDescription": "The public method returns a response record, not the entity.",
             "feedback": "The entity is tied to the table. Map it to a response record at the API boundary."
+        },
+        {
+            "id": "transaction-remote",
+            "description": "Holding a database transaction during a remote call.",
+            "stepId": "review",
+            "diagnostic": "Approving the controller that keeps @Transactional open during the RestClient call.",
+            "feedback": "The transaction keeps a connection checked out. Call remote services before or after the transactional method.",
+            "followUpSkill": "spring.security"
         }
     ],
     "lesson": {
@@ -175,7 +198,9 @@
                         "private final ProductRepository repository;",
                         "public ProductService(ProductRepository repository)"
                     ],
-                    "excludes": ["@Autowired"]
+                    "excludes": [
+                        "@Autowired"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -191,7 +216,9 @@
                     "kind": "static",
                     "description": "Reads run inside a read-only transaction.",
                     "file": "ProductService.java",
-                    "includes": ["@Transactional(readOnly = true)"],
+                    "includes": [
+                        "@Transactional(readOnly = true)"
+                    ],
                     "excludes": []
                 },
                 {
@@ -202,16 +229,33 @@
                         "record ProductResponse(long id, String name, int stock)",
                         "public ProductResponse find(long id)"
                     ],
-                    "excludes": ["public Product find(long id)"]
+                    "excludes": [
+                        "public Product find(long id)"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductService.java",
-                    "includes": ["private final ProductRepository repository;"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "private final ProductRepository repository;"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Replace the @Autowired field with a private final field.",
+                "Assign the repository in a constructor and keep the repository interface.",
+                "Annotate the read method with @Transactional(readOnly = true).",
+                "Map the entity to ProductResponse before returning it."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "mvn test",
+                "description": "Compile the project and run the Spring Boot test suite."
+            }
         },
         {
             "kind": "review",
@@ -263,7 +307,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "Returning the entity couples the API to the table and can serialize lazy fields. Field injection hides the dependency, and @Transactional holds a database connection while an external HTTP call runs. Return a response record, inject through the constructor, and move the remote call outside the transaction."
+            "explanation": "Returning the entity couples the API to the table and can serialize lazy fields. Field injection hides the dependency, and @Transactional holds a database connection while an external HTTP call runs. Return a response record, inject through the constructor, and move the remote call outside the transaction.",
+            "hints": [
+                "Check every finding against the artifact, not the stated intention.",
+                "A null body does not become a 404 response automatically.",
+                "Field injection still hides the dependency and prevents a final field.",
+                "A read-only transaction still holds a connection during a remote call."
+            ]
         }
     ],
     "evaluation": {
@@ -283,5 +333,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional"]
+    "tags": [
+        "professional"
+    ]
 }
