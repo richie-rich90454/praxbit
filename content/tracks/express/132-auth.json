@@ -1,18 +1,29 @@
 {
     "id": "express.auth",
     "version": 1,
-    "sequence": 227,
+    "sequence": 148,
     "courseId": "express",
     "title": "Session checks and role middleware",
     "summary": "Separate missing identity from a missing role, then review middleware that throws for anonymous requests and hides the difference.",
-    "skills": ["security.auth", "express.middleware", "express.errors"],
-    "prerequisites": ["express.middleware", "security.auth"],
+    "skills": [
+        "security.auth",
+        "express.middleware",
+        "express.errors"
+    ],
+    "prerequisites": [
+        "express.middleware",
+        "security.auth"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +35,24 @@
         {
             "id": "objective-apply",
             "description": "Return distinct decisions for anonymous and unauthorized users.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review session middleware for identity and role risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:express"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:express"
+    ],
     "hints": [
         "Check for a null session before reading the role.",
         "An anonymous request gets 401, not 403.",
@@ -160,7 +180,9 @@
                     "kind": "function",
                     "description": "Anonymous requests receive 401.",
                     "name": "authorizeWrite",
-                    "args": [null],
+                    "args": [
+                        null
+                    ],
                     "expected": {
                         "status": 401
                     }
@@ -277,5 +299,8 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
