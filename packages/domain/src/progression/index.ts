@@ -1,4 +1,9 @@
-import type { AchievementDefinition, EvidenceSubmission, Mission } from "@praxbit/contracts";
+import type {
+    AchievementDefinition,
+    EvidenceRecord,
+    EvidenceSubmission,
+    Mission,
+} from "@praxbit/contracts";
 
 export interface LevelProgress {
     readonly level: number;
@@ -39,6 +44,7 @@ export interface AchievementContext {
     readonly completedMissionIds: readonly string[];
     readonly projectsCompleted: number;
     readonly clubEventsCompleted: number;
+    readonly cooperativeChallengeCompleted: boolean;
     readonly worldRecovered: boolean;
     readonly languagesDemonstrated: readonly string[];
     readonly hiddenBoundaryFound: boolean;
@@ -74,7 +80,7 @@ export function satisfiesAchievement(
                 }).length >= 5 || context.difficultDebuggingRecovered
             );
         case "team-event-participation":
-            return context.clubEventsCompleted >= 1 || context.teammateHelped;
+            return context.cooperativeChallengeCompleted;
         case "first-project-complete":
             return context.projectsCompleted >= 1;
         case "three-ai-reviews":
@@ -89,6 +95,111 @@ export function satisfiesAchievement(
             return context.worldRecovered;
         default:
             return false;
+    }
+}
+
+export interface AchievementProgress {
+    readonly current: number;
+    readonly target: number;
+    readonly earned: boolean;
+}
+
+const LANGUAGE_PREFIXES = new Set([
+    "js",
+    "ts",
+    "web",
+    "html",
+    "css",
+    "python",
+    "sql",
+    "java",
+    "c",
+    "cpp",
+    "csharp",
+    "go",
+    "rust",
+    "kotlin",
+    "swift",
+    "ruby",
+    "zig",
+    "lua",
+    "react",
+]);
+
+export function demonstratedLanguages(evidence: readonly EvidenceRecord[]): readonly string[] {
+    const found = new Set<string>();
+    for (const item of evidence) {
+        if (item.outcome !== "success") {
+            continue;
+        }
+        for (const skillId of item.skills ?? []) {
+            const prefix = skillId.split(".")[0] ?? skillId;
+            if (LANGUAGE_PREFIXES.has(prefix)) {
+                found.add(prefix === "html" || prefix === "css" ? "web" : prefix);
+            }
+        }
+    }
+    return [...found];
+}
+
+function evidenceCount(
+    evidence: readonly EvidenceSubmission[],
+    category: EvidenceSubmission["category"],
+    outcome: EvidenceSubmission["outcome"] | undefined,
+): number {
+    return evidence.filter(function matches(item: EvidenceSubmission): boolean {
+        return item.category === category && (outcome === undefined || item.outcome === outcome);
+    }).length;
+}
+
+function capped(current: number, target: number): AchievementProgress {
+    return { current: Math.min(current, target), target, earned: current >= target };
+}
+
+export function achievementProgress(
+    definition: AchievementDefinition,
+    context: AchievementContext,
+): AchievementProgress {
+    switch (definition.rule) {
+        case "first-independent-transfer":
+            return capped(
+                context.evidence.filter(function independentTransfer(
+                    item: EvidenceSubmission,
+                ): boolean {
+                    return (
+                        item.category === "transfer" &&
+                        item.outcome === "success" &&
+                        item.assistance === "independent"
+                    );
+                }).length,
+                1,
+            );
+        case "three-boundary-tests":
+            return capped(
+                context.hiddenBoundaryFound
+                    ? 3
+                    : evidenceCount(context.evidence, "testing", "success"),
+                3,
+            );
+        case "five-debugging-successes":
+            return capped(
+                context.difficultDebuggingRecovered
+                    ? 5
+                    : evidenceCount(context.evidence, "debugging", "success"),
+                5,
+            );
+        case "team-event-participation":
+            return capped(context.cooperativeChallengeCompleted ? 1 : 0, 1);
+        case "first-project-complete":
+            return capped(context.projectsCompleted, 1);
+        case "three-ai-reviews":
+            return capped(evidenceCount(context.evidence, "review", "success"), 3);
+        case "second-language":
+            return capped(context.languagesDemonstrated.length, 2);
+        case "world-recovered":
+            return capped(context.worldRecovered ? 1 : 0, 1);
+        default:
+            return capped(0, 1);
     }
 }
 
