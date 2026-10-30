@@ -1,4 +1,9 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 export type NodeEnvironment = "development" | "test" | "production";
+
+export const SERVER_VERSION = "0.1.0";
 
 export interface AiConfiguration {
     readonly baseUrl: string;
@@ -29,6 +34,7 @@ export interface RateLimitConfiguration {
     readonly registerPerHour: number;
     readonly loginPerQuarterHour: number;
     readonly aiHintsPerHour: number;
+    readonly eventSubmissionsPerHour: number;
 }
 
 export const DEFAULT_RATE_LIMITS: RateLimitConfiguration = {
@@ -36,7 +42,23 @@ export const DEFAULT_RATE_LIMITS: RateLimitConfiguration = {
     registerPerHour: 20,
     loginPerQuarterHour: 15,
     aiHintsPerHour: 10,
+    eventSubmissionsPerHour: 30,
 };
+
+export function isWebBuildPresent(webDirectory: string | undefined): boolean {
+    return webDirectory !== undefined && existsSync(join(webDirectory, "index.html"));
+}
+
+export function assertProductionWebBuild(
+    webDirectory: string,
+    nodeEnvironment: NodeEnvironment,
+): void {
+    if (nodeEnvironment === "production" && !isWebBuildPresent(webDirectory)) {
+        throw new Error(
+            `The web build is missing at ${webDirectory}. Run "pnpm build" before starting the server in production.`,
+        );
+    }
+}
 
 const HANDLE_PATTERN = /^[a-z0-9_]{3,24}$/;
 
