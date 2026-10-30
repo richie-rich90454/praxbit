@@ -5,22 +5,14 @@
     "courseId": "rust",
     "title": "Name a borrow lifetime",
     "summary": "Add lifetime parameters to a borrowing struct and a function that returns a reference.",
-    "skills": [
-        "rust.ownership",
-        "rust.syntax"
-    ],
-    "prerequisites": [
-        "rust.ownership"
-    ],
+    "skills": ["rust.ownership", "rust.syntax"],
+    "prerequisites": ["rust.ownership"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "annotate-struct",
             "description": "Add a lifetime parameter to a borrowing struct.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-declaration",
             "description": "Choose the declaration for a struct that stores a reference.",
-            "stepIds": [
-                "lifetime-transfer"
-            ]
+            "stepIds": ["lifetime-transfer"]
         },
         {
             "id": "explain-lifetimes",
             "description": "Explain elision, 'static, and borrow checking accurately.",
-            "stepIds": [
-                "lifetime-check"
-            ]
+            "stepIds": ["lifetime-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:rust"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:rust"],
     "hints": [
         "A struct that stores a reference needs a lifetime parameter.",
         "The field type becomes &'a str.",
@@ -196,35 +177,22 @@
                     "kind": "static",
                     "description": "The excerpt struct declares a lifetime for its borrow.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "struct Excerpt<'a>",
-                        "text: &'a str"
-                    ],
-                    "excludes": [
-                        "struct Excerpt {"
-                    ]
+                    "includes": ["struct Excerpt<'a>", "text: &'a str"],
+                    "excludes": ["struct Excerpt {"]
                 },
                 {
                     "kind": "static",
                     "description": "The longest function ties both inputs and the output to one lifetime.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "fn longest<'a>(left: &'a str, right: &'a str) -> &'a str"
-                    ],
-                    "excludes": [
-                        "fn longest(left: &str, right: &str) -> &str"
-                    ]
+                    "includes": ["fn longest<'a>(left: &'a str, right: &'a str) -> &'a str"],
+                    "excludes": ["fn longest(left: &str, right: &str) -> &str"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter TODO is gone.",
                     "file": "src/main.rs",
-                    "includes": [
-                        "struct Excerpt<'a>"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["struct Excerpt<'a>"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -313,9 +281,7 @@
     },
     "rewards": {
         "experience": 155,
-        "unlocks": [
-            "rust.async-tokio"
-        ]
+        "unlocks": ["rust.async-tokio"]
     },
     "persistence": {
         "kind": "none"
@@ -326,7 +292,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
