@@ -31,6 +31,77 @@ describe("world reducer", function worldReducer(): void {
         expect(first.state).toEqual(second.state);
     });
 
+    it("reports no change when a restart has nothing left to repair", function noChange(): void {
+        const initial = createInitialWorld();
+        const result = applyWorldAction(initial, { id: "restart-service", systemId: "api" });
+        expect(result.changed).toBe(false);
+        expect(result.state.version).toBe(1);
+        expect(result.state.log).toHaveLength(1);
+        expect(initial.version).toBe(0);
+    });
+
+    it("opens an incident when a restart runs before its prerequisites", function badRestart(): void {
+        const initial = createInitialWorld();
+        const failed = applyWorldAction(initial, {
+            id: "restart-service",
+            systemId: "robotics",
+        });
+        expect(failed.changed).toBe(true);
+        expect(failed.state.flags["incidentOpen"]).toBe(true);
+        expect(
+            failed.state.systems.find(function robotics(system): boolean {
+                return system.id === "robotics";
+            })?.status,
+        ).toBe("down");
+        expect(isWorldRecovered(failed.state)).toBe(false);
+
+        const blocked = applyWorldAction(failed.state, { id: "resolve-incident" });
+        expect(blocked.state.flags["incidentResolved"]).toBe(false);
+    });
+
+    it("heals only after the failing prerequisites are corrected", function recovery(): void {
+        const initial = createInitialWorld();
+        let state = applyWorldAction(initial, {
+            id: "restart-service",
+            systemId: "robotics",
+        }).state;
+        state = applyWorldAction(state, { id: "integrate-systems" }).state;
+        state = applyWorldAction(state, { id: "enable-robotics" }).state;
+        state = applyWorldAction(state, { id: "restart-service", systemId: "robotics" }).state;
+        expect(state.flags["incidentOpen"]).toBe(false);
+
+        state = applyWorldAction(state, { id: "restore-deploy" }).state;
+        state = applyWorldAction(state, { id: "publish-storefront" }).state;
+        state = applyWorldAction(state, { id: "resolve-incident" }).state;
+        expect(isWorldRecovered(state)).toBe(true);
+    });
+
+    it("refuses to restart a system that is not restartable", function notRestartable(): void {
+        const initial = createInitialWorld();
+        const result = applyWorldAction(initial, {
+            id: "restart-service",
+            systemId: "database",
+        });
+        expect(result.changed).toBe(true);
+        expect(result.state.flags["incidentOpen"]).toBe(true);
+        expect(
+            result.state.systems.find(function database(system): boolean {
+                return system.id === "database";
+            })?.status,
+        ).toBe("down");
+    });
+
+    it("requires meaningful recovery evidence, not only healthy statuses", function recoveryEvidence(): void {
+        const initial = createInitialWorld();
+        const healthyButUnverified = {
+            ...initial,
+            systems: initial.systems.map(function healthy(system) {
+                return { ...system, status: "healthy" as const };
+            }),
+        };
+        expect(isWorldRecovered(healthyButUnverified)).toBe(false);
+    });
+
     it("sets world flags and appends a sequenced log entry", function flags(): void {
         const result = applyWorldAction(createInitialWorld(), { id: "repair-inventory" });
         expect(result.changed).toBe(true);
