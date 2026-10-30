@@ -11,6 +11,9 @@ const config: CapacitorConfig = {
         Preferences: {
             group: "PraxbitSession",
         },
+        LocalNotifications: {
+            presentationOptions: ["badge", "sound", "banner", "list"],
+        },
     },
 };
 
