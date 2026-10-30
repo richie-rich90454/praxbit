@@ -1,0 +1,14 @@
+{
+    "steps": {
+        "configure": {
+            "files": {
+                "Program.cs": "using Microsoft.AspNetCore.Authentication.JwtBearer;\nusing Microsoft.AspNetCore.Builder;\nusing Microsoft.Extensions.DependencyInjection;\n\nvar builder = WebApplication.CreateBuilder(args);\n\nbuilder.Services.AddControllers();\nbuilder.Services\n    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)\n    .AddJwtBearer(options =>\n    {\n        options.Authority = builder.Configuration[\"Auth:Authority\"];\n        options.Audience = builder.Configuration[\"Auth:Audience\"];\n    });\nbuilder.Services.AddAuthorization();\n\nvar app = builder.Build();\n\napp.UseAuthentication();\napp.UseAuthorization();\n\napp.MapControllers();\n\napp.Run();\n"
+            }
+        },
+        "protect": {
+            "files": {
+                "CatalogController.cs": "using Microsoft.AspNetCore.Authorization;\nusing Microsoft.AspNetCore.Mvc;\n\nnamespace Praxbit.Catalog.Controllers;\n\n[ApiController]\n[Route(\"api/[controller]\")]\npublic class CatalogController : ControllerBase\n{\n    [Authorize(Roles = \"Member\")]\n    [HttpGet]\n    public IActionResult List()\n    {\n        return Ok(new[] { \"microscope\" });\n    }\n}\n"
+            }
+        }
+    }
+}
