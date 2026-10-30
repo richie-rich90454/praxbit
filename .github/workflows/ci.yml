@@ -87,6 +87,74 @@ jobs:
             - name: Security tests
               run: pnpm test:security
 
+    android:
+        name: Android debug build
+        runs-on: ubuntu-latest
+        timeout-minutes: 45
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+            - uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: 21
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            - name: Build web assets
+              run: pnpm --filter @praxbit/web build
+            - name: Sync Capacitor Android
+              run: pnpm --filter @praxbit/web exec cap sync android
+            - name: Assemble debug APK
+              working-directory: apps/web/android
+              run: |
+                  chmod +x gradlew
+                  ./gradlew assembleDebug --no-daemon
+            - name: Upload debug APK
+              uses: actions/upload-artifact@v4
+              with:
+                  name: praxbit-android-debug
+                  path: apps/web/android/app/build/outputs/apk/debug/app-debug.apk
+                  retention-days: 7
+
+    ios:
+        name: iOS simulator build
+        runs-on: macos-latest
+        timeout-minutes: 45
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pnpm/action-setup@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+            - name: Build web assets
+              run: pnpm --filter @praxbit/web build
+            - name: Sync Capacitor iOS
+              run: pnpm --filter @praxbit/web exec cap sync ios
+            - name: Build simulator app
+              working-directory: apps/web/ios/App
+              run: |
+                  xcodebuild \
+                    -project App.xcodeproj \
+                    -target App \
+                    -configuration Debug \
+                    -sdk iphonesimulator \
+                    -derivedDataPath build \
+                    CODE_SIGNING_ALLOWED=NO \
+                    build
+            - name: Upload simulator app
+              uses: actions/upload-artifact@v4
+              with:
+                  name: praxbit-ios-simulator
+                  path: apps/web/ios/App/build/Build/Products/Debug-iphonesimulator/App.app
+                  retention-days: 7
+
     browser:
         name: Browser, accessibility, and visual tests
         runs-on: ubuntu-latest
