@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "implement-handler": {
+            "files": {
+                "main.js": "function addToCart(currentCount) {\n  return currentCount + 1;\n}\n"
+            }
+        }
+    }
+}
