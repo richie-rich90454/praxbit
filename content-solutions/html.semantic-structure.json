@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "repair-structure": {
+            "files": {
+                "index.html": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Campus store</title>\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <header><h1>Campus store</h1></header>\n  <nav><a href=\"/supplies\">Supplies</a><a href=\"/orders\">Orders</a><a href=\"/help\">Help</a></nav>\n  <main>\n    <p>Fresh supplies for every desk.</p>\n    <article class=\"product\">\n      <img src=\"pencils.svg\" alt=\"Pencil box\">\n      <div>Pencil box</div>\n      <button data-action=\"add\">Add to cart</button>\n    </article>\n    <article class=\"product\">\n      <img src=\"notebook.svg\" alt=\"Notebook\">\n      <div>Notebook</div>\n      <button data-action=\"add\">Add to cart</button>\n    </article>\n  </main>\n</body>\n</html>\n"
+            }
+        }
+    }
+}
