@@ -5,23 +5,14 @@
     "courseId": "fastapi",
     "title": "Dependency-based authentication",
     "summary": "Protect a router with a dependency that reads the Authorization header and distinguishes 401 from 403.",
-    "skills": [
-        "fastapi.routes",
-        "fastapi.validation"
-    ],
-    "prerequisites": [
-        "fastapi.routes",
-        "security.auth"
-    ],
+    "skills": ["fastapi.routes", "fastapi.validation"],
+    "prerequisites": ["fastapi.routes", "security.auth"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-dependency",
             "description": "Implement a dependency that authenticates the request.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-test",
             "description": "Test the protected router with and without credentials.",
-            "stepIds": [
-                "test"
-            ]
+            "stepIds": ["test"]
         },
         {
             "id": "objective-transfer",
             "description": "Choose the right scope for a role-specific dependency.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:api",
-        "icon:fastapi"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:fastapi"],
     "hints": [
         "A dependency can read request data through its own parameters.",
         "Header() binds the Authorization header without manual request parsing.",
@@ -238,9 +218,7 @@
                         "dependencies=[Depends(require_member)]",
                         "app.include_router(members)"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 }
             ],
             "language": "text"
@@ -287,9 +265,7 @@
                         "response = client.get(\"/members/orders\")",
                         "assert response.status_code == 401"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -358,8 +334,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
