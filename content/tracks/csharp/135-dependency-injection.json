@@ -1,0 +1,331 @@
+{
+    "id": "csharp.dependency-injection",
+    "version": 1,
+    "sequence": 88,
+    "courseId": "csharp",
+    "title": "Inject a service with lifetimes",
+    "summary": "Replace a hidden construction with constructor injection and choose service lifetimes.",
+    "skills": [
+        "csharp.dotnet"
+    ],
+    "prerequisites": [
+        "csharp.async"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "csharp-di",
+        "briefing": "OrderService creates its own clock, so tests cannot control time. Register the clock in the container, inject it through the constructor, and keep request state scoped."
+    },
+    "objectives": [
+        {
+            "id": "inject-clock",
+            "description": "Resolve the clock through constructor injection.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-lifetime",
+            "description": "Choose a lifetime for a request-bound repository.",
+            "stepIds": [
+                "di-transfer"
+            ]
+        },
+        {
+            "id": "explain-di",
+            "description": "Explain lifetimes and captive dependencies accurately.",
+            "stepIds": [
+                "di-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:csharp"
+    ],
+    "hints": [
+        "The service currently calls new SystemClock().",
+        "Add an IClock parameter to the constructor.",
+        "Register IClock and SystemClock with AddSingleton.",
+        "Resolve OrderService from the provider instead of constructing it."
+    ],
+    "misconceptions": [
+        {
+            "id": "hidden-new",
+            "description": "Constructing the dependency inside the service.",
+            "stepId": "apply",
+            "testDescription": "The clock is resolved from the container.",
+            "feedback": "A hidden new makes the dependency impossible to replace in a test. Accept IClock through the constructor.",
+            "followUpSkill": "csharp.dotnet"
+        },
+        {
+            "id": "singleton-repository",
+            "description": "Registering a request-bound repository as a singleton.",
+            "stepId": "di-transfer",
+            "answer": "singleton",
+            "feedback": "A repository that holds a request-scoped DbContext must be scoped as well. A singleton would capture it for the process lifetime.",
+            "followUpSkill": "csharp.dotnet"
+        },
+        {
+            "id": "singleton-db",
+            "description": "Sharing a DbContext as a singleton.",
+            "stepId": "di-check",
+            "answer": "singleton-db",
+            "feedback": "DbContext is not thread-safe and is designed for a short scope. Register it scoped and resolve it per request.",
+            "followUpSkill": "csharp.dotnet"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Constructor injection makes dependencies explicit",
+                "body": "A class that receives its dependencies through its constructor can be constructed with real or test implementations. It does not create hidden collaborators with new. The container builds the object graph and supplies each dependency."
+            },
+            {
+                "title": "Lifetimes describe sharing",
+                "body": "A singleton is created once per container and shared. A scoped service is created once per request scope. A transient service is created for every resolution. The lifetime must match the state the service holds; a singleton that captures a scoped DbContext is a captive dependency."
+            },
+            {
+                "title": "Registrations are code",
+                "body": "IServiceCollection registrations are ordinary code that can be tested. Build the provider once at startup and resolve request-scoped services from a request scope. Do not resolve scoped services from the root provider in a long-running application."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Dependency injection",
+                "definition": "Supplying a class's dependencies from outside instead of constructing them inside."
+            },
+            {
+                "term": "Service lifetime",
+                "definition": "The rule for how long a container reuses a resolved service."
+            },
+            {
+                "term": "Captive dependency",
+                "definition": "A long-lived service that holds a shorter-lived dependency."
+            },
+            {
+                "term": "Service provider",
+                "definition": "The container that resolves registered services."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Constructor injection makes dependencies explicit",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Constructor injection makes dependencies explicit",
+                    "body": "A class that receives its dependencies through its constructor can be constructed with real or test implementations. It does not create hidden collaborators with new. The container builds the object graph and supplies each dependency."
+                },
+                {
+                    "title": "Lifetimes describe sharing",
+                    "body": "A singleton is created once per container and shared. A scoped service is created once per request scope. A transient service is created for every resolution. The lifetime must match the state the service holds; a singleton that captures a scoped DbContext is a captive dependency."
+                },
+                {
+                    "title": "Registrations are code",
+                    "body": "IServiceCollection registrations are ordinary code that can be tested. Build the provider once at startup and resolve request-scoped services from a request scope. Do not resolve scoped services from the root provider in a long-running application."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Dependency injection",
+                    "definition": "Supplying a class's dependencies from outside instead of constructing them inside."
+                },
+                {
+                    "term": "Service lifetime",
+                    "definition": "The rule for how long a container reuses a resolved service."
+                },
+                {
+                    "term": "Captive dependency",
+                    "definition": "A long-lived service that holds a shorter-lived dependency."
+                },
+                {
+                    "term": "Service provider",
+                    "definition": "The container that resolves registered services."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Inject the clock",
+            "prompt": "Edit Program.cs. OrderService receives IClock through its constructor. Register SystemClock as a singleton and OrderService as scoped, then resolve OrderService from the provider.",
+            "evidence": "construction",
+            "language": "csharp",
+            "files": [
+                {
+                    "path": "Program.cs",
+                    "content": "using System;\nusing Microsoft.Extensions.DependencyInjection;\n\ninterface IClock\n{\n    DateTime Now { get; }\n}\n\nclass SystemClock : IClock\n{\n    public DateTime Now => DateTime.UtcNow;\n}\n\nclass OrderService\n{\n    private readonly IClock clock;\n\n    public OrderService()\n    {\n        clock = new SystemClock(); // TODO: inject the clock\n    }\n\n    public DateTime CreatedAt => clock.Now;\n}\n\nclass Program\n{\n    static void Main()\n    {\n        var services = new ServiceCollection();\n        services.AddScoped<OrderService>();\n        var provider = services.BuildServiceProvider();\n        Console.WriteLine(provider.GetRequiredService<OrderService>().CreatedAt);\n    }\n}\n",
+                    "editable": true,
+                    "language": "csharp"
+                },
+                {
+                    "path": "Campus.csproj",
+                    "content": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n  <ItemGroup>\n    <PackageReference Include=\"Microsoft.Extensions.DependencyInjection\" Version=\"8.0.1\" />\n  </ItemGroup>\n</Project>\n",
+                    "editable": false,
+                    "language": "xml"
+                }
+            ],
+            "entry": "Program.cs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet build",
+                "description": "Build the project with the .NET SDK."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The clock is resolved from the container.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "services.AddSingleton<IClock, SystemClock>();",
+                        "public OrderService(IClock clock)"
+                    ],
+                    "excludes": [
+                        "new SystemClock()"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The order service is scoped to a request.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "services.AddScoped<OrderService>();",
+                        "provider.GetRequiredService<OrderService>()"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The container is built before resolving services.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "BuildServiceProvider()"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The constructor currently takes no parameters.",
+                "Add IClock to the constructor and store it in the field.",
+                "Register IClock before OrderService.",
+                "Use AddSingleton for the clock and AddScoped for the service."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "di-transfer",
+            "title": "Choose the repository lifetime",
+            "prompt": "A repository holds a DbContext for one HTTP request. Which lifetime should it use?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the lifetime.",
+                "options": [
+                    {
+                        "id": "scoped",
+                        "label": "Scoped"
+                    },
+                    {
+                        "id": "singleton",
+                        "label": "Singleton"
+                    },
+                    {
+                        "id": "transient",
+                        "label": "Transient"
+                    },
+                    {
+                        "id": "static",
+                        "label": "A static field outside the container"
+                    }
+                ],
+                "correctId": "scoped",
+                "explanation": "A scoped lifetime matches the request and gives the repository one DbContext for that unit of work. A singleton would share the context across requests."
+            },
+            "hints": [
+                "The DbContext should live for one request.",
+                "The container has a lifetime for request scope.",
+                "Match the repository lifetime to the context.",
+                "Choose scoped."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "di-check",
+            "title": "Lifetimes and resolution",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "singleton",
+                    "label": "A singleton service is created once per container and shared.",
+                    "correct": true
+                },
+                {
+                    "id": "scoped",
+                    "label": "A scoped service is created once per request scope.",
+                    "correct": true
+                },
+                {
+                    "id": "singleton-db",
+                    "label": "A DbContext should be registered as a singleton.",
+                    "correct": false
+                },
+                {
+                    "id": "transient",
+                    "label": "A transient service is created for each resolution.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Lifetimes control sharing. A DbContext is short-lived and not thread-safe, so a singleton registration is a captive dependency.",
+            "hints": [
+                "Three statements are accurate.",
+                "DbContext is designed for a short unit of work.",
+                "Singleton means one instance for the container.",
+                "Select singleton, scoped, and transient."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": [
+            "csharp.aspnet-core"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
