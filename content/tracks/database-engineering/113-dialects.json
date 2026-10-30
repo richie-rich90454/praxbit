@@ -5,22 +5,14 @@
     "courseId": "database-engineering",
     "title": "The same SQL, three databases",
     "summary": "Port an upsert across PostgreSQL, MySQL, and SQLite while keeping the behavior explicit.",
-    "skills": [
-        "sql.dialects"
-    ],
-    "prerequisites": [
-        "sql.queries",
-        "sql.modeling"
-    ],
+    "skills": ["sql.dialects"],
+    "prerequisites": ["sql.queries", "sql.modeling"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:database",
-        "icon:database"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
     "hints": [
         "PostgreSQL uses GENERATED ALWAYS AS IDENTITY for an identity column.",
         "PostgreSQL and SQLite use ON CONFLICT (column) DO UPDATE; MySQL uses ON DUPLICATE KEY UPDATE.",
@@ -199,9 +182,7 @@
                         "SET email = EXCLUDED.email",
                         "RETURNING id, handle, email, active;"
                     ],
-                    "excludes": [
-                        "ON DUPLICATE KEY UPDATE email = 'ada@example.com'"
-                    ]
+                    "excludes": ["ON DUPLICATE KEY UPDATE email = 'ada@example.com'"]
                 },
                 {
                     "kind": "static",
@@ -229,24 +210,15 @@
                     "kind": "static",
                     "description": "The file states the LIMIT rule and avoids SELECT *.",
                     "file": "dialects.sql",
-                    "includes": [
-                        "LIMIT exists in all three dialects",
-                        "Without ORDER BY"
-                    ],
-                    "excludes": [
-                        "SELECT *"
-                    ]
+                    "includes": ["LIMIT exists in all three dialects", "Without ORDER BY"],
+                    "excludes": ["SELECT *"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "dialects.sql",
-                    "includes": [
-                        "id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -342,9 +314,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems",
-        "web"
-    ]
+    "tags": ["professional", "systems", "web"]
 }
