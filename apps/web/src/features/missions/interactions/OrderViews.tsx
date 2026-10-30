@@ -1,12 +1,14 @@
 import { For, createMemo, createSignal, type JSX } from "solid-js";
 import { evaluateStep } from "@praxbit/domain";
 import type { LoopStep, OrderStep } from "@praxbit/contracts";
+import { announce } from "../../../app/AppShell.tsx";
 import type { InteractionProps } from "./types.ts";
 
 function ReorderList(props: {
     readonly items: readonly { id: string; label: string }[];
     readonly order: readonly string[];
     readonly label: string;
+    readonly listId: string;
     readonly onMove: (index: number, delta: number) => void;
 }): JSX.Element {
     const byId = createMemo(function indexItems(): ReadonlyMap<
@@ -20,13 +22,30 @@ function ReorderList(props: {
         );
     });
 
+    function move(index: number, delta: number, id: string): void {
+        const item = byId().get(id);
+        const target = index + delta;
+        if (item === undefined || target < 0 || target >= props.order.length) {
+            return;
+        }
+        props.onMove(index, delta);
+        announce(`${item.label} moved to position ${target + 1} of ${props.order.length}.`);
+        queueMicrotask(function focusMovedItem(): void {
+            document.getElementById(`${props.listId}-${id}`)?.focus();
+        });
+    }
+
     return (
         <ol class="stack stack--tight" aria-label={props.label}>
             <For each={props.order}>
                 {function id(itemId, index): JSX.Element {
                     const item = byId().get(itemId);
                     return (
-                        <li class="surface surface--quiet row row--between">
+                        <li
+                            class="surface surface--quiet row row--between"
+                            id={`${props.listId}-${itemId}`}
+                            tabindex="-1"
+                        >
                             <span>{item?.label ?? itemId}</span>
                             <span class="row">
                                 <button
@@ -35,7 +54,7 @@ function ReorderList(props: {
                                     aria-label={`Move ${item?.label ?? itemId} up`}
                                     disabled={index() === 0}
                                     onClick={function moveUp(): void {
-                                        props.onMove(index(), -1);
+                                        move(index(), -1, itemId);
                                     }}
                                 >
                                     Move up
@@ -46,7 +65,7 @@ function ReorderList(props: {
                                     aria-label={`Move ${item?.label ?? itemId} down`}
                                     disabled={index() === props.order.length - 1}
                                     onClick={function moveDown(): void {
-                                        props.onMove(index(), 1);
+                                        move(index(), 1, itemId);
                                     }}
                                 >
                                     Move down
@@ -89,6 +108,7 @@ export function OrderView(props: { readonly step: OrderStep } & InteractionProps
                 items={props.step.items}
                 order={order()}
                 label="Ordered steps"
+                listId={`order-${props.step.id}`}
                 onMove={function onMove(index, delta): void {
                     setOrder(function update(current): readonly string[] {
                         return moveItem(current, index, delta);
@@ -149,6 +169,7 @@ export function LoopView(props: { readonly step: LoopStep } & InteractionProps):
                     items={props.step.bodyItems}
                     order={body()}
                     label="Repeated work"
+                    listId={`loop-${props.step.id}`}
                     onMove={function onMove(index, delta): void {
                         setBody(function update(current): readonly string[] {
                             return moveItem(current, index, delta);
