@@ -1,0 +1,274 @@
+{
+    "id": "nestjs.testing",
+    "version": 1,
+    "sequence": 231,
+    "courseId": "nestjs",
+    "title": "Test guard decisions before the handler",
+    "summary": "Implement an admin policy that rejects suspended accounts, then design unit and integration cases that prove the guard protects the route.",
+    "skills": ["testing.integration", "nestjs.guards", "concept.testing"],
+    "prerequisites": ["nestjs.guards", "testing.integration"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "testing",
+        "briefing": "A suspended admin can still write products because the guard checks only the role. The team wants the policy and the route wiring tested."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Implement a guard policy with account-state checks.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-design",
+            "description": "Select the unit and integration cases for a guard.",
+            "stepIds": ["design"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "hints": [
+        "Reject a null principal first.",
+        "Reject a suspended principal before checking the role.",
+        "Allow only the admin role after both checks pass.",
+        "Add one integration case that proves the guard is applied to the route."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-allow",
+            "description": "Allowing because the admin path works.",
+            "stepId": "apply",
+            "testDescription": "Anonymous requests are rejected.",
+            "feedback": "A guard that allows anonymous requests protects nothing. Deny null principals explicitly.",
+            "followUpSkill": "nestjs.guards"
+        },
+        {
+            "id": "suspended-admin",
+            "description": "Checking role but not account state.",
+            "stepId": "apply",
+            "testDescription": "A suspended admin is rejected.",
+            "feedback": "Suspension overrides the role. Check the account state before allowing an admin through.",
+            "followUpSkill": "testing.integration"
+        },
+        {
+            "id": "happy-only",
+            "description": "Testing only the active admin path.",
+            "stepId": "design",
+            "answer": "happy",
+            "feedback": "The denial branches are the security behavior. A suite that only covers the active admin cannot catch the default-allow or suspended-admin bugs.",
+            "followUpSkill": "concept.testing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Test the decision, not the framework",
+                "body": "A guard decision can be a pure function of the principal. Test anonymous, wrong-role, suspended, and allowed cases without booting Nest."
+            },
+            {
+                "title": "Suspension is not a role",
+                "body": "A suspended admin still has the admin role but must not pass. The policy needs both the role and the account state."
+            },
+            {
+                "title": "Integration tests prove wiring",
+                "body": "After the policy is tested, one integration test proves the guard is applied to the route and returns the expected status."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Principal",
+                "definition": "The authenticated caller and its account state."
+            },
+            {
+                "term": "Policy",
+                "definition": "A pure decision about whether a principal may perform an action."
+            },
+            {
+                "term": "Integration test",
+                "definition": "A test that exercises the route, guard, and handler together."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Guard policy and tests",
+            "prompt": "Read the explanation, then implement the policy.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Test the decision, not the framework",
+                    "body": "A guard decision can be a pure function of the principal. Test anonymous, wrong-role, suspended, and allowed cases without booting Nest."
+                },
+                {
+                    "title": "Suspension is not a role",
+                    "body": "A suspended admin still has the admin role but must not pass. The policy needs both the role and the account state."
+                },
+                {
+                    "title": "Integration tests prove wiring",
+                    "body": "After the policy is tested, one integration test proves the guard is applied to the route and returns the expected status."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Principal",
+                    "definition": "The authenticated caller and its account state."
+                },
+                {
+                    "term": "Policy",
+                    "definition": "A pure decision about whether a principal may perform an action."
+                },
+                {
+                    "term": "Integration test",
+                    "definition": "A test that exercises the route, guard, and handler together."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Decide whether an admin may activate",
+            "prompt": "Edit admin-policy.ts. Reject null principals, reject suspended accounts, allow active admins, and reject every other role.",
+            "evidence": "construction",
+            "hints": [
+                "Start with principal === null.",
+                "Check principal.suspended next.",
+                "Return principal.role === \"admin\" as the final decision.",
+                "Keep the function pure so it can be tested without Nest."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "admin-policy.ts",
+                    "content": "type Principal = { role: \"member\" | \"admin\"; suspended: boolean } | null;\n\nfunction canActivateAdmin(principal: Principal): boolean {\n  // TODO: require an active admin and deny everyone else\n  return true;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "admin-policy.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Anonymous requests are rejected.",
+                    "name": "canActivateAdmin",
+                    "args": [null],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "A suspended admin is rejected.",
+                    "name": "canActivateAdmin",
+                    "args": [
+                        {
+                            "role": "admin",
+                            "suspended": true
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "A member is rejected.",
+                    "name": "canActivateAdmin",
+                    "args": [
+                        {
+                            "role": "member",
+                            "suspended": false
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "An active admin is allowed.",
+                    "name": "canActivateAdmin",
+                    "args": [
+                        {
+                            "role": "admin",
+                            "suspended": false
+                        }
+                    ],
+                    "expected": true
+                }
+            ]
+        },
+        {
+            "kind": "test-design",
+            "id": "design",
+            "title": "Design the guard tests",
+            "prompt": "Select every case the guard needs, including the integration check. Leave out cases that bypass the guard.",
+            "evidence": "transfer",
+            "hints": [
+                "Cover anonymous, member, suspended admin, and active admin.",
+                "Add one test that proves the guard is attached to the route.",
+                "Reject a happy-path-only suite.",
+                "Reject tests that bypass the guard and call the handler directly."
+            ],
+            "cases": [
+                {
+                    "id": "anonymous",
+                    "label": "Returns 401 for a request without a session.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "member",
+                    "label": "Returns 403 for a signed-in member.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "suspended",
+                    "label": "Returns 403 for a suspended admin.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "admin",
+                    "label": "Allows an active admin through to the handler.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "wiring",
+                    "label": "Sends a request through the route and asserts that the guard denies before the handler runs.",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "happy",
+                    "label": "Only covers the active admin path.",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "direct",
+                    "label": "Calls the controller method directly instead of exercising the guard.",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "The policy needs anonymous, member, suspended, and active-admin cases. One integration case proves the guard is wired to the route; a happy-path-only suite or a direct controller call skips the behavior under test."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
