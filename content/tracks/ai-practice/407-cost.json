@@ -1,18 +1,28 @@
 {
     "id": "ai-practice.cost",
     "version": 1,
-    "sequence": 407,
+    "sequence": 199,
     "courseId": "ai-practice",
     "title": "Spend tokens where they change the answer",
     "summary": "Estimate request cost, cache stable context, route work to the right model, and count cost per success.",
-    "skills": ["ai.evaluation", "ai.foundations"],
-    "prerequisites": ["ai.foundations", "ai.evaluation"],
+    "skills": [
+        "ai.evaluation",
+        "ai.foundations"
+    ],
+    "prerequisites": [
+        "ai.foundations",
+        "ai.evaluation"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +34,31 @@
         {
             "id": "estimate",
             "description": "Estimate token cost from usage and prices.",
-            "stepIds": ["cost-code"]
+            "stepIds": [
+                "cost-code"
+            ]
         },
         {
             "id": "review",
             "description": "Identify avoidable spend in the request path.",
-            "stepIds": ["routing-review"]
+            "stepIds": [
+                "routing-review"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain caching, routing, and cost per success.",
-            "stepIds": ["cost-transfer"]
+            "stepIds": [
+                "cost-transfer"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:coin"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:api",
+        "icon:coin"
+    ],
     "hints": [
         "Cost is input tokens times input price plus output tokens times output price.",
         "Prices are usually quoted per million tokens, so divide by one million.",
@@ -178,35 +199,60 @@
                     "kind": "function",
                     "description": "Prices one million input tokens.",
                     "name": "estimateCost",
-                    "args": [1000000, 0, 3, 15],
+                    "args": [
+                        1000000,
+                        0,
+                        3,
+                        15
+                    ],
                     "expected": 3
                 },
                 {
                     "kind": "function",
                     "description": "Prices output tokens separately.",
                     "name": "estimateCost",
-                    "args": [0, 1000000, 3, 15],
+                    "args": [
+                        0,
+                        1000000,
+                        3,
+                        15
+                    ],
                     "expected": 15
                 },
                 {
                     "kind": "function",
                     "description": "Combines small input and output counts.",
                     "name": "estimateCost",
-                    "args": [1000, 500, 3, 15],
+                    "args": [
+                        1000,
+                        500,
+                        3,
+                        15
+                    ],
                     "expected": 0.0105
                 },
                 {
                     "kind": "function",
                     "description": "Rounds to six decimals.",
                     "name": "estimateCost",
-                    "args": [123456, 7890, 2.5, 10],
+                    "args": [
+                        123456,
+                        7890,
+                        2.5,
+                        10
+                    ],
                     "expected": 0.38754
                 },
                 {
                     "kind": "function",
                     "description": "Returns zero for empty usage.",
                     "name": "estimateCost",
-                    "args": [0, 0, 3, 15],
+                    "args": [
+                        0,
+                        0,
+                        3,
+                        15
+                    ],
                     "expected": 0
                 }
             ]
@@ -333,5 +379,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
