@@ -5,24 +5,14 @@
     "courseId": "angular",
     "title": "Services, HTTP, and route guards",
     "summary": "Move the cart request into a root-provided service and keep failures visible to the caller.",
-    "skills": [
-        "angular.services",
-        "angular.routing",
-        "web.build-tooling"
-    ],
-    "prerequisites": [
-        "angular.components",
-        "web.routing"
-    ],
+    "skills": ["angular.services", "angular.routing", "web.build-tooling"],
+    "prerequisites": ["angular.components", "web.routing"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -34,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:website",
-        "icon:angular"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:angular"],
     "hints": [
         "Change @Injectable() to @Injectable({ providedIn: \"root\" }).",
         "Add a constructor parameter typed HttpClient and mark it private readonly.",
@@ -195,43 +176,29 @@
                     "kind": "static",
                     "description": "The service is provided once at the application root.",
                     "file": "cart.service.ts",
-                    "includes": [
-                        "@Injectable({ providedIn: \"root\" })"
-                    ],
+                    "includes": ["@Injectable({ providedIn: \"root\" })"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "HttpClient arrives through constructor injection.",
                     "file": "cart.service.ts",
-                    "includes": [
-                        "constructor(private readonly http: HttpClient) {}"
-                    ],
+                    "includes": ["constructor(private readonly http: HttpClient) {}"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The request is typed and returned without a silent fallback.",
                     "file": "cart.service.ts",
-                    "includes": [
-                        "return this.http.get<CartLine[]>(\"/api/cart\")"
-                    ],
-                    "excludes": [
-                        "of([])",
-                        "catchError",
-                        "TODO"
-                    ]
+                    "includes": ["return this.http.get<CartLine[]>(\"/api/cart\")"],
+                    "excludes": ["of([])", "catchError", "TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "cart.service.ts",
-                    "includes": [
-                        "@Injectable({ providedIn: \"root\" })"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["@Injectable({ providedIn: \"root\" })"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -322,8 +289,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
