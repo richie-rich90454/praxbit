@@ -1,0 +1,455 @@
+{
+    "id": "security.access-control",
+    "version": 1,
+    "sequence": 401,
+    "courseId": "security",
+    "title": "The record that was not yours",
+    "summary": "Find an object-level authorization gap, design tests for ownership boundaries, and enforce access in code.",
+    "skills": ["security.auth", "concept.security"],
+    "prerequisites": ["http.basics", "concept.security"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "access-control",
+        "briefing": "The billing API checks that a user is signed in, then loads an invoice by the id in the URL. A support account reported seeing another customer's invoice. Review the handler, choose the tests that would have caught it, and write the ownership check."
+    },
+    "objectives": [
+        {
+            "id": "find-gap",
+            "description": "Identify the missing object-level authorization check.",
+            "stepIds": ["ownership-review"]
+        },
+        {
+            "id": "design-tests",
+            "description": "Choose tests that exercise ownership boundaries.",
+            "stepIds": ["access-tests"]
+        },
+        {
+            "id": "enforce",
+            "description": "Enforce owner-or-scoped-admin access in code.",
+            "stepIds": ["guard-code"]
+        },
+        {
+            "id": "transfer",
+            "description": "Apply the same boundary to a new endpoint.",
+            "stepIds": ["access-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:shield"],
+    "hints": [
+        "Authentication answers who you are; authorization answers what this record allows.",
+        "The invoice id comes from the client, so the server must compare it with the session user.",
+        "Admin access should require an explicit permission, not merely the admin role.",
+        "Load the record, then allow the owner or an admin with billing:read; deny everyone else by default."
+    ],
+    "misconceptions": [
+        {
+            "id": "login-is-enough",
+            "description": "Believing a signed-in user may read any record by id.",
+            "stepId": "ownership-review",
+            "answer": "accept:fetch-by-id,no-owner-check,client-supplied-id",
+            "feedback": "Authentication does not grant access to every object. The handler must compare the record's owner with the session user.",
+            "followUpSkill": "security.auth"
+        },
+        {
+            "id": "unguessable-id",
+            "description": "Treating an unguessable identifier as an authorization control.",
+            "stepId": "access-tests",
+            "answer": "uuid-secret",
+            "feedback": "Ids leak through logs, links, and support tools. Randomness is not authorization; test the denial path explicitly."
+        },
+        {
+            "id": "hidden-ui",
+            "description": "Relying on a hidden button instead of a server check.",
+            "stepId": "access-transfer",
+            "answer": "ui-hidden",
+            "feedback": "The client can issue any request it wants. Every object read or write needs a server-side ownership check."
+        },
+        {
+            "id": "always-allow",
+            "description": "Allowing access so the endpoint never returns a permission error.",
+            "stepId": "guard-code",
+            "testDescription": "Denies a different customer.",
+            "feedback": "An allow-by-default guard passes the owner case and every attack. Return false unless the owner or a scoped admin matches."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Object-level authorization",
+                "body": "A route can require a valid session and still be wrong. Object-level authorization asks whether this user may act on this specific record. The check belongs next to the data access, where the record's owner is known."
+            },
+            {
+                "title": "Deny by default",
+                "body": "Start from no access and add the owner case and any explicit, scoped override. An admin role without the billing permission is still a denial. A hidden button or an unguessable id changes nothing on the server."
+            },
+            {
+                "title": "Test the negative path",
+                "body": "A test suite that only signs in as the owner cannot detect broken object-level authorization. Add a different user, an unauthenticated request, and an admin without the required permission."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "IDOR",
+                "definition": "Insecure direct object reference: reaching another user's record by changing an identifier."
+            },
+            {
+                "term": "Object-level authorization",
+                "definition": "A check that a specific user may act on a specific record."
+            },
+            {
+                "term": "Deny by default",
+                "definition": "Refusing access unless an explicit rule allows it."
+            },
+            {
+                "term": "Scoped permission",
+                "definition": "A permission that names the action and resource it covers."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Who may read this record",
+            "prompt": "Read the explanation, then review the handler.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Object-level authorization",
+                    "body": "A route can require a valid session and still be wrong. Object-level authorization asks whether this user may act on this specific record. The check belongs next to the data access, where the record's owner is known."
+                },
+                {
+                    "title": "Deny by default",
+                    "body": "Start from no access and add the owner case and any explicit, scoped override. An admin role without the billing permission is still a denial. A hidden button or an unguessable id changes nothing on the server."
+                },
+                {
+                    "title": "Test the negative path",
+                    "body": "A test suite that only signs in as the owner cannot detect broken object-level authorization. Add a different user, an unauthenticated request, and an admin without the required permission."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "IDOR",
+                    "definition": "Insecure direct object reference: reaching another user's record by changing an identifier."
+                },
+                {
+                    "term": "Object-level authorization",
+                    "definition": "A check that a specific user may act on a specific record."
+                },
+                {
+                    "term": "Deny by default",
+                    "definition": "Refusing access unless an explicit rule allows it."
+                },
+                {
+                    "term": "Scoped permission",
+                    "definition": "A permission that names the action and resource it covers."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "ownership-review",
+            "title": "Review the invoice handler",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Trace how the invoice id enters the query.",
+                "Look for a comparison between the record owner and the session user.",
+                "Ask what the role check does and does not guarantee.",
+                "Reject the handler: it loads by client id and never checks ownership."
+            ],
+            "artifact": {
+                "title": "GET /api/invoices/:id",
+                "caption": "The route requires a session but loads the record directly by path id.",
+                "kind": "code",
+                "language": "javascript",
+                "content": "app.get(\"/api/invoices/:id\", requireSession, async function (request, response) {\n  if (request.user.role === \"guest\") {\n    return response.status(403).end();\n  }\n  const invoice = await db.invoice.findUnique({ where: { id: request.params.id } });\n  response.json(invoice);\n});"
+            },
+            "findings": [
+                {
+                    "id": "fetch-by-id",
+                    "label": "The invoice is loaded by the client-supplied path id.",
+                    "correct": true
+                },
+                {
+                    "id": "no-owner-check",
+                    "label": "The handler never compares the invoice owner with the session user.",
+                    "correct": true
+                },
+                {
+                    "id": "client-supplied-id",
+                    "label": "Any signed-in non-guest user can change the id in the URL.",
+                    "correct": true
+                },
+                {
+                    "id": "permission-scope",
+                    "label": "Admin access should require an explicit billing permission, not only the role name.",
+                    "correct": true
+                },
+                {
+                    "id": "role-enough",
+                    "label": "Rejecting guests is sufficient object-level authorization.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "accept",
+                    "label": "Accept the handler"
+                },
+                {
+                    "id": "reject",
+                    "label": "Reject until ownership is checked per record"
+                },
+                {
+                    "id": "log",
+                    "label": "Add a log line and ship"
+                }
+            ],
+            "correctVerdict": "reject",
+            "explanation": "The session check only proves that someone is signed in. The handler must compare the invoice owner with the user, and any admin override needs a scoped permission."
+        },
+        {
+            "kind": "test-design",
+            "id": "access-tests",
+            "title": "Choose the authorization tests",
+            "prompt": "Select the test cases you would keep for this endpoint.",
+            "evidence": "testing",
+            "hints": [
+                "Include the allowed owner case so the endpoint still works.",
+                "Add a different signed-in user and an unauthenticated request.",
+                "Test an admin with and without the billing permission.",
+                "Keep owner, other user, guest, scoped admin, and unscoped admin; drop the idea that a UUID is a secret."
+            ],
+            "cases": [
+                {
+                    "id": "owner",
+                    "label": "Owner reads their own invoice → 200",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "other",
+                    "label": "Another customer reads the same id → 403",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "guest",
+                    "label": "No session → 401",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "admin",
+                    "label": "Admin with billing:read reads any invoice → 200",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "admin-no-scope",
+                    "label": "Admin without billing:read → 403",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "uuid-secret",
+                    "label": "Checking that the id is a UUID is enough",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "owner-again",
+                    "label": "Owner reads their own invoice → 200 (duplicate)",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "Authorization needs both the allow case and the denial cases. A UUID check validates shape, not permission."
+        },
+        {
+            "kind": "code",
+            "id": "guard-code",
+            "title": "Write the ownership guard",
+            "prompt": "Edit access.js. canReadInvoice(user, invoice) returns true only for the invoice owner or an admin holding billing:read.",
+            "evidence": "construction",
+            "hints": [
+                "Compare the user id with the invoice owner id first.",
+                "Return false when there is no user or no invoice.",
+                "An admin still needs the billing:read permission.",
+                "Use an explicit allow expression, then return false as the default."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "access.js",
+                    "content": "function canReadInvoice(user, invoice) {\n  return true;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "access.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Allows the owner.",
+                    "name": "canReadInvoice",
+                    "args": [
+                        {
+                            "id": "u1",
+                            "role": "customer",
+                            "permissions": []
+                        },
+                        {
+                            "id": "i1",
+                            "ownerId": "u1"
+                        }
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Denies a different customer.",
+                    "name": "canReadInvoice",
+                    "args": [
+                        {
+                            "id": "u2",
+                            "role": "customer",
+                            "permissions": []
+                        },
+                        {
+                            "id": "i1",
+                            "ownerId": "u1"
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Allows an admin with billing:read.",
+                    "name": "canReadInvoice",
+                    "args": [
+                        {
+                            "id": "a1",
+                            "role": "admin",
+                            "permissions": ["billing:read"]
+                        },
+                        {
+                            "id": "i1",
+                            "ownerId": "u1"
+                        }
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Denies an admin without billing:read.",
+                    "name": "canReadInvoice",
+                    "args": [
+                        {
+                            "id": "a2",
+                            "role": "admin",
+                            "permissions": ["users:read"]
+                        },
+                        {
+                            "id": "i1",
+                            "ownerId": "u1"
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Denies a guest.",
+                    "name": "canReadInvoice",
+                    "args": [
+                        {
+                            "id": "g1",
+                            "role": "guest",
+                            "permissions": []
+                        },
+                        {
+                            "id": "i1",
+                            "ownerId": "u1"
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Denies a missing user.",
+                    "name": "canReadInvoice",
+                    "args": [
+                        null,
+                        {
+                            "id": "i1",
+                            "ownerId": "u1"
+                        }
+                    ],
+                    "expected": false
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "access-transfer",
+            "title": "Apply the boundary to a new endpoint",
+            "prompt": "Select every accurate statement about object-level authorization.",
+            "evidence": "transfer",
+            "hints": [
+                "Think about what the server knows that the browser does not.",
+                "Separate authentication from authorization.",
+                "Consider what happens when the id is copied from a log or link.",
+                "Select server-side checks and deny-by-default; reject hidden UI and unguessable ids as controls."
+            ],
+            "statements": [
+                {
+                    "id": "server-check",
+                    "label": "The server must check ownership for every record it returns or changes.",
+                    "correct": true
+                },
+                {
+                    "id": "deny",
+                    "label": "Starting from deny and adding explicit allow rules is safer than starting from allow.",
+                    "correct": true
+                },
+                {
+                    "id": "scope",
+                    "label": "An admin override should name the action and resource it covers.",
+                    "correct": true
+                },
+                {
+                    "id": "ui-hidden",
+                    "label": "Hiding the edit button in the client prevents unauthorized writes.",
+                    "correct": false
+                },
+                {
+                    "id": "id-secret",
+                    "label": "A random UUID is an authorization control because it cannot be guessed.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Object-level authorization is a server-side decision. The client cannot be trusted to hide actions, and identifiers are not secrets."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The review, test selection, code editor, and explanation all use standard keyboard controls and text results.",
+        "keyboardNotes": "Use Tab to reach each finding, case, and statement. Space toggles a selection; Ctrl+Enter runs the code checks.",
+        "screenReaderNotes": "Findings and cases announce their selected state and result. Code tests announce the expected and actual values."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional", "web"]
+}
