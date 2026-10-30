@@ -5,24 +5,14 @@
     "courseId": "algorithms-advanced",
     "title": "Prove the greedy choice",
     "summary": "Schedule the most non-overlapping meetings with an exchange argument, and find where greedy stops working.",
-    "skills": [
-        "algorithms.dp",
-        "algorithms.complexity"
-    ],
-    "prerequisites": [
-        "algorithms.recursion",
-        "algorithms.complexity"
-    ],
+    "skills": ["algorithms.dp", "algorithms.complexity"],
+    "prerequisites": ["algorithms.recursion", "algorithms.complexity"],
     "difficulty": "advanced",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -34,31 +24,20 @@
         {
             "id": "schedule",
             "description": "Implement the earliest-finish interval schedule.",
-            "stepIds": [
-                "meetings-code"
-            ]
+            "stepIds": ["meetings-code"]
         },
         {
             "id": "justify",
             "description": "Choose the argument that justifies the greedy rule.",
-            "stepIds": [
-                "greedy-proof"
-            ]
+            "stepIds": ["greedy-proof"]
         },
         {
             "id": "transfer",
             "description": "Distinguish problems where greedy is safe from where it is not.",
-            "stepIds": [
-                "greedy-transfer"
-            ]
+            "stepIds": ["greedy-transfer"]
         }
     ],
-    "assets": [
-        "pip:thinking",
-        "scene:campus",
-        "system:delivery",
-        "icon:calendar"
-    ],
+    "assets": ["pip:thinking", "scene:campus", "system:delivery", "icon:calendar"],
     "hints": [
         "Sorting by start can choose a long meeting that blocks several shorter ones.",
         "The earliest finishing meeting leaves the most room for the rest.",
@@ -200,22 +179,10 @@
                     "name": "maxMeetings",
                     "args": [
                         [
-                            [
-                                1,
-                                5
-                            ],
-                            [
-                                2,
-                                3
-                            ],
-                            [
-                                3,
-                                4
-                            ],
-                            [
-                                4,
-                                6
-                            ]
+                            [1, 5],
+                            [2, 3],
+                            [3, 4],
+                            [4, 6]
                         ]
                     ],
                     "expected": 3
@@ -226,18 +193,9 @@
                     "name": "maxMeetings",
                     "args": [
                         [
-                            [
-                                1,
-                                3
-                            ],
-                            [
-                                2,
-                                4
-                            ],
-                            [
-                                3,
-                                5
-                            ]
+                            [1, 3],
+                            [2, 4],
+                            [3, 5]
                         ]
                     ],
                     "expected": 2
@@ -246,23 +204,14 @@
                     "kind": "function",
                     "description": "Handles an empty schedule.",
                     "name": "maxMeetings",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": 0
                 },
                 {
                     "kind": "function",
                     "description": "Handles one meeting.",
                     "name": "maxMeetings",
-                    "args": [
-                        [
-                            [
-                                1,
-                                2
-                            ]
-                        ]
-                    ],
+                    "args": [[[1, 2]]],
                     "expected": 1
                 },
                 {
@@ -271,18 +220,9 @@
                     "name": "maxMeetings",
                     "args": [
                         [
-                            [
-                                1,
-                                2
-                            ],
-                            [
-                                2,
-                                3
-                            ],
-                            [
-                                3,
-                                4
-                            ]
+                            [1, 2],
+                            [2, 3],
+                            [3, 4]
                         ]
                     ],
                     "expected": 3
@@ -384,8 +324,5 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems"
-    ]
+    "tags": ["professional", "systems"]
 }
