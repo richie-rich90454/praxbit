@@ -1,18 +1,26 @@
 {
     "id": "sql.join-customers",
     "version": 1,
-    "sequence": 35,
+    "sequence": 37,
     "courseId": "sql-data",
     "title": "Join orders to customers",
     "summary": "Combine two related tables without losing or duplicating rows.",
-    "skills": ["sql.joins"],
-    "prerequisites": ["sql.queries"],
+    "skills": [
+        "sql.joins"
+    ],
+    "prerequisites": [
+        "sql.queries"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": ["sqlite-wasm", "deterministic-tests", "learning-runtime"]
+        "capabilities": [
+            "sqlite-wasm",
+            "deterministic-tests",
+            "learning-runtime"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +32,32 @@
         {
             "id": "join",
             "description": "Join orders to their customers by foreign key.",
-            "stepIds": ["join-orders"]
+            "stepIds": [
+                "join-orders"
+            ]
         },
         {
             "id": "no-duplicates",
             "description": "Return exactly one row per order.",
-            "stepIds": ["join-orders"]
+            "stepIds": [
+                "join-orders"
+            ]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": ["join-count", "join-check"]
+            "stepIds": [
+                "join-count",
+                "join-check"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:join"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:database",
+        "icon:join"
+    ],
     "hints": [
         "Name both tables in FROM and connect them with ON.",
         "orders.customer_id = customers.id.",
@@ -49,13 +69,33 @@
             "id": "missing-join",
             "description": "Selecting from both tables without a join condition.",
             "stepId": "join-orders",
-            "feedback": "Without an ON condition, every order pairs with every customer. That multiplies rows and breaks the report."
+            "testDescription": "Each order appears once with the right customer.",
+            "feedback": "Without an ON condition, every order pairs with every customer. That multiplies rows and breaks the report.",
+            "followUpSkill": "sql.joins"
         },
         {
             "id": "wrong-key",
             "description": "Joining on a display field instead of the key.",
             "stepId": "join-orders",
-            "feedback": "Names are not unique. Join orders.customer_id to customers.id, the declared relationship."
+            "diagnostic": "Joining on customer name can match duplicate names and miss renamed customers.",
+            "feedback": "Names are not unique. Join orders.customer_id to customers.id, the declared relationship.",
+            "followUpSkill": "sql.joins"
+        },
+        {
+            "id": "cartesian-count",
+            "description": "Underestimating the row count of a Cartesian product.",
+            "stepId": "join-count",
+            "answer": "seven",
+            "feedback": "A Cartesian product pairs every row with every row: 3 times 4 equals 12.",
+            "followUpSkill": "sql.joins"
+        },
+        {
+            "id": "name-key",
+            "description": "Treating a display name as a stable unique key.",
+            "stepId": "join-check",
+            "answer": "name",
+            "feedback": "Display names can repeat and change. Keys are the stable relationship.",
+            "followUpSkill": "sql.joins"
         }
     ],
     "lesson": {
@@ -107,19 +147,49 @@
                     "kind": "sql",
                     "description": "Each order appears once with the right customer.",
                     "expectedRows": [
-                        ["o1", "Ada", 2500],
-                        ["o2", "Ada", 7500],
-                        ["o3", "Bo", 12900],
-                        ["o4", "Cy", 4000],
-                        ["o5", "Bo", 5200],
-                        ["o6", "Ada", 9900]
+                        [
+                            "o1",
+                            "Ada",
+                            2500
+                        ],
+                        [
+                            "o2",
+                            "Ada",
+                            7500
+                        ],
+                        [
+                            "o3",
+                            "Bo",
+                            12900
+                        ],
+                        [
+                            "o4",
+                            "Cy",
+                            4000
+                        ],
+                        [
+                            "o5",
+                            "Bo",
+                            5200
+                        ],
+                        [
+                            "o6",
+                            "Ada",
+                            9900
+                        ]
                     ]
                 }
             ],
             "database": {
                 "schemaSql": "CREATE TABLE customers (id TEXT PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE orders (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, total_cents INTEGER NOT NULL);\n",
                 "seedSql": "INSERT INTO customers (id, name) VALUES ('c1', 'Ada'), ('c2', 'Bo'), ('c3', 'Cy');\nINSERT INTO orders (id, customer_id, total_cents) VALUES ('o1', 'c1', 2500), ('o2', 'c1', 7500), ('o3', 'c2', 12900), ('o4', 'c3', 4000), ('o5', 'c2', 5200), ('o6', 'c1', 9900);\n"
-            }
+            },
+            "hints": [
+                "Join the tables on the declared key relationship.",
+                "Use orders.customer_id = customers.id.",
+                "Select o.id, c.name, o.total_cents and order by o.id.",
+                "FROM orders o JOIN customers c ON o.customer_id = c.id"
+            ]
         },
         {
             "kind": "quiz",
@@ -151,10 +221,10 @@
                 "explanation": "A Cartesian product pairs every customer with every order: 3 × 4 = 12 rows."
             },
             "hints": [
-                "Every row on one side pairs with every row on the other.",
-                "Multiply the row counts.",
-                "3 times 4.",
-                "The result has 12 rows, which is almost certainly wrong for an order report."
+                "A join without ON pairs every row with every row.",
+                "Multiply the number of customers by the number of orders.",
+                "3 customers times 4 orders.",
+                "The Cartesian product has 12 rows."
             ]
         },
         {
@@ -185,7 +255,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Keys define relationships. Row grain reveals accidental multiplication."
+            "explanation": "Keys define relationships. Row grain reveals accidental multiplication.",
+            "hints": [
+                "Check each claim about keys and row grain.",
+                "Three statements are accurate.",
+                "Display names are not guaranteed unique.",
+                "Select key, cartesian, and grain."
+            ]
         }
     ],
     "evaluation": {
@@ -194,7 +270,9 @@
     },
     "rewards": {
         "experience": 110,
-        "unlocks": ["sql.review-model"]
+        "unlocks": [
+            "sql.review-model"
+        ]
     },
     "persistence": {
         "kind": "none"
@@ -205,5 +283,8 @@
         "screenReaderNotes": "The result row count and each row are announced. The test failure identifies an unexpected row count."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "web"]
+    "tags": [
+        "professional",
+        "web"
+    ]
 }
