@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.zig": "const std = @import(\"std\");\n\nconst PortError = error{ InvalidNumber, OutOfRange };\n\nfn parsePort(text: []const u8) PortError!u16 {\n    const value = std.fmt.parseInt(u32, text, 10) catch return PortError.InvalidNumber;\n    if (value == 0 or value > 65535) return PortError.OutOfRange;\n    return @intCast(value);\n}\n\npub fn main() void {\n    std.debug.print(\"{any}\\n\", .{parsePort(\"8080\")});\n}\n"
+            }
+        }
+    }
+}
