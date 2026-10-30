@@ -1,18 +1,27 @@
 {
     "id": "node.errors",
     "version": 1,
-    "sequence": 120,
-    "courseId": "node-services-practice",
+    "sequence": 68,
+    "courseId": "node-services",
     "title": "One async failure boundary",
     "summary": "Catch rejected promises, map failures to stable codes, and keep stack traces out of responses.",
-    "skills": ["node.errors", "node.middleware"],
-    "prerequisites": ["node.http", "node.middleware"],
+    "skills": [
+        "node.errors",
+        "node.middleware"
+    ],
+    "prerequisites": [
+        "node.http",
+        "node.middleware"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:node"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:node"
+    ],
     "hints": [
         "Attach .catch to the promise returned by the handler.",
         "Read status and code from the thrown error, with safe defaults.",
@@ -44,13 +62,24 @@
             "id": "floating-promise",
             "description": "Calling an async handler without handling its promise.",
             "stepId": "apply",
-            "feedback": "Attach a catch or await inside a wrapper. Otherwise a rejection bypasses the response entirely."
+            "testDescription": "The wrapper catches the handler promise instead of dropping it.",
+            "feedback": "Attach a catch or await inside a wrapper. Otherwise a rejection bypasses the response entirely.",
+            "followUpSkill": "node.errors"
         },
         {
             "id": "stack-response",
             "description": "Returning error.stack or a driver message to the client.",
             "stepId": "apply",
+            "testDescription": "The boundary answers with a code and never a stack trace.",
             "feedback": "Stack traces reveal internal paths and implementation details. Return a stable code and log the detail on the server."
+        },
+        {
+            "id": "uncaught-safe",
+            "description": "Trusting an uncaughtException listener as a request boundary.",
+            "stepId": "review",
+            "diagnostic": "Approving the uncaughtException listener as a safe request boundary.",
+            "feedback": "The process is already in an undefined state after an uncaught exception. Handle the handler promise per request instead.",
+            "followUpSkill": "node.errors"
         }
     ],
     "lesson": {
@@ -162,24 +191,49 @@
                     "kind": "static",
                     "description": "The boundary answers with a code and never a stack trace.",
                     "file": "errors.ts",
-                    "includes": ["response.writeHead(status", "error: code", "application/json"],
-                    "excludes": ["error.stack", "stack:"]
+                    "includes": [
+                        "response.writeHead(status",
+                        "error: code",
+                        "application/json"
+                    ],
+                    "excludes": [
+                        "error.stack",
+                        "stack:"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "Invalid JSON is converted into the shared failure path.",
                     "file": "errors.ts",
-                    "includes": ["try {", "fail(\"invalid_json\");"],
+                    "includes": [
+                        "try {",
+                        "fail(\"invalid_json\");"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "errors.ts",
-                    "includes": ["export function handle(handler: Handler)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "export function handle(handler: Handler)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Return a wrapper that owns the handler promise.",
+                "Attach .catch to the promise returned by the handler.",
+                "Map failures to a status and a stable code.",
+                "Serialize only the code, never error.stack."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Node service test suite with the project test runner."
+            }
         },
         {
             "kind": "review",
@@ -231,7 +285,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "createServer ignores the promise returned by the async handler, so a parse failure becomes an unhandled rejection. sendFailure also writes error.stack to the client, and every failure is flattened to 500. Keeping a process alive after uncaughtException is not a request boundary."
+            "explanation": "createServer ignores the promise returned by the async handler, so a parse failure becomes an unhandled rejection. sendFailure also writes error.stack to the client, and every failure is flattened to 500. Keeping a process alive after uncaughtException is not a request boundary.",
+            "hints": [
+                "Look for dropped promises and client-visible internals.",
+                "createServer does not await an async handler.",
+                "A stack trace in the body leaks implementation details.",
+                "uncaughtException is not a per-request boundary."
+            ]
         }
     ],
     "evaluation": {
@@ -251,5 +311,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
