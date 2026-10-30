@@ -1,0 +1,249 @@
+{
+    "id": "javascript.dom-events",
+    "version": 1,
+    "sequence": 224,
+    "courseId": "javascript",
+    "title": "DOM events and handlers",
+    "summary": "Respond to user input with event listeners and state updates.",
+    "skills": [
+        "js.events",
+        "js.functions",
+        "web.html"
+    ],
+    "prerequisites": [
+        "js.functions",
+        "web.html"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "dead-button",
+        "briefing": "The Add to cart button has no behavior. Implement the handler logic that toggles the cart count and returns the new count."
+    },
+    "objectives": [
+        {
+            "id": "handler",
+            "description": "Implement an event handler that updates state.",
+            "stepIds": [
+                "implement-handler"
+            ]
+        },
+        {
+            "id": "events",
+            "description": "Explain event flow and listeners.",
+            "stepIds": [
+                "event-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:event"
+    ],
+    "hints": [
+        "Keep cart state in a variable.",
+        "Increment on each call.",
+        "Return the new count.",
+        "let count = 0; function addToCart() { count += 1; return count; }"
+    ],
+    "misconceptions": [
+        {
+            "id": "inline-handler",
+            "description": "Putting large logic in inline onclick attributes.",
+            "stepId": "implement-handler",
+            "testDescription": "Returns the updated cart count.",
+            "feedback": "Inline handlers mix structure and behavior. Attach listeners in script and keep handlers testable.",
+            "followUpSkill": "js.events"
+        },
+        {
+            "id": "event-bubbling",
+            "description": "Believing stopPropagation is always required.",
+            "stepId": "event-claims",
+            "answer": "always-stop",
+            "feedback": "Events bubble by default; stopPropagation is only needed when a parent must not react.",
+            "followUpSkill": "js.events"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Events",
+                "body": "The browser emits events for user actions. addEventListener attaches a handler. The handler receives an event object and can update state."
+            },
+            {
+                "title": "State and rendering",
+                "body": "Event handlers should update a single source of truth and let rendering follow. Keep handlers small and testable by extracting pure logic."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Event listener",
+                "definition": "A function called when an event occurs."
+            },
+            {
+                "term": "Bubbling",
+                "definition": "An event traveling from target up to ancestors."
+            },
+            {
+                "term": "Default action",
+                "definition": "The browser's built-in response to an event."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "DOM events",
+            "prompt": "Read the explanation, then implement the handler.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Events",
+                    "body": "The browser emits events for user actions. addEventListener attaches a handler. The handler receives an event object and can update state."
+                },
+                {
+                    "title": "State and rendering",
+                    "body": "Event handlers should update a single source of truth and let rendering follow. Keep handlers small and testable by extracting pure logic."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Event listener",
+                    "definition": "A function called when an event occurs."
+                },
+                {
+                    "term": "Bubbling",
+                    "definition": "An event traveling from target up to ancestors."
+                },
+                {
+                    "term": "Default action",
+                    "definition": "The browser's built-in response to an event."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "implement-handler",
+            "title": "Implement cart handler",
+            "prompt": "Edit main.js. Implement addToCart() that increments and returns the cart count.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "main.js",
+                    "content": "function addToCart(currentCount) {\n  // TODO: return the next cart count\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "main.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Returns the updated cart count.",
+                    "name": "addToCart",
+                    "args": [
+                        0
+                    ],
+                    "expected": 1
+                },
+                {
+                    "kind": "function",
+                    "description": "Increments an existing count.",
+                    "name": "addToCart",
+                    "args": [
+                        3
+                    ],
+                    "expected": 4
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles a negative starting count.",
+                    "name": "addToCart",
+                    "args": [
+                        -1
+                    ],
+                    "expected": 0
+                }
+            ],
+            "hints": [
+                "Add one to the current count.",
+                "Return the new count.",
+                "Do not mutate any shared state.",
+                "return currentCount + 1;"
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "event-claims",
+            "title": "Event claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Check event flow claims.",
+                "Bubbling is default.",
+                "preventDefault stops default action.",
+                "Select listener and bubbling; reject always-stop."
+            ],
+            "statements": [
+                {
+                    "id": "listener",
+                    "label": "addEventListener attaches a handler to an element.",
+                    "correct": true
+                },
+                {
+                    "id": "bubbling",
+                    "label": "Events bubble from target to ancestors by default.",
+                    "correct": true
+                },
+                {
+                    "id": "always-stop",
+                    "label": "stopPropagation is required for every handler.",
+                    "correct": false
+                },
+                {
+                    "id": "prevent-default",
+                    "label": "preventDefault cancels the browser's default action.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Listeners react to events; bubbling and default actions can be controlled when needed."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor is keyboard accessible, and function tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its description and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
