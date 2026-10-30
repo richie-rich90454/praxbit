@@ -1,18 +1,28 @@
 {
     "id": "vue.reactivity",
     "version": 1,
-    "sequence": 74,
+    "sequence": 130,
     "courseId": "vue",
     "title": "Shared cart state and guarded routes",
     "summary": "Keep cart items in a shared ref, derive the total with computed, and guard checkout routes.",
-    "skills": ["vue.reactivity", "vue.routing", "web.state-management"],
-    "prerequisites": ["vue.components", "concept.state"],
+    "skills": [
+        "vue.reactivity",
+        "vue.routing",
+        "web.state-management"
+    ],
+    "prerequisites": [
+        "vue.components",
+        "concept.state"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:vue"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:vue"
+    ],
     "hints": [
         "Keep items in a module-scope ref so every caller sees the same cart.",
         "Replace the total ref and watcher with computed(function sum() { ... }).",
@@ -152,8 +171,13 @@
                     "kind": "static",
                     "description": "The total is derived with computed instead of a watcher.",
                     "file": "useCart.ts",
-                    "includes": ["const total = computed(", "item.price * item.quantity"],
-                    "excludes": ["watch("]
+                    "includes": [
+                        "const total = computed(",
+                        "item.price * item.quantity"
+                    ],
+                    "excludes": [
+                        "watch("
+                    ]
                 },
                 {
                     "kind": "static",
@@ -164,14 +188,20 @@
                         "to.meta.requiresCart === true",
                         "return { name: \"catalog\" }"
                     ],
-                    "excludes": ["TODO"]
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "useCart.ts",
-                    "includes": ["const total = computed("],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "const total = computed("
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -257,5 +287,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
