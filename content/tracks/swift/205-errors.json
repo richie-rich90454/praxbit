@@ -36,7 +36,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "swift.errors",
-    "sequence": 205,
+    "sequence": 108,
     "title": "Typed errors at the input boundary",
     "summary": "Throw specific parse errors instead of trapping, then repair a report that turns every failure into zero.",
     "skills": [
