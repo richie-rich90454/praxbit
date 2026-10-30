@@ -1,6 +1,6 @@
 {
     "id": "campus.page-with-no-identity",
-    "version": 1,
+    "version": 2,
     "sequence": 13,
     "courseId": "campus",
     "title": "A page with no identity",
@@ -49,13 +49,24 @@
             "id": "div-soup",
             "description": "Treating visual layout as sufficient structure.",
             "stepId": "repair-html",
-            "feedback": "Styling cannot tell assistive technology what a region means. Use header, nav, main, and article elements."
+            "testDescription": "The page has a main landmark.",
+            "feedback": "Styling cannot tell assistive technology what a region means. Use header, nav, main, and article elements.",
+            "followUpSkill": "web.html"
         },
         {
             "id": "alt-decoration",
             "description": "Leaving images without alternative text.",
             "stepId": "repair-html",
+            "testDescription": "Product images have alternative text.",
             "feedback": "Every meaningful image needs alt text describing its purpose. Decorative images use an empty alt, but product images carry information."
+        },
+        {
+            "id": "css-replaces-structure",
+            "description": "Believing CSS can supply document structure for assistive technology.",
+            "stepId": "html-claims",
+            "answer": "css-structure",
+            "feedback": "CSS controls presentation. Roles and text alternatives must exist in the HTML for assistive technology to expose them.",
+            "followUpSkill": "web.accessibility"
         }
     ],
     "lesson": {
@@ -88,6 +99,12 @@
         {
             "kind": "code",
             "id": "repair-html",
+            "hints": [
+                "Replace the generic containers with landmarks and product articles, and give each image a real text alternative.",
+                "HTML elements carry roles: header, nav, main, and article tell assistive technology what each region is.",
+                "A page with a top heading and two products needs a header with an h1, a nav with links, a main, and two articles.",
+                "Start from the body: make the brand an h1 inside header, wrap the links in nav, put the content in main, convert each product div to article.product, add alt text, and mark both add buttons with data-action=\"add\"."
+            ],
             "title": "Repair the storefront structure",
             "prompt": "Edit index.html. Use header, nav, main, article.product, and meaningful controls. Run the structure tests when done. CSS is provided and should not need changes.",
             "evidence": "construction",
@@ -157,6 +174,12 @@
         {
             "kind": "explain",
             "id": "html-claims",
+            "hints": [
+                "Select statements about the relationship between structure and presentation.",
+                "Semantic HTML communicates roles; CSS only changes appearance.",
+                "A screen reader can jump to a main landmark even when the page looks identical without CSS.",
+                "Two statements are accurate; reject CSS-as-structure and the absolute claim that div is never valid."
+            ],
             "title": "Structure and appearance",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
