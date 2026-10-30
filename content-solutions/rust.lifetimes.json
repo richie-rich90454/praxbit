@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "src/main.rs": "struct Excerpt<'a> {\n    text: &'a str,\n}\n\nfn longest<'a>(left: &'a str, right: &'a str) -> &'a str {\n    if left.len() > right.len() { left } else { right }\n}\n\nfn main() {\n    let text = String::from(\"campus power\");\n    let excerpt = Excerpt { text: &text };\n    println!(\"{}\", longest(excerpt.text, \"grid\"));\n}\n"
+            }
+        }
+    }
+}
