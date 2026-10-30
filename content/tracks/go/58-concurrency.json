@@ -1,18 +1,29 @@
 {
     "id": "go.concurrency",
     "version": 1,
-    "sequence": 58,
+    "sequence": 91,
     "courseId": "go",
     "title": "Interfaces, channels, and modules",
     "summary": "Run work in a goroutine, receive the result from a channel, and reason about module boundaries.",
-    "skills": ["go.interfaces", "go.concurrency", "go.modules", "go.web"],
-    "prerequisites": ["go.syntax", "concept.testing"],
+    "skills": [
+        "go.interfaces",
+        "go.concurrency",
+        "go.modules",
+        "go.web"
+    ],
+    "prerequisites": [
+        "go.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +35,31 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": ["diagnose"]
+            "stepIds": [
+                "diagnose"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:go"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:go"
+    ],
     "hints": [
         "Create a channel of int.",
         "Start an anonymous goroutine with go func().",
@@ -49,13 +71,25 @@
             "id": "deadlock",
             "description": "Sending on an unbuffered channel without a receiver.",
             "stepId": "apply",
-            "feedback": "The send blocks until another goroutine receives. Receive from the channel in the caller."
+            "testDescription": "The work runs in a goroutine and returns through a channel.",
+            "feedback": "The send blocks until another goroutine receives. Receive from the channel in the caller.",
+            "followUpSkill": "go.concurrency"
         },
         {
             "id": "shared",
             "description": "Writing to a shared variable from several goroutines without synchronization.",
-            "stepId": "apply",
-            "feedback": "Use channels or a mutex. Unsynchronized shared writes are a data race."
+            "stepId": "check",
+            "answer": "goroutine",
+            "feedback": "Use channels or a mutex. Unsynchronized shared writes are a data race.",
+            "followUpSkill": "go.concurrency"
+        },
+        {
+            "id": "send-without-receive",
+            "description": "Closing a channel instead of receiving from it.",
+            "stepId": "diagnose",
+            "answer": "close",
+            "feedback": "Closing does not consume the sent value. The function must receive from the channel.",
+            "followUpSkill": "go.concurrency"
         }
     ],
     "lesson": {
@@ -129,6 +163,12 @@
                     "content": "package main\n\nimport \"fmt\"\n\nfunc sum(values []int) int {\n    total := 0\n    for _, value := range values {\n        total += value\n    }\n    return total\n}\n\nfunc main() {\n    fmt.Println(sum([]int{3, -1, 2}))\n}\n",
                     "editable": true,
                     "language": "go"
+                },
+                {
+                    "path": "go.mod",
+                    "language": "go",
+                    "content": "module campus/check\n\ngo 1.23\n",
+                    "editable": false
                 }
             ],
             "entry": "main.go",
@@ -138,7 +178,9 @@
                     "kind": "static",
                     "description": "The function keeps the slice parameter and int result.",
                     "file": "main.go",
-                    "includes": ["func sum(values []int) int"],
+                    "includes": [
+                        "func sum(values []int) int"
+                    ],
                     "excludes": []
                 },
                 {
@@ -151,16 +193,33 @@
                         "results <- total",
                         "return <-results"
                     ],
-                    "excludes": ["TODO"]
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.go",
-                    "includes": ["func sum(values []int) int"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "func sum(values []int) int"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Create a channel for the result.",
+                "Move the sum into a goroutine.",
+                "Send the total on the channel.",
+                "Return <-results after starting the goroutine."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "go test ./...",
+                "description": "Compile and test the module with the Go toolchain."
+            }
         },
         {
             "kind": "debug",
@@ -202,7 +261,13 @@
                 }
             ],
             "correctFixId": "receive",
-            "explanation": "An unbuffered send blocks until a receiver is ready. Receiving in the same function completes the exchange."
+            "explanation": "An unbuffered send blocks until a receiver is ready. Receiving in the same function completes the exchange.",
+            "hints": [
+                "An unbuffered send blocks until a receiver is ready.",
+                "The function sends but never receives.",
+                "Closing the channel does not create a receiver.",
+                "Return <-results so the receive happens."
+            ]
         },
         {
             "kind": "explain",
@@ -232,7 +297,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Goroutines run concurrently, and channels synchronize their communication. Interfaces are satisfied implicitly, while modules pin dependencies."
+            "explanation": "Goroutines run concurrently, and channels synchronize their communication. Interfaces are satisfied implicitly, while modules pin dependencies.",
+            "hints": [
+                "Two statements are accurate.",
+                "Interfaces are satisfied implicitly.",
+                "A goroutine does not block the whole process.",
+                "Select interface and channel."
+            ]
         }
     ],
     "evaluation": {
@@ -252,5 +323,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
