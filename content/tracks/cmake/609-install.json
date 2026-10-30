@@ -1,0 +1,377 @@
+{
+    "id": "cmake.install",
+    "version": 1,
+    "sequence": 176,
+    "courseId": "cmake",
+    "title": "Install rules and relocatable packages",
+    "summary": "Install a library with GNUInstallDirs, separate build and install include paths, and export a target set.",
+    "skills": [
+        "cmake.packages",
+        "cmake.targets"
+    ],
+    "prerequisites": [
+        "cmake.packages",
+        "ops.deployment"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "install",
+        "briefing": "The metrics library installs into an absolute /usr/local path and publishes no targets, so another project cannot find it. Install with GNUInstallDirs and export the library."
+    },
+    "objectives": [
+        {
+            "id": "objective-install",
+            "description": "Install targets and headers with relocatable destinations.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-review",
+            "description": "Identify install rules that break package consumers.",
+            "stepIds": [
+                "review"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Explain what find_package needs beyond a targets file.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:cmake"
+    ],
+    "hints": [
+        "GNUInstallDirs provides CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_INCLUDEDIR.",
+        "The build tree and the install tree need different include paths.",
+        "Use install(TARGETS ... EXPORT ...) for the library.",
+        "Use install(EXPORT ... NAMESPACE ...) for consumers."
+    ],
+    "misconceptions": [
+        {
+            "id": "absolute-destination",
+            "description": "Installing to /usr/local/lib instead of a GNUInstallDirs destination.",
+            "stepId": "apply",
+            "testDescription": "Install destinations use GNUInstallDirs.",
+            "feedback": "An absolute destination ignores the prefix and breaks packaging. Use CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_INCLUDEDIR.",
+            "followUpSkill": "cmake.packages"
+        },
+        {
+            "id": "build-path-in-install",
+            "description": "Publishing the source include path to installed consumers.",
+            "stepId": "apply",
+            "testDescription": "The target's include path differs between build and install.",
+            "feedback": "A consumer sees the installed tree. Guard source paths with BUILD_INTERFACE and installed paths with INSTALL_INTERFACE."
+        },
+        {
+            "id": "no-export",
+            "description": "Installing the archive without an export set.",
+            "stepId": "apply",
+            "testDescription": "The export set is installed for find_package consumers.",
+            "feedback": "install(TARGETS) copies files. The EXPORT set and install(EXPORT) create the imported target definitions a consumer needs."
+        },
+        {
+            "id": "static-not-exportable",
+            "description": "Believing a static library cannot be exported.",
+            "stepId": "review",
+            "diagnostic": "Approving the claim that static libraries cannot be installed or exported.",
+            "feedback": "Static libraries have usage requirements too. The export carries include directories, definitions, and link dependencies.",
+            "followUpSkill": "cmake.packages"
+        },
+        {
+            "id": "targets-enough",
+            "description": "Expecting find_package to read a targets file directly.",
+            "stepId": "transfer",
+            "answer": "targets-only",
+            "feedback": "find_package in CONFIG mode looks for a package config file, which includes the targets file and defines the package.",
+            "followUpSkill": "cmake.packages"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Install rules describe a tree",
+                "body": "GNUInstallDirs defines standard destinations such as CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_INCLUDEDIR. install(TARGETS) copies the binary into that tree, and install(DIRECTORY) copies headers. Absolute destinations bypass the configured prefix and make packaging hostile."
+            },
+            {
+                "title": "Usage requirements change between trees",
+                "body": "While building, a consumer needs the source include directory. After installation, it needs the installed include directory. $<BUILD_INTERFACE:...> and $<INSTALL_INTERFACE:...> keep the two paths separate in one target definition."
+            },
+            {
+                "title": "A package is a config file plus targets",
+                "body": "install(TARGETS ... EXPORT ...) records the library in an export set. install(EXPORT ...) writes the imported target definitions. find_package(campus_metrics CONFIG) looks for campus_metricsConfig.cmake, which includes that targets file and often checks the version."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "GNUInstallDirs",
+                "definition": "The CMake module that defines portable install directory variables."
+            },
+            {
+                "term": "Export set",
+                "definition": "A named collection of targets that CMake turns into imported target definitions."
+            },
+            {
+                "term": "BUILD_INTERFACE",
+                "definition": "A generator expression for paths used while building the project."
+            },
+            {
+                "term": "INSTALL_INTERFACE",
+                "definition": "A generator expression for paths used by installed consumers."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Installing and exporting a target",
+            "prompt": "Read the explanation, then fix the install rules and review the artifact.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Install rules describe a tree",
+                    "body": "GNUInstallDirs defines standard destinations such as CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_INCLUDEDIR. install(TARGETS) copies the binary into that tree, and install(DIRECTORY) copies headers. Absolute destinations bypass the configured prefix and make packaging hostile."
+                },
+                {
+                    "title": "Usage requirements change between trees",
+                    "body": "While building, a consumer needs the source include directory. After installation, it needs the installed include directory. $<BUILD_INTERFACE:...> and $<INSTALL_INTERFACE:...> keep the two paths separate in one target definition."
+                },
+                {
+                    "title": "A package is a config file plus targets",
+                    "body": "install(TARGETS ... EXPORT ...) records the library in an export set. install(EXPORT ...) writes the imported target definitions. find_package(campus_metrics CONFIG) looks for campus_metricsConfig.cmake, which includes that targets file and often checks the version."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "GNUInstallDirs",
+                    "definition": "The CMake module that defines portable install directory variables."
+                },
+                {
+                    "term": "Export set",
+                    "definition": "A named collection of targets that CMake turns into imported target definitions."
+                },
+                {
+                    "term": "BUILD_INTERFACE",
+                    "definition": "A generator expression for paths used while building the project."
+                },
+                {
+                    "term": "INSTALL_INTERFACE",
+                    "definition": "A generator expression for paths used by installed consumers."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Install and export the library",
+            "prompt": "Edit CMakeLists.txt. Install metrics into GNUInstallDirs destinations, add the install include path, install the headers, and export the target set with a namespace.",
+            "evidence": "construction",
+            "hints": [
+                "Keep include(GNUInstallDirs).",
+                "Add $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> to the target includes.",
+                "Use install(TARGETS metrics EXPORT campus_metricsTargets ...).",
+                "Install the headers and the export set."
+            ],
+            "files": [
+                {
+                    "path": "CMakeLists.txt",
+                    "content": "cmake_minimum_required(VERSION 3.24)\nproject(campus_metrics LANGUAGES CXX)\n\ninclude(GNUInstallDirs)\n\nadd_library(metrics STATIC src/metrics.cpp)\ntarget_include_directories(metrics PUBLIC\n    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)\n\n# TODO: install the library, headers, and an export set\ninstall(TARGETS metrics DESTINATION /usr/local/lib)\n",
+                    "editable": true,
+                    "language": "text"
+                }
+            ],
+            "entry": "CMakeLists.txt",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cmake --build build",
+                "description": "Configure and build the project with the new install rules."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Install destinations use GNUInstallDirs.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "include(GNUInstallDirs)",
+                        "${CMAKE_INSTALL_LIBDIR}",
+                        "${CMAKE_INSTALL_INCLUDEDIR}"
+                    ],
+                    "excludes": [
+                        "/usr/local/lib"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The target's include path differs between build and install.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>",
+                        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Headers are installed with the library.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The export set is installed for find_package consumers.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "install(TARGETS metrics EXPORT campus_metricsTargets",
+                        "install(EXPORT campus_metricsTargets",
+                        "NAMESPACE campus::"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the install rules",
+            "prompt": "Review the build file and select every real problem.",
+            "evidence": "review",
+            "hints": [
+                "Check the destination paths and the published include directory.",
+                "An absolute destination ignores the install prefix.",
+                "A source path in an installed interface points at a tree the consumer does not have.",
+                "An archive without an export cannot be imported by find_package."
+            ],
+            "artifact": {
+                "title": "CMakeLists.txt",
+                "caption": "The library installs to an absolute path, publishes its source include directory, and has no export set.",
+                "kind": "code",
+                "language": "text",
+                "content": "cmake_minimum_required(VERSION 3.24)\nproject(campus_metrics LANGUAGES CXX)\n\nadd_library(metrics STATIC src/metrics.cpp)\ntarget_include_directories(metrics PUBLIC /home/ada/campus/include)\n\ninstall(TARGETS metrics DESTINATION /usr/local/lib)\n"
+            },
+            "findings": [
+                {
+                    "id": "absolute-install",
+                    "label": "The install destination is the absolute path /usr/local/lib.",
+                    "correct": true
+                },
+                {
+                    "id": "source-include",
+                    "label": "Installed consumers receive the source include path /home/ada/campus/include.",
+                    "correct": true
+                },
+                {
+                    "id": "no-export",
+                    "label": "The library is installed without an export set or imported target.",
+                    "correct": true
+                },
+                {
+                    "id": "static-not-exportable",
+                    "label": "A static library cannot be installed or exported.",
+                    "correct": false
+                },
+                {
+                    "id": "headers-bin",
+                    "label": "Headers must be installed into the bin directory.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the install rules until the paths and export are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; absolute paths are acceptable for a library."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Absolute destinations and source include paths bind the package to one machine. Without an export set, another project has no imported target to link. Use GNUInstallDirs, BUILD_INTERFACE/INSTALL_INTERFACE, and install(EXPORT ...)."
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a package config",
+            "prompt": "A consumer runs find_package(campus_metrics CONFIG REQUIRED), but the install contains only campus_metricsTargets.cmake. What is missing?",
+            "evidence": "transfer",
+            "hints": [
+                "CONFIG mode looks for a package config file.",
+                "The targets file defines imported targets but is not the entry point.",
+                "The config file includes the targets file.",
+                "A version file and a config file make the package discoverable."
+            ],
+            "quiz": {
+                "prompt": "A consumer runs find_package(campus_metrics CONFIG REQUIRED), but the install contains only campus_metricsTargets.cmake. What is missing?",
+                "options": [
+                    {
+                        "id": "config-file",
+                        "label": "A campus_metricsConfig.cmake that includes the targets file."
+                    },
+                    {
+                        "id": "targets-only",
+                        "label": "Nothing; find_package reads the targets file directly."
+                    },
+                    {
+                        "id": "second-target",
+                        "label": "A second copy of the library under a different name."
+                    },
+                    {
+                        "id": "source-tree",
+                        "label": "The consumer must point CMAKE_PREFIX_PATH at the original source tree."
+                    }
+                ],
+                "correctId": "config-file",
+                "explanation": "find_package in CONFIG mode searches for a package config file. That file defines the package and includes the exported targets. The targets file alone is not the documented entry point."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 160,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems"
+    ]
+}
