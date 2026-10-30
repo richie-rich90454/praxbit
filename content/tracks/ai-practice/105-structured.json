@@ -1,18 +1,28 @@
 {
     "id": "ai-practice.structured",
     "version": 1,
-    "sequence": 105,
+    "sequence": 197,
     "courseId": "ai-practice",
     "title": "Constrain, validate, and bound model output",
     "summary": "Validate structured output, retry with a short repair, cap attempts and tokens, and log without content.",
-    "skills": ["ai.prompting", "ai.agents", "ai.evaluation"],
-    "prerequisites": ["ai.prompting", "ai.agents"],
+    "skills": [
+        "ai.prompting",
+        "ai.agents",
+        "ai.evaluation"
+    ],
+    "prerequisites": [
+        "ai.prompting",
+        "ai.agents"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:ai"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:ai"
+    ],
     "hints": [
         "Parse into unknown, then check title, priority, and hours one by one.",
         "Use a for loop with a fixed attempt count instead of while (true).",
@@ -178,8 +197,13 @@
                     "kind": "static",
                     "description": "Attempts are capped and each call has an output limit.",
                     "file": "structured.ts",
-                    "includes": ["attempt <= 3", "complete(prompt, 400)"],
-                    "excludes": ["while (true"]
+                    "includes": [
+                        "attempt <= 3",
+                        "complete(prompt, 400)"
+                    ],
+                    "excludes": [
+                        "while (true"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -195,22 +219,34 @@
                     "kind": "static",
                     "description": "A failed validation is reported back without echoing the raw reply.",
                     "file": "structured.ts",
-                    "includes": ["The previous reply failed validation."],
+                    "includes": [
+                        "The previous reply failed validation."
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "Logs carry counts and lengths, never the note or the reply.",
                     "file": "structured.ts",
-                    "includes": ["ticket.extracted", "titleLength: ticket.title.length"],
-                    "excludes": ["log(note", "text: result.text"]
+                    "includes": [
+                        "ticket.extracted",
+                        "titleLength: ticket.title.length"
+                    ],
+                    "excludes": [
+                        "log(note",
+                        "text: result.text"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "structured.ts",
-                    "includes": ["typeof record.title"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "typeof record.title"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -311,5 +347,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
