@@ -46,16 +46,36 @@
     ],
     "misconceptions": [
         {
-            "id": "bang",
-            "description": "Forcing a nullable value with !!.",
+            "id": "global-scope",
+            "description": "Launching work outside a structured coroutine scope.",
             "stepId": "apply",
-            "feedback": "!! throws a NullPointerException when the value is absent. Use ?: or a safe call."
+            "testDescription": "The work runs in a coroutine scope with two async tasks.",
+            "feedback": "GlobalScope does not tie the work to the caller. A coroutineScope block waits for its children and cancels them with the parent.",
+            "followUpSkill": "kotlin.coroutines"
         },
         {
-            "id": "cancel",
-            "description": "Assuming cancelled parents leave children alive.",
+            "id": "serial-await",
+            "description": "Awaiting each task before starting the next.",
             "stepId": "apply",
-            "feedback": "Structured concurrency cancels children with the parent. Cleanup belongs in finally or NonCancellable."
+            "diagnostic": "Starting one async task, awaiting it, and only then starting the second.",
+            "feedback": "Awaiting immediately serializes the work. Start both async tasks first, then await both Deferred values.",
+            "followUpSkill": "kotlin.coroutines"
+        },
+        {
+            "id": "force-unwrap",
+            "description": "Forcing a nullable value with !!.",
+            "stepId": "diagnose",
+            "answer": "ignore",
+            "feedback": "!! throws a NullPointerException when the value is absent. Use ?: or a safe call so absence is handled as data.",
+            "followUpSkill": "kotlin.syntax"
+        },
+        {
+            "id": "children-alive",
+            "description": "Assuming cancelled parents leave children alive.",
+            "stepId": "check",
+            "answer": "cancel",
+            "feedback": "Structured concurrency cancels children with the parent. Cleanup belongs in finally or NonCancellable.",
+            "followUpSkill": "kotlin.coroutines"
         }
     ],
     "lesson": {
@@ -122,6 +142,12 @@
             "title": "Load two totals concurrently",
             "prompt": "Edit Main.kt. loadTotal starts two async tasks and returns their sum inside coroutineScope.",
             "evidence": "construction",
+            "hints": [
+                "Return a coroutineScope block.",
+                "Create two async blocks before awaiting either one.",
+                "Bind both Deferred values.",
+                "Sum the awaited results."
+            ],
             "language": "kotlin",
             "files": [
                 {
@@ -133,6 +159,11 @@
             ],
             "entry": "Main.kt",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "./gradlew test --tests 'LoadTotalTest'",
+                "description": "Runs the project's coroutine tests with the Gradle wrapper, including the kotlinx-coroutines dependency."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -163,6 +194,12 @@
             "title": "The forced unwrap",
             "prompt": "This code crashes when the map has no entry. Select the faulty instruction and the correct repair.",
             "evidence": "debugging",
+            "hints": [
+                "A map lookup returns Int?.",
+                "The double bang is where the null is forced.",
+                "Do not catch the crash later; handle absence now.",
+                "Replace the force with the Elvis operator and a default."
+            ],
             "instructions": [
                 {
                     "id": "lookup",
@@ -205,6 +242,12 @@
             "title": "Coroutines and null safety",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
+            "hints": [
+                "coroutineScope waits for its children.",
+                "async returns a Deferred.",
+                "Cancellation flows from parent to child.",
+                "!! is a forced unwrap, not a safe default."
+            ],
             "statements": [
                 {
                     "id": "structured",
