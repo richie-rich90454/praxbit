@@ -5,21 +5,14 @@
     "courseId": "java",
     "title": "Aggregate with collections",
     "summary": "Count categories with a Map and choose the right collection for a report.",
-    "skills": [
-        "java.collections"
-    ],
-    "prerequisites": [
-        "java.oop"
-    ],
+    "skills": ["java.collections"],
+    "prerequisites": ["java.oop"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,31 +24,20 @@
         {
             "id": "count-categories",
             "description": "Accumulate counts in a typed map.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-collection",
             "description": "Choose a collection for a lookup-and-order requirement.",
-            "stepIds": [
-                "collection-transfer"
-            ]
+            "stepIds": ["collection-transfer"]
         },
         {
             "id": "explain-collections",
             "description": "Explain map operations and collection behavior accurately.",
-            "stepIds": [
-                "collection-check"
-            ]
+            "stepIds": ["collection-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:java"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:java"],
     "hints": [
         "A HashMap lookup replaces the previous value when the key already exists.",
         "Use Map.merge to add one to the existing count.",
@@ -193,23 +175,15 @@
                     "kind": "static",
                     "description": "Repeated categories accumulate their counts.",
                     "file": "Main.java",
-                    "includes": [
-                        "counts.merge(category, 1, Integer::sum);"
-                    ],
-                    "excludes": [
-                        "counts.put(category, 1);"
-                    ]
+                    "includes": ["counts.merge(category, 1, Integer::sum);"],
+                    "excludes": ["counts.put(category, 1);"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter overwrite is gone.",
                     "file": "Main.java",
-                    "includes": [
-                        "Map<String, Integer> counts = new HashMap<>();"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["Map<String, Integer> counts = new HashMap<>();"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -303,9 +277,7 @@
     },
     "rewards": {
         "experience": 140,
-        "unlocks": [
-            "java.concurrency-executors"
-        ]
+        "unlocks": ["java.concurrency-executors"]
     },
     "persistence": {
         "kind": "none"
@@ -316,7 +288,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ]
+    "tags": ["professional"]
 }
