@@ -7,6 +7,7 @@
         ".": "./src/index.ts",
         "./interfaces": "./src/interfaces/index.ts",
         "./browser": "./src/browser/index.ts",
+        "./ast": "./src/browser/ast-runner.ts",
         "./wasm": "./src/wasm/index.ts",
         "./simulated": "./src/simulated/index.ts"
     },
@@ -15,7 +16,8 @@
     },
     "dependencies": {
         "@praxbit/contracts": "workspace:*",
-        "sql.js": "^1.15.2"
+        "sql.js": "^1.15.2",
+        "typescript": "5.9.3"
     },
     "devDependencies": {
         "@types/sql.js": "^1.4.11"
