@@ -5,25 +5,14 @@
     "courseId": "javascript",
     "title": "Values and functions",
     "summary": "Declare values, write a function, and return a computed result.",
-    "skills": [
-        "js.variables",
-        "js.functions",
-        "js.types"
-    ],
-    "prerequisites": [
-        "concept.state",
-        "concept.conditions"
-    ],
+    "skills": ["js.variables", "js.functions", "js.types"],
+    "prerequisites": ["concept.state", "concept.conditions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-javascript",
-        "capabilities": [
-            "source-editing",
-            "worker-isolation",
-            "deterministic-tests"
-        ]
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -35,31 +24,20 @@
         {
             "id": "function",
             "description": "Implement a function that returns a value.",
-            "stepIds": [
-                "implement-function"
-            ]
+            "stepIds": ["implement-function"]
         },
         {
             "id": "types",
             "description": "Handle string and number values correctly.",
-            "stepIds": [
-                "implement-function"
-            ]
+            "stepIds": ["implement-function"]
         },
         {
             "id": "understanding",
             "description": "Explain values and functions.",
-            "stepIds": [
-                "function-claims"
-            ]
+            "stepIds": ["function-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:function"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:function"],
     "hints": [
         "Declare a function with a parameter.",
         "Build the result string with template literals.",
@@ -164,27 +142,21 @@
                     "kind": "function",
                     "description": "Returns a greeting with the name.",
                     "name": "formatGreeting",
-                    "args": [
-                        "Ada"
-                    ],
+                    "args": ["Ada"],
                     "expected": "Hello, Ada!"
                 },
                 {
                     "kind": "function",
                     "description": "Handles an empty string.",
                     "name": "formatGreeting",
-                    "args": [
-                        ""
-                    ],
+                    "args": [""],
                     "expected": "Hello, !"
                 },
                 {
                     "kind": "function",
                     "description": "Converts a number to text.",
                     "name": "formatGreeting",
-                    "args": [
-                        42
-                    ],
+                    "args": [42],
                     "expected": "Hello, 42!"
                 }
             ],
@@ -250,7 +222,5 @@
         "screenReaderNotes": "Each test announces its description and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
