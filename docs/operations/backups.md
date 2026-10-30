@@ -2,6 +2,20 @@
 
 The backup scripts use PostgreSQL custom-format dumps, SHA-256 checksums, retention, and an optional off-box copy. They do not encrypt the dump themselves. Store backups on an encrypted volume or an encrypted off-box destination.
 
+`scripts/restore-drill.mjs` verifies a backup by restoring it into a new disposable database, checking schema and row counts, and dropping that database. A backup is not trusted until the drill passes.
+
+## Backup schedule
+
+| Task | Cadence | Command |
+| --- | --- | --- |
+| Local custom-format dump | Daily, 02:30 UTC | `infra/backup/backup-postgres.sh` |
+| Off-box copy | With each dump when `OFFBOX_TARGET` is set | The same script |
+| Off-box checksum verification | Weekly | `sha256sum -c` on the copied file |
+| Restore drill | Monthly, and before any destructive migration | `scripts/restore-drill.mjs` |
+| Immediate backup | Before a schema migration, release rollback, or manual data repair | `infra/backup/backup-postgres.sh` |
+
+With a daily dump, the recovery point objective is up to about 24 hours. Increase frequency if the club activity justifies it. Measure the recovery time objective in a drill; do not assume it.
+
 ## Backup
 
 ```bash
@@ -96,14 +110,82 @@ Create the target database first. The dump does not include `CREATE DATABASE`:
 createdb -h scratch-host -U praxbit praxbit_restore
 ```
 
-## Restoration testing
+## Restore drill
 
-A backup is not verified until it has been restored. Run a drill at least monthly and before a risky migration.
+A backup is not verified until it has been restored. Run the drill at least monthly and before a risky migration. The drill reads the source, creates a new database, restores into it, verifies it, and drops it.
+
+Required:
+
+- `DATABASE_URL` points at the source. It is only dumped and queried; it is never restored over.
+- `pg_dump` and `pg_restore` are installed and match the server major version.
+- The maintenance role can `CREATE DATABASE` and `DROP DATABASE`.
+- `PRAXBIT_DRILL_ADMIN_URL` points at a maintenance database such as `postgres`. If omitted, the script derives it from `DATABASE_URL` by replacing the database name with `postgres`.
+
+Linux or macOS:
+
+```bash
+export DATABASE_URL="postgres://praxbit:…@db-host:5432/praxbit"
+export PRAXBIT_DRILL_ADMIN_URL="postgres://praxbit:…@db-host:5432/postgres"
+node scripts/restore-drill.mjs
+```
+
+Windows PowerShell:
+
+```powershell
+$env:DATABASE_URL = "postgres://praxbit:…@db-host:5432/praxbit"
+$env:PRAXBIT_DRILL_ADMIN_URL = "postgres://praxbit:…@db-host:5432/postgres"
+$env:PRAXBIT_PG_BIN = "C:\Program Files\PostgreSQL\18\bin"
+node scripts/restore-drill.mjs
+```
+
+Production source:
+
+```bash
+export PRAXBIT_DRILL_ALLOW_PRODUCTION=yes
+NODE_ENV=production node scripts/restore-drill.mjs
+```
+
+The production opt-in is required because the drill reads a production database and creates a temporary database on the same server. The drill still never restores over the source.
+
+What the script does:
+
+1. Refuses to run when `NODE_ENV=production` and `PRAXBIT_DRILL_ALLOW_PRODUCTION` is not `yes`.
+2. Refuses a source name that looks like production (`praxbit`, `*_prod`, or a name containing `production`) without the same opt-in.
+3. Refuses an existing drill database, a drill name outside `praxbit_drill_[a-z0-9_]+`, or a maintenance URL equal to the source database.
+4. Runs `pg_dump --format=custom --compress=1 --no-owner --no-privileges` into a temporary directory.
+5. Creates `praxbit_drill_<timestamp>_<pid>`, or the name in `PRAXBIT_DRILL_DATABASE`.
+6. Runs `pg_restore --no-owner --no-privileges --exit-on-error --single-transaction`.
+7. Checks the public table count, the presence of core tables, source and restored row counts, the migration ledger, orphan rows in `worlds`, `auth_identities`, and `mission_completions`, and the admin account count.
+8. Drops the drill database with `WITH (FORCE)` and removes the temporary dump unless `--keep-database` or `--keep-dump` is set.
+
+Expected output includes:
+
+```text
+Public tables: source 28, restored 28
+Table counts (source -> restored):
+  users                       42 ->       42
+  pgmigrations                 3 ->        3
+  ...
+Restore verified in praxbit_drill_...
+Drill passed in 8.4 seconds.
+```
+
+Counts can differ for high-churn tables if the source accepted writes after the dump. The script tolerates growth but fails when a populated table restores empty, the migration ledger differs, or a referential check finds orphans. Record the elapsed time as the measured restore time for the current backup size.
+
+Options:
+
+```bash
+node scripts/restore-drill.mjs --keep-database
+node scripts/restore-drill.mjs --keep-dump
+node scripts/restore-drill.mjs --help
+```
+
+Manual fallback, if the Node script cannot run:
 
 1. Choose a backup from the expected retention window.
 2. Copy it to a scratch host or a disposable database.
 3. Verify the checksum.
-4. Restore with the script.
+4. Restore with `infra/backup/restore-postgres.sh`.
 5. Run `SELECT count(*)` on core tables: `users`, `auth_sessions`, `learning_evidence`, `mission_completions`, `worlds`, `clubs`, `event_submissions`.
 6. Start a staging API against the restored database with `CONTENT_DIR` pointing at the matching release.
 7. Sign in with a test account, load `/me`, sync an empty batch, load the world, and export the account.
