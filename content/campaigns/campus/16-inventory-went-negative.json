@@ -1,6 +1,6 @@
 {
     "id": "campus.inventory-went-negative",
-    "version": 1,
+    "version": 2,
     "sequence": 16,
     "courseId": "campus",
     "title": "Inventory went negative",
@@ -49,13 +49,31 @@
             "id": "upper-bound-only",
             "description": "Checking only the maximum stock.",
             "stepId": "repair-stock",
-            "feedback": "The upper bound alone accepts zero and negative quantities. A valid shipment also needs a lower bound."
+            "testDescription": "A zero-quantity order is rejected.",
+            "feedback": "The upper bound alone accepts zero and negative quantities. A valid shipment also needs a lower bound.",
+            "followUpSkill": "js.conditions"
         },
         {
             "id": "float-quantity",
             "description": "Allowing fractional notebooks.",
             "stepId": "repair-stock",
+            "testDescription": "A fractional quantity is rejected.",
             "feedback": "An order of 1.5 notebooks is not a whole item. Reject non-integer quantities unless the product explicitly supports fractions."
+        },
+        {
+            "id": "typical-value-is-a-boundary",
+            "description": "Choosing an ordinary value instead of the edges.",
+            "stepId": "boundary-suite",
+            "answer": "thirty",
+            "feedback": "Age 30 sits far from both limits. The decisions change at 17/18 and 65/66, so those are the informative cases.",
+            "followUpSkill": "testing.boundaries"
+        },
+        {
+            "id": "compile-proves-logic",
+            "description": "Believing a condition that compiles must be logically correct.",
+            "stepId": "conditions-check",
+            "answer": "compile",
+            "feedback": "Compilation checks syntax and types, not intent. A condition can compile and still accept the wrong range."
         }
     ],
     "lesson": {
@@ -88,6 +106,12 @@
         {
             "kind": "code",
             "id": "repair-stock",
+            "hints": [
+                "Return true only for whole quantities between 1 and the available stock.",
+                "A range rule needs a lower bound, an upper bound, and an integer check.",
+                "For ages 18 through 65, reject 17 and 66, accept 18 and 65, and reject 20.5.",
+                "Combine quantity >= 1, quantity <= stock, and Number.isInteger(quantity); also reject invalid stock."
+            ],
             "title": "Repair the stock check",
             "prompt": "Edit inventory.js. canFulfill(stock, quantity) returns true only for whole quantities from 1 through stock. Run the tests.",
             "evidence": "debugging",
@@ -157,9 +181,15 @@
         {
             "kind": "test-design",
             "id": "boundary-suite",
+            "hints": [
+                "Select the cases that test each edge of the 18 through 65 rule.",
+                "Boundary testing uses just below, exactly at, and just above each limit.",
+                "For 1 through 5, the informative values are 0, 1, 5, and 6, not 3.",
+                "Keep the values just below, exactly at, and just above each limit; drop the ordinary value and the code-reading option."
+            ],
             "title": "Choose boundary cases",
             "prompt": "A different rule accepts ages from 18 through 65 inclusive. Select the cases that test its boundaries.",
-            "evidence": "testing",
+            "evidence": "transfer",
             "cases": [
                 {
                     "id": "seventeen",
@@ -197,6 +227,12 @@
         {
             "kind": "explain",
             "id": "conditions-check",
+            "hints": [
+                "Select statements about why a range check needs both ends.",
+                "A lower bound rejects zero and negatives; an upper bound rejects over-stock orders.",
+                "A temperature rule of 18 through 25 fails if it accepts -5 or 40.",
+                "Three statements are accurate; reject the claim that compilation proves logical correctness."
+            ],
             "title": "Why both bounds matter",
             "prompt": "Select the accurate statements.",
             "evidence": "explanation",
