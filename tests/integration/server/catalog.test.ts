@@ -158,6 +158,40 @@ describe("catalog, health, and transport protections", function catalogSuite(): 
         expect(allowed.status).toBe(200);
     });
 
+    it("allows native CORS preflights only from configured origins", async function testNativeCors(): Promise<void> {
+        const config: ServerConfig = {
+            ...context.config,
+            corsOrigins: ["https://localhost", "capacitor://localhost"],
+        };
+        const app = createApplication({
+            config,
+            pool: context.pool,
+            content: context.content,
+        });
+        const allowed = await app.request("http://localhost/api/v1/auth/login", {
+            method: "OPTIONS",
+            headers: {
+                origin: "https://localhost",
+                "access-control-request-method": "POST",
+                "access-control-request-headers": "content-type,x-praxbit-client",
+            },
+        });
+        expect(allowed.status).toBe(204);
+        expect(allowed.headers.get("access-control-allow-origin")).toBe("https://localhost");
+        expect(allowed.headers.get("access-control-allow-headers")?.toLowerCase()).toContain(
+            "x-praxbit-client",
+        );
+
+        const denied = await app.request("http://localhost/api/v1/auth/login", {
+            method: "OPTIONS",
+            headers: {
+                origin: "https://evil.example",
+                "access-control-request-method": "POST",
+            },
+        });
+        expect(denied.headers.get("access-control-allow-origin")).toBeNull();
+    });
+
     it("separates rate limit buckets when the socket address is unavailable", async function testClientKeys(): Promise<void> {
         function buildApp(
             globalPerMinute: number,
