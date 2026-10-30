@@ -142,7 +142,13 @@ export class CompletionService {
             placementSkippedSkills: progress.placementSkippedSkills,
         });
 
-        await this.advanceReviews(executor, userId, mission.skills, completedAt);
+        await this.advanceReviews(
+            executor,
+            userId,
+            mission.skills,
+            input.independent ? "success" : "failure",
+            completedAt,
+        );
         const achievements = await this.achievements.evaluate(executor, userId, now);
 
         return { status: "accepted", completion: inserted, achievements };
@@ -152,6 +158,7 @@ export class CompletionService {
         executor: QueryExecutor,
         userId: string,
         skillIds: readonly string[],
+        outcome: "success" | "failure",
         now: Date,
     ): Promise<void> {
         const existing = await this.evidence.listReviewsForSkills(executor, userId, skillIds);
@@ -164,8 +171,8 @@ export class CompletionService {
             const previous = bySkill.get(skillId);
             const next =
                 previous === undefined
-                    ? this.scheduler.create(skillId, now, "success")
-                    : this.scheduler.update(previous, "success", now);
+                    ? this.scheduler.create(skillId, now, outcome)
+                    : this.scheduler.update(previous, outcome, now);
             await this.evidence.saveReview(executor, userId, next);
         }
     }
