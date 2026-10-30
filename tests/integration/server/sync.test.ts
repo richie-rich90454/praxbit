@@ -23,7 +23,7 @@ import {
 } from "./helpers/client.ts";
 
 const MISSION_ID = "before-code.make-it-respond";
-const MISSION_VERSION = 1;
+let MISSION_VERSION = 1;
 const PROJECT_ID = "projects.campus-status-board";
 
 describe("synchronization, mastery, worlds, and projects", function syncSuite(): void {
@@ -31,6 +31,7 @@ describe("synchronization, mastery, worlds, and projects", function syncSuite():
 
     beforeAll(async function setup(): Promise<void> {
         context = await createTestContext();
+        MISSION_VERSION = context.content.getMission(MISSION_ID)?.version ?? 1;
     });
 
     afterAll(async function teardown(): Promise<void> {
@@ -294,6 +295,166 @@ describe("synchronization, mastery, worlds, and projects", function syncSuite():
             }),
         ).toBe(true);
         expect(snapshot.progress.achievements.length).toBeGreaterThan(0);
+    });
+
+    it("calculates project, debugging, and static-analysis achievement counters", async function testAchievementCounters(): Promise<void> {
+        const client = new TestClient(context.app);
+        await register(client, "achievement_counters");
+
+        await client.post("/api/v1/me/evidence", {
+            evidence: buildEvidence(PROJECT_ID, 1, {
+                id: crypto.randomUUID(),
+                category: "construction",
+            }),
+        });
+        await postSync(client, [
+            buildCompletionOperation("static-analysis-c", "c.memory", 1, "attempt-c-1"),
+            buildCompletionOperation(
+                "static-analysis-python",
+                "python.values",
+                1,
+                "attempt-python-1",
+            ),
+        ]);
+        await client.post("/api/v1/me/evidence", {
+            evidence: buildEvidence(MISSION_ID, MISSION_VERSION, {
+                id: crypto.randomUUID(),
+                category: "construction",
+            }),
+        });
+        for (let index = 0; index < 5; index += 1) {
+            await client.post("/api/v1/me/evidence", {
+                evidence: buildEvidence(MISSION_ID, MISSION_VERSION, {
+                    id: crypto.randomUUID(),
+                    category: "debugging",
+                }),
+            });
+        }
+
+        const snapshot = await postSync(client, []);
+        const earned = new Set(
+            snapshot.achievements.map(function idOf(record): string {
+                return record.achievementId;
+            }),
+        );
+        expect(earned.has("achievement.project-shipper")).toBe(true);
+        expect(earned.has("achievement.debugger")).toBe(true);
+        expect(earned.has("achievement.polyglot")).toBe(true);
+    });
+
+    it("merges guest progress without lowering newer account data", async function testGuestProgressMerge(): Promise<void> {
+        const client = new TestClient(context.app);
+        await register(client, "guest_progress_user");
+        const completion = buildCompletionOperation(
+            "guest-completion-op",
+            MISSION_ID,
+            MISSION_VERSION,
+            "guest-attempt-op",
+        );
+        const first = await postSync(client, [completion]);
+        expect(first.progress.experience).toBe(57);
+
+        const merged = await postSync(client, [
+            {
+                kind: "progress",
+                operationId: "guest-progress-lower",
+                experience: 10,
+                streakDays: 1,
+                longestStreak: 1,
+                lastPracticeOn: "2020-01-01",
+                placementSkippedSkills: ["concept.state"],
+                achievements: ["achievement.first-transfer"],
+            },
+        ]);
+        expect(merged.progress.experience).toBe(57);
+        expect(merged.progress.streakDays).toBe(1);
+        expect(merged.progress.placementSkippedSkills).toContain("concept.state");
+        expect(
+            merged.achievements.some(function transfer(record): boolean {
+                return record.achievementId === "achievement.first-transfer";
+            }),
+        ).toBe(true);
+
+        const second = await postSync(client, [
+            {
+                kind: "progress",
+                operationId: "guest-progress-newer",
+                experience: 500,
+                streakDays: 4,
+                longestStreak: 9,
+                lastPracticeOn: "2026-10-20",
+                placementSkippedSkills: ["concept.computation"],
+                achievements: ["achievement.unknown"],
+            },
+        ]);
+        expect(second.progress.experience).toBe(500);
+        expect(second.progress.streakDays).toBe(4);
+        expect(second.progress.longestStreak).toBe(9);
+        expect(second.progress.lastPracticeOn).not.toBe("2020-01-01");
+        expect(second.progress.placementSkippedSkills).toEqual([
+            "concept.state",
+            "concept.computation",
+        ]);
+        expect(
+            second.achievements.some(function unknown(record): boolean {
+                return record.achievementId === "achievement.unknown";
+            }),
+        ).toBe(false);
+    });
+
+    it("does not advance reviews for assisted completion or assisted review evidence", async function testReviewEvidence(): Promise<void> {
+        const client = new TestClient(context.app);
+        await register(client, "review_evidence_user");
+
+        for (let index = 0; index < 2; index += 1) {
+            await client.post("/api/v1/me/evidence", {
+                evidence: buildEvidence(MISSION_ID, MISSION_VERSION, {
+                    id: crypto.randomUUID(),
+                    category: "review",
+                }),
+            });
+        }
+        const advanced = await postSync(client, []);
+        const before = advanced.reviews.find(function concept(review): boolean {
+            return review.skillId === "concept.computation";
+        });
+        expect(before?.intervalIndex).toBe(1);
+
+        const assisted = await postSync(client, [
+            {
+                kind: "mission-completion",
+                operationId: "assisted-completion-op",
+                missionId: MISSION_ID,
+                missionVersion: MISSION_VERSION,
+                attemptId: "assisted-attempt-op",
+                independent: false,
+                completedAt: new Date().toISOString(),
+            },
+        ]);
+        const after = assisted.reviews.find(function concept(review): boolean {
+            return review.skillId === "concept.computation";
+        });
+        expect(after?.intervalIndex).toBe(0);
+        expect(after?.lastOutcome).toBe("failure");
+
+        await client.post("/api/v1/me/evidence", {
+            evidence: buildEvidence(
+                "before-code.remember-this",
+                context.content.getMission("before-code.remember-this")?.version ?? 1,
+                {
+                    id: crypto.randomUUID(),
+                    category: "review",
+                    assistance: "hint-1",
+                    independence: 0.8,
+                },
+            ),
+        });
+        const snapshot = await postSync(client, []);
+        const assistedReview = snapshot.reviews.find(function state(review): boolean {
+            return review.skillId === "concept.state";
+        });
+        expect(assistedReview?.lastOutcome).toBe("failure");
+        expect(assistedReview?.intervalIndex).toBe(0);
     });
 
     it("rejects unknown missions and version mismatches without failing the batch", async function testRejectedOperations(): Promise<void> {
