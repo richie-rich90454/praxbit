@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,10 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ],
+    "tags": ["professional", "web"],
     "accessibility": {
         "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -40,45 +34,28 @@
     "sequence": 113,
     "title": "Rescue narrowly, fail loudly",
     "summary": "Raise a custom error for bad quantities, then repair a job that logs failures and keeps reporting success.",
-    "skills": [
-        "ruby.syntax",
-        "ruby.tooling"
-    ],
-    "prerequisites": [
-        "ruby.syntax",
-        "concept.testing"
-    ],
+    "skills": ["ruby.syntax", "ruby.tooling"],
+    "prerequisites": ["ruby.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Raise a typed error at the input boundary.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find an error handler that hides failure from the caller.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Select the narrowest rescue clause.",
-            "stepIds": [
-                "rescue"
-            ]
+            "stepIds": ["rescue"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:ruby"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:ruby"],
     "hints": [
         "A custom error inherits from StandardError.",
         "Integer(text, 10) raises ArgumentError on malformed text.",
@@ -225,9 +202,7 @@
                     "kind": "static",
                     "description": "The custom error type is declared.",
                     "file": "main.rb",
-                    "includes": [
-                        "class InvalidQuantity < StandardError"
-                    ],
+                    "includes": ["class InvalidQuantity < StandardError"],
                     "excludes": []
                 },
                 {
@@ -239,20 +214,14 @@
                         "value.positive?",
                         "rescue ArgumentError"
                     ],
-                    "excludes": [
-                        "rescue\n  0"
-                    ]
+                    "excludes": ["rescue\n  0"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.rb",
-                    "includes": [
-                        "def parse_quantity"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["def parse_quantity"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
