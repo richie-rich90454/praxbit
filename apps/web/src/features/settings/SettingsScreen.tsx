@@ -3,6 +3,8 @@ import { For, Show, createEffect, createSignal, type JSX } from "solid-js";
 import type { Interest, Preferences } from "@praxbit/contracts";
 import { useLearning } from "../learning/learning-store.tsx";
 import { Pip } from "../../design/Pip.tsx";
+import { platformCapabilities } from "../../platform/services.ts";
+import { reminderScheduler, type ReminderKind } from "../../platform/notifications.ts";
 import "./settings.css";
 
 const INTEREST_OPTIONS: readonly { id: Interest; label: string }[] = [
@@ -13,6 +15,16 @@ const INTEREST_OPTIONS: readonly { id: Interest; label: string }[] = [
     { id: "professional", label: "Professional development" },
     { id: "everything", label: "Explore everything" },
 ];
+
+function reminderSupportText(kind: ReminderKind): string {
+    if (kind === "native") {
+        return "The installed mobile app schedules a local reminder that can fire while Praxbit is closed. Quiet hours are respected.";
+    }
+    if (kind === "web") {
+        return "This browser can show reminders only while Praxbit is open. Install the mobile app to schedule reminders that fire while it is closed. Quiet hours are respected.";
+    }
+    return "This browser does not support notifications. Reminders cannot be scheduled here, so the preference stays off.";
+}
 
 export function SettingsScreen(): JSX.Element {
     const learning = useLearning();
@@ -44,6 +56,10 @@ export function SettingsScreen(): JSX.Element {
     const [deleteConfirming, setDeleteConfirming] = createSignal(false);
     const [deleteConfirmation, setDeleteConfirmation] = createSignal("");
     const [deleteError, setDeleteError] = createSignal("");
+    const reminderKind = platformCapabilities.supportsNotifications
+        ? reminderScheduler.kind
+        : "none";
+    const remindersSupported = reminderKind !== "none";
 
     let hydrated = false;
     createEffect(function hydrateSavedPreferences(): void {
@@ -147,7 +163,7 @@ export function SettingsScreen(): JSX.Element {
         setPreferenceError("");
         setPreferencesSaved(false);
         setPreferencesBusy(true);
-        const next: Preferences = {
+        let next: Preferences = {
             interests: [...interests()],
             challenge: challenge(),
             textScale: textScale(),
@@ -161,6 +177,19 @@ export function SettingsScreen(): JSX.Element {
             },
         };
         try {
+            if (next.reminders.enabled) {
+                const result = await reminderScheduler.enable(next.reminders);
+                if (!result.scheduled) {
+                    setReminders(false);
+                    setReminderError(
+                        result.reason ?? "The practice reminder could not be scheduled.",
+                    );
+                    next = {
+                        ...next,
+                        reminders: { ...next.reminders, enabled: false },
+                    };
+                }
+            }
             await learning.savePreferences(next);
             setPreferencesSaved(true);
             setTimeout(function quiet(): void {
@@ -176,25 +205,30 @@ export function SettingsScreen(): JSX.Element {
     }
 
     async function requestReminders(enabled: boolean): Promise<void> {
-        setReminders(enabled);
         setReminderError("");
         if (!enabled) {
+            setReminders(false);
+            await reminderScheduler.disable();
             return;
         }
-        if (typeof Notification === "undefined") {
+        if (!remindersSupported) {
             setReminders(false);
             setReminderError(
-                "This browser does not support notifications. The reminder preference was left off.",
+                "Notifications are not supported here. The reminder preference was left off.",
             );
             return;
         }
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
+        const result = await reminderScheduler.enable({
+            enabled: true,
+            quietStart: quietStart(),
+            quietEnd: quietEnd(),
+        });
+        if (!result.scheduled) {
             setReminders(false);
-            setReminderError(
-                "Notification permission was not granted. The reminder preference was left off.",
-            );
+            setReminderError(result.reason ?? "The practice reminder could not be scheduled.");
+            return;
         }
+        setReminders(true);
     }
 
     function deletionConfirmed(): boolean {
@@ -237,7 +271,9 @@ export function SettingsScreen(): JSX.Element {
                         curriculum.
                     </p>
                 </div>
-                <Pip pose="observing" size={76} />
+                <span aria-hidden="true">
+                    <Pip pose="observing" size={76} />
+                </span>
             </div>
 
             <Show
@@ -628,39 +664,46 @@ export function SettingsScreen(): JSX.Element {
                                 <span class="meta">A short two-note cue. Off by default.</span>
                             </span>
                         </label>
-                        <label class="choice">
-                            <input
-                                type="checkbox"
-                                checked={aiTutor()}
-                                onChange={function change(event): void {
-                                    setAiTutor(event.currentTarget.checked);
-                                }}
-                            />
-                            <span class="choice__text">
-                                Allow live AI tutor requests
-                                <span class="meta">
-                                    Off by default. Curated hints always work offline. When enabled,
-                                    the server gateway receives only the selected mission, step,
-                                    your question, and an optional code snippet. Provider
-                                    availability is not guaranteed.
+                        <Show
+                            when={learning.aiTutorAvailable()}
+                            fallback={
+                                <p class="small muted">
+                                    Curated hints are available offline. This server has no live AI
+                                    provider configured.
+                                </p>
+                            }
+                        >
+                            <label class="choice">
+                                <input
+                                    type="checkbox"
+                                    checked={aiTutor()}
+                                    onChange={function change(event): void {
+                                        setAiTutor(event.currentTarget.checked);
+                                    }}
+                                />
+                                <span class="choice__text">
+                                    Allow live AI tutor requests
+                                    <span class="meta">
+                                        Off by default. Curated hints always work offline. When
+                                        enabled, the server gateway receives only the selected
+                                        mission, step, your question, and an optional code snippet.
+                                        Provider availability is not guaranteed.
+                                    </span>
                                 </span>
-                            </span>
-                        </label>
+                            </label>
+                        </Show>
                         <label class="choice">
                             <input
                                 type="checkbox"
                                 checked={reminders()}
+                                disabled={!remindersSupported}
                                 onChange={function change(event): void {
                                     void requestReminders(event.currentTarget.checked);
                                 }}
                             />
                             <span class="choice__text">
                                 Optional practice reminder
-                                <span class="meta">
-                                    Web notifications only fire while the app is open. The installed
-                                    mobile app can schedule local reminders. Quiet hours are
-                                    respected.
-                                </span>
+                                <span class="meta">{reminderSupportText(reminderKind)}</span>
                                 <Show when={reminderError().length > 0}>
                                     <span class="settings-field-error" role="alert">
                                         {reminderError()}
