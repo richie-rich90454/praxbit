@@ -26,11 +26,23 @@ test.describe("web fallback capabilities", function nativeCapabilitySuite(): voi
         await page.goto("/settings");
         await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
         const reminder = page.getByRole("checkbox", { name: /Optional practice reminder/ });
-        await expect(reminder).toBeEnabled();
-        await expect(
-            page.getByText(/This browser can show reminders only while Praxbit is open/),
-        ).toBeVisible();
-        await expect(page.getByText(/does not support notifications/)).toHaveCount(0);
+        const supported = await page.evaluate(function notificationSupport(): boolean {
+            return typeof Notification !== "undefined";
+        });
+        if (supported) {
+            await expect(reminder).toBeEnabled();
+            await expect(
+                page.getByText(/This browser can show reminders only while Praxbit is open/),
+            ).toBeVisible();
+            await expect(page.getByText(/does not support notifications/)).toHaveCount(0);
+        } else {
+            await expect(reminder).toBeDisabled();
+            await expect(
+                page.getByText(
+                    /This browser does not support notifications\. Reminders cannot be scheduled here/,
+                ),
+            ).toBeVisible();
+        }
         const requests = await page.evaluate(function permissionRequests(): number {
             const probe = (
                 window as unknown as {
@@ -40,10 +52,12 @@ test.describe("web fallback capabilities", function nativeCapabilitySuite(): voi
             return probe === undefined ? 0 : probe();
         });
         expect(requests).toBe(0);
-        const permission = await page.evaluate(function notificationPermission(): string {
-            return Notification.permission;
-        });
-        expect(permission).not.toBe("granted");
+        if (supported) {
+            const permission = await page.evaluate(function notificationPermission(): string {
+                return Notification.permission;
+            });
+            expect(permission).not.toBe("granted");
+        }
     });
 
     test("unsupported notification APIs disable reminders with an explanation", async function unsupported({
