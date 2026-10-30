@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Program.cs": "using System;\nusing System.Collections.Generic;\nusing System.Threading;\nusing System.Threading.Tasks;\n\nclass Program\n{\n    static async Task<int> CountAsync(IEnumerable<int> values, CancellationToken token)\n    {\n        int count = 0;\n        foreach (int value in values)\n        {\n            token.ThrowIfCancellationRequested();\n            await Task.Delay(1, token);\n            if (value > 0)\n            {\n                count += 1;\n            }\n        }\n        return count;\n    }\n\n    static async Task Main()\n    {\n        Console.WriteLine(await CountAsync(new[] { 3, -1, 2 }, CancellationToken.None));\n    }\n}\n"
+            }
+        }
+    }
+}
