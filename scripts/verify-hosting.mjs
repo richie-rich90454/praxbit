@@ -41,6 +41,9 @@ function parseArguments(argv) {
 
     for (let index = 0; index < argv.length; index += 1) {
         const raw = argv[index];
+        if (raw === "--") {
+            continue;
+        }
         if (raw === "--help" || raw === "-h") {
             console.log(USAGE);
             process.exit(0);
