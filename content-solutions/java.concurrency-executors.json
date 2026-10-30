@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Main.java": "import java.util.concurrent.ExecutorService;\nimport java.util.concurrent.Executors;\nimport java.util.concurrent.Future;\n\npublic class Main {\n    static int countPositiveConcurrently(int[] values) throws Exception {\n        int midpoint = values.length / 2;\n        ExecutorService executor = Executors.newFixedThreadPool(2);\n        try {\n            Future<Integer> left = executor.submit(() -> countPositive(values, 0, midpoint));\n            Future<Integer> right = executor.submit(() -> countPositive(values, midpoint, values.length));\n            return left.get() + right.get();\n        } finally {\n            executor.shutdown();\n        }\n    }\n\n    private static int countPositive(int[] values, int start, int end) {\n        int count = 0;\n        for (int index = start; index < end; index += 1) {\n            if (values[index] > 0) {\n                count += 1;\n            }\n        }\n        return count;\n    }\n\n    public static void main(String[] args) throws Exception {\n        System.out.println(countPositiveConcurrently(new int[] { 3, -1, 2, 7 }));\n    }\n}\n"
+            }
+        }
+    }
+}
