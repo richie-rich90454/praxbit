@@ -5,22 +5,14 @@
     "courseId": "aspnet-core",
     "title": "Attribute-routed actions with typed results",
     "summary": "Mark an API controller, keep the attribute route, and return a typed result with 404 handling.",
-    "skills": [
-        "aspnet.controllers"
-    ],
-    "prerequisites": [
-        "csharp.syntax",
-        "http.basics"
-    ],
+    "skills": ["aspnet.controllers"],
+    "prerequisites": ["csharp.syntax", "http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:dotnet"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:dotnet"],
     "hints": [
         "Keep the existing route template and the integer constraint.",
         "Add [ApiController] above the class declaration.",
@@ -177,10 +160,7 @@
                     "kind": "static",
                     "description": "The controller is an API controller with an attribute route.",
                     "file": "ProductsController.cs",
-                    "includes": [
-                        "[ApiController]",
-                        "[Route(\"api/[controller]\")]"
-                    ],
+                    "includes": ["[ApiController]", "[Route(\"api/[controller]\")]"],
                     "excludes": []
                 },
                 {
@@ -197,24 +177,15 @@
                     "kind": "static",
                     "description": "A missing product becomes a 404.",
                     "file": "ProductsController.cs",
-                    "includes": [
-                        "return NotFound();",
-                        "return product;"
-                    ],
-                    "excludes": [
-                        "return _service.Find(id)!;"
-                    ]
+                    "includes": ["return NotFound();", "return product;"],
+                    "excludes": ["return _service.Find(id)!;"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductsController.cs",
-                    "includes": [
-                        "[ApiController]"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["[ApiController]"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -288,8 +259,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
