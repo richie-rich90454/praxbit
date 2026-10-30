@@ -1,6 +1,6 @@
 {
     "id": "before-code.give-better-instructions",
-    "version": 1,
+    "version": 2,
     "sequence": 2,
     "courseId": "before-code",
     "title": "Give better instructions",
@@ -50,7 +50,8 @@
             "description": "Moving before acquiring the parcel.",
             "stepId": "delivery-order",
             "answer": "turn,walk,lift,lower,return",
-            "feedback": "A robot cannot deliver what it is not holding. Acquire the parcel before moving."
+            "feedback": "A robot cannot deliver what it is not holding. Acquire the parcel before moving.",
+            "followUpSkill": "concept.algorithms"
         },
         {
             "id": "vague-is-enough",
@@ -58,6 +59,14 @@
             "stepId": "precision-check",
             "answer": "goal",
             "feedback": "\"Deliver the parcel\" states an outcome, not the steps. A machine needs unambiguous operations in a workable order."
+        },
+        {
+            "id": "order-is-cosmetic",
+            "description": "Believing the order of algorithm steps never changes the result.",
+            "stepId": "algorithm-claims",
+            "answer": "order-free",
+            "feedback": "Reordering lift and walk changes whether the robot carries the parcel. Order is part of the algorithm, not decoration.",
+            "followUpSkill": "concept.instructions"
         }
     ],
     "lesson": {
@@ -90,6 +99,12 @@
         {
             "kind": "order",
             "id": "delivery-order",
+            "hints": [
+                "Arrange the queue so the robot delivers the parcel and finishes charged.",
+                "Each command depends on the state left by the previous one, so order is part of the algorithm.",
+                "To carry a cup to a table you must lift it before walking and lower it after arriving.",
+                "Start with the command that acquires the parcel and leave the return command for after the drop."
+            ],
             "title": "Load the courier queue",
             "prompt": "Arrange these commands so the courier delivers the parcel safely. Use the up and down buttons or drag with a pointer.",
             "evidence": "construction",
@@ -144,15 +159,21 @@
                 "explanation": "Walk forward 4 steps names an action and a measurable amount. The other commands depend on judgment the robot does not have."
             },
             "hints": [
-                "Which command has a measurable action?",
-                "Look for a number and a direction.",
-                "Walk forward 4 steps is actionable. Quickly and carefully are not measurable here.",
-                "The precise command is walk forward 4 steps."
+                "Choose the command a robot could execute without asking a follow-up question.",
+                "Precise instructions name an action and a measurable amount or direction.",
+                "Compare walk forward with walk forward 4 steps: only the second fixes distance and direction.",
+                "Eliminate the two commands that depend on human judgment such as quickly or carefully."
             ]
         },
         {
             "kind": "explain",
             "id": "algorithm-claims",
+            "hints": [
+                "Select only claims that hold for every algorithm, not just this delivery.",
+                "An algorithm is finite, unambiguous, and sensitive to the order of its steps.",
+                "A recipe that says \"cook until done\" is not an algorithm for a machine that cannot judge doneness.",
+                "Two statements describe required properties; two describe common misunderstandings about order and randomness."
+            ],
             "title": "Why order matters",
             "prompt": "Select every statement that is true about algorithms.",
             "evidence": "explanation",
