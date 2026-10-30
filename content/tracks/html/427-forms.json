@@ -1,0 +1,271 @@
+{
+    "id": "html.forms",
+    "version": 1,
+    "sequence": 213,
+    "courseId": "html",
+    "title": "Forms, labels, and validation",
+    "summary": "Build an accessible form with labeled inputs and native validation attributes.",
+    "skills": [
+        "web.html",
+        "web.accessibility"
+    ],
+    "prerequisites": [
+        "web.html"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-html",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "dom-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "unlabeled-form",
+        "briefing": "The checkout form has inputs with no labels and no validation. Screen readers announce only 'edit text', and empty submissions reach the server. Add labels, types, and required attributes without changing the field order."
+    },
+    "objectives": [
+        {
+            "id": "labels",
+            "description": "Associate every input with a label.",
+            "stepIds": [
+                "build-form"
+            ]
+        },
+        {
+            "id": "validation",
+            "description": "Use input types and required attributes.",
+            "stepIds": [
+                "build-form"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain form semantics.",
+            "stepIds": [
+                "form-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:form"
+    ],
+    "hints": [
+        "Every input needs a label connected by for and id.",
+        "Use type=\"email\" for the email field and type=\"number\" for quantity.",
+        "Mark required fields with the required attribute.",
+        "Wrap fields in a form with a submit button of type=\"submit\"."
+    ],
+    "misconceptions": [
+        {
+            "id": "placeholder-label",
+            "description": "Using placeholder text instead of a label.",
+            "stepId": "build-form",
+            "testDescription": "Every input has an associated label.",
+            "feedback": "Placeholder text disappears on input and is not a substitute for a label. Use a label element connected to the input.",
+            "followUpSkill": "web.accessibility"
+        },
+        {
+            "id": "validation-only-client",
+            "description": "Believing HTML validation alone secures the server.",
+            "stepId": "form-claims",
+            "answer": "client-only",
+            "feedback": "Native validation improves usability but can be bypassed. The server must still validate every submission.",
+            "followUpSkill": "api.validation"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Labels name fields",
+                "body": "A label element connected to an input by for and id tells assistive technology what the field means and expands the click target. Placeholder text is a hint, not a name."
+            },
+            {
+                "title": "Native validation",
+                "body": "Input types such as email and number trigger appropriate keyboards and basic checks. The required attribute prevents empty submission. These are usability aids; the server still validates."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Label",
+                "definition": "An element that names a form control."
+            },
+            {
+                "term": "Required",
+                "definition": "An attribute marking a field that must have a value."
+            },
+            {
+                "term": "Input type",
+                "definition": "An attribute that sets a control's data type and keyboard."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Labels and validation",
+            "prompt": "Read the explanation, then build the form.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Labels name fields",
+                    "body": "A label element connected to an input by for and id tells assistive technology what the field means and expands the click target. Placeholder text is a hint, not a name."
+                },
+                {
+                    "title": "Native validation",
+                    "body": "Input types such as email and number trigger appropriate keyboards and basic checks. The required attribute prevents empty submission. These are usability aids; the server still validates."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Label",
+                    "definition": "An element that names a form control."
+                },
+                {
+                    "term": "Required",
+                    "definition": "An attribute marking a field that must have a value."
+                },
+                {
+                    "term": "Input type",
+                    "definition": "An attribute that sets a control's data type and keyboard."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "build-form",
+            "title": "Build an accessible form",
+            "prompt": "Edit index.html. Add labels, appropriate input types, required attributes, and a submit button.",
+            "evidence": "construction",
+            "language": "html",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Checkout</title>\n</head>\n<body>\n  <h1>Checkout</h1>\n  <form>\n    <input name=\"email\">\n    <input name=\"quantity\">\n    <button>Submit</button>\n  </form>\n</body>\n</html>\n",
+                    "editable": true,
+                    "language": "html"
+                }
+            ],
+            "entry": "index.html",
+            "preview": "html",
+            "tests": [
+                {
+                    "kind": "dom",
+                    "description": "The page has a form.",
+                    "selector": "form",
+                    "property": "exists",
+                    "expected": true
+                },
+                {
+                    "kind": "dom",
+                    "description": "Every input has an associated label.",
+                    "selector": "label",
+                    "property": "count",
+                    "expected": 2
+                },
+                {
+                    "kind": "dom",
+                    "description": "The email field uses email input type.",
+                    "selector": "input[name=\"email\"]",
+                    "property": "attribute",
+                    "attribute": "type",
+                    "expected": "email"
+                },
+                {
+                    "kind": "dom",
+                    "description": "The quantity field uses number input type.",
+                    "selector": "input[name=\"quantity\"]",
+                    "property": "attribute",
+                    "attribute": "type",
+                    "expected": "number"
+                },
+                {
+                    "kind": "dom",
+                    "description": "Both fields are required.",
+                    "selector": "input[required]",
+                    "property": "count",
+                    "expected": 2
+                },
+                {
+                    "kind": "dom",
+                    "description": "The form has a submit button.",
+                    "selector": "button[type=\"submit\"]",
+                    "property": "count",
+                    "expected": 1
+                }
+            ],
+            "hints": [
+                "Add a label for each input and connect it with for and id.",
+                "Change input types to email and number.",
+                "Add required to both inputs.",
+                "Set the button type to submit."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "form-claims",
+            "title": "Form semantics",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Labels are not optional hints.",
+                "Native validation is a usability aid.",
+                "Server validation remains necessary.",
+                "Select labels, types, and server validation; reject client-only security."
+            ],
+            "statements": [
+                {
+                    "id": "labels",
+                    "label": "Every form control needs an accessible name, usually a label.",
+                    "correct": true
+                },
+                {
+                    "id": "types",
+                    "label": "Input types improve mobile keyboards and basic validation.",
+                    "correct": true
+                },
+                {
+                    "id": "client-only",
+                    "label": "HTML validation alone is enough to protect the server.",
+                    "correct": false
+                },
+                {
+                    "id": "required",
+                    "label": "The required attribute prevents empty submission in supporting browsers.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Accessible names and native validation improve usability, but the server must still validate every submission."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and HTML tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
