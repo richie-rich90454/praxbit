@@ -1,18 +1,26 @@
 {
     "id": "sql.review-model",
     "version": 1,
-    "sequence": 36,
+    "sequence": 38,
     "courseId": "sql-data",
     "title": "Review a data model",
     "summary": "Find missing constraints and indexes in a proposed relational schema.",
-    "skills": ["sql.modeling"],
-    "prerequisites": ["sql.queries", "sql.joins"],
+    "skills": [
+        "sql.modeling"
+    ],
+    "prerequisites": [
+        "sql.queries",
+        "sql.joins"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["schema-review", "no-execution"]
+        "capabilities": [
+            "schema-review",
+            "no-execution"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "find-schema-issues",
             "description": "Identify missing keys, constraints, and indexes.",
-            "stepIds": ["schema-review"]
+            "stepIds": [
+                "schema-review"
+            ]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": ["model-check"]
+            "stepIds": [
+                "model-check"
+            ]
         }
     ],
-    "assets": ["pip:thinking", "scene:campus", "system:database", "icon:schema"],
+    "assets": [
+        "pip:thinking",
+        "scene:campus",
+        "system:database",
+        "icon:schema"
+    ],
     "hints": [
         "Every table needs a stable primary key.",
         "orders.customer_id must reference customers.id.",
@@ -44,13 +61,25 @@
             "id": "app-validation",
             "description": "Assuming application code is enough to protect data integrity.",
             "stepId": "schema-review",
-            "feedback": "Applications can have bugs and multiple writers. Database constraints enforce invariants at the shared boundary."
+            "answer": "accept",
+            "feedback": "Applications can have bugs and multiple writers. Database constraints enforce invariants at the shared boundary.",
+            "followUpSkill": "sql.modeling"
+        },
+        {
+            "id": "name-key",
+            "description": "Accepting a customer name as the primary key.",
+            "stepId": "schema-review",
+            "answer": "name-key",
+            "feedback": "Names are not stable or unique. Use a generated identifier as the primary key.",
+            "followUpSkill": "sql.modeling"
         },
         {
             "id": "index-everything",
             "description": "Adding indexes without a query workload.",
-            "stepId": "schema-review",
-            "feedback": "Indexes cost write time and space. Add them for measured or clearly expected query patterns."
+            "stepId": "model-check",
+            "answer": "index-free",
+            "feedback": "Indexes cost write time and space. Add them for measured or clearly expected query patterns.",
+            "followUpSkill": "sql.modeling"
         }
     ],
     "lesson": {
@@ -135,7 +164,13 @@
                 }
             ],
             "correctVerdict": "reject",
-            "explanation": "The schema has no identity, relationship, range constraints, or index for its stated query. Names are not stable unique identifiers."
+            "explanation": "The schema has no identity, relationship, range constraints, or index for its stated query. Names are not stable unique identifiers.",
+            "hints": [
+                "Look for identity, relationship, range, and query-performance rules.",
+                "Every table needs a primary key.",
+                "The stated query filters by customer and orders by date.",
+                "Select pk, fk, checks, and index, then reject the schema."
+            ]
         },
         {
             "kind": "explain",
@@ -165,7 +200,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Constraints enforce invariants near the data. Indexes trade storage and writes for read speed."
+            "explanation": "Constraints enforce invariants near the data. Indexes trade storage and writes for read speed.",
+            "hints": [
+                "Check each claim against where constraints run.",
+                "Three statements are accurate.",
+                "Indexes trade storage and write cost for read speed.",
+                "Select shared, pk, and fk."
+            ]
         }
     ],
     "evaluation": {
@@ -185,5 +226,7 @@
         "screenReaderNotes": "The schema is announced as a code block. Findings and verdict feedback are read in order."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional"]
+    "tags": [
+        "professional"
+    ]
 }
