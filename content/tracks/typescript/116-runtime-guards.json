@@ -5,23 +5,14 @@
     "courseId": "typescript",
     "title": "Validate what the compiler cannot see",
     "summary": "Turn an unknown JSON value into a nonnegative integer or null.",
-    "skills": [
-        "ts.runtime-validation"
-    ],
-    "prerequisites": [
-        "ts.generics",
-        "api.validation"
-    ],
+    "skills": ["ts.runtime-validation"],
+    "prerequisites": ["ts.generics", "api.validation"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "syntax-diagnostics",
-            "transpiled-tests"
-        ]
+        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:typescript"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:typescript"],
     "hints": [
         "Start by checking typeof value.",
         "Reject non-numbers before doing arithmetic.",
@@ -171,45 +153,35 @@
                     "kind": "function",
                     "description": "A nonnegative integer is returned unchanged.",
                     "name": "parseCount",
-                    "args": [
-                        3
-                    ],
+                    "args": [3],
                     "expected": 3
                 },
                 {
                     "kind": "function",
                     "description": "Zero is a valid count.",
                     "name": "parseCount",
-                    "args": [
-                        0
-                    ],
+                    "args": [0],
                     "expected": 0
                 },
                 {
                     "kind": "function",
                     "description": "A negative value is rejected.",
                     "name": "parseCount",
-                    "args": [
-                        -1
-                    ],
+                    "args": [-1],
                     "expected": null
                 },
                 {
                     "kind": "function",
                     "description": "A numeric string is rejected instead of coerced.",
                     "name": "parseCount",
-                    "args": [
-                        "3"
-                    ],
+                    "args": ["3"],
                     "expected": null
                 },
                 {
                     "kind": "function",
                     "description": "A fractional value is rejected.",
                     "name": "parseCount",
-                    "args": [
-                        2.5
-                    ],
+                    "args": [2.5],
                     "expected": null
                 }
             ],
@@ -274,8 +246,5 @@
         "screenReaderNotes": "Tests announce arguments, expected output, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
