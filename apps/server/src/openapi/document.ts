@@ -23,8 +23,9 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
         version: "1.0.0",
         description:
             "Versioned HTTP API for Praxbit. Browser clients authenticate with an opaque HttpOnly session cookie and " +
-            "must send the double-submit CSRF header on every mutation. Native clients authenticate with a bearer token " +
-            "and do not need CSRF. Errors always use the ApiError envelope with a request id.",
+            "must send the double-submit CSRF header on every mutation, including when x-praxbit-client is native. " +
+            "Native clients authenticate with a bearer token and do not need CSRF. Errors always use the ApiError " +
+            "envelope with a request id.",
     },
     servers: [{ url: "/api/v1" }],
     tags: [
@@ -402,6 +403,34 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
                             preferences: reference("Preferences"),
                         },
                     },
+                    {
+                        type: "object",
+                        required: [
+                            "kind",
+                            "operationId",
+                            "experience",
+                            "streakDays",
+                            "longestStreak",
+                            "placementSkippedSkills",
+                            "achievements",
+                        ],
+                        properties: {
+                            kind: { const: "progress" },
+                            operationId: { type: "string", minLength: 8, maxLength: 80 },
+                            experience: { type: "integer", minimum: 0 },
+                            streakDays: { type: "integer", minimum: 0 },
+                            longestStreak: { type: "integer", minimum: 0 },
+                            lastPracticeOn: { type: "string", format: "date" },
+                            placementSkippedSkills: {
+                                type: "array",
+                                items: { type: "string" },
+                            },
+                            achievements: {
+                                type: "array",
+                                items: { type: "string" },
+                            },
+                        },
+                    },
                 ],
             },
             SyncResult: {
@@ -417,6 +446,7 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
                             "project-revision",
                             "mission-completion",
                             "preferences",
+                            "progress",
                         ],
                     },
                     status: {
@@ -620,6 +650,18 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
                     remaining: { type: "integer", minimum: 0 },
                 },
             },
+            Capabilities: {
+                type: "object",
+                required: ["aiTutor"],
+                additionalProperties: false,
+                properties: {
+                    aiTutor: {
+                        type: "boolean",
+                        description:
+                            "Whether optional AI tutoring is configured on this server. Provider credentials are never exposed.",
+                    },
+                },
+            },
             ExportBundle: {
                 type: "object",
                 required: [
@@ -633,6 +675,9 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
                     "completions",
                     "worlds",
                     "achievements",
+                    "projects",
+                    "clubMemberships",
+                    "reports",
                 ],
                 properties: {
                     exportedAt: { type: "string", format: "date-time" },
@@ -645,6 +690,53 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
                     completions: { type: "array", items: reference("CompletionRecord") },
                     worlds: { type: "array", items: reference("WorldState") },
                     achievements: { type: "array", items: reference("AchievementRecord") },
+                    projects: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            required: ["projectId", "currentRevision", "revisions"],
+                            properties: {
+                                projectId: { type: "string" },
+                                currentRevision: { type: "integer", minimum: 0 },
+                                updatedAt: { type: "string", format: "date-time" },
+                                revisions: {
+                                    type: "array",
+                                    items: reference("ProjectRevision"),
+                                },
+                            },
+                        },
+                    },
+                    clubMemberships: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            required: ["clubId", "clubName", "role", "joinedAt"],
+                            properties: {
+                                clubId: { type: "string" },
+                                clubName: { type: "string" },
+                                role: { type: "string", enum: ["owner", "member"] },
+                                joinedAt: { type: "string", format: "date-time" },
+                            },
+                        },
+                    },
+                    reports: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            required: ["id", "clubId", "reason", "status", "createdAt"],
+                            properties: {
+                                id: { type: "string" },
+                                clubId: { type: "string" },
+                                reason: { type: "string" },
+                                status: {
+                                    type: "string",
+                                    enum: ["open", "reviewed", "dismissed"],
+                                },
+                                createdAt: { type: "string", format: "date-time" },
+                                resolvedAt: { type: "string", format: "date-time" },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -654,7 +746,9 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
             get: {
                 tags: ["Operations"],
                 operationId: "health",
-                summary: "Process liveness. Does not query the database.",
+                summary:
+                    "Process liveness with version, environment, capabilities, and web build metadata. " +
+                    "Does not query the database.",
                 servers: [{ url: "/" }],
                 responses: {
                     "200": {
@@ -668,7 +762,9 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
             get: {
                 tags: ["Operations"],
                 operationId: "readiness",
-                summary: "Database readiness. Returns 503 when PostgreSQL cannot be reached.",
+                summary:
+                    "Database and web build readiness. Returns 503 when PostgreSQL cannot be reached " +
+                    "or a required web build is missing.",
                 servers: [{ url: "/" }],
                 responses: {
                     "200": {
@@ -676,6 +772,21 @@ export const OPENAPI_DOCUMENT: Record<string, unknown> = {
                         content: jsonContent({ type: "object" }),
                     },
                     "503": { description: "Not ready.", content: jsonContent({ type: "object" }) },
+                },
+            },
+        },
+        "/capabilities": {
+            get: {
+                tags: ["Operations"],
+                operationId: "getCapabilities",
+                summary:
+                    "Public server capabilities. Reports whether optional AI tutoring is configured " +
+                    "without exposing provider keys or base URLs.",
+                responses: {
+                    "200": {
+                        description: "Capabilities.",
+                        content: jsonContent(reference("Capabilities")),
+                    },
                 },
             },
         },
