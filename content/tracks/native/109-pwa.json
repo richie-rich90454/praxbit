@@ -5,23 +5,14 @@
     "courseId": "native",
     "title": "Installable and honestly offline",
     "summary": "Ship a web app manifest and a service worker whose cache strategy matches each request.",
-    "skills": [
-        "web.browser-apis",
-        "web.build-tooling"
-    ],
-    "prerequisites": [
-        "web.browser-apis",
-        "http.basics"
-    ],
+    "skills": ["web.browser-apis", "web.build-tooling"],
+    "prerequisites": ["web.browser-apis", "http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:native"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:native"],
     "hints": [
         "Start with a cache version and derive both cache names from it.",
         "Pre-cache the manifest, icons, and offline page during install and pass the promise to waitUntil.",
@@ -221,20 +203,14 @@
                         "cache.put(request, copy)",
                         "return cached ?? network"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "service-worker.ts",
-                    "includes": [
-                        "const CACHE_VERSION = \"v3\""
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["const CACHE_VERSION = \"v3\""],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -313,8 +289,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
