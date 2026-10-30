@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "redact-code": {
+            "files": {
+                "privacy.js": "function redactPii(record) {\n  if (record === null || record === undefined) {\n    return record ?? null;\n  }\n  const copy = { ...record };\n  for (const key of [\"email\", \"phone\", \"card\"]) {\n    if (Object.prototype.hasOwnProperty.call(copy, key)) {\n      copy[key] = \"[redacted]\";\n    }\n  }\n  return copy;\n}\n"
+            }
+        }
+    }
+}
