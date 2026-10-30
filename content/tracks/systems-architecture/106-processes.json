@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "thread-shares-nothing",
-            "description": "Treating threads as separate address spaces.",
+            "description": "Believing threads have separate memory.",
             "stepId": "apply",
-            "feedback": "Threads share the process's address space and descriptors, so a write in one thread is visible to all of them. Use processes when a crash or memory corruption must stay contained."
+            "testDescription": "The job list is read on a private descriptor and closed for workers.",
+            "feedback": "Threads share the process address space, so a private descriptor per worker prevents accidental sharing of the job list.",
+            "followUpSkill": "ops.processes"
         },
         {
             "id": "ignore-exit",
-            "description": "Ignoring wait because the logs already show failures.",
+            "description": "Supervising without reaping children or checking exit status.",
             "stepId": "apply",
-            "feedback": "A process that exits leaves a status; without wait, the supervisor cannot report it, and the child stays a zombie until reaped. Collect every status with wait or wait -n."
+            "testDescription": "Every child is reaped and any failure makes the supervisor exit nonzero.",
+            "feedback": "Unreaped children become zombies, and a zero exit hides a failed job. Wait for every child and propagate failure."
         },
         {
             "id": "sigkill-catch",
-            "description": "Planning cleanup in a SIGKILL handler.",
+            "description": "Believing a process can catch SIGKILL.",
             "stepId": "check",
-            "feedback": "SIGKILL is delivered by the kernel and cannot be caught, blocked, or ignored. Cleanup belongs in a SIGTERM or SIGINT handler, with SIGKILL as the last resort."
+            "answer": "sigkill",
+            "feedback": "SIGKILL is delivered by the kernel and cannot be caught, blocked, or handled. Use SIGTERM for graceful shutdown."
         }
     ],
     "lesson": {
@@ -248,7 +252,18 @@
                     "includes": ["readonly MAX_PARALLEL=4"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Bound how many workers can run at once.",
+                "Give each worker only the descriptors it needs.",
+                "Forward termination and set a deadline for every child.",
+                "Reap every child, close inherited descriptors, and exit nonzero if any job fails."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "explain",
@@ -288,7 +303,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "A process is the isolation boundary: it gets its own virtual address space and descriptor table, while threads share both inside it. Descriptors are per-process handles inherited across fork and exec, so a private descriptor must be closed for children. SIGTERM is a catchable request, SIGKILL is not, and the exit status a parent reaps is how it learns that a child failed."
+            "explanation": "A process is the isolation boundary: it gets its own virtual address space and descriptor table, while threads share both inside it. Descriptors are per-process handles inherited across fork and exec, so a private descriptor must be closed for children. SIGTERM is a catchable request, SIGKILL is not, and the exit status a parent reaps is how it learns that a child failed.",
+            "hints": [
+                "Threads share an address space; processes do not.",
+                "A descriptor is a handle into the process's table.",
+                "SIGKILL cannot be caught or cleaned up.",
+                "Select process/thread, descriptors, and zombies; reject virtual-address and SIGKILL claims."
+            ]
         }
     ],
     "evaluation": {
