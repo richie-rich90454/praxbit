@@ -1,0 +1,10 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "inventory.lua": "local Inventory = {}\n\nfunction Inventory.add(items, name, count)\n  items[name] = (items[name] or 0) + count\nend\n\nfunction Inventory.total(items)\n  local sum = 0\n  for _, count in pairs(items) do\n    sum = sum + count\n  end\n  return sum\nend\n\nreturn Inventory\n",
+                "main.lua": "local Inventory = require(\"inventory\")\n\nlocal items = {}\nInventory.add(items, \"bolts\", 3)\nInventory.add(items, \"bolts\", 2)\nprint(Inventory.total(items))\n"
+            }
+        }
+    }
+}
