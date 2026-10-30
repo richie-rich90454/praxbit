@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "fix-motion": {
+            "files": {
+                "styles.css": ".cta { background: #B54131; color: #fff; padding: 8px 12px; transition: background-color 150ms ease, transform 150ms ease; }\n.cta:hover { background: #8f3226; transform: translateY(-1px); }\n.spinner { width: 24px; height: 24px; border: 3px solid #D6D6D6; border-top-color: #B54131; border-radius: 50%; animation: spin 1s linear infinite; }\n@keyframes spin { to { transform: rotate(360deg); } }\n@media (prefers-reduced-motion: reduce) {\n  .cta, .spinner { transition: none; animation: none; }\n}\n"
+            }
+        }
+    }
+}
