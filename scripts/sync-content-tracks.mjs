@@ -62,7 +62,12 @@ const newTracks = [
 ];
 
 for (const track of newTracks) {
-    if (byCourse.has(track.id) && !document.tracks.some(function same(trackItem) { return trackItem.id === track.id; })) {
+    if (
+        byCourse.has(track.id) &&
+        !document.tracks.some(function same(trackItem) {
+            return trackItem.id === track.id;
+        })
+    ) {
         document.tracks.push({ ...track, missionIds: [] });
     }
 }
