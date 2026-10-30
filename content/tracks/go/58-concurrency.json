@@ -5,25 +5,14 @@
     "courseId": "go",
     "title": "Interfaces, channels, and modules",
     "summary": "Run work in a goroutine, receive the result from a channel, and reason about module boundaries.",
-    "skills": [
-        "go.interfaces",
-        "go.concurrency",
-        "go.modules",
-        "go.web"
-    ],
-    "prerequisites": [
-        "go.syntax",
-        "concept.testing"
-    ],
+    "skills": ["go.interfaces", "go.concurrency", "go.modules", "go.web"],
+    "prerequisites": ["go.syntax", "concept.testing"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -35,31 +24,20 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Diagnose a realistic mistake and choose the correct repair.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:go"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:go"],
     "hints": [
         "Create a channel of int.",
         "Start an anonymous goroutine with go func().",
@@ -178,9 +156,7 @@
                     "kind": "static",
                     "description": "The function keeps the slice parameter and int result.",
                     "file": "main.go",
-                    "includes": [
-                        "func sum(values []int) int"
-                    ],
+                    "includes": ["func sum(values []int) int"],
                     "excludes": []
                 },
                 {
@@ -193,20 +169,14 @@
                         "results <- total",
                         "return <-results"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.go",
-                    "includes": [
-                        "func sum(values []int) int"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["func sum(values []int) int"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -323,8 +293,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional"
-    ]
+    "tags": ["systems", "professional"]
 }
