@@ -5,22 +5,14 @@
     "courseId": "css",
     "title": "Cascade, specificity, and inheritance",
     "summary": "Write selectors that win for the right reason and avoid !important.",
-    "skills": [
-        "web.css"
-    ],
-    "prerequisites": [
-        "web.html"
-    ],
+    "skills": ["web.css"],
+    "prerequisites": ["web.html"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-css",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "computed-style-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "computed-style-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "specificity",
             "description": "Use a selector with appropriate specificity.",
-            "stepIds": [
-                "fix-cascade"
-            ]
+            "stepIds": ["fix-cascade"]
         },
         {
             "id": "no-important",
             "description": "Remove !important from the button rule.",
-            "stepIds": [
-                "fix-cascade"
-            ]
+            "stepIds": ["fix-cascade"]
         },
         {
             "id": "understanding",
             "description": "Explain cascade and specificity.",
-            "stepIds": [
-                "cascade-claims"
-            ]
+            "stepIds": ["cascade-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:layout"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:layout"],
     "hints": [
         "Target the button with .card .cta rather than a bare element selector.",
         "Remove !important and let specificity decide.",
@@ -248,7 +229,5 @@
         "screenReaderNotes": "Each test announces selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
