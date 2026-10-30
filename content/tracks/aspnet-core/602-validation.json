@@ -1,0 +1,342 @@
+{
+    "id": "aspnet-core.validation",
+    "version": 1,
+    "sequence": 163,
+    "courseId": "aspnet-core",
+    "title": "Validation attributes and ProblemDetails",
+    "summary": "Put data annotations on a request DTO and let [ApiController] return a 400 ProblemDetails before the action runs.",
+    "skills": [
+        "aspnet.controllers"
+    ],
+    "prerequisites": [
+        "aspnet.controllers",
+        "api.validation"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "validation",
+        "briefing": "The product create action accepts a blank name and a negative stock because the request record has no constraints. Add a validation contract and return a proper 201 when the request is accepted."
+    },
+    "objectives": [
+        {
+            "id": "objective-validate",
+            "description": "Declare constraints on the request DTO and bind it to an API action.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-modelstate",
+            "description": "Explain when model validation runs and what response it produces.",
+            "stepIds": [
+                "check"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Predict the result for an invalid numeric range.",
+            "stepIds": [
+                "transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:dotnet"
+    ],
+    "hints": [
+        "Data annotations belong on the request record, not on the entity.",
+        "[ApiController] runs model validation automatically.",
+        "Use Required and StringLength on the name, and Range on the stock.",
+        "Return Created with a location and the created product."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-annotations",
+            "description": "Expecting model binding to reject invalid values with no constraints.",
+            "stepId": "apply",
+            "testDescription": "The request record declares its validation contract.",
+            "feedback": "Model binding converts types; it does not invent business rules. Attributes declare the rules that ModelState checks.",
+            "followUpSkill": "aspnet.controllers"
+        },
+        {
+            "id": "manual-modelstate",
+            "description": "Adding a manual ModelState check in every action.",
+            "stepId": "check",
+            "diagnostic": "Believing ModelState.IsValid must be checked by hand even on an API controller.",
+            "feedback": "[ApiController] installs a filter that short-circuits invalid ModelState with a 400 ProblemDetails response."
+        },
+        {
+            "id": "required-value-type",
+            "description": "Assuming [Required] rejects the default value of a value type.",
+            "stepId": "check",
+            "diagnostic": "Selecting the statement that [Required] rejects 0 on a non-nullable int.",
+            "feedback": "A non-nullable int always has a value, so [Required] passes. Use [Range] to reject an out-of-range number.",
+            "followUpSkill": "aspnet.controllers"
+        },
+        {
+            "id": "range-ignored",
+            "description": "Believing Range is documentation only.",
+            "stepId": "transfer",
+            "answer": "range-not-enforced",
+            "feedback": "Range is enforced during model validation. The negative value never reaches the action.",
+            "followUpSkill": "aspnet.controllers"
+        },
+        {
+            "id": "service-error",
+            "description": "Expecting a 500 for an invalid client value.",
+            "stepId": "transfer",
+            "answer": "server-error",
+            "feedback": "A validation failure is a client error and returns 400. A 500 means the server failed after accepting the request."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Attributes declare the contract",
+                "body": "Data annotations such as [Required], [StringLength], and [Range] sit on the request DTO. They describe the boundary before any business logic runs. Keeping them on the DTO also keeps the entity free of transport rules."
+            },
+            {
+                "title": "[ApiController] supplies the validation response",
+                "body": "The attribute adds API conventions, including automatic model validation. When ModelState is invalid, the framework returns 400 with a ValidationProblemDetails body before the action method executes. A manual ModelState check in every action is redundant."
+            },
+            {
+                "title": "A successful create is 201",
+                "body": "Created returns 201 and a location for the new resource. Returning Ok after a create hides the fact that a resource was created and gives the client no location to follow."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Data annotation",
+                "definition": "An attribute that declares a validation rule on a model member."
+            },
+            {
+                "term": "ModelState",
+                "definition": "The binding and validation state collected before an action runs."
+            },
+            {
+                "term": "ProblemDetails",
+                "definition": "The standard machine-readable error body used by ASP.NET Core APIs."
+            },
+            {
+                "term": "DTO",
+                "definition": "A transport object shaped for one request or response."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Annotations, model state, and error bodies",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Attributes declare the contract",
+                    "body": "Data annotations such as [Required], [StringLength], and [Range] sit on the request DTO. They describe the boundary before any business logic runs. Keeping them on the DTO also keeps the entity free of transport rules."
+                },
+                {
+                    "title": "[ApiController] supplies the validation response",
+                    "body": "The attribute adds API conventions, including automatic model validation. When ModelState is invalid, the framework returns 400 with a ValidationProblemDetails body before the action method executes. A manual ModelState check in every action is redundant."
+                },
+                {
+                    "title": "A successful create is 201",
+                    "body": "Created returns 201 and a location for the new resource. Returning Ok after a create hides the fact that a resource was created and gives the client no location to follow."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Data annotation",
+                    "definition": "An attribute that declares a validation rule on a model member."
+                },
+                {
+                    "term": "ModelState",
+                    "definition": "The binding and validation state collected before an action runs."
+                },
+                {
+                    "term": "ProblemDetails",
+                    "definition": "The standard machine-readable error body used by ASP.NET Core APIs."
+                },
+                {
+                    "term": "DTO",
+                    "definition": "A transport object shaped for one request or response."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Add the request contract",
+            "prompt": "Edit ProductsController.cs. Put Required and StringLength on the name, Range on the stock, and return 201 with a location when the product is created.",
+            "evidence": "construction",
+            "hints": [
+                "Keep [ApiController] and the attribute route.",
+                "Annotate the record components with attribute targets.",
+                "Use [property: Required, StringLength(120)] and [property: Range(0, 100000)].",
+                "Return Created with the new product's location."
+            ],
+            "files": [
+                {
+                    "path": "ProductsController.cs",
+                    "content": "using System.ComponentModel.DataAnnotations;\nusing Microsoft.AspNetCore.Mvc;\n\nnamespace Praxbit.Catalog.Controllers;\n\n[ApiController]\n[Route(\"api/[controller]\")]\npublic class ProductsController : ControllerBase\n{\n    private readonly IProductService _service;\n\n    public ProductsController(IProductService service) => _service = service;\n\n    [HttpPost]\n    public ActionResult<Product> Create(CreateProductRequest request)\n    {\n        // TODO: validate the request and return 201 with the created product\n        var product = _service.Create(request.Name, request.Stock);\n        return Ok(product);\n    }\n}\n\npublic record CreateProductRequest(string Name, int Stock);\n",
+                    "editable": true,
+                    "language": "csharp"
+                }
+            ],
+            "entry": "ProductsController.cs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet test",
+                "description": "Restore, build, and run the ASP.NET Core validation tests."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The request record declares its validation contract.",
+                    "file": "ProductsController.cs",
+                    "includes": [
+                        "[property: Required, StringLength(120)] string Name",
+                        "[property: Range(0, 100000)] int Stock"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The action binds a validated DTO on an API controller.",
+                    "file": "ProductsController.cs",
+                    "includes": [
+                        "[ApiController]",
+                        "public ActionResult<Product> Create(CreateProductRequest request)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "A created product is answered with 201 and a location.",
+                    "file": "ProductsController.cs",
+                    "includes": [
+                        "return Created($\"/api/products/{product.Id}\", product);"
+                    ],
+                    "excludes": [
+                        "return Ok(product);",
+                        "TODO"
+                    ]
+                }
+            ],
+            "language": "text"
+        },
+        {
+            "kind": "explain",
+            "id": "check",
+            "title": "What the API controller filter does",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Think about what happens between model binding and the action body.",
+                "The filter runs for every action on an API controller.",
+                "A non-nullable value type always has a value.",
+                "ProblemDetails is a normal response body, not a debug view."
+            ],
+            "statements": [
+                {
+                    "id": "automatic-400",
+                    "label": "[ApiController] returns 400 with ProblemDetails when ModelState is invalid.",
+                    "correct": true
+                },
+                {
+                    "id": "annotations-before-action",
+                    "label": "Data annotations are evaluated before the action body runs.",
+                    "correct": true
+                },
+                {
+                    "id": "required-int",
+                    "label": "[Required] rejects the value 0 on a non-nullable int property.",
+                    "correct": false
+                },
+                {
+                    "id": "manual-check",
+                    "label": "Every action must check ModelState.IsValid even with [ApiController].",
+                    "correct": false
+                },
+                {
+                    "id": "stack",
+                    "label": "ProblemDetails includes the exception stack trace by default.",
+                    "correct": false
+                }
+            ],
+            "explanation": "The API controller filter short-circuits invalid model state with a 400 ProblemDetails response. Annotations run during binding, before the action. [Required] cannot reject 0 on a non-nullable int, and the default ProblemDetails body does not expose a stack trace."
+        },
+        {
+            "kind": "quiz",
+            "id": "transfer",
+            "title": "Transfer to a negative range",
+            "prompt": "A client posts a product with Stock = -1. The record declares [Range(0, 100000)] and the controller has [ApiController]. Which response is produced?",
+            "evidence": "transfer",
+            "hints": [
+                "Range is a validation attribute, not a type conversion.",
+                "The API controller filter runs before the action.",
+                "An out-of-range value makes ModelState invalid.",
+                "Invalid model state becomes 400, not 500 or 201."
+            ],
+            "quiz": {
+                "prompt": "A client posts a product with Stock = -1. The record declares [Range(0, 100000)] and the controller has [ApiController]. Which response is produced?",
+                "options": [
+                    {
+                        "id": "bad-request",
+                        "label": "400 with ProblemDetails before the action runs."
+                    },
+                    {
+                        "id": "created",
+                        "label": "201 because Range only applies to query-string parameters."
+                    },
+                    {
+                        "id": "server-error",
+                        "label": "500 because the negative value reaches the service."
+                    },
+                    {
+                        "id": "range-not-enforced",
+                        "label": "200 with the stored product; Range is documentation only."
+                    }
+                ],
+                "correctId": "bad-request",
+                "explanation": "Range fails for -1, ModelState becomes invalid, and the API controller filter returns 400 ProblemDetails before Create runs."
+            }
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Checks verify source structure and the reference tests; they do not compile or run the framework.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
