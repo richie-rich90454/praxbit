@@ -1,0 +1,361 @@
+{
+    "id": "typescript.generic-constraints",
+    "version": 1,
+    "sequence": 64,
+    "courseId": "typescript",
+    "title": "Constrain a generic key",
+    "summary": "Group typed records by a key while keeping the key and value types connected.",
+    "skills": [
+        "ts.generics"
+    ],
+    "prerequisites": [
+        "ts.types",
+        "js.functions"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": [
+            "source-editing",
+            "syntax-diagnostics",
+            "transpiled-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "generic-constraints",
+        "briefing": "The campus API groups records by different fields. The current helper accepts any string and keeps only the last record for each group. Preserve the key relationship and accumulate every record."
+    },
+    "objectives": [
+        {
+            "id": "group-records",
+            "description": "Group typed records and accumulate every member.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-signature",
+            "description": "Choose a generic signature that preserves the value type.",
+            "stepIds": [
+                "constraint-transfer"
+            ]
+        },
+        {
+            "id": "explain-constraints",
+            "description": "Explain how constraints and indexed access types work.",
+            "stepIds": [
+                "constraint-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:typescript"
+    ],
+    "hints": [
+        "The key must be limited to the properties of T.",
+        "Use K extends keyof T for the key parameter.",
+        "The return type can use T[K] or a record of grouped T values.",
+        "Push each item into the group instead of replacing the group."
+    ],
+    "misconceptions": [
+        {
+            "id": "overwrite-group",
+            "description": "Replacing a group with the latest record.",
+            "stepId": "apply",
+            "testDescription": "Items with the same category share one group.",
+            "feedback": "A group is a list. Append each matching record instead of assigning a new single-element array.",
+            "followUpSkill": "ts.generics"
+        },
+        {
+            "id": "string-key",
+            "description": "Typing the key as string and losing the value relationship.",
+            "stepId": "constraint-transfer",
+            "answer": "string-key",
+            "feedback": "A plain string key cannot prove that T has that property. Use K extends keyof T and return T[K].",
+            "followUpSkill": "ts.generics"
+        },
+        {
+            "id": "keyof-runtime",
+            "description": "Believing keyof performs a runtime check.",
+            "stepId": "constraint-check",
+            "answer": "keyof-runtime",
+            "feedback": "keyof is a compile-time type operator. Runtime data still needs a guard.",
+            "followUpSkill": "ts.generics"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Constraints keep a relationship",
+                "body": "A type parameter can carry a constraint: K extends keyof T says that K must be one of T's property names. The return type T[K] then describes the value stored at that key. The constraint and the indexed access type work together, so a caller cannot ask for a key that the object does not have."
+            },
+            {
+                "title": "Constraints are compile-time evidence",
+                "body": "TypeScript checks a generic constraint while compiling. It does not inspect objects at runtime. A function that reads external JSON still needs a runtime guard before the value can be treated as T."
+            },
+            {
+                "title": "Avoid the any escape hatch",
+                "body": "Replacing a constrained parameter with any makes the call compile but discards the relationship between the key and the result. Prefer a type parameter, keyof, and indexed access. When the shape is genuinely unknown, use unknown plus a guard."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Type parameter",
+                "definition": "A type placeholder supplied by the caller of a generic function."
+            },
+            {
+                "term": "Constraint",
+                "definition": "A requirement that limits which types a type parameter may accept."
+            },
+            {
+                "term": "keyof",
+                "definition": "A type operator that produces the union of an object type's property names."
+            },
+            {
+                "term": "Indexed access type",
+                "definition": "A type written T[K] that describes the value at key K of T."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Constraints keep a relationship",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Constraints keep a relationship",
+                    "body": "A type parameter can carry a constraint: K extends keyof T says that K must be one of T's property names. The return type T[K] then describes the value stored at that key. The constraint and the indexed access type work together, so a caller cannot ask for a key that the object does not have."
+                },
+                {
+                    "title": "Constraints are compile-time evidence",
+                    "body": "TypeScript checks a generic constraint while compiling. It does not inspect objects at runtime. A function that reads external JSON still needs a runtime guard before the value can be treated as T."
+                },
+                {
+                    "title": "Avoid the any escape hatch",
+                    "body": "Replacing a constrained parameter with any makes the call compile but discards the relationship between the key and the result. Prefer a type parameter, keyof, and indexed access. When the shape is genuinely unknown, use unknown plus a guard."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Type parameter",
+                    "definition": "A type placeholder supplied by the caller of a generic function."
+                },
+                {
+                    "term": "Constraint",
+                    "definition": "A requirement that limits which types a type parameter may accept."
+                },
+                {
+                    "term": "keyof",
+                    "definition": "A type operator that produces the union of an object type's property names."
+                },
+                {
+                    "term": "Indexed access type",
+                    "definition": "A type written T[K] that describes the value at key K of T."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Group records without losing entries",
+            "prompt": "Edit group.ts. groupBy groups every record by the supplied key, and each group contains all matching records in input order.",
+            "evidence": "construction",
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "group.ts",
+                    "content": "function groupBy<T>(items: readonly T[], key: string): Record<string, T[]> {\n    const groups: Record<string, T[]> = {};\n    for (const item of items) {\n        const group = String((item as Record<string, unknown>)[key]);\n        groups[group] = [item];\n    }\n    return groups;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "group.ts",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Items with the same category share one group.",
+                    "name": "groupBy",
+                    "args": [
+                        [
+                            {
+                                "id": 1,
+                                "category": "a"
+                            },
+                            {
+                                "id": 2,
+                                "category": "a"
+                            }
+                        ],
+                        "category"
+                    ],
+                    "expected": {
+                        "a": [
+                            {
+                                "id": 1,
+                                "category": "a"
+                            },
+                            {
+                                "id": 2,
+                                "category": "a"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Different categories create separate groups.",
+                    "name": "groupBy",
+                    "args": [
+                        [
+                            {
+                                "id": 1,
+                                "category": "a"
+                            },
+                            {
+                                "id": 2,
+                                "category": "b"
+                            }
+                        ],
+                        "category"
+                    ],
+                    "expected": {
+                        "a": [
+                            {
+                                "id": 1,
+                                "category": "a"
+                            }
+                        ],
+                        "b": [
+                            {
+                                "id": 2,
+                                "category": "b"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty list produces no groups.",
+                    "name": "groupBy",
+                    "args": [
+                        [],
+                        "category"
+                    ],
+                    "expected": {}
+                }
+            ],
+            "hints": [
+                "The current helper stores only the last item for each key.",
+                "Append the item to the existing group.",
+                "Use ??= to create a group when it is missing.",
+                "Constrain the key with K extends keyof T and push into groups[group]."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "constraint-transfer",
+            "title": "Choose the preserving signature",
+            "prompt": "A helper accepts a configuration object and one of its keys. It must return the value stored at that key.",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Which signature preserves the relationship between the key and the result?",
+                "options": [
+                    {
+                        "id": "constrained",
+                        "label": "<T, K extends keyof T>(config: T, key: K): T[K]"
+                    },
+                    {
+                        "id": "string-key",
+                        "label": "<T>(config: T, key: string): unknown"
+                    },
+                    {
+                        "id": "any",
+                        "label": "(config: any, key: string): any"
+                    },
+                    {
+                        "id": "same-type",
+                        "label": "<T, K>(config: T, key: K): T"
+                    }
+                ],
+                "correctId": "constrained",
+                "explanation": "K extends keyof T restricts the key to real properties, and T[K] describes the value at that key. The other signatures either reject valid keys or discard the result type."
+            },
+            "hints": [
+                "The key must be one of the object's property names.",
+                "The result type should depend on the chosen key.",
+                "keyof T and T[K] express that relationship.",
+                "Choose <T, K extends keyof T>(config: T, key: K): T[K]."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "constraint-check",
+            "title": "Constraints and indexed access",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "keyof-union",
+                    "label": "keyof T produces the union of T's property names.",
+                    "correct": true
+                },
+                {
+                    "id": "compile-time",
+                    "label": "A generic constraint is checked at compile time.",
+                    "correct": true
+                },
+                {
+                    "id": "keyof-runtime",
+                    "label": "keyof performs a runtime check on the object.",
+                    "correct": false
+                },
+                {
+                    "id": "any-preserves",
+                    "label": "Using any preserves the relationship between the key and the value type.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Constraints and indexed access types carry type information through a generic call. They disappear at runtime, and any discards the relationship.",
+            "hints": [
+                "Two statements are accurate.",
+                "Type operators are erased before the code runs.",
+                "any turns off checking for the values it touches.",
+                "Select keyof-union and compile-time."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": [
+            "typescript.exhaustive-unions"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The TypeScript editor and tests are keyboard accessible. Tests run in the browser runtime.",
+        "keyboardNotes": "Use Tab to move between the editor and the results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
