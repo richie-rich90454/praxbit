@@ -1,18 +1,28 @@
 {
     "id": "react.data",
     "version": 1,
-    "sequence": 72,
+    "sequence": 126,
     "courseId": "react",
     "title": "Data loading with explicit states",
     "summary": "Load remote data once and expose loading, error, and success states.",
-    "skills": ["react.state", "react.effects", "react.data"],
-    "prerequisites": ["react.components", "http.basics"],
+    "skills": [
+        "react.state",
+        "react.effects",
+        "react.data"
+    ],
+    "prerequisites": [
+        "react.components",
+        "http.basics"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:react"
+    ],
     "hints": [
         "Move the request into a useEffect with an empty dependency array.",
         "Create an AbortController inside the effect and pass its signal to fetch.",
@@ -187,22 +206,35 @@
                     "kind": "static",
                     "description": "The effect loads once and aborts on cleanup.",
                     "file": "useProducts.ts",
-                    "includes": ["useEffect(", "new AbortController()", "controller.abort()"],
+                    "includes": [
+                        "useEffect(",
+                        "new AbortController()",
+                        "controller.abort()"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "A failed response sets an error instead of being swallowed.",
                     "file": "useProducts.ts",
-                    "includes": ["if (!response.ok)", "setError("],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "if (!response.ok)",
+                        "setError("
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "useProducts.ts",
-                    "includes": ["const [loading, setLoading] = useState("],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "const [loading, setLoading] = useState("
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -298,5 +330,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
