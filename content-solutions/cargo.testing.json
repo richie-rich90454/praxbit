@@ -1,0 +1,14 @@
+{
+    "steps": {
+        "lib": {
+            "files": {
+                "src/lib.rs": "pub fn parse_quantity(input: &str) -> Result<u32, QuantityError> {\n    let quantity = input.parse::<u32>().map_err(|_| QuantityError::NotANumber)?;\n    if quantity == 0 {\n        return Err(QuantityError::Zero);\n    }\n    Ok(quantity)\n}\n\n#[derive(Debug, PartialEq)]\npub enum QuantityError {\n    NotANumber,\n    Zero,\n}\n"
+            }
+        },
+        "tests": {
+            "files": {
+                "tests/quantity.rs": "use campus_core::parse_quantity;\n\n#[test]\nfn parses_a_quantity() {\n    assert_eq!(parse_quantity(\"4\").unwrap(), 4);\n}\n\n#[test]\nfn rejects_zero() {\n    assert_eq!(parse_quantity(\"0\"), Err(campus_core::QuantityError::Zero));\n}\n\n#[test]\nfn rejects_text() {\n    assert_eq!(\n        parse_quantity(\"many\"),\n        Err(campus_core::QuantityError::NotANumber)\n    );\n}\n"
+            }
+        }
+    }
+}
