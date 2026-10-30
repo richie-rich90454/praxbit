@@ -1,0 +1,327 @@
+{
+    "id": "native.deep-links",
+    "version": 1,
+    "sequence": 423,
+    "courseId": "native",
+    "title": "A link is an untrusted input",
+    "summary": "Review an open deep link, choose tests for host and route boundaries, and map links to authenticated routes.",
+    "skills": ["web.browser-apis", "api.validation"],
+    "prerequisites": ["web.browser-apis", "api.validation"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["configuration-review", "no-execution"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "deep-links",
+        "briefing": "The campus app registers a custom scheme and accepts any URL. The handler reads a redirect parameter and sends the user to it after login. A phishing link used the app to bounce users to a look-alike site. Review the configuration before adding universal links."
+    },
+    "objectives": [
+        {
+            "id": "review",
+            "description": "Identify open-host, open-redirect, and unauthenticated link risks.",
+            "stepIds": ["deeplink-review"]
+        },
+        {
+            "id": "tests",
+            "description": "Choose tests for host, route, and session boundaries.",
+            "stepIds": ["deeplink-tests"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain verified links, allowlists, and route mapping.",
+            "stepIds": ["deeplink-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:website", "icon:link"],
+    "hints": [
+        "A custom scheme can be registered by any app.",
+        "The host and path both need validation.",
+        "A redirect parameter is an open redirect unless it is constrained.",
+        "Map known hosts and routes to app screens; require a session for private screens."
+    ],
+    "misconceptions": [
+        {
+            "id": "custom-scheme-secure",
+            "description": "Treating a custom URL scheme as proof of the sender.",
+            "stepId": "deeplink-review",
+            "answer": "approve:any-host,redirect-param,no-session,raw-path",
+            "feedback": "Any app can register or send a custom scheme. Use verified universal or app links and validate the host and route.",
+            "followUpSkill": "api.validation"
+        },
+        {
+            "id": "ui-hides",
+            "description": "Testing only the link the app itself generates.",
+            "stepId": "deeplink-tests",
+            "answer": "own-link",
+            "feedback": "An attacker does not use your generated link. Test foreign hosts, encoded paths, and unauthenticated access."
+        },
+        {
+            "id": "trust-host",
+            "description": "Checking the scheme but not the host or path.",
+            "stepId": "deeplink-transfer",
+            "answer": "scheme-only",
+            "feedback": "A valid scheme can carry any host and path. Validate both against an allowlist before routing."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Links arrive from anywhere",
+                "body": "A deep link is an input from the operating system, a browser, or another app. The sender is not authenticated. Custom schemes are easy to imitate, and encoded paths can hide traversal or extra segments."
+            },
+            {
+                "title": "Verified links and allowlists",
+                "body": "Universal links (iOS) and app links (Android) verify that the app controls the domain. Even then, route only known hosts and paths. Map a path to an internal screen; never redirect to a raw URL from the link."
+            },
+            {
+                "title": "Session belongs in the route",
+                "body": "A link to an order or message screen must require the same session check as the in-app navigation. A link is not proof of identity, and it must not bypass authentication."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Deep link",
+                "definition": "A URL that opens a specific screen or resource in an app."
+            },
+            {
+                "term": "Universal link",
+                "definition": "An iOS link verified against a domain the app controls."
+            },
+            {
+                "term": "App link",
+                "definition": "An Android link verified with a digital asset association."
+            },
+            {
+                "term": "Open redirect",
+                "definition": "A redirect that accepts an attacker-controlled destination."
+            },
+            {
+                "term": "Allowlist",
+                "definition": "An explicit set of values that may pass a boundary."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Treat the URL as data",
+            "prompt": "Read the explanation, then review the link handler.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Links arrive from anywhere",
+                    "body": "A deep link is an input from the operating system, a browser, or another app. The sender is not authenticated. Custom schemes are easy to imitate, and encoded paths can hide traversal or extra segments."
+                },
+                {
+                    "title": "Verified links and allowlists",
+                    "body": "Universal links (iOS) and app links (Android) verify that the app controls the domain. Even then, route only known hosts and paths. Map a path to an internal screen; never redirect to a raw URL from the link."
+                },
+                {
+                    "title": "Session belongs in the route",
+                    "body": "A link to an order or message screen must require the same session check as the in-app navigation. A link is not proof of identity, and it must not bypass authentication."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Deep link",
+                    "definition": "A URL that opens a specific screen or resource in an app."
+                },
+                {
+                    "term": "Universal link",
+                    "definition": "An iOS link verified against a domain the app controls."
+                },
+                {
+                    "term": "App link",
+                    "definition": "An Android link verified with a digital asset association."
+                },
+                {
+                    "term": "Open redirect",
+                    "definition": "A redirect that accepts an attacker-controlled destination."
+                },
+                {
+                    "term": "Allowlist",
+                    "definition": "An explicit set of values that may pass a boundary."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "deeplink-review",
+            "title": "Review the link handler",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Check which hosts and schemes the app accepts.",
+                "Follow the redirect parameter.",
+                "Check whether the order screen requires a session.",
+                "Block the handler: any host, a raw redirect, and no session check."
+            ],
+            "artifact": {
+                "title": "deep-links.ts",
+                "caption": "Capacitor configuration and the link handler.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "const config = {\n  appId: \"test.campus.app\",\n  server: { hostname: \"campus.test\" },\n  plugins: {\n    App: {\n      appUrlOpen: true,\n      allowNavigation: [\"*\"]\n    }\n  }\n};\n\nApp.addListener(\"appUrlOpen\", function (event) {\n  const url = new URL(event.url);\n  if (url.pathname === \"/order\") {\n    router.push(\"/order/\" + url.searchParams.get(\"id\"));\n  } else {\n    window.location.href = url.searchParams.get(\"redirect\");\n  }\n});"
+            },
+            "findings": [
+                {
+                    "id": "any-host",
+                    "label": "The app accepts links from any host.",
+                    "correct": true
+                },
+                {
+                    "id": "redirect-param",
+                    "label": "The redirect parameter sends the user to an unvalidated URL.",
+                    "correct": true
+                },
+                {
+                    "id": "no-session",
+                    "label": "The order route is opened without checking the session.",
+                    "correct": true
+                },
+                {
+                    "id": "raw-path",
+                    "label": "The raw id parameter is concatenated into a route.",
+                    "correct": true
+                },
+                {
+                    "id": "custom-scheme",
+                    "label": "A custom scheme identifies the sending app.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the handler"
+                },
+                {
+                    "id": "block",
+                    "label": "Block until hosts, routes, redirects, and sessions are constrained"
+                },
+                {
+                    "id": "log",
+                    "label": "Only log incoming links"
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The app trusts any host and redirects to a raw URL. The order route also needs a session check and a validated id."
+        },
+        {
+            "kind": "test-design",
+            "id": "deeplink-tests",
+            "title": "Choose the link tests",
+            "prompt": "Select the tests you would keep for the handler.",
+            "evidence": "testing",
+            "hints": [
+                "Start with the valid campus link.",
+                "Add a foreign host and a different scheme.",
+                "Add an encoded path and an unauthenticated private route.",
+                "Keep valid, foreign host, wrong scheme, encoded path, and no-session cases; drop the self-generated duplicate."
+            ],
+            "cases": [
+                {
+                    "id": "valid",
+                    "label": "https://campus.test/order?id=17 opens the signed-in order → accepted",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "foreign",
+                    "label": "https://evil.test/order?id=17 → rejected",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "scheme",
+                    "label": "otherapp://campus.test/order?id=17 → rejected",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "encoded",
+                    "label": "https://campus.test/%2e%2e/order?id=17 → rejected",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "no-session",
+                    "label": "Valid order link without a session → login, then the order",
+                    "shouldSelect": true
+                },
+                {
+                    "id": "own-link",
+                    "label": "The link the app generated itself → accepted",
+                    "shouldSelect": false
+                },
+                {
+                    "id": "valid-again",
+                    "label": "https://campus.test/order?id=17 opens the order (duplicate)",
+                    "shouldSelect": false
+                }
+            ],
+            "explanation": "Link tests must include foreign hosts, wrong schemes, encoded paths, and unauthenticated private routes. Testing only your own link proves little."
+        },
+        {
+            "kind": "explain",
+            "id": "deeplink-transfer",
+            "title": "Route links deliberately",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "The scheme alone does not identify the sender.",
+                "Map paths to screens instead of redirecting raw URLs.",
+                "Private screens need the same session check as in-app navigation.",
+                "Select verified links, host and path allowlists, mapped routes, and session checks; reject scheme-only trust."
+            ],
+            "statements": [
+                {
+                    "id": "verified",
+                    "label": "Universal and app links verify that the app controls the linked domain.",
+                    "correct": true
+                },
+                {
+                    "id": "allowlist",
+                    "label": "The handler should allow only known hosts and paths.",
+                    "correct": true
+                },
+                {
+                    "id": "map",
+                    "label": "A path should map to an internal screen, not to a raw redirect destination.",
+                    "correct": true
+                },
+                {
+                    "id": "session",
+                    "label": "Private screens reached by a link still require a session check.",
+                    "correct": true
+                },
+                {
+                    "id": "scheme-only",
+                    "label": "Checking the URL scheme is enough because another app cannot use it.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Link safety comes from verified domains, allowlisted paths, mapped routes, and the same authorization checks as in-app navigation."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
