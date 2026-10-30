@@ -1,0 +1,388 @@
+{
+    "id": "ai.tool-calling",
+    "version": 1,
+    "sequence": 404,
+    "courseId": "ai-engineering",
+    "title": "Tools are contracts with consequences",
+    "summary": "Validate model-chosen tool arguments, require approval for irreversible actions, and keep tool use idempotent.",
+    "skills": ["ai.agents", "ai.prompting"],
+    "prerequisites": ["ai.agents", "api.validation"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "tool-calling",
+        "briefing": "The support agent can look up orders and issue refunds. The model proposes a tool name and arguments, and the runtime executes them. A malformed refund reached production because the arguments were trusted. Write the validation boundary before the tool runs."
+    },
+    "objectives": [
+        {
+            "id": "validate",
+            "description": "Validate tool names and arguments before execution.",
+            "stepIds": ["validate-call"]
+        },
+        {
+            "id": "approve",
+            "description": "Decide when a human approval is required.",
+            "stepIds": ["approval-check"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain scoped, idempotent, auditable tool use.",
+            "stepIds": ["tool-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:tool"],
+    "hints": [
+        "Treat the model's tool call as untrusted input.",
+        "Check the tool name against an allowlist and validate every argument.",
+        "Reject unknown fields instead of ignoring them.",
+        "Require approval for irreversible actions and reuse an idempotency key on retries."
+    ],
+    "misconceptions": [
+        {
+            "id": "trust-schema",
+            "description": "Assuming the model follows the tool schema because it was described.",
+            "stepId": "validate-call",
+            "testDescription": "Rejects an amount above the refund limit.",
+            "feedback": "A schema in the prompt is guidance, not enforcement. Parse and validate the actual call before any side effect.",
+            "followUpSkill": "ai.agents"
+        },
+        {
+            "id": "always-approve",
+            "description": "Requiring human approval for read-only lookups too.",
+            "stepId": "approval-check",
+            "answer": "lookup",
+            "feedback": "Approval should sit before irreversible or high-impact actions. Read-only lookups can use scoped permissions without interrupting a person."
+        },
+        {
+            "id": "schema-in-prompt",
+            "description": "Believing a tool description enforces argument shape.",
+            "stepId": "tool-transfer",
+            "answer": "description",
+            "feedback": "Descriptions help the model choose, but the runtime must validate names, types, ranges, and unknown fields."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The model proposes; the runtime decides",
+                "body": "A tool call is a request from an untrusted component. The runtime checks the tool name, required fields, types, ranges, and unknown fields before executing anything. A schema in the prompt is documentation, not a guard."
+            },
+            {
+                "title": "Approval follows consequence",
+                "body": "Read-only lookups can run under a narrow scope. Money movement, deletions, deploys, and permission changes need an explicit human decision. Approval is part of the tool contract, not an afterthought in the UI."
+            },
+            {
+                "title": "Retries need identity",
+                "body": "If a tool call times out, the side effect may already have happened. Reuse one idempotency key across attempts so the receiver can collapse duplicates. Log the decision and the arguments without secrets."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Tool call",
+                "definition": "A structured request from a model to run a named function with arguments."
+            },
+            {
+                "term": "Argument validation",
+                "definition": "Checking types, ranges, required fields, and unknown fields before execution."
+            },
+            {
+                "term": "Idempotency key",
+                "definition": "A stable identifier that lets a receiver treat retries as one operation."
+            },
+            {
+                "term": "Human approval",
+                "definition": "An explicit decision before an irreversible or high-impact action."
+            },
+            {
+                "term": "Least privilege",
+                "definition": "Giving the tool only the permissions its job needs."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A tool call is untrusted input",
+            "prompt": "Read the explanation, then enforce it in code.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The model proposes; the runtime decides",
+                    "body": "A tool call is a request from an untrusted component. The runtime checks the tool name, required fields, types, ranges, and unknown fields before executing anything. A schema in the prompt is documentation, not a guard."
+                },
+                {
+                    "title": "Approval follows consequence",
+                    "body": "Read-only lookups can run under a narrow scope. Money movement, deletions, deploys, and permission changes need an explicit human decision. Approval is part of the tool contract, not an afterthought in the UI."
+                },
+                {
+                    "title": "Retries need identity",
+                    "body": "If a tool call times out, the side effect may already have happened. Reuse one idempotency key across attempts so the receiver can collapse duplicates. Log the decision and the arguments without secrets."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Tool call",
+                    "definition": "A structured request from a model to run a named function with arguments."
+                },
+                {
+                    "term": "Argument validation",
+                    "definition": "Checking types, ranges, required fields, and unknown fields before execution."
+                },
+                {
+                    "term": "Idempotency key",
+                    "definition": "A stable identifier that lets a receiver treat retries as one operation."
+                },
+                {
+                    "term": "Human approval",
+                    "definition": "An explicit decision before an irreversible or high-impact action."
+                },
+                {
+                    "term": "Least privilege",
+                    "definition": "Giving the tool only the permissions its job needs."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "validate-call",
+            "title": "Validate before the side effect",
+            "prompt": "Edit tools.js. isValidToolCall(call) returns true only for a known tool with exactly the allowed arguments, valid types and ranges. Lookup accepts orderId. Refund accepts orderId, an integer amount from 1 to 500, and a reason of 3 to 200 characters.",
+            "evidence": "construction",
+            "hints": [
+                "Reject a call whose name is not in the allowlist.",
+                "Check that arguments is a plain object with no unknown keys.",
+                "Check types and ranges, including integer amounts.",
+                "Return true only after every field for that tool passes."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "tools.js",
+                    "content": "function isValidToolCall(call) {\n  return true;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "tools.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Accepts a valid order lookup.",
+                    "name": "isValidToolCall",
+                    "args": [
+                        {
+                            "name": "lookupOrder",
+                            "arguments": {
+                                "orderId": "o-17"
+                            }
+                        }
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Accepts a valid refund.",
+                    "name": "isValidToolCall",
+                    "args": [
+                        {
+                            "name": "refund",
+                            "arguments": {
+                                "orderId": "o-17",
+                                "amount": 40,
+                                "reason": "damaged item"
+                            }
+                        }
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects an unknown tool.",
+                    "name": "isValidToolCall",
+                    "args": [
+                        {
+                            "name": "deleteAccount",
+                            "arguments": {
+                                "id": "u-1"
+                            }
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects an amount above the refund limit.",
+                    "name": "isValidToolCall",
+                    "args": [
+                        {
+                            "name": "refund",
+                            "arguments": {
+                                "orderId": "o-17",
+                                "amount": 501,
+                                "reason": "damaged item"
+                            }
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects a fractional refund amount.",
+                    "name": "isValidToolCall",
+                    "args": [
+                        {
+                            "name": "refund",
+                            "arguments": {
+                                "orderId": "o-17",
+                                "amount": 4.5,
+                                "reason": "damaged item"
+                            }
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects an unexpected argument.",
+                    "name": "isValidToolCall",
+                    "args": [
+                        {
+                            "name": "lookupOrder",
+                            "arguments": {
+                                "orderId": "o-17",
+                                "includePayment": true
+                            }
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects a missing reason.",
+                    "name": "isValidToolCall",
+                    "args": [
+                        {
+                            "name": "refund",
+                            "arguments": {
+                                "orderId": "o-17",
+                                "amount": 20
+                            }
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Rejects a null call.",
+                    "name": "isValidToolCall",
+                    "args": [null],
+                    "expected": false
+                }
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "approval-check",
+            "title": "When does a person decide?",
+            "prompt": "Which tool call should require explicit human approval?",
+            "evidence": "prediction",
+            "hints": [
+                "Think about reversibility and blast radius.",
+                "Reading a record is not the same as changing money.",
+                "Approval should be rare enough to stay meaningful.",
+                "Require approval for issuing a refund, not for a read-only lookup."
+            ],
+            "quiz": {
+                "prompt": "Choose the call that needs approval before execution.",
+                "options": [
+                    {
+                        "id": "refund",
+                        "label": "Issue a 240-unit refund to a customer"
+                    },
+                    {
+                        "id": "lookup",
+                        "label": "Look up one order by id"
+                    },
+                    {
+                        "id": "format",
+                        "label": "Format a summary for the agent's reply"
+                    },
+                    {
+                        "id": "cache",
+                        "label": "Read a cached policy document"
+                    }
+                ],
+                "correctId": "refund",
+                "explanation": "Money movement is irreversible and high impact. Read-only lookups and formatting can run under scoped permissions."
+            }
+        },
+        {
+            "kind": "explain",
+            "id": "tool-transfer",
+            "title": "Make tool use auditable",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "The runtime owns validation, not the prompt.",
+                "Consider a retry after a timeout.",
+                "Think about what the audit log should retain.",
+                "Select runtime validation, scoped permissions, idempotency, and redacted logs; reject prompt-only enforcement."
+            ],
+            "statements": [
+                {
+                    "id": "runtime",
+                    "label": "The runtime must validate the tool name and arguments before execution.",
+                    "correct": true
+                },
+                {
+                    "id": "scope",
+                    "label": "Each tool should run with only the permissions its action needs.",
+                    "correct": true
+                },
+                {
+                    "id": "idempotent",
+                    "label": "Retries should reuse one idempotency key so duplicates collapse.",
+                    "correct": true
+                },
+                {
+                    "id": "logs",
+                    "label": "Audit logs should record the action and decision without secrets or full personal data.",
+                    "correct": true
+                },
+                {
+                    "id": "description",
+                    "label": "A detailed tool description in the prompt is sufficient enforcement.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Tool safety combines runtime validation, scoped authority, approval for irreversible actions, idempotent retries, and careful audit records."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["ai", "professional"]
+}
