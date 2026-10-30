@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "statement-atomic",
-            "description": "Confusing statement atomicity with transaction atomicity.",
+            "description": "Believing each statement's atomicity makes the whole transfer atomic.",
             "stepId": "apply",
-            "feedback": "Each statement is atomic by itself. Two statements need an explicit transaction to succeed or fail together."
+            "testDescription": "The transfer opens a transaction with an explicit isolation level.",
+            "feedback": "A transaction must span the read and both writes. Statement-level atomicity does not prevent another request from interleaving.",
+            "followUpSkill": "sql.transactions"
         },
         {
             "id": "read-committed",
-            "description": "Believing READ COMMITTED prevents lost updates.",
+            "description": "Accepting an unlocked read-modify-write under read committed.",
             "stepId": "review",
-            "feedback": "Two transactions can still read the same balance and write over each other. Lock the row or use an atomic conditional update."
+            "answer": "ship:read-modify-write,lost-update,no-lock,atomic-update",
+            "feedback": "Read committed does not stop two transactions from reading the same old value and overwriting each other. Lock or use an atomic update."
         },
         {
             "id": "lock-after-read",
-            "description": "Reading the balance first and locking afterward.",
+            "description": "Taking the lock after the value has already been read.",
             "stepId": "apply",
-            "feedback": "The value read before FOR UPDATE can already be stale. Lock first, then use the locked row."
+            "testDescription": "Both account rows are locked before they are changed.",
+            "feedback": "Locking after the read leaves a window for another transaction to change the row. Lock before reading the value you will write."
         }
     ],
     "lesson": {
@@ -200,7 +204,18 @@
                     "includes": ["BEGIN;"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Open the transaction before either balance is read.",
+                "Lock both rows in a consistent order before changing them.",
+                "Guard the debit and make the credit part of the same unit of work.",
+                "Commit on success, roll back on any failure, and release locks when the transaction ends."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "review",
@@ -257,7 +272,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "Both requests read the same balance, both pass the check, and both write a balance derived from that stale read. Use a conditional atomic UPDATE or lock the row with FOR UPDATE inside a transaction."
+            "explanation": "Both requests read the same balance, both pass the check, and both write a balance derived from that stale read. Use a conditional atomic UPDATE or lock the row with FOR UPDATE inside a transaction.",
+            "hints": [
+                "Find the read-modify-write sequence that two requests can interleave.",
+                "Check whether the rows are locked before the read.",
+                "Ask what isolation level would prevent the lost update.",
+                "Block the change: the read is unlocked and the write can overwrite a concurrent update."
+            ]
         }
     ],
     "evaluation": {
