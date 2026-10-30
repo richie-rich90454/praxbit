@@ -10,6 +10,8 @@
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "cap:copy": "cap copy",
         "cap:sync": "cap sync",
+        "cap:sync:android": "cap sync android",
+        "cap:sync:ios": "cap sync ios",
         "cap:add:android": "cap add android",
         "cap:add:ios": "cap add ios",
         "cap:open:android": "cap open android",
@@ -17,7 +19,7 @@
     },
     "dependencies": {
         "@capacitor/app": "^8.1.2",
-        "@capacitor/core": "^8.5.3",
+        "@capacitor/core": "8.6.0",
         "@capacitor/filesystem": "^8.1.5",
         "@capacitor/local-notifications": "^8.3.1",
         "@capacitor/preferences": "^8.0.1",
@@ -55,7 +57,9 @@
         "zod": "^4.6.7"
     },
     "devDependencies": {
-        "@capacitor/cli": "^8.5.3",
+        "@capacitor/android": "8.6.0",
+        "@capacitor/cli": "8.6.0",
+        "@capacitor/ios": "8.6.0",
         "@types/sql.js": "^1.4.11",
         "vite-plugin-pwa": "^2.0.0",
         "vite-plugin-static-copy": "^4.1.1"
