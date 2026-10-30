@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "requestState.ts": "type RequestState<T> =\n  | { status: \"idle\" }\n  | { status: \"loading\" }\n  | { status: \"success\"; data: T }\n  | { status: \"error\"; message: string };\n\ntype RequestAction<T> =\n  | { type: \"start\" }\n  | { type: \"success\"; data: T }\n  | { type: \"error\"; message: string };\n\nfunction reduceRequest<T>(state: RequestState<T>, action: RequestAction<T>): RequestState<T> {\n  switch (action.type) {\n    case \"start\":\n      return { status: \"loading\" };\n    case \"success\":\n      return { status: \"success\", data: action.data };\n    case \"error\":\n      return { status: \"error\", message: action.message };\n    default:\n      return state;\n  }\n}\n"
+            }
+        }
+    }
+}
