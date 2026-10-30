@@ -1,18 +1,27 @@
 {
     "id": "native.capacitor",
     "version": 1,
-    "sequence": 110,
+    "sequence": 207,
     "courseId": "native",
     "title": "Native shell, shared contracts",
     "summary": "Keep platform calls behind one adapter, protect credentials and deep links, and resolve cross-device sync conflicts by revision.",
-    "skills": ["api.architecture", "web.state-management"],
-    "prerequisites": ["api.validation", "testing.integration"],
+    "skills": [
+        "api.architecture",
+        "web.state-management"
+    ],
+    "prerequisites": [
+        "api.validation",
+        "testing.integration"
+    ],
     "difficulty": "advanced",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:native"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:native"
+    ],
     "hints": [
         "Define one PlatformAdapter interface and one factory.",
         "Branch on Capacitor.isNativePlatform() inside the factory.",
@@ -220,14 +238,20 @@
                         "throw new Error(\"Sync conflict: pull the newer server record first\")",
                         "return { saveSession, readSession, clearSession, requestNotifications, onDeepLink }"
                     ],
-                    "excludes": ["TODO"]
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "native.ts",
-                    "includes": ["Capacitor.isNativePlatform()"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "Capacitor.isNativePlatform()"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -323,5 +347,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
