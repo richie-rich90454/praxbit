@@ -1,6 +1,6 @@
 {
     "id": "campus.two-developers-disagree",
-    "version": 1,
+    "version": 2,
     "sequence": 22,
     "courseId": "campus",
     "title": "Two developers disagree",
@@ -49,13 +49,23 @@
             "id": "keeps-one-side",
             "description": "Resolving by discarding the other branch's intent.",
             "stepId": "resolve-conflict",
-            "feedback": "The conflict exists because both changes are valid. Keep rounding and the new rate together."
+            "diagnostic": "Keeps only the rounding change or only the rate change, losing one branch's intent.",
+            "feedback": "The conflict exists because both changes are valid. Keep rounding and the new rate together.",
+            "followUpSkill": "git.branches"
         },
         {
             "id": "markers-left",
             "description": "Committing conflict markers as if they were code.",
             "stepId": "resolve-conflict",
+            "diagnostic": "Commits the file with <<<<<<<, =======, or >>>>>>> markers still present.",
             "feedback": "Conflict markers are not valid code. Remove them and write the combined result before committing."
+        },
+        {
+            "id": "always-keep-ours",
+            "description": "Believing keeping your own side is always the safest resolution.",
+            "stepId": "merge-check",
+            "answer": "always-ours",
+            "feedback": "Keeping your side can discard a valid change from the other branch. Resolution should preserve both intents when both are correct."
         }
     ],
     "lesson": {
@@ -88,6 +98,12 @@
         {
             "kind": "git",
             "id": "resolve-conflict",
+            "hints": [
+                "Merge main into feature/tax, combine both changes in src/pricing.js, stage, and commit.",
+                "A conflict resolution must preserve both intents and remove every marker.",
+                "If one branch adds rounding and another changes the rate, the result rounds the new rate.",
+                "Write Math.round(amount * 0.2), confirm no markers remain, then commit the merge."
+            ],
             "title": "Merge and resolve",
             "prompt": "Use the Git terminal and file editor. Merge main into feature/tax, resolve src/pricing.js by rounding amount * 0.2, stage it, and commit the resolution.",
             "evidence": "construction",
@@ -137,6 +153,12 @@
         {
             "kind": "explain",
             "id": "merge-check",
+            "hints": [
+                "Select statements about what a good merge preserves.",
+                "Resolution combines intent, removes markers, and still needs testing.",
+                "Keeping only your side can silently delete a teammate's valid change.",
+                "Three statements are accurate; reject the claim that always keeping your own side is safest."
+            ],
             "title": "What did the merge preserve?",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
