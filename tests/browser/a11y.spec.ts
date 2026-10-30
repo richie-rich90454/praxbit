@@ -269,6 +269,7 @@ test.describe("accessibility", function accessibilitySuite(): void {
                 });
             })
             .toBe("large");
+        await page.waitForTimeout(150);
         const headingSize = await page.evaluate(function largeHeading(): number {
             const heading = document.querySelector("h1");
             return heading === null ? 0 : Number.parseFloat(getComputedStyle(heading).fontSize);
