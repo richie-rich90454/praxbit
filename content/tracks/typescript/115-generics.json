@@ -5,23 +5,14 @@
     "courseId": "typescript",
     "title": "Generics preserve relationships",
     "summary": "Write a generic helper that returns the first item or null without unsafe casts.",
-    "skills": [
-        "ts.generics"
-    ],
-    "prerequisites": [
-        "ts.types",
-        "js.functions"
-    ],
+    "skills": ["ts.generics"],
+    "prerequisites": ["ts.types", "js.functions"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "syntax-diagnostics",
-            "transpiled-tests"
-        ]
+        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:typescript"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:typescript"],
     "hints": [
         "The return type already permits null.",
         "The first item is items[0], which may be undefined.",
@@ -171,33 +153,21 @@
                     "kind": "function",
                     "description": "An empty array returns null.",
                     "name": "firstOrNull",
-                    "args": [
-                        []
-                    ],
+                    "args": [[]],
                     "expected": null
                 },
                 {
                     "kind": "function",
                     "description": "The first number is preserved.",
                     "name": "firstOrNull",
-                    "args": [
-                        [
-                            4,
-                            5
-                        ]
-                    ],
+                    "args": [[4, 5]],
                     "expected": 4
                 },
                 {
                     "kind": "function",
                     "description": "The first string is preserved.",
                     "name": "firstOrNull",
-                    "args": [
-                        [
-                            "a",
-                            "b"
-                        ]
-                    ],
+                    "args": [["a", "b"]],
                     "expected": "a"
                 }
             ],
@@ -262,8 +232,5 @@
         "screenReaderNotes": "Tests announce arguments, expected output, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
