@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "guard-code": {
+            "files": {
+                "access.js": "function canReadInvoice(user, invoice) {\n  if (user === null || user === undefined || invoice === null || invoice === undefined) {\n    return false;\n  }\n  if (user.id === invoice.ownerId) {\n    return true;\n  }\n  return (\n    user.role === \"admin\" &&\n    Array.isArray(user.permissions) &&\n    user.permissions.includes(\"billing:read\")\n  );\n}\n"
+            }
+        }
+    }
+}
