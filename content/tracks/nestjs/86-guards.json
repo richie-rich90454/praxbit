@@ -44,13 +44,25 @@
             "id": "default-allow",
             "description": "Returning true from a guard because the happy path works.",
             "stepId": "apply",
-            "feedback": "A guard that always allows is not an authorization check. Deny by default and allow only explicit cases."
+            "feedback": "A guard that always allows is not an authorization check. Deny by default and allow only explicit cases.",
+            "testDescription": "Requests without the admin role are rejected.",
+            "followUpSkill": "nestjs.guards"
         },
         {
             "id": "manual-provider",
             "description": "Constructing a service with new inside a controller.",
             "stepId": "apply",
-            "feedback": "That hides the dependency from Nest and from tests. Register the provider and inject it through the constructor."
+            "feedback": "That hides the dependency from Nest and from tests. Register the provider and inject it through the constructor.",
+            "diagnostic": "Constructing a service with new hides it from Nest and from test substitutes.",
+            "followUpSkill": "nestjs.providers"
+        },
+        {
+            "id": "ship-default-allow",
+            "description": "Shipping a guard that allows every request.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "A guard with no denial path does not authorize anything. The handler runs for anonymous callers, so the change is blocked.",
+            "followUpSkill": "nestjs.guards"
         }
     ],
     "lesson": {
@@ -182,7 +194,18 @@
                     "includes": ["implements CanActivate"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Read public metadata with this.reflector.getAllAndOverride<boolean>(\"public\", [context.getHandler(), context.getClass()]).",
+                "Return true only when the public flag is true.",
+                "Read the HTTP request with context.switchToHttp().getRequest().",
+                "Throw ForbiddenException when the role is not admin, then apply @UseGuards(AuthGuard)."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the NestJS unit tests with Jest or Vitest."
+            }
         },
         {
             "kind": "review",
@@ -234,7 +257,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The guard ignores metadata and returns true for every request, so the route has no authorization. The controller constructs its service with new, and the module never registers ProductsService as a provider, so injection cannot supply it."
+            "explanation": "The guard ignores metadata and returns true for every request, so the route has no authorization. The controller constructs its service with new, and the module never registers ProductsService as a provider, so injection cannot supply it.",
+            "hints": [
+                "Check whether the guard has any denying branch.",
+                "Check how ProductsService is constructed and registered.",
+                "Look for the missing providers entry.",
+                "Reject the false reflector finding and block on authorization and injection."
+            ]
         }
     ],
     "evaluation": {
