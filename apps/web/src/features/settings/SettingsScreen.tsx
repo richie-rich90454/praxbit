@@ -114,6 +114,24 @@ export function SettingsScreen(): JSX.Element {
         setPasswordTouched(false);
     }
 
+    function handleAccountTabKey(event: KeyboardEvent): void {
+        const next =
+            event.key === "ArrowLeft" || event.key === "Home"
+                ? "register"
+                : event.key === "ArrowRight" || event.key === "End"
+                  ? "login"
+                  : undefined;
+        if (next === undefined) {
+            return;
+        }
+        event.preventDefault();
+        chooseMode(next);
+        const target = document.getElementById(
+            next === "register" ? "account-tab-register" : "account-tab-login",
+        );
+        target?.focus();
+    }
+
     function toggleInterest(interest: Interest): void {
         setInterests(function update(current): readonly Interest[] {
             if (current.includes(interest)) {
@@ -303,12 +321,20 @@ export function SettingsScreen(): JSX.Element {
                                         actions. If the account already has progress, conflicting
                                         world versions are reported rather than overwritten.
                                     </p>
-                                    <div class="tabs" role="tablist" aria-label="Account action">
+                                    <div
+                                        class="tabs"
+                                        role="tablist"
+                                        aria-label="Account action"
+                                        onKeyDown={handleAccountTabKey}
+                                    >
                                         <button
                                             type="button"
                                             class="tab"
                                             role="tab"
+                                            id="account-tab-register"
                                             aria-selected={mode() === "register"}
+                                            aria-controls="account-panel"
+                                            tabIndex={mode() === "register" ? 0 : -1}
                                             onClick={function registerTab(): void {
                                                 chooseMode("register");
                                             }}
@@ -319,7 +345,10 @@ export function SettingsScreen(): JSX.Element {
                                             type="button"
                                             class="tab"
                                             role="tab"
+                                            id="account-tab-login"
                                             aria-selected={mode() === "login"}
+                                            aria-controls="account-panel"
+                                            tabIndex={mode() === "login" ? 0 : -1}
                                             onClick={function loginTab(): void {
                                                 chooseMode("login");
                                             }}
@@ -327,121 +356,135 @@ export function SettingsScreen(): JSX.Element {
                                             Sign in
                                         </button>
                                     </div>
-                                    <form
-                                        class="stack"
-                                        onSubmit={function submit(event): void {
-                                            event.preventDefault();
-                                            void submitAccount();
-                                        }}
+                                    <div
+                                        id="account-panel"
+                                        role="tabpanel"
+                                        aria-labelledby={
+                                            mode() === "register"
+                                                ? "account-tab-register"
+                                                : "account-tab-login"
+                                        }
                                     >
-                                        <label class="field">
-                                            <span>Handle</span>
-                                            <input
-                                                class="input"
-                                                value={handle()}
-                                                autocomplete="username"
-                                                spellcheck={false}
-                                                maxlength={24}
-                                                aria-invalid={
-                                                    handleTouched() && handleProblem().length > 0
-                                                }
-                                                aria-describedby="account-handle-hint account-handle-error"
-                                                onInput={function change(event): void {
-                                                    setHandle(event.currentTarget.value);
-                                                    setHandleTouched(true);
-                                                }}
-                                                onBlur={function blur(): void {
-                                                    setHandleTouched(true);
-                                                }}
-                                            />
-                                            <span class="meta" id="account-handle-hint">
-                                                3-24 lowercase letters, numbers, or underscores. No
-                                                real name required.
-                                            </span>
-                                            <Show
-                                                when={handleTouched() && handleProblem().length > 0}
-                                            >
-                                                <span
-                                                    class="settings-field-error"
-                                                    id="account-handle-error"
-                                                    role="alert"
-                                                >
-                                                    {handleProblem()}
-                                                </span>
-                                            </Show>
-                                        </label>
-                                        <label class="field">
-                                            <span>Password</span>
-                                            <input
-                                                class="input"
-                                                type="password"
-                                                value={password()}
-                                                maxlength={200}
-                                                autocomplete={
-                                                    mode() === "register"
-                                                        ? "new-password"
-                                                        : "current-password"
-                                                }
-                                                aria-invalid={
-                                                    passwordTouched() &&
-                                                    passwordProblem().length > 0
-                                                }
-                                                aria-describedby="account-password-hint account-password-error"
-                                                onInput={function change(event): void {
-                                                    setPassword(event.currentTarget.value);
-                                                    setPasswordTouched(true);
-                                                }}
-                                                onBlur={function blur(): void {
-                                                    setPasswordTouched(true);
-                                                }}
-                                            />
-                                            <span class="meta" id="account-password-hint">
-                                                {mode() === "register"
-                                                    ? "At least 10 characters. Stored as a salted scrypt hash on the server."
-                                                    : "Enter the password for this account."}
-                                            </span>
-                                            <Show
-                                                when={
-                                                    passwordTouched() &&
-                                                    passwordProblem().length > 0
-                                                }
-                                            >
-                                                <span
-                                                    class="settings-field-error"
-                                                    id="account-password-error"
-                                                    role="alert"
-                                                >
-                                                    {passwordProblem()}
-                                                </span>
-                                            </Show>
-                                        </label>
-                                        <Show when={accountError().length > 0}>
-                                            <p class="feedback feedback--error" role="alert">
-                                                {accountError()}
-                                            </p>
-                                        </Show>
-                                        <button
-                                            type="submit"
-                                            class="button"
-                                            disabled={accountBusy() || !accountReady()}
-                                            aria-describedby="account-submit-hint"
+                                        <form
+                                            class="stack"
+                                            onSubmit={function submit(event): void {
+                                                event.preventDefault();
+                                                void submitAccount();
+                                            }}
                                         >
-                                            {accountBusy()
-                                                ? mode() === "register"
-                                                    ? "Creating account…"
-                                                    : "Signing in…"
-                                                : mode() === "register"
-                                                  ? "Create account and upload progress"
-                                                  : "Sign in"}
-                                        </button>
-                                        <Show when={!accountReady() && !accountBusy()}>
-                                            <p class="meta" id="account-submit-hint">
-                                                {mode() === "register"
-                                                    ? "Enter a valid handle and a password of at least 10 characters to continue."
-                                                    : "Enter your handle and password to continue."}
-                                            </p>
-                                        </Show>
-                                    </form>
+                                            <label class="field">
+                                                <span>Handle</span>
+                                                <input
+                                                    class="input"
+                                                    value={handle()}
+                                                    autocomplete="username"
+                                                    spellcheck={false}
+                                                    maxlength={24}
+                                                    aria-invalid={
+                                                        handleTouched() &&
+                                                        handleProblem().length > 0
+                                                    }
+                                                    aria-describedby="account-handle-hint account-handle-error"
+                                                    onInput={function change(event): void {
+                                                        setHandle(event.currentTarget.value);
+                                                        setHandleTouched(true);
+                                                    }}
+                                                    onBlur={function blur(): void {
+                                                        setHandleTouched(true);
+                                                    }}
+                                                />
+                                                <span class="meta" id="account-handle-hint">
+                                                    3-24 lowercase letters, numbers, or underscores.
+                                                    No real name required.
+                                                </span>
+                                                <Show
+                                                    when={
+                                                        handleTouched() &&
+                                                        handleProblem().length > 0
+                                                    }
+                                                >
+                                                    <span
+                                                        class="settings-field-error"
+                                                        id="account-handle-error"
+                                                        role="alert"
+                                                    >
+                                                        {handleProblem()}
+                                                    </span>
+                                                </Show>
+                                            </label>
+                                            <label class="field">
+                                                <span>Password</span>
+                                                <input
+                                                    class="input"
+                                                    type="password"
+                                                    value={password()}
+                                                    maxlength={200}
+                                                    autocomplete={
+                                                        mode() === "register"
+                                                            ? "new-password"
+                                                            : "current-password"
+                                                    }
+                                                    aria-invalid={
+                                                        passwordTouched() &&
+                                                        passwordProblem().length > 0
+                                                    }
+                                                    aria-describedby="account-password-hint account-password-error"
+                                                    onInput={function change(event): void {
+                                                        setPassword(event.currentTarget.value);
+                                                        setPasswordTouched(true);
+                                                    }}
+                                                    onBlur={function blur(): void {
+                                                        setPasswordTouched(true);
+                                                    }}
+                                                />
+                                                <span class="meta" id="account-password-hint">
+                                                    {mode() === "register"
+                                                        ? "At least 10 characters. Stored as a salted scrypt hash on the server."
+                                                        : "Enter the password for this account."}
+                                                </span>
+                                                <Show
+                                                    when={
+                                                        passwordTouched() &&
+                                                        passwordProblem().length > 0
+                                                    }
+                                                >
+                                                    <span
+                                                        class="settings-field-error"
+                                                        id="account-password-error"
+                                                        role="alert"
+                                                    >
+                                                        {passwordProblem()}
+                                                    </span>
+                                                </Show>
+                                            </label>
+                                            <Show when={accountError().length > 0}>
+                                                <p class="feedback feedback--error" role="alert">
+                                                    {accountError()}
+                                                </p>
+                                            </Show>
+                                            <button
+                                                type="submit"
+                                                class="button"
+                                                disabled={accountBusy() || !accountReady()}
+                                                aria-describedby="account-submit-hint"
+                                            >
+                                                {accountBusy()
+                                                    ? mode() === "register"
+                                                        ? "Creating account…"
+                                                        : "Signing in…"
+                                                    : mode() === "register"
+                                                      ? "Create account and upload progress"
+                                                      : "Sign in"}
+                                            </button>
+                                            <Show when={!accountReady() && !accountBusy()}>
+                                                <p class="meta" id="account-submit-hint">
+                                                    {mode() === "register"
+                                                        ? "Enter a valid handle and a password of at least 10 characters to continue."
+                                                        : "Enter your handle and password to continue."}
+                                                </p>
+                                            </Show>
+                                        </form>
+                                    </div>
                                 </div>
                             }
                         >
