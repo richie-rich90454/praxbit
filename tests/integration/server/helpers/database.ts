@@ -48,6 +48,7 @@ export function buildTestConfig(databaseUrl: string): ServerConfig {
             registerPerHour: 10000,
             loginPerQuarterHour: 10000,
             aiHintsPerHour: 10,
+            eventSubmissionsPerHour: 10000,
         },
     };
 }
