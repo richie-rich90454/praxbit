@@ -1,6 +1,15 @@
-import type { Club, ClubDetail, ClubEvent, EventSubmissionResponse } from "@praxbit/contracts";
+import type {
+    Club,
+    ClubDetail,
+    ClubEvent,
+    ClubEventSummary,
+    ClubInvite,
+    ClubWeek,
+    CooperativeChallenge,
+    EventSubmissionResponse,
+} from "@praxbit/contracts";
 import type { Pool } from "pg";
-import { AppError, validationError } from "../http/app-error.ts";
+import { AppError, forbidden, notFound, validationError } from "../http/app-error.ts";
 import { withTransaction } from "../db/pool.ts";
 import type { QueryExecutor } from "../db/rows.ts";
 import type { ContentCatalog } from "../content/catalog.ts";
@@ -9,10 +18,26 @@ import type { ClubRepository } from "../repositories/club-repository.ts";
 import type { AchievementService } from "./achievement-service.ts";
 
 const MAXIMUM_INVITE_ATTEMPTS = 5;
+const REQUIRED_COOPERATIVE_MEMBERS = 2;
 
-type PublicClubEvent = Omit<ClubEvent, "answerHash" | "answerSalt">;
+function dateOnly(value: Date): string {
+    return value.toISOString().slice(0, 10);
+}
 
-function toPublicEvent(event: ClubEvent): PublicClubEvent {
+export function clubWeek(now: Date): ClubWeek {
+    const startsAt = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const day = startsAt.getUTCDay();
+    startsAt.setUTCDate(startsAt.getUTCDate() - (day === 0 ? 6 : day - 1));
+    const endsAt = new Date(startsAt);
+    endsAt.setUTCDate(endsAt.getUTCDate() + 7);
+    return {
+        activeWeekOf: dateOnly(startsAt),
+        startsAt: startsAt.toISOString(),
+        endsAt: endsAt.toISOString(),
+    };
+}
+
+function toPublicEvent(event: ClubEvent, activeWeekOf: string): ClubEventSummary {
     return {
         id: event.id,
         title: event.title,
@@ -23,6 +48,7 @@ function toPublicEvent(event: ClubEvent): PublicClubEvent {
             return { id: option.id, label: option.label };
         }),
         points: event.points,
+        participationOpen: event.weekOf === activeWeekOf,
     };
 }
 
@@ -122,6 +148,39 @@ export class ClubService {
         },
         client: QueryExecutor,
     ): Promise<Club> {
+        const invite = await this.clubs.findActiveInviteByCode(client, input.inviteCode, input.now);
+        if (invite !== undefined) {
+            const club = await this.clubs.findClubById(client, invite.clubId);
+            if (club === undefined) {
+                throw notFound("club_not_found", "No club matches that invite code.");
+            }
+            const membership = await this.clubs.findMembership(client, club.id, input.userId);
+            if (membership === undefined) {
+                const consumed = await this.clubs.consumeInvite(client, invite.id, input.now);
+                if (!consumed) {
+                    throw new AppError(
+                        409,
+                        "invite_unavailable",
+                        "That invite expired or reached its use limit.",
+                    );
+                }
+                await this.clubs.addMember(client, club.id, input.userId, input.now);
+            }
+            const joined = await this.clubs.findClubForUser(client, input.userId, club.id);
+            if (joined === undefined) {
+                throw new Error("Club membership was not readable after joining.");
+            }
+            return joined;
+        }
+
+        const knownInvite = await this.clubs.findInviteByCode(client, input.inviteCode);
+        if (knownInvite !== undefined) {
+            throw new AppError(
+                409,
+                "invite_unavailable",
+                "That invite expired, was revoked, or reached its use limit.",
+            );
+        }
         const club = await this.clubs.findClubByInviteCode(client, input.inviteCode);
         if (club === undefined) {
             throw new AppError(404, "club_not_found", "No club matches that invite code.");
@@ -156,15 +215,53 @@ export class ClubService {
         if (club === undefined) {
             throw new AppError(404, "club_not_found", "Unknown club.");
         }
-        const stored = await this.clubs.findClubByInviteCode(client, input.inviteCode);
-        if (stored === undefined || stored.id !== club.id) {
-            throw new AppError(
-                403,
-                "invalid_invite_code",
-                "The invite code does not belong to this club.",
-            );
+        const invite = await this.clubs.findActiveInviteByCode(client, input.inviteCode, input.now);
+        if (invite !== undefined) {
+            if (invite.clubId !== club.id) {
+                throw new AppError(
+                    403,
+                    "invalid_invite_code",
+                    "The invite code does not belong to this club.",
+                );
+            }
+            const membership = await this.clubs.findMembership(client, club.id, input.userId);
+            if (membership === undefined) {
+                const consumed = await this.clubs.consumeInvite(client, invite.id, input.now);
+                if (!consumed) {
+                    throw new AppError(
+                        409,
+                        "invite_unavailable",
+                        "That invite expired or reached its use limit.",
+                    );
+                }
+                await this.clubs.addMember(client, club.id, input.userId, input.now);
+            }
+        } else {
+            const knownInvite = await this.clubs.findInviteByCode(client, input.inviteCode);
+            if (knownInvite !== undefined) {
+                if (knownInvite.clubId !== club.id) {
+                    throw new AppError(
+                        403,
+                        "invalid_invite_code",
+                        "The invite code does not belong to this club.",
+                    );
+                }
+                throw new AppError(
+                    409,
+                    "invite_unavailable",
+                    "That invite expired, was revoked, or reached its use limit.",
+                );
+            }
+            const stored = await this.clubs.findClubByInviteCode(client, input.inviteCode);
+            if (stored === undefined || stored.id !== club.id) {
+                throw new AppError(
+                    403,
+                    "invalid_invite_code",
+                    "The invite code does not belong to this club.",
+                );
+            }
+            await this.clubs.addMember(client, club.id, input.userId, input.now);
         }
-        await this.clubs.addMember(client, club.id, input.userId, input.now);
         const joined = await this.clubs.findClubForUser(client, input.userId, club.id);
         if (joined === undefined) {
             throw new Error("Club membership was not readable after joining.");
@@ -176,6 +273,7 @@ export class ClubService {
         readonly userId: string;
         readonly role: "member" | "admin";
         readonly clubId: string;
+        readonly now: Date;
     }): Promise<ClubDetail> {
         const membership = await this.clubs.findMembership(this.pool, input.clubId, input.userId);
         if (membership === undefined && input.role !== "admin") {
@@ -195,16 +293,28 @@ export class ClubService {
             input.clubId,
             input.userId,
         );
+        const week = clubWeek(input.now);
         const events = this.content.clubEvents
             .slice()
             .sort(function newestFirst(left: ClubEvent, right: ClubEvent): number {
                 return right.weekOf.localeCompare(left.weekOf);
             })
-            .map(toPublicEvent);
+            .map(function eventOf(event: ClubEvent): ClubEventSummary {
+                return toPublicEvent(event, week.activeWeekOf);
+            });
+        const activeEvent = this.content.clubEvents.find(function active(event): boolean {
+            return event.weekOf === week.activeWeekOf;
+        });
+        const cooperativeChallenge =
+            activeEvent === undefined
+                ? null
+                : await this.buildCooperativeChallenge(input.clubId, activeEvent);
         return {
             club,
             members: [...members],
             events: [...events],
+            week,
+            cooperativeChallenge,
             leaderboard: [...leaderboard],
             submissions: submissions.map(function submissionOf(item): {
                 eventId: string;
@@ -216,13 +326,35 @@ export class ClubService {
         };
     }
 
-    public listEvents(): readonly PublicClubEvent[] {
+    private async buildCooperativeChallenge(
+        clubId: string,
+        event: ClubEvent,
+    ): Promise<CooperativeChallenge> {
+        const participants = await this.clubs.listVerifiedParticipants(this.pool, clubId, event.id);
+        return {
+            eventId: event.id,
+            title: `Cooperative challenge: ${event.title}`,
+            description:
+                "At least two club members must submit verified answers for the active event. Individual points do not complete this challenge.",
+            requiredMembers: REQUIRED_COOPERATIVE_MEMBERS,
+            verifiedMembers: participants.length,
+            completed: participants.length >= REQUIRED_COOPERATIVE_MEMBERS,
+            participants: participants.map(function handleOf(participant): string {
+                return participant.handle;
+            }),
+        };
+    }
+
+    public listEvents(now: Date): readonly ClubEventSummary[] {
+        const week = clubWeek(now);
         return this.content.clubEvents
             .slice()
             .sort(function newestFirst(left: ClubEvent, right: ClubEvent): number {
                 return right.weekOf.localeCompare(left.weekOf);
             })
-            .map(toPublicEvent);
+            .map(function eventOf(event: ClubEvent): ClubEventSummary {
+                return toPublicEvent(event, week.activeWeekOf);
+            });
     }
 
     public async submitEvent(input: {
@@ -234,6 +366,13 @@ export class ClubService {
         const event = this.content.getClubEvent(input.eventId);
         if (event === undefined) {
             throw new AppError(404, "event_not_found", "Unknown club event.");
+        }
+        if (event.weekOf !== clubWeek(input.now).activeWeekOf) {
+            throw new AppError(
+                409,
+                "event_closed",
+                "This event is closed. Only the active week's event accepts answers.",
+            );
         }
         const club = await this.clubs.findFirstClubForUser(this.pool, input.userId);
         if (club === undefined) {
@@ -293,19 +432,232 @@ export class ClubService {
         };
     }
 
-    public async reportClub(input: {
+    private async requireOwner(
+        executor: QueryExecutor,
+        clubId: string,
+        userId: string,
+    ): Promise<void> {
+        const membership = await this.clubs.findMembership(executor, clubId, userId);
+        if (membership === undefined) {
+            throw forbidden("club_forbidden", "Join this club before managing it.");
+        }
+        if (membership.role !== "owner") {
+            throw forbidden("club_owner_required", "Only club owners can do that.");
+        }
+    }
+
+    public async updateMemberRole(input: {
+        readonly actorUserId: string;
+        readonly clubId: string;
+        readonly handle: string;
+        readonly role: "owner" | "member";
+    }): Promise<void> {
+        const service = this;
+        await withTransaction(this.pool, async function updateRole(client): Promise<void> {
+            await service.requireOwner(client, input.clubId, input.actorUserId);
+            const target = await service.clubs.findMembershipByHandle(
+                client,
+                input.clubId,
+                input.handle,
+            );
+            if (target === undefined) {
+                throw notFound("club_member_not_found", "That member is not in this club.");
+            }
+            if (target.role === input.role) {
+                return;
+            }
+            if (input.role === "member") {
+                const owners = await service.clubs.countOwners(client, input.clubId);
+                if (owners <= 1) {
+                    throw new AppError(
+                        409,
+                        "last_owner_required",
+                        "A club needs at least one owner. Promote another member first.",
+                    );
+                }
+            }
+            await service.clubs.setMemberRole(client, input.clubId, input.handle, input.role);
+        });
+    }
+
+    public async removeMember(input: {
+        readonly actorUserId: string;
+        readonly clubId: string;
+        readonly handle: string;
+    }): Promise<void> {
+        const service = this;
+        await withTransaction(this.pool, async function removeMember(client): Promise<void> {
+            await service.requireOwner(client, input.clubId, input.actorUserId);
+            const target = await service.clubs.findMembershipByHandle(
+                client,
+                input.clubId,
+                input.handle,
+            );
+            if (target === undefined) {
+                throw notFound("club_member_not_found", "That member is not in this club.");
+            }
+            if (target.role === "owner") {
+                const owners = await service.clubs.countOwners(client, input.clubId);
+                if (owners <= 1) {
+                    throw new AppError(
+                        409,
+                        "last_owner_required",
+                        "The last owner cannot be removed. Promote another member first.",
+                    );
+                }
+            }
+            await service.clubs.removeMember(client, input.clubId, input.handle);
+        });
+    }
+
+    public async listInvites(input: {
         readonly userId: string;
         readonly clubId: string;
+    }): Promise<readonly ClubInvite[]> {
+        await this.requireOwner(this.pool, input.clubId, input.userId);
+        return this.clubs.listInvites(this.pool, input.clubId);
+    }
+
+    public async createInvite(input: {
+        readonly userId: string;
+        readonly clubId: string;
+        readonly maxUses: number;
+        readonly expiresInHours: number;
+        readonly now: Date;
+    }): Promise<ClubInvite> {
+        for (let attempt = 0; attempt < MAXIMUM_INVITE_ATTEMPTS; attempt += 1) {
+            try {
+                return await withTransaction(this.pool, this.createInviteWork.bind(this, input));
+            } catch (error) {
+                if (isUniqueViolation(error)) {
+                    continue;
+                }
+                throw error;
+            }
+        }
+        throw new AppError(
+            503,
+            "invite_code_exhausted",
+            "Could not allocate an invite code. Try again.",
+        );
+    }
+
+    private async createInviteWork(
+        input: {
+            readonly userId: string;
+            readonly clubId: string;
+            readonly maxUses: number;
+            readonly expiresInHours: number;
+            readonly now: Date;
+        },
+        client: QueryExecutor,
+    ): Promise<ClubInvite> {
+        await this.requireOwner(client, input.clubId, input.userId);
+        const expiresAt = new Date(input.now.getTime() + input.expiresInHours * 3_600_000);
+        const inviteId = crypto.randomUUID();
+        await this.clubs.createInvite(client, {
+            id: inviteId,
+            clubId: input.clubId,
+            code: createInviteCode(),
+            createdBy: input.userId,
+            maxUses: input.maxUses,
+            expiresAt,
+            now: input.now,
+        });
+        const invite = await this.clubs.findInviteById(client, input.clubId, inviteId);
+        if (invite === undefined) {
+            throw new Error("Invite was not readable after creation.");
+        }
+        return invite;
+    }
+
+    public async revokeInvite(input: {
+        readonly userId: string;
+        readonly clubId: string;
+        readonly inviteId: string;
+        readonly now: Date;
+    }): Promise<void> {
+        const service = this;
+        await withTransaction(this.pool, async function revoke(client): Promise<void> {
+            await service.requireOwner(client, input.clubId, input.userId);
+            const revoked = await service.clubs.revokeInvite(
+                client,
+                input.clubId,
+                input.inviteId,
+                input.now,
+            );
+            if (!revoked) {
+                throw notFound("club_invite_not_found", "Unknown active invite.");
+            }
+        });
+    }
+
+    public async reportClub(input: {
+        readonly userId: string;
+        readonly role: "member" | "admin";
+        readonly clubId: string;
         readonly reason: string;
+        readonly details: string | undefined;
+        readonly targetType: "club" | "member" | "event" | undefined;
+        readonly targetHandle: string | undefined;
+        readonly targetEventId: string | undefined;
         readonly now: Date;
     }): Promise<string> {
         const club = await this.clubs.findClubById(this.pool, input.clubId);
         if (club === undefined) {
             throw new AppError(404, "club_not_found", "Unknown club.");
         }
+        if (input.role !== "admin") {
+            const membership = await this.clubs.findMembership(
+                this.pool,
+                input.clubId,
+                input.userId,
+            );
+            if (membership === undefined) {
+                throw forbidden("club_forbidden", "Join this club before reporting it.");
+            }
+        }
         const reason = input.reason.trim();
         if (reason.length < 5) {
             throw validationError("A report needs a short description.", { field: "reason" });
+        }
+        const details = input.details?.trim();
+        if (details !== undefined && details.length < 5) {
+            throw validationError("Report details need at least five characters.", {
+                field: "details",
+            });
+        }
+        const targetType =
+            input.targetType ??
+            (input.targetHandle !== undefined
+                ? "member"
+                : input.targetEventId !== undefined
+                  ? "event"
+                  : "club");
+        if (targetType === "member") {
+            if (input.targetHandle === undefined) {
+                throw validationError("Choose the member you are reporting.", {
+                    field: "targetHandle",
+                });
+            }
+            const target = await this.clubs.findMembershipByHandle(
+                this.pool,
+                input.clubId,
+                input.targetHandle,
+            );
+            if (target === undefined) {
+                throw notFound("club_member_not_found", "That member is not in this club.");
+            }
+        }
+        if (targetType === "event") {
+            if (input.targetEventId === undefined) {
+                throw validationError("Choose the event you are reporting.", {
+                    field: "targetEventId",
+                });
+            }
+            if (this.content.getClubEvent(input.targetEventId) === undefined) {
+                throw notFound("event_not_found", "Unknown club event.");
+            }
         }
         const reportId = crypto.randomUUID();
         await this.clubs.createReport(this.pool, {
@@ -313,6 +665,10 @@ export class ClubService {
             clubId: input.clubId,
             reporterUserId: input.userId,
             reason,
+            targetType,
+            targetHandle: targetType === "member" ? input.targetHandle : undefined,
+            targetEventId: targetType === "event" ? input.targetEventId : undefined,
+            details,
             now: input.now,
         });
         return reportId;
