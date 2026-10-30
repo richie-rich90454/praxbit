@@ -44,19 +44,24 @@
             "id": "swallow-error",
             "description": "Returning an empty array when the request fails.",
             "stepId": "apply",
-            "feedback": "An empty array is a valid cart, so the caller can no longer tell success from failure. Let the error reach the caller and render an error state."
+            "feedback": "An empty array is a valid cart, so the caller can no longer tell success from failure. Let the error reach the caller and render an error state.",
+            "testDescription": "The request is typed and returned without a silent fallback.",
+            "followUpSkill": "angular.services"
         },
         {
             "id": "new-service",
             "description": "Constructing the service with new instead of injecting it.",
             "stepId": "apply",
-            "feedback": "The service needs HttpClient and application scope. Inject it through the constructor or inject()."
+            "feedback": "The service needs HttpClient and application scope. Inject it through the constructor or inject().",
+            "diagnostic": "Calling new CartService() skips HttpClient and the application injector."
         },
         {
             "id": "subscribe-service",
             "description": "Subscribing to the observable inside the service.",
             "stepId": "review",
-            "feedback": "A service that subscribes takes ownership of the request and the cleanup. Return the observable and let the consumer decide when to subscribe."
+            "feedback": "A service that subscribes takes ownership of the request and the cleanup. Return the observable and let the consumer decide when to subscribe.",
+            "answer": "ship",
+            "followUpSkill": "angular.services"
         }
     ],
     "lesson": {
@@ -195,7 +200,18 @@
                     "includes": ["@Injectable({ providedIn: \"root\" })"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Change the decorator to @Injectable({ providedIn: \"root\" }).",
+                "Add constructor(private readonly http: HttpClient) {}.",
+                "Return this.http.get<CartLine[]>(\"/api/cart\") directly.",
+                "Remove of([]) and catchError so failures reach the caller."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "npx ng test",
+                "description": "Run the Angular unit tests with the Angular CLI."
+            }
         },
         {
             "kind": "review",
@@ -247,7 +263,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "The manual subscription keeps running after the component is destroyed, and the error callback makes a failed request look like an empty cart. The standalone template also cannot resolve *ngFor without importing CommonModule or NgFor. Return the observable to the template or unsubscribe in ngOnDestroy, and surface the failure."
+            "explanation": "The manual subscription keeps running after the component is destroyed, and the error callback makes a failed request look like an empty cart. The standalone template also cannot resolve *ngFor without importing CommonModule or NgFor. Return the observable to the template or unsubscribe in ngOnDestroy, and surface the failure.",
+            "hints": [
+                "Check whether the subscription has a lifetime bound to the component.",
+                "Look at what the error callback does with a failed request.",
+                "Check the standalone template imports for *ngFor.",
+                "Ignore the false finding about providers and block on the real risks."
+            ]
         }
     ],
     "evaluation": {
