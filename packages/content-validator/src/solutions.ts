@@ -3,7 +3,7 @@ import path from "node:path";
 import type { CodeStep, Mission, ProjectDefinition } from "@praxbit/contracts";
 import { isSafeRelativePath } from "./paths.ts";
 import { runCodeTests } from "./runtime/index.ts";
-import { errorIssue } from "./types.ts";
+import { errorIssue, warningIssue } from "./types.ts";
 import type {
     LoadedContent,
     MissionSolution,
@@ -137,7 +137,7 @@ export function parseMissionSolution(
             );
             continue;
         }
-        const unexpectedStep = hasOnlyKeys(stepValue, ["files"]);
+        const unexpectedStep = hasOnlyKeys(stepValue, ["files", "alternatives"]);
         if (unexpectedStep !== undefined) {
             issues.push(
                 errorIssue(
@@ -148,8 +148,66 @@ export function parseMissionSolution(
             );
         }
         const files = parseFileMap(stepValue["files"], `${sourcePath}#${stepId}`, issues);
+        const alternativesValue = stepValue["alternatives"];
+        const alternatives: Record<string, string>[] = [];
+        if (alternativesValue !== undefined) {
+            if (!Array.isArray(alternativesValue)) {
+                issues.push(
+                    errorIssue(
+                        "solution-shape",
+                        sourcePath,
+                        `Alternatives for step ${stepId} must be an array.`,
+                    ),
+                );
+            } else if (alternativesValue.length > 5) {
+                issues.push(
+                    errorIssue(
+                        "solution-shape",
+                        sourcePath,
+                        `Step ${stepId} has ${alternativesValue.length} alternatives; at most 5 are allowed.`,
+                    ),
+                );
+            } else {
+                const alternativesList = alternativesValue as unknown[];
+                for (let index = 0; index < alternativesList.length; index += 1) {
+                    const alternative = alternativesList[index];
+                    const alternativePath = `${sourcePath}#${stepId}/alternatives/${index}`;
+                    if (!isRecord(alternative)) {
+                        issues.push(
+                            errorIssue(
+                                "solution-shape",
+                                alternativePath,
+                                "An alternative solution must be an object.",
+                            ),
+                        );
+                        continue;
+                    }
+                    const unexpectedAlternative = hasOnlyKeys(alternative, ["files"]);
+                    if (unexpectedAlternative !== undefined) {
+                        issues.push(
+                            errorIssue(
+                                "solution-shape",
+                                alternativePath,
+                                `Unexpected key in alternative: ${unexpectedAlternative}`,
+                            ),
+                        );
+                    }
+                    const alternativeFiles = parseFileMap(
+                        alternative["files"],
+                        alternativePath,
+                        issues,
+                    );
+                    if (alternativeFiles !== undefined) {
+                        alternatives.push({ ...alternativeFiles });
+                    }
+                }
+            }
+        }
         if (files !== undefined) {
-            steps[stepId] = { files };
+            steps[stepId] = {
+                files,
+                ...(alternatives.length === 0 ? {} : { alternatives }),
+            };
         }
     }
     if (Object.keys(steps).length === 0) {
@@ -517,14 +575,53 @@ export async function runMissionReferenceSolutions(
                 );
                 continue;
             }
-            const files = mergeFiles(
-                Object.fromEntries(
-                    step.files.map(function toEntry(file): [string, string] {
-                        return [file.path, file.content];
-                    }),
-                ),
-                stepSolution.files,
+            const starterFiles = Object.fromEntries(
+                step.files.map(function toEntry(file): [string, string] {
+                    return [file.path, file.content];
+                }),
             );
+            const sourcePath = `content-solutions/${mission.id}.json#${step.id}`;
+            const hasEditableStarter = step.files.some(function editable(file): boolean {
+                return file.editable;
+            });
+            if (hasEditableStarter) {
+                const starterReport = await runCodeTests({
+                    language: step.language,
+                    files: starterFiles,
+                    entry: step.entry,
+                    tests: step.tests,
+                    ...(step.database === undefined ? {} : { database: step.database }),
+                });
+                let starterExecuted = 0;
+                let starterFailed = false;
+                for (const outcome of starterReport.outcomes) {
+                    if (outcome.deferred) {
+                        continue;
+                    }
+                    starterExecuted += 1;
+                    if (!outcome.passed) {
+                        starterFailed = true;
+                    }
+                }
+                if (starterExecuted === 0) {
+                    issues.push(
+                        warningIssue(
+                            "starter-not-verified",
+                            sourcePath,
+                            "No starter check could be executed; the starter is not proven to fail.",
+                        ),
+                    );
+                } else if (!starterFailed) {
+                    issues.push(
+                        errorIssue(
+                            "starter-passes-tests",
+                            sourcePath,
+                            "The starter files pass every executed test; at least one test must fail before the learner edits.",
+                        ),
+                    );
+                }
+            }
+            const files = mergeFiles(starterFiles, stepSolution.files);
             const report = await runCodeTests({
                 language: step.language,
                 files,
@@ -532,7 +629,6 @@ export async function runMissionReferenceSolutions(
                 tests: step.tests,
                 ...(step.database === undefined ? {} : { database: step.database }),
             });
-            const sourcePath = `content-solutions/${mission.id}.json#${step.id}`;
             for (const outcome of report.outcomes) {
                 if (outcome.deferred) {
                     deferredChecks += 1;
@@ -545,6 +641,27 @@ export async function runMissionReferenceSolutions(
                             "reference-solution-test-failed",
                             sourcePath,
                             `Test "${outcome.description}" failed: ${outcome.error ?? "no detail"}`,
+                        ),
+                    );
+                }
+            }
+            for (const [index, alternative] of (stepSolution.alternatives ?? []).entries()) {
+                const alternativeReport = await runCodeTests({
+                    language: step.language,
+                    files: mergeFiles(files, alternative),
+                    entry: step.entry,
+                    tests: step.tests,
+                    ...(step.database === undefined ? {} : { database: step.database }),
+                });
+                for (const outcome of alternativeReport.outcomes) {
+                    if (outcome.deferred || outcome.passed) {
+                        continue;
+                    }
+                    issues.push(
+                        errorIssue(
+                            "alternative-solution-test-failed",
+                            `${sourcePath}/alternatives/${index}`,
+                            `Alternative ${index} failed test "${outcome.description}": ${outcome.error ?? "no detail"}`,
                         ),
                     );
                 }
