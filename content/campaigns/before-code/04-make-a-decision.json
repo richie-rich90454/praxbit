@@ -1,6 +1,6 @@
 {
     "id": "before-code.make-a-decision",
-    "version": 1,
+    "version": 2,
     "sequence": 4,
     "courseId": "before-code",
     "title": "Make a decision",
@@ -50,13 +50,23 @@
             "description": "Using OR when both conditions are required.",
             "stepId": "gate-rule",
             "answer": "either",
-            "feedback": "OR allows access when only one condition holds. That lets expired or invalid badges through. The policy needs both conditions."
+            "feedback": "OR allows access when only one condition holds. That lets expired or invalid badges through. The policy needs both conditions.",
+            "followUpSkill": "concept.boolean"
         },
         {
             "id": "and-equals-or",
             "description": "Confusing AND with OR in natural language.",
             "stepId": "boolean-check",
+            "answer": "either-true",
             "feedback": "AND is true only when both sides are true. OR is true when at least one side is true."
+        },
+        {
+            "id": "every-condition-must-hold",
+            "description": "Requiring both arrival conditions and treating quiet hours as an opening condition.",
+            "stepId": "gate-transfer",
+            "answer": "and-only",
+            "feedback": "The policy says an expected parcel OR a present courier is enough. Requiring both rejects valid deliveries, and including quiet hours reverses the rejection.",
+            "followUpSkill": "concept.conditions"
         }
     ],
     "lesson": {
@@ -89,6 +99,12 @@
         {
             "kind": "rule",
             "id": "gate-rule",
+            "hints": [
+                "Choose the rule that allows exactly the valid, active badge.",
+                "The policy combines two requirements; decide whether both are needed or only one.",
+                "A library entry rule needs a valid card and an unexpired account; either alone is not enough.",
+                "Test each candidate rule against the expired and invalid cases, then pick the one that rejects both."
+            ],
             "title": "Configure the gate",
             "prompt": "Choose the rule that produces the required outcome for every badge case.",
             "evidence": "construction",
@@ -152,6 +168,12 @@
         {
             "kind": "explain",
             "id": "boolean-check",
+            "hints": [
+                "Select statements that match the truth tables for AND, OR, and NOT.",
+                "AND requires both operands; OR requires at least one.",
+                "With A true and B false, A AND B is false while A OR B is true.",
+                "Three statements are correct; reject the one claiming AND is true when either side is true."
+            ],
             "title": "AND or OR?",
             "prompt": "Select every statement that is true.",
             "evidence": "explanation",
@@ -209,10 +231,10 @@
                 "explanation": "Either arrival condition can open the dock, and the quiet-hours rejection must also be false."
             },
             "hints": [
-                "Find the two alternatives that each allow entry.",
-                "Quiet hours must block both alternatives.",
-                "Combine the alternatives with OR, then require NOT quiet hours.",
-                "The policy is (expected OR courier) AND NOT quiet hours."
+                "Translate each phrase into an operator and a grouping.",
+                "OR combines the two arrival conditions; the quiet-hours check is a separate rejection.",
+                "Like (has ticket OR has pass) AND NOT after closing, the arrival test is an OR inside an AND NOT.",
+                "Build the condition in two parts: OR the arrival signals, then AND NOT the quiet-hours check. Find the option with that shape."
             ]
         }
     ],
