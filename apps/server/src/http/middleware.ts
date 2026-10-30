@@ -1,5 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { getConnInfo } from "@hono/node-server/conninfo";
+import { createHash, randomUUID } from "node:crypto";
 import { AppError, forbidden, unauthorized } from "./app-error.ts";
 import { constantTimeEquals } from "../security/tokens.ts";
 import type { AuthService } from "../services/auth-service.ts";
@@ -14,18 +16,50 @@ export const NATIVE_CLIENT_HEADER = "x-praxbit-client";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9._-]{8,80}$/;
 const COOKIE_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+const ADDRESS_HASH_SALT = randomUUID();
 
-export function clientAddress(context: Context<AppEnvironment>, trustProxy: boolean): string {
-    if (trustProxy) {
-        const forwarded = context.req.header("x-forwarded-for");
-        if (forwarded !== undefined) {
-            const first = forwarded.split(",")[0]?.trim();
-            if (first !== undefined && first.length > 0) {
-                return first;
-            }
+function normalizeAddress(address: string | undefined): string | undefined {
+    const value = address?.trim();
+    if (value === undefined || value.length === 0) {
+        return undefined;
+    }
+    return value.startsWith("::ffff:") ? value.slice(7) : value;
+}
+
+function forwardedAddress(context: Context<AppEnvironment>): string | undefined {
+    const forwarded = context.req.header("x-forwarded-for");
+    if (forwarded !== undefined) {
+        const first = normalizeAddress(forwarded.split(",")[0]);
+        if (first !== undefined) {
+            return first;
         }
     }
-    return "direct";
+    return normalizeAddress(context.req.header("x-real-ip"));
+}
+
+function socketAddress(context: Context<AppEnvironment>): string | undefined {
+    try {
+        return normalizeAddress(getConnInfo(context).remote.address);
+    } catch {
+        return undefined;
+    }
+}
+
+function hashAddress(address: string): string {
+    return `forwarded:${createHash("sha256").update(ADDRESS_HASH_SALT).update(address).digest("hex").slice(0, 32)}`;
+}
+
+export function clientAddress(context: Context<AppEnvironment>, trustProxy: boolean): string {
+    const forwarded = forwardedAddress(context);
+    if (trustProxy && forwarded !== undefined) {
+        return forwarded;
+    }
+    const socket = socketAddress(context);
+    if (socket !== undefined) {
+        return socket;
+    }
+    // Untrusted proxy headers still separate clients without retaining raw addresses.
+    return forwarded === undefined ? "unknown" : hashAddress(forwarded);
 }
 
 export function requestIdMiddleware(): MiddlewareHandler<AppEnvironment> {
@@ -84,7 +118,7 @@ export function securityHeadersMiddleware(config: ServerConfig): MiddlewareHandl
                 "content-security-policy",
                 [
                     "default-src 'self'",
-                    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'",
                     "style-src 'self' 'unsafe-inline'",
                     "img-src 'self' data: blob:",
                     "font-src 'self' data:",
@@ -155,10 +189,6 @@ export function csrfMiddleware(): MiddlewareHandler<AppEnvironment> {
         }
         const session = context.get("session");
         if (session !== null && session.method === "bearer") {
-            await next();
-            return;
-        }
-        if (context.req.header(NATIVE_CLIENT_HEADER)?.toLowerCase() === "native") {
             await next();
             return;
         }
