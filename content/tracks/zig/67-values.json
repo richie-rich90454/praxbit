@@ -30,6 +30,11 @@
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
             "stepIds": ["check"]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Predict the result of the same counting rule on new input.",
+            "stepIds": ["count"]
         }
     ],
     "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:zig"],
@@ -41,16 +46,35 @@
     ],
     "misconceptions": [
         {
+            "id": "nonpositive",
+            "description": "Counting zero as a positive delta.",
+            "stepId": "apply",
+            "testDescription": "The for loop binds each value and counts only positives.",
+            "feedback": "The test is value > 0. Zero and negative values must not increment the count.",
+            "followUpSkill": "zig.syntax"
+        },
+        {
             "id": "const-reassign",
             "description": "Assuming a const binding can be reassigned.",
             "stepId": "apply",
-            "feedback": "const prevents reassignment. Use var for a value that changes, and keep the type explicit."
+            "diagnostic": "Declaring count with const, then using count += 1 in the loop.",
+            "feedback": "const prevents reassignment. Use var for a value that changes, and keep the type explicit.",
+            "followUpSkill": "zig.syntax"
         },
         {
-            "id": "bounds",
-            "description": "Assuming slice indexing is unchecked in every build.",
-            "stepId": "apply",
-            "feedback": "Safe builds panic on out-of-bounds access; ReleaseFast drops the check. Keep every index inside the length."
+            "id": "dynamic-type",
+            "description": "Assuming a Zig variable can change type after assignment.",
+            "stepId": "check",
+            "answer": "dynamic",
+            "feedback": "Zig is statically typed. A variable keeps its declared type; only its value changes.",
+            "followUpSkill": "zig.syntax"
+        },
+        {
+            "id": "count-everything",
+            "description": "Counting every element instead of the positive ones.",
+            "stepId": "count",
+            "answer": "size",
+            "feedback": "The function increments only when value > 0. An array length includes zero and negative values."
         }
     ],
     "lesson": {
@@ -125,6 +149,12 @@
             "title": "Count positive speed changes",
             "prompt": "Edit main.zig. countPositive returns how many values are greater than zero.",
             "evidence": "construction",
+            "hints": [
+                "The for loop already visits every value.",
+                "Compare the captured value with zero.",
+                "Use an if statement around the increment.",
+                "Add if (value > 0) { count += 1; } inside the loop."
+            ],
             "language": "zig",
             "files": [
                 {
@@ -136,6 +166,11 @@
             ],
             "entry": "main.zig",
             "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "zig run main.zig",
+                "description": "Compiles and runs the program with the Zig compiler, printing the counted total."
+            },
             "tests": [
                 {
                     "kind": "static",
@@ -166,6 +201,12 @@
             "title": "Types and slices",
             "prompt": "Select every accurate statement.",
             "evidence": "explanation",
+            "hints": [
+                "Function parameters declare types.",
+                "const prevents reassignment.",
+                "A slice carries a pointer and a length.",
+                "Zig does not allow a variable to change type."
+            ],
             "statements": [
                 {
                     "id": "typed",
@@ -189,6 +230,42 @@
                 }
             ],
             "explanation": "Zig is statically typed: the compiler knows every parameter and return type. const prevents reassignment, var allows it, and a slice combines a pointer with a length used for bounds checks."
+        },
+        {
+            "kind": "quiz",
+            "id": "count",
+            "title": "Run the same rule",
+            "prompt": "countPositive receives the slice { 4, 0, -3, 7 }. What does it return?",
+            "evidence": "transfer",
+            "hints": [
+                "The function counts values strictly greater than zero.",
+                "Zero is not counted.",
+                "The negative value is not counted either.",
+                "Two values satisfy the condition."
+            ],
+            "quiz": {
+                "prompt": "countPositive receives the slice { 4, 0, -3, 7 }. What does it return?",
+                "options": [
+                    {
+                        "id": "two",
+                        "label": "2"
+                    },
+                    {
+                        "id": "three",
+                        "label": "3, because zero is counted"
+                    },
+                    {
+                        "id": "size",
+                        "label": "4, because the slice length is returned"
+                    },
+                    {
+                        "id": "zero",
+                        "label": "0, because the count starts at zero"
+                    }
+                ],
+                "correctId": "two",
+                "explanation": "Only 4 and 7 satisfy value > 0, so the counter reaches two."
+            }
         }
     ],
     "evaluation": {
