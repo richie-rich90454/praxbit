@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.c": "#include <arpa/inet.h>\n#include <netinet/in.h>\n#include <stdint.h>\n#include <sys/socket.h>\n#include <unistd.h>\n\nint open_listener(int port) {\n    int listener = socket(AF_INET, SOCK_STREAM, 0);\n    if (listener < 0) {\n        return -1;\n    }\n    int reuse = 1;\n    setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));\n    struct sockaddr_in address = {0};\n    address.sin_family = AF_INET;\n    address.sin_port = htons((uint16_t)port);\n    address.sin_addr.s_addr = INADDR_ANY;\n    if (bind(listener, (struct sockaddr *)&address, sizeof(address)) < 0) {\n        close(listener);\n        return -1;\n    }\n    if (listen(listener, 8) < 0) {\n        close(listener);\n        return -1;\n    }\n    return listener;\n}\n"
+            }
+        }
+    }
+}
