@@ -1,0 +1,362 @@
+{
+    "id": "systems-architecture.parallelism",
+    "version": 1,
+    "sequence": 420,
+    "courseId": "systems-architecture",
+    "title": "Two workers, one counter",
+    "summary": "Reproduce a lost update in asynchronous code, serialize the critical section, and reason about races and deadlock.",
+    "skills": ["ops.processes", "architecture.distributed"],
+    "prerequisites": ["concept.state", "architecture.distributed"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": ["source-editing", "worker-isolation", "deterministic-tests"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "parallelism",
+        "briefing": "The campus job counter is incremented by many asynchronous workers. Under load the counter reaches one instead of the number of jobs. Reproduce the lost update, serialize the critical section, and explain why a faster machine will not fix it."
+    },
+    "objectives": [
+        {
+            "id": "fix",
+            "description": "Serialize read-modify-write updates in asynchronous code.",
+            "stepIds": ["counter-code"]
+        },
+        {
+            "id": "review",
+            "description": "Identify the race in a concurrent balance update.",
+            "stepIds": ["race-review"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain critical sections, locking order, and atomic operations.",
+            "stepIds": ["parallel-transfer"]
+        }
+    ],
+    "assets": ["pip:thinking", "scene:campus", "system:api", "icon:parallel"],
+    "hints": [
+        "A read followed by an await can be interleaved with another read.",
+        "The read and write must form one critical section.",
+        "Queue the increments so only one runs at a time.",
+        "Chain each update on the previous promise and await the whole queue."
+    ],
+    "misconceptions": [
+        {
+            "id": "single-thread-safe",
+            "description": "Believing a single-threaded runtime has no race conditions.",
+            "stepId": "counter-code",
+            "testDescription": "Counts ten concurrent increments.",
+            "feedback": "Asynchronous interleaving is still concurrency. Two tasks can read the same value before either writes.",
+            "followUpSkill": "ops.processes"
+        },
+        {
+            "id": "faster-machine",
+            "description": "Expecting a faster CPU to remove a lost update.",
+            "stepId": "race-review",
+            "answer": "approve:read-modify-write,no-lock,lost-update,retry-blind",
+            "feedback": "A lost update is an ordering bug, not a speed bug. Faster execution changes the timing but not the possible interleaving."
+        },
+        {
+            "id": "lock-order",
+            "description": "Acquiring two locks in inconsistent orders.",
+            "stepId": "parallel-transfer",
+            "answer": "any-order",
+            "feedback": "Two workers can each hold one lock and wait for the other. Define a global lock order or use one lock."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Interleaving is concurrency",
+                "body": "JavaScript runs one task at a time, but await yields control. If two tasks read a value, both await, and both write back, one update is lost. The runtime did not run them simultaneously; it interleaved them."
+            },
+            {
+                "title": "Make the critical section atomic",
+                "body": "The read, computation, and write must appear as one operation to other tasks. A promise queue serializes the section. In a database, a row lock or conditional update does the same job."
+            },
+            {
+                "title": "Locks need a discipline",
+                "body": "Two locks acquired in different orders can deadlock. Agree on a global order, hold locks for the shortest time, and prefer atomic operations when the platform provides them."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Race condition",
+                "definition": "A result that depends on the timing of concurrent operations."
+            },
+            {
+                "term": "Critical section",
+                "definition": "Code that must not interleave with another instance of itself."
+            },
+            {
+                "term": "Lost update",
+                "definition": "A write overwritten because another task changed the value first."
+            },
+            {
+                "term": "Deadlock",
+                "definition": "Two or more tasks waiting forever on locks the others hold."
+            },
+            {
+                "term": "Atomic operation",
+                "definition": "An operation that completes without an observable intermediate state."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Interleaving loses updates",
+            "prompt": "Read the explanation, then fix the counter.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Interleaving is concurrency",
+                    "body": "JavaScript runs one task at a time, but await yields control. If two tasks read a value, both await, and both write back, one update is lost. The runtime did not run them simultaneously; it interleaved them."
+                },
+                {
+                    "title": "Make the critical section atomic",
+                    "body": "The read, computation, and write must appear as one operation to other tasks. A promise queue serializes the section. In a database, a row lock or conditional update does the same job."
+                },
+                {
+                    "title": "Locks need a discipline",
+                    "body": "Two locks acquired in different orders can deadlock. Agree on a global order, hold locks for the shortest time, and prefer atomic operations when the platform provides them."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Race condition",
+                    "definition": "A result that depends on the timing of concurrent operations."
+                },
+                {
+                    "term": "Critical section",
+                    "definition": "Code that must not interleave with another instance of itself."
+                },
+                {
+                    "term": "Lost update",
+                    "definition": "A write overwritten because another task changed the value first."
+                },
+                {
+                    "term": "Deadlock",
+                    "definition": "Two or more tasks waiting forever on locks the others hold."
+                },
+                {
+                    "term": "Atomic operation",
+                    "definition": "An operation that completes without an observable intermediate state."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "counter-code",
+            "title": "Serialize the increment",
+            "prompt": "Edit counter.js. incrementAll(counter, times) starts the requested number of concurrent increment tasks and resolves to the final counter value. Each task reads, awaits once, then writes. Make the updates serialized so none are lost.",
+            "evidence": "construction",
+            "hints": [
+                "Reproduce the bug by running two increments and comparing the result.",
+                "Queue each read-modify-write behind the previous one.",
+                "Return the queue promise from each increment.",
+                "Await Promise.all of the queued jobs, then return counter.value."
+            ],
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "counter.js",
+                    "content": "async function incrementAll(counter, times) {\n  async function increment() {\n    const current = counter.value;\n    await Promise.resolve();\n    counter.value = current + 1;\n  }\n  await Promise.all(Array.from({ length: times }, increment));\n  return counter.value;\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "counter.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Keeps one increment correct.",
+                    "name": "incrementAll",
+                    "args": [
+                        {
+                            "value": 0
+                        },
+                        1
+                    ],
+                    "expected": 1
+                },
+                {
+                    "kind": "function",
+                    "description": "Keeps two concurrent increments.",
+                    "name": "incrementAll",
+                    "args": [
+                        {
+                            "value": 0
+                        },
+                        2
+                    ],
+                    "expected": 2
+                },
+                {
+                    "kind": "function",
+                    "description": "Counts ten concurrent increments.",
+                    "name": "incrementAll",
+                    "args": [
+                        {
+                            "value": 0
+                        },
+                        10
+                    ],
+                    "expected": 10
+                },
+                {
+                    "kind": "function",
+                    "description": "Counts one hundred concurrent increments.",
+                    "name": "incrementAll",
+                    "args": [
+                        {
+                            "value": 0
+                        },
+                        100
+                    ],
+                    "expected": 100
+                },
+                {
+                    "kind": "function",
+                    "description": "Preserves an existing counter value.",
+                    "name": "incrementAll",
+                    "args": [
+                        {
+                            "value": 7
+                        },
+                        3
+                    ],
+                    "expected": 10
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "race-review",
+            "title": "Review the balance update",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Trace two workers through the read and the write.",
+                "Look for a lock or conditional update.",
+                "Ask what happens when both read the same balance.",
+                "Block the change: the read and write are not atomic and one update is lost."
+            ],
+            "artifact": {
+                "title": "withdraw.ts",
+                "caption": "Two workers can process withdrawals for the same account.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "async function withdraw(accountId: string, amount: number): Promise<void> {\n  const account = await db.account.findUnique({ where: { id: accountId } });\n  if (account.balance < amount) throw new Error(\"insufficient funds\");\n  await db.account.update({\n    where: { id: accountId },\n    data: { balance: account.balance - amount },\n  });\n}"
+            },
+            "findings": [
+                {
+                    "id": "read-modify-write",
+                    "label": "The balance is read, checked, and written in separate steps.",
+                    "correct": true
+                },
+                {
+                    "id": "no-lock",
+                    "label": "No row lock or conditional update protects the balance.",
+                    "correct": true
+                },
+                {
+                    "id": "lost-update",
+                    "label": "Two workers can both read the same balance and overwrite each other.",
+                    "correct": true
+                },
+                {
+                    "id": "retry-blind",
+                    "label": "Retrying the same read-modify-write without a condition repeats the race.",
+                    "correct": true
+                },
+                {
+                    "id": "faster",
+                    "label": "A faster database removes the interleaving.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the function"
+                },
+                {
+                    "id": "block",
+                    "label": "Block until the update is conditional or locked"
+                },
+                {
+                    "id": "log",
+                    "label": "Only add a warning log"
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The read and write need one atomic boundary: a row lock with a transaction, or a conditional UPDATE that checks the balance in the database."
+        },
+        {
+            "kind": "explain",
+            "id": "parallel-transfer",
+            "title": "Coordinate without deadlock",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Concurrency can exist without parallel threads.",
+                "Lock order decides whether two tasks can wait forever.",
+                "Atomic operations avoid an explicit critical section.",
+                "Select interleaving, critical sections, lock order, and atomics; reject faster hardware as a fix."
+            ],
+            "statements": [
+                {
+                    "id": "interleave",
+                    "label": "Asynchronous tasks can interleave even on a single thread.",
+                    "correct": true
+                },
+                {
+                    "id": "critical",
+                    "label": "A read-modify-write must be one critical section or an atomic operation.",
+                    "correct": true
+                },
+                {
+                    "id": "order",
+                    "label": "Acquiring multiple locks in a consistent global order prevents a common deadlock.",
+                    "correct": true
+                },
+                {
+                    "id": "atomic",
+                    "label": "A conditional update can make the check and write atomic in the database.",
+                    "correct": true
+                },
+                {
+                    "id": "any-order",
+                    "label": "Lock acquisition order does not matter as long as every path releases its locks.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Concurrency safety comes from atomic boundaries and a consistent lock order, not from faster hardware."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
