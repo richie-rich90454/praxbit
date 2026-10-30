@@ -41,9 +41,11 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ["**/*.{js,css,html,svg,woff2}"],
-                globIgnores: ["pyodide/**/*"],
+                globIgnores: ["pyodide/**/*", "assets/typescript-*.js", "assets/sql-wasm-*.js"],
                 maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
                 navigateFallback: "/index.html",
+                navigateFallbackDenylist: [/^\/api\//, /^\/pyodide\//],
+                importScripts: ["sw-background-sync.js"],
                 cleanupOutdatedCaches: true,
             },
             devOptions: { enabled: false },
