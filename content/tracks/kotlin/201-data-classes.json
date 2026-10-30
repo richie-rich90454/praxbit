@@ -1,0 +1,348 @@
+{
+    "version": 1,
+    "courseId": "kotlin",
+    "prerequisites": [
+        "kotlin.syntax",
+        "concept.data"
+    ],
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "restock-report",
+        "briefing": "The campus bookstore exports stock as item records. Build a restock list for the warehouse without mutating the records."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ],
+    "accessibility": {
+        "summary": "The Kotlin workspace is keyboard accessible. Checks verify source structure; they do not compile or run Kotlin.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "kotlin.data-classes",
+    "sequence": 201,
+    "title": "Data classes and report pipelines",
+    "summary": "Model stock records with an immutable data class, then build a sorted restock list and diagnose an inclusive boundary.",
+    "skills": [
+        "kotlin.oop",
+        "kotlin.syntax"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 7,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Build a collection pipeline over immutable records.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find an inclusive comparison that overstocks the warehouse.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Transfer the pipeline to a total-units calculation.",
+            "stepIds": [
+                "total"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:kotlin"
+    ],
+    "hints": [
+        "A data class generates equals, hashCode, toString, and copy from its constructor properties.",
+        "filter keeps the items below the threshold.",
+        "map turns each remaining Item into its name.",
+        "Chain filter, map, and sorted, then return the result."
+    ],
+    "misconceptions": [
+        {
+            "id": "unordered-report",
+            "description": "Returning names in input order instead of sorted order.",
+            "stepId": "apply",
+            "testDescription": "The pipeline filters low stock, maps names, and sorts them.",
+            "feedback": "The warehouse reads the list alphabetically. Call sorted() after map so the output does not depend on input order.",
+            "followUpSkill": "kotlin.syntax"
+        },
+        {
+            "id": "mutable-record",
+            "description": "Declaring record properties with var and mutating them in place.",
+            "stepId": "apply",
+            "diagnostic": "Declaring data class properties with var and changing the record during the report.",
+            "feedback": "Keep report records immutable with val. Build a new list instead of editing the source records.",
+            "followUpSkill": "kotlin.oop"
+        },
+        {
+            "id": "sort-fix",
+            "description": "Trying to fix a boundary error by sorting first.",
+            "stepId": "diagnose",
+            "answer": "sort-first",
+            "feedback": "Sorting changes presentation, not which items pass the filter. Correct the comparison operator."
+        },
+        {
+            "id": "count-rows",
+            "description": "Counting low-stock rows instead of summing their units.",
+            "stepId": "total",
+            "answer": "row-count",
+            "feedback": "count() counts records; sumOf { it.units } adds the units those records contain."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Data classes describe records",
+                "body": "A data class such as data class Item(val name: String, val units: Int) is a concise record. The compiler generates equals, hashCode, toString, copy, and component functions from the constructor properties. val makes each property read-only, so a report never mutates the exported rows. copy creates a changed duplicate: item.copy(units = 0). Destructuring reads the generated components: val (name, units) = item."
+            },
+            {
+                "title": "Pipelines read top to bottom",
+                "body": "Collection operators return new collections. filter keeps matching elements, map transforms each element, sorted returns an ascending list, and sumOf adds a selected number. A chain such as items.filter { it.units < threshold }.map { it.name }.sorted() states the report in the order it happens. Operators do not change the source list."
+            },
+            {
+                "title": "Nullability inside records",
+                "body": "A property can be nullable, and a lookup can return null. mapNotNull drops null results, firstOrNull stops at the first match, and the Elvis operator ?: supplies a fallback. Keep absence visible in the type instead of forcing a value with !!."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Data class",
+                "definition": "A class that generates equality, hashing, display, copy, and component functions from its constructor properties."
+            },
+            {
+                "term": "copy",
+                "definition": "A generated function that returns a changed duplicate of a data class instance."
+            },
+            {
+                "term": "Pipeline",
+                "definition": "A chain of collection operators that each return a new collection."
+            },
+            {
+                "term": "mapNotNull",
+                "definition": "A transform that keeps only non-null results."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Records and pipelines",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Data classes describe records",
+                    "body": "A data class such as data class Item(val name: String, val units: Int) is a concise record. The compiler generates equals, hashCode, toString, copy, and component functions from the constructor properties. val makes each property read-only, so a report never mutates the exported rows. copy creates a changed duplicate: item.copy(units = 0). Destructuring reads the generated components: val (name, units) = item."
+                },
+                {
+                    "title": "Pipelines read top to bottom",
+                    "body": "Collection operators return new collections. filter keeps matching elements, map transforms each element, sorted returns an ascending list, and sumOf adds a selected number. A chain such as items.filter { it.units < threshold }.map { it.name }.sorted() states the report in the order it happens. Operators do not change the source list."
+                },
+                {
+                    "title": "Nullability inside records",
+                    "body": "A property can be nullable, and a lookup can return null. mapNotNull drops null results, firstOrNull stops at the first match, and the Elvis operator ?: supplies a fallback. Keep absence visible in the type instead of forcing a value with !!."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Data class",
+                    "definition": "A class that generates equality, hashing, display, copy, and component functions from its constructor properties."
+                },
+                {
+                    "term": "copy",
+                    "definition": "A generated function that returns a changed duplicate of a data class instance."
+                },
+                {
+                    "term": "Pipeline",
+                    "definition": "A chain of collection operators that each return a new collection."
+                },
+                {
+                    "term": "mapNotNull",
+                    "definition": "A transform that keeps only non-null results."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Build the restock list",
+            "prompt": "Edit Main.kt. restockNeeded returns the names of items whose units are below the threshold, in alphabetical order.",
+            "evidence": "construction",
+            "hints": [
+                "Keep the data class and the List<Item> parameter.",
+                "Filter first so only low-stock records remain.",
+                "Map each remaining record to its name.",
+                "Sort the names before returning them."
+            ],
+            "language": "kotlin",
+            "files": [
+                {
+                    "path": "Main.kt",
+                    "content": "data class Item(val name: String, val units: Int)\n\nfun restockNeeded(items: List<Item>, threshold: Int): List<String> {\n    return emptyList() // TODO: filter, map, and sort\n}\n\nfun main() {\n    val items = listOf(Item(\"bolts\", 2), Item(\"nuts\", 9), Item(\"washers\", 1))\n    println(restockNeeded(items, 3))\n}\n",
+                    "editable": true,
+                    "language": "kotlin"
+                }
+            ],
+            "entry": "Main.kt",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "kotlinc Main.kt -include-runtime -d main.jar && java -jar main.jar",
+                "description": "Compiles the file with the Kotlin compiler and runs the resulting JVM program."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The function keeps the data class and typed parameters.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "data class Item(val name: String, val units: Int)",
+                        "fun restockNeeded(items: List<Item>, threshold: Int): List<String>"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The pipeline filters low stock, maps names, and sorts them.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "filter { it.units < threshold }",
+                        "map { it.name }",
+                        "sorted()"
+                    ],
+                    "excludes": [
+                        "emptyList()",
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter placeholder is gone.",
+                    "file": "Main.kt",
+                    "includes": [
+                        "fun restockNeeded"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The inclusive boundary",
+            "prompt": "The warehouse says it is overstocking items that are exactly at the threshold. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The report should include only items that need restocking.",
+                "An item at the threshold is not below it.",
+                "Read the comparison operator in the filter.",
+                "Replace <= with <."
+            ],
+            "instructions": [
+                {
+                    "id": "signature",
+                    "label": "fun restockNeeded(items: List<Item>, threshold: Int) ="
+                },
+                {
+                    "id": "filter",
+                    "label": "items.filter { it.units <= threshold }"
+                },
+                {
+                    "id": "map",
+                    "label": ".map { it.name }"
+                },
+                {
+                    "id": "sort",
+                    "label": ".sorted()"
+                }
+            ],
+            "buggyId": "filter",
+            "fixes": [
+                {
+                    "id": "strict",
+                    "label": "Use items.filter { it.units < threshold }."
+                },
+                {
+                    "id": "reversed",
+                    "label": "Use items.filter { it.units > threshold }."
+                },
+                {
+                    "id": "sort-first",
+                    "label": "Sort the records before filtering."
+                },
+                {
+                    "id": "map-null",
+                    "label": "Use mapNotNull instead of map."
+                }
+            ],
+            "correctFixId": "strict",
+            "explanation": "A stock of exactly the threshold is still acceptable, so the restock condition is strictly less than. Reversing the operator selects the wrong half of the data."
+        },
+        {
+            "kind": "quiz",
+            "id": "total",
+            "title": "Total only the low-stock units",
+            "prompt": "A teammate needs the total number of units across items below the threshold. Which expression returns that total?",
+            "evidence": "transfer",
+            "hints": [
+                "Keep the low-stock filter from the report.",
+                "Totals add units, not names or row counts.",
+                "sumOf selects a number from each remaining record.",
+                "Filter first, then sum it.units."
+            ],
+            "quiz": {
+                "prompt": "A teammate needs the total number of units across items below the threshold. Which expression returns that total?",
+                "options": [
+                    {
+                        "id": "filter-sum",
+                        "label": "items.filter { it.units < threshold }.sumOf { it.units }"
+                    },
+                    {
+                        "id": "all-units",
+                        "label": "items.sumOf { it.units }"
+                    },
+                    {
+                        "id": "row-count",
+                        "label": "items.filter { it.units < threshold }.count()"
+                    },
+                    {
+                        "id": "all-sum",
+                        "label": "items.map { it.units }.sum()"
+                    }
+                ],
+                "correctId": "filter-sum",
+                "explanation": "The filter keeps the low-stock records, and sumOf { it.units } adds the unit count from each one. Summing every item includes stock that does not need a restock."
+            }
+        }
+    ]
+}
