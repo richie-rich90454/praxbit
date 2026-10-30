@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.rb": "class InvalidQuantity < StandardError; end\n\ndef parse_quantity(text)\n  value = Integer(text, 10)\n  raise InvalidQuantity, \"quantity must be positive\" unless value.positive?\n  value\nrescue ArgumentError\n  raise InvalidQuantity, \"quantity must be a number\"\nend\n\nputs parse_quantity(\"12\")\n"
+            }
+        }
+    }
+}
