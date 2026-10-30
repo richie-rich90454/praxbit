@@ -1,18 +1,27 @@
 {
     "id": "devops-practice.networking",
     "version": 1,
-    "sequence": 103,
+    "sequence": 192,
     "courseId": "devops-practice",
     "title": "Trace a request through DNS, TLS, and the proxy",
     "summary": "Follow a request from name resolution to the upstream, preserve client address and scheme, and bound every timeout.",
-    "skills": ["devops.networking", "api.observability"],
-    "prerequisites": ["concept.networks", "http.basics"],
+    "skills": [
+        "devops.networking",
+        "api.observability"
+    ],
+    "prerequisites": [
+        "concept.networks",
+        "http.basics"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:devops"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:devops"
+    ],
     "hints": [
         "Resolve the name first; if the address is wrong, stop there.",
         "Read the certificate subject and dates from openssl s_client.",
@@ -187,8 +205,13 @@
                     "kind": "static",
                     "description": "Upstream timeouts are bounded instead of ten minutes.",
                     "file": "network.md",
-                    "includes": ["proxy_connect_timeout 3s", "proxy_read_timeout 10s"],
-                    "excludes": ["proxy_read_timeout 600s"]
+                    "includes": [
+                        "proxy_connect_timeout 3s",
+                        "proxy_read_timeout 10s"
+                    ],
+                    "excludes": [
+                        "proxy_read_timeout 600s"
+                    ]
                 },
                 {
                     "kind": "static",
@@ -204,8 +227,12 @@
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "network.md",
-                    "includes": ["dig +short api.campus.test"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "dig +short api.campus.test"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -301,5 +328,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
