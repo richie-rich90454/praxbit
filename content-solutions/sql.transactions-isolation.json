@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "transfer": {
+            "files": {
+                "transfer.sql": "BEGIN IMMEDIATE;\nUPDATE accounts SET balance_cents = balance_cents - 2500 WHERE id = 'a1';\nUPDATE accounts SET balance_cents = balance_cents + 2500 WHERE id = 'a2';\nCOMMIT;\n"
+            }
+        }
+    }
+}
