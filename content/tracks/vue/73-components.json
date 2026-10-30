@@ -44,13 +44,24 @@
             "id": "mutate-prop",
             "description": "Assigning directly to a prop.",
             "stepId": "apply",
-            "feedback": "Props are read-only. Emit an event so the parent updates its own state."
+            "feedback": "Props are read-only. Emit an event so the parent updates its own state.",
+            "diagnostic": "Assigning to a prop warns and leaves the parent's value unchanged; emit an event instead.",
+            "followUpSkill": "vue.components"
         },
         {
             "id": "hardcode",
             "description": "Copying demo values into the component instead of declaring props.",
             "stepId": "apply",
-            "feedback": "Hardcoded values ignore the parent. Declare the data contract with defineProps."
+            "feedback": "Hardcoded values ignore the parent. Declare the data contract with defineProps.",
+            "testDescription": "The component declares typed props with defineProps."
+        },
+        {
+            "id": "props-write-parent",
+            "description": "Believing a child assignment updates the parent.",
+            "stepId": "check",
+            "answer": "mutate",
+            "feedback": "Vue props are read-only. The child emits an event and the parent changes its own state.",
+            "followUpSkill": "web.component-architecture"
         }
     ],
     "lesson": {
@@ -158,7 +169,18 @@
                     "includes": ["const props = defineProps<{"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Replace the demo constants with a defineProps call.",
+                "Declare name as string and price as number in the generic.",
+                "Read props.name and props.price in the template.",
+                "Format the price with props.price.toFixed(2) and remove the TODO."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Vue Test Utils suite with Vitest."
+            }
         },
         {
             "kind": "explain",
@@ -193,7 +215,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "defineProps makes the component's data contract explicit. The child reads props and renders them, while the parent remains the owner of the values."
+            "explanation": "defineProps makes the component's data contract explicit. The child reads props and renders them, while the parent remains the owner of the values.",
+            "hints": [
+                "Check whether each statement treats props as read-only.",
+                "Remember that defineProps is compiled, not a runtime function imported from Vue.",
+                "Check the claims about template scope and single-file structure.",
+                "Select only the statements that match Vue's component model."
+            ]
         }
     ],
     "evaluation": {
