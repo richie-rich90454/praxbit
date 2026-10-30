@@ -1,0 +1,352 @@
+{
+    "id": "react.routing",
+    "version": 1,
+    "sequence": 216,
+    "courseId": "react",
+    "title": "Accessible routing and guarded routes",
+    "summary": "Model route access as a pure decision, then review a router that lets anonymous visitors reach checkout and loses focus after navigation.",
+    "skills": ["web.routing", "web.accessibility", "react.components"],
+    "prerequisites": ["react.components", "web.html"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "routing",
+        "briefing": "The campus storefront added a checkout route. Anonymous visitors can open it, and keyboard users stay focused on the old navigation after the page changes."
+    },
+    "objectives": [
+        {
+            "id": "objective-guard",
+            "description": "Implement allow, deny, and redirect decisions for routes.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review a router for access and accessibility risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:react"],
+    "hints": [
+        "Decide the public route first; it never needs a user.",
+        "For protected routes, return false when the user is null.",
+        "Check adminOnly only after a user exists.",
+        "Return /login for anonymous users and /catalog for a signed-in user without access."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-allow",
+            "description": "Treating access as allowed unless a component crashes.",
+            "stepId": "apply",
+            "testDescription": "Protected routes reject anonymous visitors.",
+            "feedback": "A route guard must deny by default. Returning true for an anonymous request exposes the screen and hides the missing decision.",
+            "followUpSkill": "web.routing"
+        },
+        {
+            "id": "redirect-to-catalog",
+            "description": "Sending an anonymous user to the catalog instead of sign-in.",
+            "stepId": "apply",
+            "testDescription": "Anonymous visitors are redirected to login.",
+            "feedback": "Anonymous users need a sign-in path; signed-in users who lack a role need a different destination. Collapsing both into one redirect loses that distinction.",
+            "followUpSkill": "web.accessibility"
+        },
+        {
+            "id": "ship-without-guard",
+            "description": "Shipping a router with no guard and no focus handling.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Missing authorization and missing focus management are functional defects. They block the change; they are not styling issues.",
+            "followUpSkill": "web.routing"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "The URL owns the screen",
+                "body": "A router maps a URL to a screen. Route metadata such as requiresAuth and adminOnly belongs beside that mapping so a guard can decide before the screen renders."
+            },
+            {
+                "title": "Guards return a decision",
+                "body": "A route guard should be a small function with an explicit allow, deny, and redirect outcome. A guard that always returns true is not a guard; it is decoration."
+            },
+            {
+                "title": "Navigation is a focus change",
+                "body": "When a client-side route replaces the main content, move focus to the new heading and update the document title. Keyboard and screen reader users otherwise stay on the old page."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Route guard",
+                "definition": "A function that decides whether a route may render for the current user."
+            },
+            {
+                "term": "Route metadata",
+                "definition": "Data attached to a route that describes access or layout requirements."
+            },
+            {
+                "term": "Focus management",
+                "definition": "Moving keyboard focus to the new content after navigation."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Route decisions and focus",
+            "prompt": "Read the explanation, then implement the guard.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "The URL owns the screen",
+                    "body": "A router maps a URL to a screen. Route metadata such as requiresAuth and adminOnly belongs beside that mapping so a guard can decide before the screen renders."
+                },
+                {
+                    "title": "Guards return a decision",
+                    "body": "A route guard should be a small function with an explicit allow, deny, and redirect outcome. A guard that always returns true is not a guard; it is decoration."
+                },
+                {
+                    "title": "Navigation is a focus change",
+                    "body": "When a client-side route replaces the main content, move focus to the new heading and update the document title. Keyboard and screen reader users otherwise stay on the old page."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Route guard",
+                    "definition": "A function that decides whether a route may render for the current user."
+                },
+                {
+                    "term": "Route metadata",
+                    "definition": "Data attached to a route that describes access or layout requirements."
+                },
+                {
+                    "term": "Focus management",
+                    "definition": "Moving keyboard focus to the new content after navigation."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Decide who may open a route",
+            "prompt": "Edit access.ts. Implement canAccessRoute and routeRedirect so public routes open, protected routes require a user, and admin-only routes require the admin role.",
+            "evidence": "construction",
+            "hints": [
+                "Start with the public case and return true immediately.",
+                "For a protected route, check user === null before reading the role.",
+                "Read route.adminOnly only after confirming a user exists.",
+                "Make routeRedirect return the login path for null and the catalog path for a signed-in denial."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "access.ts",
+                    "content": "type User = { role: \"member\" | \"admin\" } | null;\ntype RouteMeta = { requiresAuth: boolean; adminOnly?: boolean };\n\nfunction canAccessRoute(route: RouteMeta, user: User): boolean {\n  // TODO: deny protected routes without a user and admin routes without the admin role\n  return true;\n}\n\nfunction routeRedirect(route: RouteMeta, user: User): string | null {\n  // TODO: send anonymous users to /login and signed-in members without access to /catalog\n  return null;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "access.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Public routes allow anonymous visitors.",
+                    "name": "canAccessRoute",
+                    "args": [
+                        {
+                            "requiresAuth": false
+                        },
+                        null
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Protected routes reject anonymous visitors.",
+                    "name": "canAccessRoute",
+                    "args": [
+                        {
+                            "requiresAuth": true
+                        },
+                        null
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Protected routes allow a signed-in member.",
+                    "name": "canAccessRoute",
+                    "args": [
+                        {
+                            "requiresAuth": true
+                        },
+                        {
+                            "role": "member"
+                        }
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Admin routes reject a member.",
+                    "name": "canAccessRoute",
+                    "args": [
+                        {
+                            "requiresAuth": true,
+                            "adminOnly": true
+                        },
+                        {
+                            "role": "member"
+                        }
+                    ],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Admin routes allow an admin.",
+                    "name": "canAccessRoute",
+                    "args": [
+                        {
+                            "requiresAuth": true,
+                            "adminOnly": true
+                        },
+                        {
+                            "role": "admin"
+                        }
+                    ],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "Anonymous visitors are redirected to login.",
+                    "name": "routeRedirect",
+                    "args": [
+                        {
+                            "requiresAuth": true
+                        },
+                        null
+                    ],
+                    "expected": "/login"
+                },
+                {
+                    "kind": "function",
+                    "description": "Members without admin access are redirected to the catalog.",
+                    "name": "routeRedirect",
+                    "args": [
+                        {
+                            "requiresAuth": true,
+                            "adminOnly": true
+                        },
+                        {
+                            "role": "member"
+                        }
+                    ],
+                    "expected": "/catalog"
+                },
+                {
+                    "kind": "function",
+                    "description": "Allowed routes do not redirect.",
+                    "name": "routeRedirect",
+                    "args": [
+                        {
+                            "requiresAuth": true
+                        },
+                        {
+                            "role": "member"
+                        }
+                    ],
+                    "expected": null
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the checkout router",
+            "prompt": "Review App.tsx and select every real access or accessibility problem.",
+            "evidence": "transfer",
+            "hints": [
+                "Ask what happens when an anonymous visitor opens /checkout directly.",
+                "Check where focus goes after the route content changes.",
+                "Look for a way to skip the repeated navigation with a keyboard.",
+                "Separate missing behavior from behavior that is already present."
+            ],
+            "artifact": {
+                "title": "App.tsx",
+                "caption": "The router renders a checkout route without a guard and replaces the main content without moving focus.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import { BrowserRouter, Link, Route, Routes } from \"react-router-dom\";\n\nfunction Catalog() {\n  return <h1>Catalog</h1>;\n}\n\nfunction Checkout() {\n  return <h1>Checkout</h1>;\n}\n\nexport function App() {\n  return (\n    <BrowserRouter>\n      <nav>\n        <Link to=\"/\">Catalog</Link>\n        <Link to=\"/checkout\">Checkout</Link>\n      </nav>\n      <Routes>\n        <Route path=\"/\" element={<Catalog />} />\n        <Route path=\"/checkout\" element={<Checkout />} />\n      </Routes>\n    </BrowserRouter>\n  );\n}\n"
+            },
+            "findings": [
+                {
+                    "id": "no-guard",
+                    "label": "Checkout renders for anonymous visitors because no route guard wraps it.",
+                    "correct": true
+                },
+                {
+                    "id": "no-focus",
+                    "label": "Navigation replaces the main content without moving focus or announcing the new route.",
+                    "correct": true
+                },
+                {
+                    "id": "no-skip",
+                    "label": "There is no skip link for keyboard users to bypass the repeated navigation.",
+                    "correct": true
+                },
+                {
+                    "id": "link",
+                    "label": "The navigation uses Link so it avoids a full-page reload.",
+                    "correct": false
+                },
+                {
+                    "id": "memory",
+                    "label": "BrowserRouter keeps history only in memory, so refreshing loses the route.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The checkout route has no access decision, so the URL alone exposes the screen. The router also swaps content without moving focus to the new heading, and the navigation has no skip link. Links already use the router, so the reload finding is false."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
