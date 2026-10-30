@@ -5,22 +5,14 @@
     "courseId": "database-engineering",
     "title": "Cache without lying",
     "summary": "Add a cache-aside read and a write path that invalidates instead of serving stale rows.",
-    "skills": [
-        "redis.caching"
-    ],
-    "prerequisites": [
-        "concept.data",
-        "performance.measure"
-    ],
+    "skills": ["redis.caching"],
+    "prerequisites": ["concept.data", "performance.measure"],
     "difficulty": "developing",
     "estimatedMinutes": 10,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:database",
-        "icon:database"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
     "hints": [
         "Cache-aside: read Redis, fall back to PostgreSQL, then fill Redis with a TTL.",
         "Update the database first, then delete the cached key.",
@@ -219,9 +202,7 @@
                     "includes": [
                         "const product = await db.updateProduct(id, priceCents);\n    try {\n        await cache.del(keyFor(id));"
                     ],
-                    "excludes": [
-                        "cache.set(keyFor(id), JSON.stringify(product)"
-                    ]
+                    "excludes": ["cache.set(keyFor(id), JSON.stringify(product)"]
                 },
                 {
                     "kind": "static",
@@ -236,12 +217,8 @@
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "cache.ts",
-                    "includes": [
-                        "const TTL_SECONDS = 300;"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["const TTL_SECONDS = 300;"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -337,9 +314,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "systems",
-        "web"
-    ]
+    "tags": ["professional", "systems", "web"]
 }
