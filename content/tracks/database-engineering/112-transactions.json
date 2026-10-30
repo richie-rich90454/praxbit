@@ -1,18 +1,26 @@
 {
     "id": "database-engineering.transactions",
     "version": 1,
-    "sequence": 112,
+    "sequence": 182,
     "courseId": "database-engineering",
     "title": "Transactions under concurrency",
     "summary": "Make a read-modify-write transfer atomic and lock the rows it depends on.",
-    "skills": ["sql.transactions"],
-    "prerequisites": ["sql.queries", "concept.responsibility"],
+    "skills": [
+        "sql.transactions"
+    ],
+    "prerequisites": [
+        "sql.queries",
+        "concept.responsibility"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:database", "icon:database"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:database",
+        "icon:database"
+    ],
     "hints": [
         "BEGIN starts the unit; COMMIT makes it durable; ROLLBACK discards it.",
         "A plain SELECT does not lock the row. Add FOR UPDATE to hold it until commit.",
@@ -167,7 +184,10 @@
                     "kind": "static",
                     "description": "The transfer opens a transaction with an explicit isolation level.",
                     "file": "transaction.sql",
-                    "includes": ["BEGIN;", "SET TRANSACTION ISOLATION LEVEL READ COMMITTED;"],
+                    "includes": [
+                        "BEGIN;",
+                        "SET TRANSACTION ISOLATION LEVEL READ COMMITTED;"
+                    ],
                     "excludes": []
                 },
                 {
@@ -188,21 +208,30 @@
                         "WHERE id = 'acct-a' AND balance_cents >= 2500;",
                         "SET balance_cents = balance_cents + 2500"
                     ],
-                    "excludes": ["SET balance_cents = 2500"]
+                    "excludes": [
+                        "SET balance_cents = 2500"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The successful path commits and the abandoned path rolls back.",
                     "file": "transaction.sql",
-                    "includes": ["COMMIT;", "ROLLBACK;"],
+                    "includes": [
+                        "COMMIT;",
+                        "ROLLBACK;"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "transaction.sql",
-                    "includes": ["BEGIN;"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "BEGIN;"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -298,5 +327,9 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["professional", "systems", "web"]
+    "tags": [
+        "professional",
+        "systems",
+        "web"
+    ]
 }
