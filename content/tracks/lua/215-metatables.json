@@ -1,0 +1,345 @@
+{
+    "version": 1,
+    "courseId": "lua",
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "inventory-sort",
+        "briefing": "The inventory needs a deterministic order by count and then name, with readable rows in the debug console."
+    },
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 110,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "games",
+        "systems"
+    ],
+    "accessibility": {
+        "summary": "The Lua workspace is keyboard accessible. Checks verify source structure; they do not compile or run Lua.",
+        "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
+    },
+    "id": "lua.metatables",
+    "sequence": 215,
+    "title": "Metatables and sortable items",
+    "summary": "Teach two tables how to compare and print through metamethods, then repair a sort that has no ordering rule.",
+    "skills": [
+        "lua.tables",
+        "lua.functions"
+    ],
+    "prerequisites": [
+        "lua.tables",
+        "concept.iteration"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Define ordering and display metamethods.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "objective-diagnose",
+            "description": "Find a sort that has no comparison metamethod.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "objective-transfer",
+            "description": "Reason about equal elements under table.sort.",
+            "stepIds": [
+                "equal"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:lua"
+    ],
+    "hints": [
+        "Metamethods are looked up on the metatable.",
+        "Item.__index = Item shares methods with every instance.",
+        "__lt receives the left and right operands.",
+        "__tostring returns the string for tostring."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-lt",
+            "description": "Sorting tables without a comparison metamethod.",
+            "stepId": "diagnose",
+            "answer": "convert-strings",
+            "feedback": "table.sort compares elements with <. Two plain tables have no <, so sort raises an error. Define __lt on their shared metatable.",
+            "followUpSkill": "lua.tables"
+        },
+        {
+            "id": "unstable-sort",
+            "description": "Expecting table.sort to keep equal elements stable.",
+            "stepId": "equal",
+            "answer": "error",
+            "feedback": "table.sort is not stable. When __lt is false in both directions, either order is valid, so add a tie-breaker when order matters.",
+            "followUpSkill": "lua.tables"
+        },
+        {
+            "id": "shared-metatable",
+            "description": "Defining a separate metatable per item.",
+            "stepId": "apply",
+            "testDescription": "Items compare by count and then by name.",
+            "feedback": "One shared metatable keeps behavior consistent and cheap. Per-item metatables make the ordering rule harder to reason about.",
+            "followUpSkill": "lua.tables"
+        },
+        {
+            "id": "closure-methods",
+            "description": "Storing a new closure on every item.",
+            "stepId": "apply",
+            "diagnostic": "Attaching a fresh __lt closure to each item table instead of using the shared Item metatable.",
+            "feedback": "Methods belong on the shared metatable. Store data on the item and behavior on Item."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Metatables intercept operations",
+                "body": "A metatable is an ordinary table that changes how another table behaves. setmetatable(item, Item) attaches it. __index handles missing keys, __tostring controls tostring, __eq compares equality, and __lt defines the less-than relation. Lua looks these names up on the metatable when the operation occurs."
+            },
+            {
+                "title": "Comparison needs a strict order",
+                "body": "table.sort(arr) uses the < operator between elements. For tables, that means __lt must exist and must define a consistent order. If two elements are not less than each other in either direction, they are equivalent for sorting; the algorithm may place them in either order. Add a name tie-breaker when the report must be deterministic."
+            },
+            {
+                "title": "Share behavior, store data",
+                "body": "Set Item.__index = Item so instances fall back to the module table for methods. Define Item.new(name, count) to build the data and attach the metatable. Avoid giving every instance its own closures; shared methods are easier to test and use less memory."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Metamethod",
+                "definition": "A function on a metatable that Lua calls for an operator or conversion."
+            },
+            {
+                "term": "__lt",
+                "definition": "The metamethod that implements the less-than comparison."
+            },
+            {
+                "term": "__tostring",
+                "definition": "The metamethod that supplies the string used by tostring."
+            },
+            {
+                "term": "Stable sort",
+                "definition": "A sort that preserves the input order of elements that compare equal."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Metatables and ordering",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Metatables intercept operations",
+                    "body": "A metatable is an ordinary table that changes how another table behaves. setmetatable(item, Item) attaches it. __index handles missing keys, __tostring controls tostring, __eq compares equality, and __lt defines the less-than relation. Lua looks these names up on the metatable when the operation occurs."
+                },
+                {
+                    "title": "Comparison needs a strict order",
+                    "body": "table.sort(arr) uses the < operator between elements. For tables, that means __lt must exist and must define a consistent order. If two elements are not less than each other in either direction, they are equivalent for sorting; the algorithm may place them in either order. Add a name tie-breaker when the report must be deterministic."
+                },
+                {
+                    "title": "Share behavior, store data",
+                    "body": "Set Item.__index = Item so instances fall back to the module table for methods. Define Item.new(name, count) to build the data and attach the metatable. Avoid giving every instance its own closures; shared methods are easier to test and use less memory."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Metamethod",
+                    "definition": "A function on a metatable that Lua calls for an operator or conversion."
+                },
+                {
+                    "term": "__lt",
+                    "definition": "The metamethod that implements the less-than comparison."
+                },
+                {
+                    "term": "__tostring",
+                    "definition": "The metamethod that supplies the string used by tostring."
+                },
+                {
+                    "term": "Stable sort",
+                    "definition": "A sort that preserves the input order of elements that compare equal."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Order and print inventory items",
+            "prompt": "Edit main.lua. Define __lt so items sort by count and then name, and __tostring so each row reads name:count.",
+            "evidence": "construction",
+            "hints": [
+                "Compare counts first.",
+                "Break ties with the names.",
+                "__lt receives left and right item tables.",
+                "Use string.format(\"%s:%d\", item.name, item.count) for display."
+            ],
+            "language": "lua",
+            "files": [
+                {
+                    "path": "main.lua",
+                    "content": "local Item = {}\nItem.__index = Item\n\nfunction Item.new(name, count)\n  return setmetatable({ name = name, count = count }, Item)\nend\n\n-- TODO: define __lt and __tostring\n\nlocal items = {\n  Item.new(\"nuts\", 2),\n  Item.new(\"bolts\", 2),\n  Item.new(\"washers\", 1),\n}\ntable.sort(items)\nfor _, item in ipairs(items) do\n  print(tostring(item))\nend\n",
+                    "editable": true,
+                    "language": "lua"
+                }
+            ],
+            "entry": "main.lua",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "lua main.lua",
+                "description": "Runs the file with Lua, which calls the metamethods during sort and printing."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "Items compare by count and then by name.",
+                    "file": "main.lua",
+                    "includes": [
+                        "function Item.__lt(left, right)",
+                        "left.count == right.count",
+                        "left.name < right.name",
+                        "left.count < right.count"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Items print as name:count.",
+                    "file": "main.lua",
+                    "includes": [
+                        "function Item.__tostring(item)",
+                        "string.format(\"%s:%d\", item.name, item.count)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The sort and display loop are intact.",
+                    "file": "main.lua",
+                    "includes": [
+                        "table.sort(items)",
+                        "print(tostring(item))"
+                    ],
+                    "excludes": []
+                }
+            ]
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The sort with no order",
+            "prompt": "table.sort raises \"attempt to compare two table values\". Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "hints": [
+                "The items are tables, so < must be defined.",
+                "A metatable supplies the comparison.",
+                "Item has __index but no __lt.",
+                "Define __lt on the shared Item metatable."
+            ],
+            "instructions": [
+                {
+                    "id": "new",
+                    "label": "local items = { Item.new(\"nuts\", 2), Item.new(\"bolts\", 2) }"
+                },
+                {
+                    "id": "sort",
+                    "label": "table.sort(items)"
+                },
+                {
+                    "id": "print",
+                    "label": "print(tostring(items[1]))"
+                },
+                {
+                    "id": "end",
+                    "label": "end"
+                }
+            ],
+            "buggyId": "sort",
+            "fixes": [
+                {
+                    "id": "define-lt",
+                    "label": "Define Item.__lt(left, right) on the shared metatable."
+                },
+                {
+                    "id": "convert-strings",
+                    "label": "Convert every item to a string before sorting."
+                },
+                {
+                    "id": "ipairs",
+                    "label": "Call ipairs before table.sort."
+                }
+            ],
+            "correctFixId": "define-lt",
+            "explanation": "Plain tables have no built-in order. table.sort uses <, so the metatable needs __lt. Converting the items to strings changes the data instead of teaching it how to compare."
+        },
+        {
+            "kind": "quiz",
+            "id": "equal",
+            "title": "Equal counts in a sort",
+            "prompt": "Two items have the same count, and __lt returns false in both directions. What does table.sort do with them?",
+            "evidence": "transfer",
+            "hints": [
+                "Neither element is less than the other.",
+                "The comparator sees them as equivalent.",
+                "Lua's sort is not stable.",
+                "Either order is valid."
+            ],
+            "quiz": {
+                "prompt": "Two items have the same count, and __lt returns false in both directions. What does table.sort do with them?",
+                "options": [
+                    {
+                        "id": "either",
+                        "label": "Treats them as equivalent and may place either one first."
+                    },
+                    {
+                        "id": "error",
+                        "label": "Raises an error because the order is ambiguous."
+                    },
+                    {
+                        "id": "insertion",
+                        "label": "Keeps the earlier item first because Lua sorts stably."
+                    },
+                    {
+                        "id": "drop",
+                        "label": "Removes one of the equal items."
+                    }
+                ],
+                "correctId": "either",
+                "explanation": "table.sort only knows what __lt reports. Equal elements are interchangeable to the algorithm, and Lua does not promise a stable result, so a tie-breaker is needed for a deterministic report."
+            }
+        }
+    ]
+}
