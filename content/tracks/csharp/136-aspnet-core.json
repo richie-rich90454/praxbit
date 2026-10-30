@@ -5,23 +5,14 @@
     "courseId": "csharp",
     "title": "Expose an ASP.NET Core endpoint",
     "summary": "Return the right status for a found or missing order from a minimal API.",
-    "skills": [
-        "csharp.dotnet",
-        "csharp.async"
-    ],
-    "prerequisites": [
-        "csharp.dotnet",
-        "http.basics"
-    ],
+    "skills": ["csharp.dotnet", "csharp.async"],
+    "prerequisites": ["csharp.dotnet", "http.basics"],
     "difficulty": "advanced",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "map-endpoint",
             "description": "Map an order route to a handler with dependency injection.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "choose-status",
             "description": "Choose the status code for a missing resource.",
-            "stepIds": [
-                "aspnet-transfer"
-            ]
+            "stepIds": ["aspnet-transfer"]
         },
         {
             "id": "explain-http",
             "description": "Explain route binding, results, and dependency injection accurately.",
-            "stepIds": [
-                "aspnet-check"
-            ]
+            "stepIds": ["aspnet-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:csharp"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:csharp"],
     "hints": [
         "The route template already contains {id}.",
         "Ask the store for the order before building the response.",
@@ -207,24 +187,15 @@
                     "kind": "static",
                     "description": "A missing order returns 404.",
                     "file": "Program.cs",
-                    "includes": [
-                        "Results.NotFound()",
-                        "Results.Ok("
-                    ],
-                    "excludes": [
-                        "return \"order\";"
-                    ]
+                    "includes": ["Results.NotFound()", "Results.Ok("],
+                    "excludes": ["return \"order\";"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "Program.cs",
-                    "includes": [
-                        "app.Run();"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["app.Run();"],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -324,8 +295,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
