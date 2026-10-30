@@ -5,22 +5,14 @@
     "courseId": "sql-data",
     "title": "Find high-value orders",
     "summary": "Write a SELECT with a filter, ordering, and explicit columns.",
-    "skills": [
-        "sql.queries"
-    ],
-    "prerequisites": [
-        "concept.data"
-    ],
+    "skills": ["sql.queries"],
+    "prerequisites": ["concept.data"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-sql",
-        "capabilities": [
-            "sqlite-wasm",
-            "deterministic-tests",
-            "learning-runtime"
-        ]
+        "capabilities": ["sqlite-wasm", "deterministic-tests", "learning-runtime"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "filter",
             "description": "Filter orders at or above the threshold.",
-            "stepIds": [
-                "high-value"
-            ]
+            "stepIds": ["high-value"]
         },
         {
             "id": "order",
             "description": "Order results by total descending.",
-            "stepIds": [
-                "high-value"
-            ]
+            "stepIds": ["high-value"]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": [
-                "sql-check"
-            ]
+            "stepIds": ["sql-check"]
         }
     ],
-    "assets": [
-        "pip:observing",
-        "scene:campus",
-        "system:database",
-        "icon:query"
-    ],
+    "assets": ["pip:observing", "scene:campus", "system:database", "icon:query"],
     "hints": [
         "SELECT chooses columns, FROM names the table, WHERE filters rows.",
         "total_cents >= 5000 includes the boundary.",
@@ -138,22 +119,10 @@
                     "kind": "sql",
                     "description": "The query returns the exact expected rows in order.",
                     "expectedRows": [
-                        [
-                            "o3",
-                            12900
-                        ],
-                        [
-                            "o6",
-                            9900
-                        ],
-                        [
-                            "o2",
-                            7500
-                        ],
-                        [
-                            "o5",
-                            5200
-                        ]
+                        ["o3", 12900],
+                        ["o6", 9900],
+                        ["o2", 7500],
+                        ["o5", 5200]
                     ]
                 }
             ],
@@ -211,9 +180,7 @@
     },
     "rewards": {
         "experience": 100,
-        "unlocks": [
-            "sql.join-customers"
-        ]
+        "unlocks": ["sql.join-customers"]
     },
     "persistence": {
         "kind": "none"
@@ -224,8 +191,5 @@
         "screenReaderNotes": "The result table announces column names and row count. The test compares rows and reports the first mismatch."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
