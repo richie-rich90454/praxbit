@@ -36,6 +36,7 @@ const RegexTestSchema = z.strictObject({
         .string()
         .regex(/^[dgimsuvy]*$/)
         .max(8),
+    invert: z.boolean().optional(),
 });
 
 const JsonTestSchema = z.strictObject({
