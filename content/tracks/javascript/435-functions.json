@@ -1,0 +1,256 @@
+{
+    "id": "javascript.functions",
+    "version": 1,
+    "sequence": 221,
+    "courseId": "javascript",
+    "title": "Values and functions",
+    "summary": "Declare values, write a function, and return a computed result.",
+    "skills": [
+        "js.variables",
+        "js.functions",
+        "js.types"
+    ],
+    "prerequisites": [
+        "concept.state",
+        "concept.conditions"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-javascript",
+        "capabilities": [
+            "source-editing",
+            "worker-isolation",
+            "deterministic-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "broken-helper",
+        "briefing": "The advising portal formats student names and counts completed tasks. The helper returns undefined because it never returns a value. Fix the function."
+    },
+    "objectives": [
+        {
+            "id": "function",
+            "description": "Implement a function that returns a value.",
+            "stepIds": [
+                "implement-function"
+            ]
+        },
+        {
+            "id": "types",
+            "description": "Handle string and number values correctly.",
+            "stepIds": [
+                "implement-function"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain values and functions.",
+            "stepIds": [
+                "function-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:function"
+    ],
+    "hints": [
+        "Declare a function with a parameter.",
+        "Build the result string with template literals.",
+        "Return the value explicitly.",
+        "Use function formatGreeting(name) { return `Hello, ${name}!`; }."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-return",
+            "description": "Calling a function but forgetting to return.",
+            "stepId": "implement-function",
+            "testDescription": "Returns a greeting with the name.",
+            "feedback": "A function without return yields undefined. Add an explicit return.",
+            "followUpSkill": "js.functions"
+        },
+        {
+            "id": "implicit-global",
+            "description": "Assigning without declaration creates a global.",
+            "stepId": "function-claims",
+            "answer": "global",
+            "feedback": "Undeclared assignment leaks to the global object. Declare variables with const or let.",
+            "followUpSkill": "js.variables"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Values and types",
+                "body": "JavaScript has strings, numbers, booleans, null, undefined, objects, and arrays. const declares a binding that cannot be reassigned; let declares a mutable one."
+            },
+            {
+                "title": "Functions",
+                "body": "A function packages a computation. Parameters receive inputs and return sends a value back to the caller. Without return, the result is undefined."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "const",
+                "definition": "A declaration that cannot be reassigned."
+            },
+            {
+                "term": "Parameter",
+                "definition": "A named input to a function."
+            },
+            {
+                "term": "Return",
+                "definition": "The value a function sends back."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Values and functions",
+            "prompt": "Read the explanation, then implement the function.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Values and types",
+                    "body": "JavaScript has strings, numbers, booleans, null, undefined, objects, and arrays. const declares a binding that cannot be reassigned; let declares a mutable one."
+                },
+                {
+                    "title": "Functions",
+                    "body": "A function packages a computation. Parameters receive inputs and return sends a value back to the caller. Without return, the result is undefined."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "const",
+                    "definition": "A declaration that cannot be reassigned."
+                },
+                {
+                    "term": "Parameter",
+                    "definition": "A named input to a function."
+                },
+                {
+                    "term": "Return",
+                    "definition": "The value a function sends back."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "implement-function",
+            "title": "Implement the greeting",
+            "prompt": "Edit main.js. Implement formatGreeting(name) so it returns 'Hello, <name>!'.",
+            "evidence": "construction",
+            "language": "javascript",
+            "files": [
+                {
+                    "path": "main.js",
+                    "content": "function formatGreeting(name) {\n  // TODO: return a greeting\n}\n",
+                    "editable": true,
+                    "language": "javascript"
+                }
+            ],
+            "entry": "main.js",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Returns a greeting with the name.",
+                    "name": "formatGreeting",
+                    "args": [
+                        "Ada"
+                    ],
+                    "expected": "Hello, Ada!"
+                },
+                {
+                    "kind": "function",
+                    "description": "Handles an empty string.",
+                    "name": "formatGreeting",
+                    "args": [
+                        ""
+                    ],
+                    "expected": "Hello, !"
+                },
+                {
+                    "kind": "function",
+                    "description": "Converts a number to text.",
+                    "name": "formatGreeting",
+                    "args": [
+                        42
+                    ],
+                    "expected": "Hello, 42!"
+                }
+            ],
+            "hints": [
+                "Use a template literal.",
+                "Include the name inside the string.",
+                "Return the result.",
+                "return `Hello, ${name}!`;"
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "function-claims",
+            "title": "Values and functions claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Check each statement.",
+                "const cannot be reassigned.",
+                "Undeclared assignment is global.",
+                "Select const, return, and typeof; reject global."
+            ],
+            "statements": [
+                {
+                    "id": "const",
+                    "label": "const declares a binding that cannot be reassigned.",
+                    "correct": true
+                },
+                {
+                    "id": "return",
+                    "label": "A function without return returns undefined.",
+                    "correct": true
+                },
+                {
+                    "id": "global",
+                    "label": "Assigning to an undeclared variable creates a local variable.",
+                    "correct": false
+                },
+                {
+                    "id": "typeof",
+                    "label": "typeof null is \"object\".",
+                    "correct": true
+                }
+            ],
+            "explanation": "Values, declarations, and returns follow consistent rules; undeclared assignment leaks globally."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor is keyboard accessible, and function tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its description and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
