@@ -5,20 +5,14 @@
     "courseId": "ai-engineering",
     "title": "A prompt is a contract",
     "summary": "Structure a prompt around a goal, context, constraints, and verifiable success.",
-    "skills": [
-        "ai.foundations",
-        "ai.prompting"
-    ],
+    "skills": ["ai.foundations", "ai.prompting"],
     "prerequisites": [],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "order",
     "runtime": {
         "kind": "none",
-        "capabilities": [
-            "curated-exercise",
-            "no-model-inference"
-        ]
+        "capabilities": ["curated-exercise", "no-model-inference"]
     },
     "scenario": {
         "world": "campus",
@@ -30,24 +24,15 @@
         {
             "id": "prompt-order",
             "description": "Order the parts of an evaluable prompt.",
-            "stepIds": [
-                "prompt-parts"
-            ]
+            "stepIds": ["prompt-parts"]
         },
         {
             "id": "prompt-checks",
             "description": "Explain what makes a prompt testable.",
-            "stepIds": [
-                "prompt-check"
-            ]
+            "stepIds": ["prompt-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:ai"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:ai"],
     "hints": [
         "Start with the task and the context the model actually needs.",
         "Constraints and non-goals prevent unwanted changes.",
@@ -126,13 +111,7 @@
                     "label": "Output: one JavaScript function plus its test cases"
                 }
             ],
-            "correctOrder": [
-                "goal",
-                "context",
-                "constraints",
-                "success",
-                "format"
-            ],
+            "correctOrder": ["goal", "context", "constraints", "success", "format"],
             "explanation": "Goal and context establish the task. Constraints narrow acceptable solutions. Success criteria and output format make the result checkable.",
             "hints": [
                 "Start with what the model must achieve.",
@@ -184,9 +163,7 @@
     },
     "rewards": {
         "experience": 100,
-        "unlocks": [
-            "ai.evaluate-output"
-        ]
+        "unlocks": ["ai.evaluate-output"]
     },
     "persistence": {
         "kind": "none"
@@ -197,8 +174,5 @@
         "screenReaderNotes": "Each section announces its position and full text after every move."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "ai",
-        "professional"
-    ]
+    "tags": ["ai", "professional"]
 }
