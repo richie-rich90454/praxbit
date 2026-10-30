@@ -1,18 +1,26 @@
 {
     "id": "nestjs.guards",
     "version": 1,
-    "sequence": 86,
+    "sequence": 154,
     "courseId": "nestjs",
     "title": "Guards that reject before the handler",
     "summary": "Implement CanActivate with Reflector metadata and apply it with UseGuards.",
-    "skills": ["nestjs.guards"],
-    "prerequisites": ["nestjs.modules", "security.auth"],
+    "skills": [
+        "nestjs.guards"
+    ],
+    "prerequisites": [
+        "nestjs.modules",
+        "security.auth"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:nestjs"
+    ],
     "hints": [
         "Use this.reflector.getAllAndOverride with the handler and class.",
         "Return true only when the route is explicitly public.",
@@ -184,15 +201,21 @@
                     "kind": "static",
                     "description": "The guard is applied to the controller with UseGuards.",
                     "file": "auth.guard.ts",
-                    "includes": ["@UseGuards(AuthGuard)"],
+                    "includes": [
+                        "@UseGuards(AuthGuard)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "auth.guard.ts",
-                    "includes": ["implements CanActivate"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "implements CanActivate"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -283,5 +306,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
