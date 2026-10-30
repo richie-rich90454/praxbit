@@ -5,22 +5,14 @@
     "courseId": "security",
     "title": "Session mistakes",
     "summary": "Review cookie attributes and browser storage choices for a session token.",
-    "skills": [
-        "security.auth",
-        "concept.security"
-    ],
-    "prerequisites": [
-        "http.basics"
-    ],
+    "skills": ["security.auth", "concept.security"],
+    "prerequisites": ["http.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "configuration-review",
-            "no-execution"
-        ]
+        "capabilities": ["configuration-review", "no-execution"]
     },
     "scenario": {
         "world": "campus",
@@ -32,24 +24,15 @@
         {
             "id": "review-cookie",
             "description": "Identify unsafe session cookie attributes and storage.",
-            "stepIds": [
-                "session-review"
-            ]
+            "stepIds": ["session-review"]
         },
         {
             "id": "explain-session",
             "description": "Explain session protection principles.",
-            "stepIds": [
-                "session-check"
-            ]
+            "stepIds": ["session-check"]
         }
     ],
-    "assets": [
-        "pip:alert",
-        "scene:campus",
-        "system:api",
-        "icon:lock"
-    ],
+    "assets": ["pip:alert", "scene:campus", "system:api", "icon:lock"],
     "hints": [
         "An HttpOnly cookie is not readable by page scripts.",
         "Secure limits the cookie to HTTPS. SameSite limits cross-site sending.",
@@ -217,9 +200,5 @@
         "screenReaderNotes": "Cookie attributes are read as text. Findings announce their evidence after submission."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional",
-        "systems"
-    ]
+    "tags": ["web", "professional", "systems"]
 }
