@@ -45,12 +45,32 @@ export function findMisconception(
     mission: Mission,
     stepId: string,
     answerKey: string | undefined,
+    context?: {
+        readonly failedTests?: readonly string[];
+        readonly diagnostic?: string;
+    },
 ): Misconception | undefined {
-    if (answerKey === undefined) {
-        return undefined;
-    }
     return mission.misconceptions.find(function matches(item: Misconception): boolean {
-        return item.stepId === stepId && item.answer === answerKey;
+        if (item.stepId !== stepId) {
+            return false;
+        }
+        if (answerKey !== undefined && item.answer === answerKey) {
+            return true;
+        }
+        if (
+            item.testDescription !== undefined &&
+            context?.failedTests?.includes(item.testDescription) === true
+        ) {
+            return true;
+        }
+        if (
+            item.diagnostic !== undefined &&
+            context?.diagnostic !== undefined &&
+            context.diagnostic.includes(item.diagnostic)
+        ) {
+            return true;
+        }
+        return false;
     });
 }
 
