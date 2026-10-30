@@ -3,7 +3,13 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createApplication } from "../../../apps/server/src/app.ts";
-import { ClubSchema, ProjectDetailSchema } from "../../../packages/contracts/src/index.ts";
+import type { ServerConfig } from "../../../apps/server/src/config.ts";
+import { createDatabasePool } from "../../../apps/server/src/db/pool.ts";
+import {
+    CapabilitiesSchema,
+    ClubSchema,
+    ProjectDetailSchema,
+} from "../../../packages/contracts/src/index.ts";
 import { closeTestContext, createTestContext, type TestContext } from "./helpers/database.ts";
 import { TestClient, expectApiError, field, readJson, register } from "./helpers/client.ts";
 
@@ -93,6 +99,7 @@ describe("catalog, health, and transport protections", function catalogSuite(): 
             "/admin/audit",
             "/admin/reports",
             "/admin/reports/{id}/resolve",
+            "/capabilities",
         ]) {
             expect(Object.prototype.hasOwnProperty.call(paths, path)).toBe(true);
         }
@@ -104,11 +111,152 @@ describe("catalog, health, and transport protections", function catalogSuite(): 
         expect(health.status).toBe(200);
         const healthBody = await readJson(health);
         expect(field(healthBody, "status")).toBe("ok");
+        expect(field(healthBody, "version")).toBe("0.1.0");
+        expect(field(healthBody, "environment")).toBe("test");
+        expect(field(field(healthBody, "capabilities"), "aiTutor")).toBe(false);
+        expect(field(healthBody, "webBuild")).toBe(false);
         expect(JSON.stringify(healthBody)).not.toContain("postgres");
 
         const ready = await client.get("/readyz");
         expect(ready.status).toBe(200);
-        expect(field(await readJson(ready), "status")).toBe("ready");
+        const readyBody = await readJson(ready);
+        expect(field(readyBody, "status")).toBe("ready");
+        expect(field(field(readyBody, "checks"), "database")).toBe("ok");
+        expect(field(field(readyBody, "checks"), "webBuild")).toBe("disabled");
+        expect(JSON.stringify(readyBody)).not.toContain("postgres");
+    });
+
+    it("reports public capabilities without exposing provider configuration", async function testCapabilities(): Promise<void> {
+        const client = new TestClient(context.app);
+        const response = await client.get("/api/v1/capabilities");
+        expect(response.status).toBe(200);
+        const parsed = CapabilitiesSchema.parse(await readJson(response));
+        expect(parsed.aiTutor).toBe(false);
+        expect(JSON.stringify(parsed)).not.toContain("http");
+    });
+
+    it("rejects the native header for cookie sessions but accepts bearer sessions", async function testCsrfNative(): Promise<void> {
+        const browser = new TestClient(context.app);
+        await register(browser, "csrf_native_user");
+
+        const blocked = await browser.post(
+            "/api/v1/sync",
+            { operations: [] },
+            { native: true, csrf: false },
+        );
+        expect(blocked.status).toBe(403);
+        expectApiError(await readJson(blocked), "csrf_invalid");
+
+        const native = new TestClient(context.app);
+        await native.csrfToken();
+        const auth = await register(native, "native_bearer_user", { native: true, csrf: true });
+        expect(auth.nativeToken).toBeDefined();
+
+        const bearer = new TestClient(context.app);
+        bearer.useBearer(auth.nativeToken ?? "", true);
+        const allowed = await bearer.post("/api/v1/sync", { operations: [] }, { csrf: false });
+        expect(allowed.status).toBe(200);
+    });
+
+    it("separates rate limit buckets when the socket address is unavailable", async function testClientKeys(): Promise<void> {
+        function buildApp(
+            globalPerMinute: number,
+            trustProxy: boolean,
+        ): ReturnType<typeof createApplication> {
+            const config: ServerConfig = {
+                ...context.config,
+                trustProxy,
+                rateLimits: { ...context.config.rateLimits, globalPerMinute },
+            };
+            return createApplication({ config, pool: context.pool, content: context.content });
+        }
+
+        const untrusted = buildApp(1, false);
+        const first = await untrusted.request("http://localhost/api/v1/catalog", {
+            headers: { "x-forwarded-for": "203.0.113.10" },
+        });
+        expect(first.status).toBe(200);
+        const repeated = await untrusted.request("http://localhost/api/v1/catalog", {
+            headers: { "x-forwarded-for": "203.0.113.10" },
+        });
+        expect(repeated.status).toBe(429);
+        const other = await untrusted.request("http://localhost/api/v1/catalog", {
+            headers: { "x-forwarded-for": "203.0.113.11" },
+        });
+        expect(other.status).toBe(200);
+
+        const trusted = buildApp(1, true);
+        const proxied = await trusted.request("http://localhost/api/v1/catalog", {
+            headers: { "x-forwarded-for": "198.51.100.7, 10.0.0.1" },
+        });
+        expect(proxied.status).toBe(200);
+        const sameClient = await trusted.request("http://localhost/api/v1/catalog", {
+            headers: { "x-forwarded-for": "198.51.100.7, 10.0.0.2" },
+        });
+        expect(sameClient.status).toBe(429);
+        const anotherClient = await trusted.request("http://localhost/api/v1/catalog", {
+            headers: { "x-forwarded-for": "198.51.100.8, 10.0.0.1" },
+        });
+        expect(anotherClient.status).toBe(200);
+    });
+
+    it("applies a dedicated rate limit to club event submissions", async function testEventSubmissionLimit(): Promise<void> {
+        const event = context.content.clubEvents[0];
+        if (event === undefined) {
+            throw new Error("The content catalog has no club event.");
+        }
+        const config: ServerConfig = {
+            ...context.config,
+            rateLimits: { ...context.config.rateLimits, eventSubmissionsPerHour: 0 },
+        };
+        const app = createApplication({ config, pool: context.pool, content: context.content });
+        const client = new TestClient(app);
+        await register(client, "event_limit_user");
+        const created = await client.post("/api/v1/clubs", { name: "Rate Limited Club" });
+        expect(created.status).toBe(201);
+
+        const response = await client.post(`/api/v1/events/${event.id}/submissions`, {
+            eventId: event.id,
+            answer: "idempotency-key",
+        });
+        expect(response.status).toBe(429);
+        expectApiError(await readJson(response), "rate_limited");
+        expect(response.headers.get("retry-after")).not.toBeNull();
+    });
+
+    it("reports not ready when the database or a required web build is missing", async function testNotReady(): Promise<void> {
+        const brokenPool = createDatabasePool(context.config);
+        await brokenPool.end();
+        const brokenApp = createApplication({
+            config: context.config,
+            pool: brokenPool,
+            content: context.content,
+        });
+        const broken = await new TestClient(brokenApp).get("/readyz");
+        expect(broken.status).toBe(503);
+        const brokenBody = await readJson(broken);
+        expect(field(brokenBody, "status")).toBe("not_ready");
+        expect(field(field(brokenBody, "checks"), "database")).toBe("failed");
+
+        const emptyWeb = await mkdtemp(join(tmpdir(), "praxbit-empty-web-"));
+        try {
+            const productionApp = createApplication({
+                config: { ...context.config, nodeEnvironment: "production" },
+                pool: context.pool,
+                content: context.content,
+                webDirectory: emptyWeb,
+            });
+            const client = new TestClient(productionApp);
+            const health = await readJson(await client.get("/healthz"));
+            expect(field(health, "webBuild")).toBe(false);
+            const ready = await client.get("/readyz");
+            expect(ready.status).toBe(503);
+            const readyBody = await readJson(ready);
+            expect(field(readyBody, "status")).toBe("not_ready");
+            expect(field(field(readyBody, "checks"), "webBuild")).toBe("missing");
+        } finally {
+            await rm(emptyWeb, { recursive: true, force: true });
+        }
     });
 
     it("serves projects publicly and with per-user revisions", async function testProjects(): Promise<void> {
@@ -186,6 +334,12 @@ describe("catalog, health, and transport protections", function catalogSuite(): 
             expect(home.status, homeText).toBe(200);
             expect(homeText).toContain("Praxbit shell");
             expect(home.headers.get("content-security-policy")).toContain("script-src 'self'");
+
+            const ready = await client.get("/readyz");
+            expect(ready.status).toBe(200);
+            const readyBody = await readJson(ready);
+            expect(field(field(readyBody, "checks"), "webBuild")).toBe("ok");
+            expect(field(readyBody, "webBuild")).toBe(true);
 
             const asset = await client.get("/app.js");
             expect(asset.status).toBe(200);
