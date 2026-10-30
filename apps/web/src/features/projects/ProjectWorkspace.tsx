@@ -1,8 +1,20 @@
 import { A, useParams } from "@solidjs/router";
-import { For, Show, createMemo, createSignal, onCleanup, onMount, type JSX } from "solid-js";
-import type { ProjectDefinition } from "@praxbit/contracts";
+import {
+    For,
+    Show,
+    createEffect,
+    createMemo,
+    createSignal,
+    onCleanup,
+    onMount,
+    type JSX,
+} from "solid-js";
+import type { ProjectDetail, ProjectDefinition } from "@praxbit/contracts";
+import { ApiError } from "@praxbit/client";
 import { buildPreviewDocument } from "@praxbit/execution/browser";
+import { announce } from "../../app/AppShell.tsx";
 import { CodeEditor } from "../../components/CodeEditor.tsx";
+import { TabPanel, Tabs, type TabItem } from "../../components/Tabs.tsx";
 import { projectById, skillName } from "../../content/index.ts";
 import { api } from "../../platform/services.ts";
 import { executeChecks, type CheckOutcome } from "../missions/run-checks.ts";
@@ -51,6 +63,8 @@ export function ProjectWorkspace(): JSX.Element {
     const project = projectById(params.id);
 
     let headingRef: HTMLHeadingElement | undefined;
+    let stageHeadingRef: HTMLHeadingElement | undefined;
+    let stageFocusPending = false;
     const [files, setFiles] = createSignal<Readonly<Record<string, string>>>(project?.files ?? {});
     const [activePath, setActivePath] = createSignal(project?.entry ?? "");
     const [stageIndex, setStageIndex] = createSignal(0);
@@ -59,6 +73,7 @@ export function ProjectWorkspace(): JSX.Element {
     const [passedStages, setPassedStages] = createSignal<readonly string[]>([]);
     const [runtimeError, setRuntimeError] = createSignal("");
     const [savedRevision, setSavedRevision] = createSignal<number | undefined>(undefined);
+    const [loadedRevision, setLoadedRevision] = createSignal<number | undefined>(undefined);
     const [revisionError, setRevisionError] = createSignal("");
     const [revisionBusy, setRevisionBusy] = createSignal(false);
     const [completionMessage, setCompletionMessage] = createSignal("");
@@ -67,9 +82,39 @@ export function ProjectWorkspace(): JSX.Element {
     const [draftLoading, setDraftLoading] = createSignal(true);
     const [draftReady, setDraftReady] = createSignal(false);
     const [draftError, setDraftError] = createSignal("");
+    const [accountRevisionLoaded, setAccountRevisionLoaded] = createSignal(false);
 
     const stage = createMemo(function currentStage() {
         return project?.stages[stageIndex()];
+    });
+
+    const stageTabs = createMemo(function stageItems(): readonly TabItem[] {
+        return (project?.stages ?? []).map(function stageTab(item, index): TabItem {
+            return {
+                id: item.id,
+                label: `${index + 1}. ${item.title}`,
+                detail: `${stageIndex() === index ? "Current stage · " : ""}${
+                    passedStages().includes(item.id) ? "Passed" : "Not yet passed"
+                }`,
+            };
+        });
+    });
+
+    const fileTabs = createMemo(function fileItems(): readonly TabItem[] {
+        return Object.keys(project?.files ?? {}).map(function fileTab(path): TabItem {
+            return { id: path, label: path };
+        });
+    });
+
+    createEffect(function focusStageHeading(): void {
+        const index = stageIndex();
+        if (!stageFocusPending || index < 0) {
+            return;
+        }
+        stageFocusPending = false;
+        queueMicrotask(function focus(): void {
+            stageHeadingRef?.focus();
+        });
     });
 
     const activeFile = createMemo(function currentFile() {
@@ -155,6 +200,15 @@ export function ProjectWorkspace(): JSX.Element {
         return stageId !== undefined && passedStages().includes(stageId);
     }
 
+    function openStage(index: number): void {
+        if (index < 0) {
+            return;
+        }
+        stageFocusPending = true;
+        setStageIndex(index);
+        setOutcomes([]);
+    }
+
     onMount(function loadDraft(): void {
         void (async function load(): Promise<void> {
             if (project === undefined) {
@@ -163,6 +217,8 @@ export function ProjectWorkspace(): JSX.Element {
             }
             try {
                 const draft = await learning.loadProjectDraft(project.id);
+                const draftRevision = await learning.loadProjectRevision(project.id);
+                setLoadedRevision(draftRevision);
                 if (draft !== undefined) {
                     setFiles({ ...project.files, ...draft });
                 }
@@ -173,13 +229,39 @@ export function ProjectWorkspace(): JSX.Element {
                 }
                 setDraftReady(true);
             } catch (error) {
-                setDraftError(
+                const message =
                     error instanceof Error
                         ? `${error.message} The starter files are shown instead.`
-                        : "Your saved draft could not be loaded. The starter files are shown instead.",
-                );
+                        : "Your saved draft could not be loaded. The starter files are shown instead.";
+                setDraftError(message);
+                announce(`Draft error. ${message}`);
             } finally {
                 setDraftLoading(false);
+            }
+        })();
+    });
+
+    createEffect(function loadAccountRevision(): void {
+        if (
+            project === undefined ||
+            accountRevisionLoaded() ||
+            draftLoading() ||
+            !learning.ready() ||
+            learning.user() === undefined
+        ) {
+            return;
+        }
+        setAccountRevisionLoaded(true);
+        void (async function load(): Promise<void> {
+            try {
+                const detail = await api.getProject(project.id);
+                const latest = detail.revisions[detail.revisions.length - 1];
+                setLoadedRevision(detail.project.currentRevision);
+                if (latest !== undefined) {
+                    setFiles({ ...project.files, ...latest.files, ...files() });
+                }
+            } catch {
+                // Keep the local draft usable when the account revision cannot be fetched.
             }
         })();
     });
@@ -219,10 +301,19 @@ export function ProjectWorkspace(): JSX.Element {
                         : [...current, stage()?.id ?? ""];
                 });
             }
-        } catch (error) {
-            setRuntimeError(
-                error instanceof Error ? error.message : "The project checks could not run.",
+            const failed = result.outcomes.filter(function failedCheck(item): boolean {
+                return !item.passed;
+            }).length;
+            announce(
+                failed === 0
+                    ? `All ${result.outcomes.length} checks for this stage passed.`
+                    : `${failed} of ${result.outcomes.length} checks failed.`,
             );
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "The project checks could not run.";
+            setRuntimeError(message);
+            announce(`Runtime error. ${message}`);
         } finally {
             setRunning(false);
         }
@@ -241,20 +332,49 @@ export function ProjectWorkspace(): JSX.Element {
         setCompletionBusy(true);
         try {
             const outcome = await learning.recordProjectCompletion(project, passedStages().length);
-            setCompletionMessage(
-                outcome.alreadyCompleted
-                    ? "Project completion was already recorded."
-                    : `Project complete. ${outcome.experience} experience points recorded.`,
-            );
+            const message = outcome.alreadyCompleted
+                ? "Project completion was already recorded."
+                : `Project complete. ${outcome.experience} experience points recorded.`;
+            setCompletionMessage(message);
+            announce(message);
         } catch (error) {
-            setCompletionError(
+            const message =
                 error instanceof Error
                     ? error.message
-                    : "Completion could not be recorded. Your stage results are still available; try again.",
-            );
+                    : "Completion could not be recorded. Your stage results are still available; try again.";
+            setCompletionError(message);
+            announce(`Completion error. ${message}`);
         } finally {
             setCompletionBusy(false);
         }
+    }
+
+    async function persistSavedRevision(
+        detail: ProjectDetail,
+        nextFiles: Readonly<Record<string, string>>,
+    ): Promise<void> {
+        if (project === undefined) {
+            return;
+        }
+        setFiles(nextFiles);
+        setSavedRevision(detail.project.currentRevision);
+        setLoadedRevision(detail.project.currentRevision);
+        await learning.saveProjectDraft(project.id, nextFiles, detail.project.currentRevision);
+    }
+
+    async function queueRevision(
+        nextFiles: Readonly<Record<string, string>>,
+        baseRevision: number,
+    ): Promise<void> {
+        if (project === undefined) {
+            return;
+        }
+        await learning.queueProjectRevision(
+            project.id,
+            nextFiles,
+            baseRevision,
+            "Project workspace revision",
+        );
     }
 
     async function saveRevision(): Promise<void> {
@@ -263,18 +383,57 @@ export function ProjectWorkspace(): JSX.Element {
         }
         setRevisionError("");
         setRevisionBusy(true);
+        const baseRevision =
+            loadedRevision() ?? (await learning.loadProjectRevision(project.id)) ?? 0;
         try {
-            const current = await api.getProject(project.id);
             const revision = await api.saveRevision(project.id, {
-                baseRevision: current.project.currentRevision,
+                baseRevision,
                 message: "Project workspace revision",
                 files: files(),
             });
-            setSavedRevision(revision.project.currentRevision);
+            await persistSavedRevision(revision, files());
         } catch (error) {
-            setRevisionError(
-                error instanceof Error ? error.message : "The revision could not be saved.",
-            );
+            if (error instanceof ApiError && error.code === "project_revision_conflict") {
+                let mergedFiles = files();
+                let mergeBase = loadedRevision() ?? baseRevision;
+                try {
+                    const latestDetail = await api.getProject(project.id);
+                    const latest = latestDetail.revisions[latestDetail.revisions.length - 1];
+                    mergedFiles = {
+                        ...project.files,
+                        ...latest?.files,
+                        ...files(),
+                    };
+                    mergeBase = latestDetail.project.currentRevision;
+                    const revision = await api.saveRevision(project.id, {
+                        baseRevision: mergeBase,
+                        message: "Project workspace revision merged with account changes",
+                        files: mergedFiles,
+                    });
+                    await persistSavedRevision(revision, mergedFiles);
+                    const message =
+                        "Another device changed this project. The latest account files were merged with your local draft and saved as a new revision.";
+                    setRevisionError(message);
+                    announce(message);
+                } catch {
+                    await queueRevision(mergedFiles, mergeBase);
+                    const message =
+                        "The conflict could not be merged online. Your draft is saved on this device and queued for retry; it remains available for resolution.";
+                    setRevisionError(message);
+                    announce(message);
+                }
+            } else if (error instanceof ApiError && error.status < 500) {
+                const message =
+                    error instanceof Error ? error.message : "The revision could not be saved.";
+                setRevisionError(message);
+                announce(`Revision error. ${message}`);
+            } else {
+                await queueRevision(files(), baseRevision);
+                const message =
+                    "The server could not be reached. Your draft is saved on this device and queued for synchronization.";
+                setRevisionError(message);
+                announce(message);
+            }
         } finally {
             setRevisionBusy(false);
         }
@@ -304,7 +463,9 @@ export function ProjectWorkspace(): JSX.Element {
 
             <div class="stack stack--wide">
                 <div class="row" style={{ "align-items": "flex-start" }}>
-                    <Pip pose="thinking" size={84} />
+                    <span aria-hidden="true">
+                        <Pip pose="thinking" size={84} />
+                    </span>
                     <div class="stack stack--tight">
                         <h1 ref={headingRef} tabindex="-1">
                             {project.title}
@@ -335,8 +496,7 @@ export function ProjectWorkspace(): JSX.Element {
                                         type="button"
                                         class="button button--secondary button--small"
                                         onClick={function advance(): void {
-                                            setStageIndex(current().index);
-                                            setOutcomes([]);
+                                            openStage(current().index);
                                         }}
                                     >
                                         Open next unpassed stage: {current().stage.title}
@@ -363,80 +523,64 @@ export function ProjectWorkspace(): JSX.Element {
                         Stages can be reviewed in any order. Completion requires a passing check run
                         for every stage.
                     </p>
-                    <div
-                        class="method-tabs project-stages"
-                        role="tablist"
-                        aria-label="Project stages"
-                    >
-                        <For each={project.stages}>
-                            {function stageTab(item, index): JSX.Element {
-                                return (
-                                    <button
-                                        type="button"
-                                        role="tab"
-                                        class="method-tab"
-                                        aria-selected={stageIndex() === index()}
-                                        onClick={function choose(): void {
-                                            setStageIndex(index());
-                                            setOutcomes([]);
-                                        }}
-                                    >
-                                        <span class="method-tab__name">
-                                            {index() + 1}. {item.title}
-                                        </span>
-                                        <span class="method-tab__detail">
-                                            {stageIndex() === index() ? "Current stage · " : ""}
-                                            {passedStages().includes(item.id)
-                                                ? "Passed"
-                                                : "Not yet passed"}
-                                        </span>
-                                    </button>
-                                );
-                            }}
-                        </For>
-                    </div>
-                </div>
-
-                <Show when={stage() !== undefined}>
-                    <div class="surface stack stack--tight">
-                        <div class="row row--between">
-                            <h2>{stage()?.title}</h2>
-                            <span
-                                class={`status ${stagePassed(stage()?.id) ? "status--success" : ""}`}
-                            >
-                                <span class="status__mark" aria-hidden="true" />
-                                {stagePassed(stage()?.id) ? "Passed" : "Not yet passed"}
-                            </span>
-                        </div>
-                        <p class="small">{stage()?.description}</p>
-                        <p class="meta">
-                            Stage {stageIndex() + 1} of {project.stages.length}.{" "}
-                            {stagePassed(stage()?.id)
-                                ? "This stage has a passing check run."
-                                : "Run the checks below until every row passes."}
-                        </p>
-                    </div>
-                </Show>
-
-                <div class="method-tabs" role="tablist" aria-label="Project files">
-                    <For each={Object.keys(project.files)}>
-                        {function path(item): JSX.Element {
-                            return (
-                                <button
-                                    type="button"
-                                    role="tab"
-                                    class="method-tab"
-                                    aria-selected={activeFile() === item}
-                                    onClick={function open(): void {
-                                        setActivePath(item);
-                                    }}
-                                >
-                                    <span class="method-tab__name">{item}</span>
-                                </button>
-                            );
+                    <Tabs
+                        idPrefix="project-stages"
+                        label="Project stages"
+                        items={stageTabs()}
+                        activeId={stage()?.id ?? ""}
+                        onSelect={function chooseStage(id): void {
+                            const index = project.stages.findIndex(function match(item): boolean {
+                                return item.id === id;
+                            });
+                            openStage(index);
                         }}
-                    </For>
+                    />
                 </div>
+
+                <For each={project.stages}>
+                    {function stageItem(item, index): JSX.Element {
+                        return (
+                            <TabPanel
+                                idPrefix="project-stages"
+                                id={item.id}
+                                activeId={stage()?.id ?? ""}
+                                content={function stagePanel(): JSX.Element {
+                                    const passed = stagePassed(item.id);
+                                    return (
+                                        <div class="surface stack stack--tight">
+                                            <div class="row row--between">
+                                                <h2 ref={stageHeadingRef} tabindex="-1">
+                                                    {item.title}
+                                                </h2>
+                                                <span
+                                                    class={`status ${passed ? "status--success" : ""}`}
+                                                >
+                                                    <span class="status__mark" aria-hidden="true" />
+                                                    {passed ? "Passed" : "Not yet passed"}
+                                                </span>
+                                            </div>
+                                            <p class="small">{item.description}</p>
+                                            <p class="meta">
+                                                Stage {index() + 1} of {project.stages.length}.{" "}
+                                                {passed
+                                                    ? "This stage has a passing check run."
+                                                    : "Run the checks below until every row passes."}
+                                            </p>
+                                        </div>
+                                    );
+                                }}
+                            />
+                        );
+                    }}
+                </For>
+
+                <Tabs
+                    idPrefix="project-files"
+                    label="Project files"
+                    items={fileTabs()}
+                    activeId={activeFile()}
+                    onSelect={setActivePath}
+                />
 
                 <div class="grid grid--two">
                     <div class="stack stack--tight">
@@ -450,21 +594,37 @@ export function ProjectWorkspace(): JSX.Element {
                                 {draftError()}
                             </p>
                         </Show>
-                        <CodeEditor
-                            value={files()[activeFile()] ?? ""}
-                            language={editorLanguage(activeFile())}
-                            label={`${activeFile()} editor`}
-                            onChange={function change(value): void {
-                                setFiles(function update(current): Readonly<
-                                    Record<string, string>
-                                > {
-                                    return { ...current, [activeFile()]: value };
-                                });
+                        <For each={Object.keys(project.files)}>
+                            {function file(item): JSX.Element {
+                                return (
+                                    <TabPanel
+                                        idPrefix="project-files"
+                                        id={item}
+                                        activeId={activeFile()}
+                                        content={function editorPanel(): JSX.Element {
+                                            return (
+                                                <CodeEditor
+                                                    value={files()[item] ?? ""}
+                                                    language={editorLanguage(item)}
+                                                    label={`${item} editor`}
+                                                    onChange={function change(value): void {
+                                                        setFiles(function update(current): Readonly<
+                                                            Record<string, string>
+                                                        > {
+                                                            return { ...current, [item]: value };
+                                                        });
+                                                    }}
+                                                    onRun={function run(): void {
+                                                        void runStage();
+                                                    }}
+                                                />
+                                            );
+                                        }}
+                                    />
+                                );
                             }}
-                            onRun={function run(): void {
-                                void runStage();
-                            }}
-                        />
+                        </For>
+
                         <div class="row">
                             <button
                                 type="button"
@@ -528,6 +688,36 @@ export function ProjectWorkspace(): JSX.Element {
                                 <p class="feedback feedback--error" role="alert">
                                     {revisionError()}
                                 </p>
+                            </Show>
+                            <Show when={learning.conflictCount() > 0}>
+                                <div class="surface surface--quiet stack stack--tight">
+                                    <p class="small">
+                                        {learning.conflictCount()} local change
+                                        {learning.conflictCount() === 1 ? "" : "s"} could not be
+                                        applied because the account changed elsewhere. The local
+                                        work is kept until you choose what to do.
+                                    </p>
+                                    <div class="row">
+                                        <button
+                                            type="button"
+                                            class="button button--secondary button--small"
+                                            onClick={function retry(): void {
+                                                void learning.retryConflicts();
+                                            }}
+                                        >
+                                            Retry queued changes
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="button button--ghost button--small"
+                                            onClick={function discard(): void {
+                                                void learning.discardConflicts();
+                                            }}
+                                        >
+                                            Discard retained changes
+                                        </button>
+                                    </div>
+                                </div>
                             </Show>
                         </Show>
                     </div>
