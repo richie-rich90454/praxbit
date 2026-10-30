@@ -1,6 +1,6 @@
 {
     "id": "before-code.find-the-file",
-    "version": 1,
+    "version": 2,
     "sequence": 9,
     "courseId": "before-code",
     "title": "Find the file",
@@ -50,14 +50,23 @@
             "description": "Selecting an old backup instead of the live file.",
             "stepId": "find-inventory",
             "answer": "srv/campus/backups/inventory-old.json",
-            "feedback": "The backup is not the file the running service uses. Live data is in srv/campus/data."
+            "feedback": "The backup is not the file the running service uses. Live data is in srv/campus/data.",
+            "followUpSkill": "concept.filesystems"
         },
         {
             "id": "parent-path",
             "description": "Misreading ../ as moving deeper.",
             "stepId": "path-check",
             "answer": "data",
-            "feedback": ".. moves up one folder. From app, ../data means go up to campus, then into data."
+            "feedback": ".. moves up one folder. From app, ../data means go up to campus, then into data.",
+            "followUpSkill": "concept.filesystems"
+        },
+        {
+            "id": "extension-proves-content",
+            "description": "Assuming a file extension guarantees valid content.",
+            "stepId": "filesystem-claims",
+            "answer": "extension",
+            "feedback": "An extension is a naming convention. A .json file can contain invalid JSON or something else entirely."
         }
     ],
     "lesson": {
@@ -90,6 +99,12 @@
         {
             "kind": "filesystem",
             "id": "find-inventory",
+            "hints": [
+                "Open the folders and choose the live inventory file, not a copy.",
+                "A path identifies a file by its folder chain; similar names in backups are different files.",
+                "In /home/student/notes.txt the folders are home and student and the file is notes.txt.",
+                "The live data sits beside orders.json under campus, not under backups. Navigate there and select it."
+            ],
             "title": "Locate inventory.json",
             "prompt": "Navigate the folders and select the live inventory file. Do not select a backup.",
             "evidence": "construction",
@@ -198,15 +213,21 @@
                 "explanation": "From app, .. moves up to campus. Then data/inventory.json reaches the live file."
             },
             "hints": [
-                "Where is data relative to app?",
-                "data is a sibling of app, not a child.",
-                "Move up one folder first with ...",
-                "The path is ../data/inventory.json."
+                "Start at /srv/campus/app and find the shortest correct relative path.",
+                ".. moves up one folder; a name without .. moves down from the current folder.",
+                "From /a/b, ../c reaches /a/c, while c reaches /a/b/c.",
+                "You need to leave app first, then enter data. Build the path from that move."
             ]
         },
         {
             "kind": "explain",
             "id": "filesystem-claims",
+            "hints": [
+                "Select statements that are true about how paths and files behave.",
+                "Names are scoped by folders, relative paths depend on the current directory, and extensions are conventions.",
+                "Two files named config.json can exist in different folders without conflict.",
+                "Two statements are accurate; reject the claims about backups being live and extensions proving content."
+            ],
             "title": "Paths and identity",
             "prompt": "Select the accurate statements.",
             "evidence": "explanation",
