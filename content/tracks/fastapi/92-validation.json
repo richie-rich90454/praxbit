@@ -1,18 +1,27 @@
 {
     "id": "fastapi.validation",
     "version": 1,
-    "sequence": 92,
+    "sequence": 166,
     "courseId": "fastapi",
     "title": "Response contracts and dependency overrides",
     "summary": "Use response_model and HTTPException, then replace a dependency in tests.",
-    "skills": ["fastapi.validation", "fastapi.testing"],
-    "prerequisites": ["fastapi.routes", "api.validation"],
+    "skills": [
+        "fastapi.validation",
+        "fastapi.testing"
+    ],
+    "prerequisites": [
+        "fastapi.routes",
+        "api.validation"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +33,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastapi"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:fastapi"
+    ],
     "hints": [
         "Import get_items from main next to app.",
         "Assign app.dependency_overrides[get_items] = fake_items before creating the client.",
@@ -44,19 +62,24 @@
             "id": "override-leak",
             "description": "Leaving a dependency override installed after a test.",
             "stepId": "apply",
-            "feedback": "The override is global to the app object. Clear it in finally so later tests do not silently use fake data."
+            "testDescription": "The override is cleared after each test.",
+            "feedback": "The override is global to the app object. Clear it in finally so later tests do not silently use fake data.",
+            "followUpSkill": "fastapi.testing"
         },
         {
             "id": "test-real-store",
             "description": "Letting the test call the real data store.",
             "stepId": "apply",
+            "testDescription": "The override supplies fake records instead of the real store.",
             "feedback": "A unit test should replace the dependency and assert the contract without external state."
         },
         {
             "id": "async-block",
             "description": "Calling a blocking database client from an async endpoint.",
             "stepId": "review",
-            "feedback": "The event loop cannot serve other requests while the call blocks. Use def or an async driver."
+            "diagnostic": "Approving the async endpoint that runs a synchronous ORM query.",
+            "feedback": "The event loop cannot serve other requests while the call blocks. Use def or an async driver.",
+            "followUpSkill": "fastapi.testing"
         }
     ],
     "lesson": {
@@ -161,7 +184,9 @@
                     "kind": "static",
                     "description": "The test imports the app and the dependency it replaces.",
                     "file": "test_main.py",
-                    "includes": ["from main import app, get_items"],
+                    "includes": [
+                        "from main import app, get_items"
+                    ],
                     "excludes": []
                 },
                 {
@@ -198,17 +223,34 @@
                     "kind": "static",
                     "description": "The override is cleared after each test.",
                     "file": "test_main.py",
-                    "includes": ["app.dependency_overrides.clear()"],
+                    "includes": [
+                        "app.dependency_overrides.clear()"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "test_main.py",
-                    "includes": ["from main import app, get_items"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "from main import app, get_items"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "Import get_items from main along with app.",
+                "Define a fake dependency that returns fixed records.",
+                "Assign app.dependency_overrides[get_items] = fake_items.",
+                "Assert the filtered JSON and clear the override in finally."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pytest",
+                "description": "Run the Python test suite for the FastAPI service."
+            }
         },
         {
             "kind": "review",
@@ -260,7 +302,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "Without a response model FastAPI has no field list, so ORM columns leak and serialization can fail. The synchronous query also blocks the event loop. Return a DTO with response_model, use a sync handler or async driver, and raise HTTPException for missing rows."
+            "explanation": "Without a response model FastAPI has no field list, so ORM columns leak and serialization can fail. The synchronous query also blocks the event loop. Return a DTO with response_model, use a sync handler or async driver, and raise HTTPException for missing rows.",
+            "hints": [
+                "Check each finding against the endpoint code.",
+                "ORM objects without a response model expose every column.",
+                "A blocking query inside async def holds the event loop.",
+                "A missing 404 and an explicit response model are separate issues."
+            ]
         }
     ],
     "evaluation": {
@@ -280,5 +328,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
