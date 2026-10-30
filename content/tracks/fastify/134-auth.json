@@ -1,0 +1,278 @@
+{
+    "id": "fastify.auth",
+    "version": 1,
+    "sequence": 229,
+    "courseId": "fastify",
+    "title": "Authenticate and authorize writes",
+    "summary": "Require both the admin role and the catalog write scope, then review a validated route that still has no caller check.",
+    "skills": ["security.auth", "fastify.plugins", "fastify.schemas"],
+    "prerequisites": ["fastify.plugins", "security.auth"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "auth",
+        "briefing": "The write route validates its body but accepts anonymous callers. An admin with only read scope can also publish products."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Check role and scope before allowing a write.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review a route for missing authentication and response risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:fastify"],
+    "hints": [
+        "Reject a null role first.",
+        "Require role === \"admin\" before checking scopes.",
+        "Check scopes.includes(\"catalog:write\").",
+        "Return false unless both checks pass."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-allow",
+            "description": "Allowing a write without a caller.",
+            "stepId": "apply",
+            "testDescription": "Anonymous callers cannot write.",
+            "feedback": "A null role must fail. The route needs an authenticated admin before it can consider scopes.",
+            "followUpSkill": "security.auth"
+        },
+        {
+            "id": "role-only",
+            "description": "Checking the role but not the required scope.",
+            "stepId": "apply",
+            "testDescription": "An admin without catalog:write is denied.",
+            "feedback": "Role is coarse. A read-only admin still lacks catalog:write, so the scope check is part of authorization.",
+            "followUpSkill": "fastify.plugins"
+        },
+        {
+            "id": "ship-no-prehandler",
+            "description": "Trusting body validation as caller validation.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "A body schema validates shape, not identity. Without a preHandler the route accepts anonymous writes.",
+            "followUpSkill": "fastify.schemas"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "preHandler is the auth slot",
+                "body": "A preHandler runs after parsing and validation but before the route handler. It is the right place to reject a caller without a session or scope."
+            },
+            {
+                "title": "Role and scope are different",
+                "body": "An admin role does not imply every permission. Check the specific scope the route needs so a read-only admin cannot write catalog data."
+            },
+            {
+                "title": "Validation is not authentication",
+                "body": "A body schema proves the payload shape. It says nothing about who sent it, so a validated request can still be anonymous."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "preHandler",
+                "definition": "A route hook that runs after validation and before the handler."
+            },
+            {
+                "term": "Scope",
+                "definition": "A named permission required for an action."
+            },
+            {
+                "term": "401 versus 403",
+                "definition": "Missing identity versus a known caller without permission."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Role, scope, and preHandler",
+            "prompt": "Read the explanation, then implement the write decision.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "preHandler is the auth slot",
+                    "body": "A preHandler runs after parsing and validation but before the route handler. It is the right place to reject a caller without a session or scope."
+                },
+                {
+                    "title": "Role and scope are different",
+                    "body": "An admin role does not imply every permission. Check the specific scope the route needs so a read-only admin cannot write catalog data."
+                },
+                {
+                    "title": "Validation is not authentication",
+                    "body": "A body schema proves the payload shape. It says nothing about who sent it, so a validated request can still be anonymous."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "preHandler",
+                    "definition": "A route hook that runs after validation and before the handler."
+                },
+                {
+                    "term": "Scope",
+                    "definition": "A named permission required for an action."
+                },
+                {
+                    "term": "401 versus 403",
+                    "definition": "Missing identity versus a known caller without permission."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Decide whether a catalog write is allowed",
+            "prompt": "Edit authorize.ts. Allow only an admin whose scopes include catalog:write; deny null roles, other roles, and admins without the scope.",
+            "evidence": "construction",
+            "hints": [
+                "Use role === null as the first denial.",
+                "Return false for every role except admin.",
+                "Check scopes.includes for the exact write scope.",
+                "Return true only after all checks pass."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "authorize.ts",
+                    "content": "type Role = \"member\" | \"admin\" | \"auditor\";\n\nfunction canWriteCatalog(role: Role | null, scopes: string[]): boolean {\n  // TODO: require an admin role and the catalog:write scope\n  return true;\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "authorize.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Anonymous callers cannot write.",
+                    "name": "canWriteCatalog",
+                    "args": [null, ["catalog:write"]],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "Members cannot write.",
+                    "name": "canWriteCatalog",
+                    "args": ["member", ["catalog:write"]],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "An admin without catalog:write is denied.",
+                    "name": "canWriteCatalog",
+                    "args": ["admin", ["catalog:read"]],
+                    "expected": false
+                },
+                {
+                    "kind": "function",
+                    "description": "An admin with catalog:write is allowed.",
+                    "name": "canWriteCatalog",
+                    "args": ["admin", ["catalog:read", "catalog:write"]],
+                    "expected": true
+                },
+                {
+                    "kind": "function",
+                    "description": "An auditor cannot write.",
+                    "name": "canWriteCatalog",
+                    "args": ["auditor", ["catalog:write"]],
+                    "expected": false
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the write route",
+            "prompt": "Review server.ts and select every real authentication or response problem.",
+            "evidence": "transfer",
+            "hints": [
+                "Look for a preHandler or an authentication hook on the route.",
+                "Distinguish body validation from caller identity.",
+                "Check whether a response schema limits the serialized fields.",
+                "Reject claims that a schema or encapsulation performs authentication."
+            ],
+            "artifact": {
+                "title": "server.ts",
+                "caption": "The route validates the body and writes a product without checking the caller or declaring a response schema.",
+                "kind": "code",
+                "language": "typescript",
+                "content": "import Fastify from \"fastify\";\n\nexport const app = Fastify({ logger: false });\n\nconst productSchema = {\n  type: \"object\",\n  required: [\"name\", \"price\"],\n  properties: {\n    name: { type: \"string\" },\n    price: { type: \"number\" },\n  },\n};\n\napp.post(\"/products\", { schema: { body: productSchema } }, async function createProduct(request, reply) {\n  return reply.status(201).send(request.body);\n});\n"
+            },
+            "findings": [
+                {
+                    "id": "no-auth",
+                    "label": "The write route has no preHandler, so any client can create a product.",
+                    "correct": true
+                },
+                {
+                    "id": "validation",
+                    "label": "The body schema validates shape but says nothing about the caller's identity.",
+                    "correct": true
+                },
+                {
+                    "id": "response",
+                    "label": "The response schema is missing, so internal fields can leak from the serialized payload.",
+                    "correct": true
+                },
+                {
+                    "id": "scope",
+                    "label": "The body schema requires catalog:write, so anonymous writes are rejected.",
+                    "correct": false
+                },
+                {
+                    "id": "encapsulated",
+                    "label": "The route is encapsulated, which authenticates it automatically.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "Body validation proves the payload shape, not the caller. The route has no preHandler and no response schema, so anonymous writes pass and the reply can include fields the client should not see."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web", "professional"]
+}
