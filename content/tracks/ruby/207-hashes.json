@@ -37,7 +37,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "ruby.hashes",
-    "sequence": 207,
+    "sequence": 112,
     "title": "Hashes, defaults, and grouped totals",
     "summary": "Total order rows with a default-zero hash, then diagnose a shared default array that leaks items across categories.",
     "skills": [
