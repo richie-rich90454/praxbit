@@ -5,21 +5,14 @@
     "courseId": "go",
     "title": "Serve JSON over HTTP",
     "summary": "Replace a plain-text handler with a routed JSON response and reason about headers.",
-    "skills": [
-        "go.web"
-    ],
-    "prerequisites": [
-        "go.interfaces"
-    ],
+    "skills": ["go.web"],
+    "prerequisites": ["go.interfaces"],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -31,31 +24,20 @@
         {
             "id": "write-json",
             "description": "Write a JSON response from an HTTP handler.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "header-order",
             "description": "Reason about headers after the response starts.",
-            "stepIds": [
-                "http-transfer"
-            ]
+            "stepIds": ["http-transfer"]
         },
         {
             "id": "explain-http",
             "description": "Explain routing, headers, and handler concurrency accurately.",
-            "stepIds": [
-                "http-check"
-            ]
+            "stepIds": ["http-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:go"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:go"],
     "hints": [
         "Set the Content-Type header before writing the body.",
         "json.NewEncoder can encode a struct directly to the writer.",
@@ -199,9 +181,7 @@
                         "w.Header().Set(\"Content-Type\", \"application/json\")",
                         "json.NewEncoder(w).Encode("
                     ],
-                    "excludes": [
-                        "fmt.Fprintln(w, \"order\")"
-                    ]
+                    "excludes": ["fmt.Fprintln(w, \"order\")"]
                 },
                 {
                     "kind": "static",
@@ -218,12 +198,8 @@
                     "kind": "static",
                     "description": "The starter TODO is gone.",
                     "file": "main.go",
-                    "includes": [
-                        "\"encoding/json\""
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["\"encoding/json\""],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -323,9 +299,5 @@
         "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems",
-        "professional",
-        "web"
-    ]
+    "tags": ["systems", "professional", "web"]
 }
