@@ -1,0 +1,328 @@
+{
+    "id": "cpp.threads-cmake",
+    "version": 1,
+    "sequence": 84,
+    "courseId": "cpp",
+    "title": "Threads and CMake",
+    "summary": "Link the platform thread library and reason about shared state.",
+    "skills": [
+        "cpp.build",
+        "cpp.stl"
+    ],
+    "prerequisites": [
+        "cpp.templates",
+        "concept.iteration"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "cpp-threads-cmake",
+        "briefing": "A worker binary uses std::thread but the CMake target does not link the platform thread library, so the build fails on Linux. Repair the target, then reason about a shared counter."
+    },
+    "objectives": [
+        {
+            "id": "link-threads",
+            "description": "Find and link the platform thread library in CMake.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-sync",
+            "description": "Choose synchronization for a shared counter.",
+            "stepIds": [
+                "thread-transfer"
+            ]
+        },
+        {
+            "id": "explain-threads",
+            "description": "Explain joins, data races, and CMake targets accurately.",
+            "stepIds": [
+                "thread-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:server-room",
+        "icon:cpp"
+    ],
+    "hints": [
+        "CMake has a package for platform threads.",
+        "Call find_package(Threads REQUIRED) before the target.",
+        "Link Threads::Threads to the executable.",
+        "Use target_link_libraries with PRIVATE scope."
+    ],
+    "misconceptions": [
+        {
+            "id": "no-link",
+            "description": "Compiling without linking the thread library.",
+            "stepId": "apply",
+            "testDescription": "CMake requires the thread package.",
+            "feedback": "std::thread needs the platform thread library. Find the Threads package and link Threads::Threads to the target.",
+            "followUpSkill": "cpp.build"
+        },
+        {
+            "id": "volatile",
+            "description": "Using volatile as a synchronization primitive.",
+            "stepId": "thread-transfer",
+            "answer": "volatile",
+            "feedback": "volatile controls compiler optimizations, not atomicity or ordering. Use a mutex or std::atomic.",
+            "followUpSkill": "cpp.build"
+        },
+        {
+            "id": "detach-safe",
+            "description": "Believing a detached thread finishes before main exits.",
+            "stepId": "thread-check",
+            "answer": "detach-safe",
+            "feedback": "A detached thread runs independently. If main exits first, the process can terminate while the thread is still using its data.",
+            "followUpSkill": "cpp.build"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Threads need a join or a plan",
+                "body": "std::thread starts a new thread of execution. A joinable thread must be joined or detached before it is destroyed, or the program terminates. Join when the result matters; detach only when the work truly outlives the current scope and owns everything it touches."
+            },
+            {
+                "title": "Shared writes need synchronization",
+                "body": "Two threads incrementing the same int without synchronization create a data race, which is undefined behavior. A mutex protects a critical section, and std::atomic provides indivisible operations for simple shared values. volatile is not a synchronization tool in C++."
+            },
+            {
+                "title": "CMake carries platform requirements",
+                "body": "Threads are part of the platform toolchain, so CMake needs find_package(Threads REQUIRED) and target_link_libraries(... Threads::Threads). The same target model links sockets or other system libraries. Keep the requirements on the target that uses them."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Thread",
+                "definition": "An independent sequence of execution within a process."
+            },
+            {
+                "term": "join",
+                "definition": "Waiting for a thread to finish before continuing."
+            },
+            {
+                "term": "Data race",
+                "definition": "Concurrent unsynchronized access where at least one access writes."
+            },
+            {
+                "term": "CMake target",
+                "definition": "A build artifact with its own sources, flags, and link dependencies."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Threads need a join or a plan",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Threads need a join or a plan",
+                    "body": "std::thread starts a new thread of execution. A joinable thread must be joined or detached before it is destroyed, or the program terminates. Join when the result matters; detach only when the work truly outlives the current scope and owns everything it touches."
+                },
+                {
+                    "title": "Shared writes need synchronization",
+                    "body": "Two threads incrementing the same int without synchronization create a data race, which is undefined behavior. A mutex protects a critical section, and std::atomic provides indivisible operations for simple shared values. volatile is not a synchronization tool in C++."
+                },
+                {
+                    "title": "CMake carries platform requirements",
+                    "body": "Threads are part of the platform toolchain, so CMake needs find_package(Threads REQUIRED) and target_link_libraries(... Threads::Threads). The same target model links sockets or other system libraries. Keep the requirements on the target that uses them."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Thread",
+                    "definition": "An independent sequence of execution within a process."
+                },
+                {
+                    "term": "join",
+                    "definition": "Waiting for a thread to finish before continuing."
+                },
+                {
+                    "term": "Data race",
+                    "definition": "Concurrent unsynchronized access where at least one access writes."
+                },
+                {
+                    "term": "CMake target",
+                    "definition": "A build artifact with its own sources, flags, and link dependencies."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Link the thread library",
+            "prompt": "Edit CMakeLists.txt. Require the platform Threads package and link Threads::Threads to campus_worker.",
+            "evidence": "construction",
+            "language": "cpp",
+            "files": [
+                {
+                    "path": "CMakeLists.txt",
+                    "content": "cmake_minimum_required(VERSION 3.24)\nproject(campus_worker CXX)\n\nset(CMAKE_CXX_STANDARD 20)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\n\nadd_executable(campus_worker main.cpp)\n\n# TODO: find and link the platform thread library\n",
+                    "editable": true,
+                    "language": "cmake"
+                },
+                {
+                    "path": "main.cpp",
+                    "content": "#include <iostream>\n#include <thread>\n\nint main() {\n    int value = 42;\n    std::thread worker([value]() { std::cout << value << \"\\n\"; });\n    worker.join();\n    return 0;\n}\n",
+                    "editable": false,
+                    "language": "cpp"
+                }
+            ],
+            "entry": "main.cpp",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "cmake -S . -B build && cmake --build build",
+                "description": "Configure and build the project with CMake."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "CMake requires the thread package.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "find_package(Threads REQUIRED)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The executable links the thread library.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "target_link_libraries(campus_worker PRIVATE Threads::Threads)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The target and C++ standard are still declared.",
+                    "file": "CMakeLists.txt",
+                    "includes": [
+                        "add_executable(campus_worker main.cpp)",
+                        "CMAKE_CXX_STANDARD 20"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "hints": [
+                "The package name is Threads.",
+                "Use REQUIRED so configuration fails without it.",
+                "Threads::Threads is the imported target.",
+                "Link it PRIVATE to campus_worker."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "thread-transfer",
+            "title": "Protect the shared counter",
+            "prompt": "Two threads increment the same int. Which change removes the data race?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the synchronization.",
+                "options": [
+                    {
+                        "id": "mutex",
+                        "label": "Guard the increment with std::mutex or use std::atomic<int>."
+                    },
+                    {
+                        "id": "volatile",
+                        "label": "Declare the counter volatile."
+                    },
+                    {
+                        "id": "sleep",
+                        "label": "Sleep one millisecond between increments."
+                    },
+                    {
+                        "id": "detach",
+                        "label": "Detach both threads and let main exit."
+                    }
+                ],
+                "correctId": "mutex",
+                "explanation": "A mutex makes the read-modify-write atomic as a critical section. std::atomic provides an atomic increment directly. volatile and sleeps do not provide synchronization."
+            },
+            "hints": [
+                "The race is on a read-modify-write sequence.",
+                "Sleeping changes timing but not atomicity.",
+                "Use a mutex or an atomic type.",
+                "Choose the mutex or atomic option."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "thread-check",
+            "title": "Joins, races, and targets",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "join",
+                    "label": "A joinable thread must be joined or detached before it is destroyed.",
+                    "correct": true
+                },
+                {
+                    "id": "race",
+                    "label": "A mutex can protect a read-modify-write sequence from a data race.",
+                    "correct": true
+                },
+                {
+                    "id": "detach-safe",
+                    "label": "A detached thread always finishes before main exits.",
+                    "correct": false
+                },
+                {
+                    "id": "target",
+                    "label": "CMake can attach link requirements to a specific target.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Thread lifetime needs an explicit decision. A mutex or atomic protects shared writes, and CMake keeps link requirements on the target that needs them.",
+            "hints": [
+                "Three statements are accurate.",
+                "Detached work is not awaited by main.",
+                "CMake target properties do not leak to unrelated targets.",
+                "Select join, race, and target."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 150,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "systems",
+        "professional"
+    ]
+}
