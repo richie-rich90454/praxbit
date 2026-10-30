@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "Cargo.toml": "[package]\nname = \"campus-cli\"\nversion = \"0.1.0\"\nedition = \"2021\"\ndescription = \"Campus inventory command-line tool\"\nlicense = \"MIT OR Apache-2.0\"\nrepository = \"https://github.com/praxbit/campus-cli\"\nkeywords = [\"inventory\", \"campus\"]\ncategories = [\"command-line-utilities\"]\nexclude = [\".env\", \"fixtures/private/*\"]\n\n[dependencies]\nserde = { version = \"1.0.203\", features = [\"derive\"] }\n"
+            }
+        }
+    }
+}
