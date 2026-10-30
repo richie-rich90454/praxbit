@@ -5,23 +5,14 @@
     "courseId": "cmake",
     "title": "Install rules and relocatable packages",
     "summary": "Install a library with GNUInstallDirs, separate build and install include paths, and export a target set.",
-    "skills": [
-        "cmake.packages",
-        "cmake.targets"
-    ],
-    "prerequisites": [
-        "cmake.packages",
-        "ops.deployment"
-    ],
+    "skills": ["cmake.packages", "cmake.targets"],
+    "prerequisites": ["cmake.packages", "ops.deployment"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,31 +24,20 @@
         {
             "id": "objective-install",
             "description": "Install targets and headers with relocatable destinations.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-review",
             "description": "Identify install rules that break package consumers.",
-            "stepIds": [
-                "review"
-            ]
+            "stepIds": ["review"]
         },
         {
             "id": "objective-transfer",
             "description": "Explain what find_package needs beyond a targets file.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:server-room",
-        "icon:cmake"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:server-room", "icon:cmake"],
     "hints": [
         "GNUInstallDirs provides CMAKE_INSTALL_LIBDIR and CMAKE_INSTALL_INCLUDEDIR.",
         "The build tree and the install tree need different include paths.",
@@ -215,9 +195,7 @@
                         "${CMAKE_INSTALL_LIBDIR}",
                         "${CMAKE_INSTALL_INCLUDEDIR}"
                     ],
-                    "excludes": [
-                        "/usr/local/lib"
-                    ]
+                    "excludes": ["/usr/local/lib"]
                 },
                 {
                     "kind": "static",
@@ -247,9 +225,7 @@
                         "install(EXPORT campus_metricsTargets",
                         "NAMESPACE campus::"
                     ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "excludes": ["TODO"]
                 }
             ],
             "language": "text"
@@ -371,7 +347,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "systems"
-    ]
+    "tags": ["systems"]
 }
