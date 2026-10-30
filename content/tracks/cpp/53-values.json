@@ -1,18 +1,26 @@
 {
     "id": "cpp.values",
     "version": 1,
-    "sequence": 53,
+    "sequence": 80,
     "courseId": "cpp",
     "title": "References and loops in C++",
     "summary": "Use a const reference and a range-for loop to inspect a vector.",
-    "skills": ["cpp.syntax"],
-    "prerequisites": ["c.syntax", "concept.conditions"],
+    "skills": [
+        "cpp.syntax"
+    ],
+    "prerequisites": [
+        "c.syntax",
+        "concept.conditions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:cpp"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:cpp"
+    ],
     "hints": [
         "The vector is already passed by const reference.",
         "The loop visits every value.",
@@ -43,14 +60,26 @@
         {
             "id": "copy",
             "description": "Passing large objects by value by default.",
-            "stepId": "apply",
-            "feedback": "Use const references for read-only parameters to avoid copies."
+            "stepId": "check",
+            "answer": "copy",
+            "feedback": "Use const references for read-only parameters to avoid copies.",
+            "followUpSkill": "cpp.syntax"
         },
         {
             "id": "bounds",
             "description": "Assuming operator[] validates the index.",
+            "stepId": "check",
+            "answer": "bounds",
+            "feedback": "operator[] does not check bounds. Use at() when a checked access is required.",
+            "followUpSkill": "cpp.syntax"
+        },
+        {
+            "id": "zero-count",
+            "description": "Leaving the placeholder increment.",
             "stepId": "apply",
-            "feedback": "operator[] does not check bounds. Use at() when a checked access is required."
+            "testDescription": "The range-for loop counts positive values.",
+            "feedback": "count += 0 never changes the count. Increment in the positive branch.",
+            "followUpSkill": "cpp.syntax"
         }
     ],
     "lesson": {
@@ -133,24 +162,46 @@
                     "kind": "static",
                     "description": "The function accepts a const vector reference.",
                     "file": "main.cpp",
-                    "includes": ["int count_positive(const std::vector<int>& values)"],
+                    "includes": [
+                        "int count_positive(const std::vector<int>& values)"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The range-for loop counts positive values.",
                     "file": "main.cpp",
-                    "includes": ["if (value > 0)", "count += 1;"],
-                    "excludes": ["count += 0"]
+                    "includes": [
+                        "if (value > 0)",
+                        "count += 1;"
+                    ],
+                    "excludes": [
+                        "count += 0"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.cpp",
-                    "includes": ["int count_positive(const std::vector<int>& values)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "int count_positive(const std::vector<int>& values)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "The vector is already a const reference.",
+                "The range-for loop visits each value.",
+                "Test value > 0 before incrementing.",
+                "if (value > 0) { count += 1; }"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "c++ -std=c++20 -Wall -Wextra main.cpp -o main",
+                "description": "Compile main.cpp with the C++20 standard using the C++ compiler."
+            }
         },
         {
             "kind": "explain",
@@ -180,7 +231,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "A const reference avoids a copy while preserving read-only access. A range-for loop hides the iterator mechanics."
+            "explanation": "A const reference avoids a copy while preserving read-only access. A range-for loop hides the iterator mechanics.",
+            "hints": [
+                "Two statements are accurate.",
+                "operator[] does not check bounds.",
+                "A const reference avoids a copy.",
+                "Select reference and range."
+            ]
         }
     ],
     "evaluation": {
@@ -200,5 +257,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "games"]
+    "tags": [
+        "systems",
+        "games"
+    ]
 }
