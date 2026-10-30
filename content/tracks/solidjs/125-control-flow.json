@@ -1,18 +1,28 @@
 {
     "id": "solidjs.control-flow",
     "version": 1,
-    "sequence": 220,
+    "sequence": 135,
     "courseId": "solidjs",
     "title": "Keyed lists that keep row identity",
     "summary": "Reconcile a product list by id, then review a component that renders with map and loses row identity.",
-    "skills": ["solid.control-flow", "web.component-architecture"],
-    "prerequisites": ["solid.signals", "web.html"],
+    "skills": [
+        "solid.control-flow",
+        "web.component-architecture"
+    ],
+    "prerequisites": [
+        "solid.signals",
+        "web.html"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Reconcile rows by stable id.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review a list for identity and prop-binding risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:solid"
+    ],
     "hints": [
         "Build a map from the current rows keyed by id.",
         "Walk the next rows and look each id up in that map.",
@@ -393,5 +412,7 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
