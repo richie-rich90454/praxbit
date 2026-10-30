@@ -1,0 +1,275 @@
+{
+    "id": "html.document-structure",
+    "version": 1,
+    "sequence": 211,
+    "courseId": "html",
+    "title": "Document structure and metadata",
+    "summary": "Write a complete HTML document with doctype, language, head metadata, and a body.",
+    "skills": [
+        "web.html"
+    ],
+    "prerequisites": [
+        "concept.instructions"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 5,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-html",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "dom-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "bare-page",
+        "briefing": "The storefront page is missing its document shell. Browsers guess the encoding and language, and assistive technology has no title. Build the full HTML document around the existing heading."
+    },
+    "objectives": [
+        {
+            "id": "document-shell",
+            "description": "Add the doctype, html, head, and body structure.",
+            "stepIds": [
+                "build-document"
+            ]
+        },
+        {
+            "id": "metadata",
+            "description": "Provide charset, viewport, and title metadata.",
+            "stepIds": [
+                "build-document"
+            ]
+        },
+        {
+            "id": "understanding",
+            "description": "Explain document structure and metadata.",
+            "stepIds": [
+                "document-claims"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:page"
+    ],
+    "hints": [
+        "Start with <!doctype html> and wrap everything in html with a lang attribute.",
+        "The head carries charset, viewport, and title; the body carries visible content.",
+        "Keep the existing h1 inside the body.",
+        "Use <!doctype html>, <html lang=\"en\">, <meta charset=\"utf-8\">, <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">, and <title>Campus store</title>."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-doctype",
+            "description": "Omitting the doctype and relying on browser quirks mode.",
+            "stepId": "build-document",
+            "testDescription": "The document declares its doctype.",
+            "feedback": "The doctype tells the browser to use standards mode. Without it, layout and parsing can fall back to legacy quirks.",
+            "followUpSkill": "web.html"
+        },
+        {
+            "id": "title-in-body",
+            "description": "Placing the title element in the body.",
+            "stepId": "document-claims",
+            "answer": "title-body",
+            "feedback": "The title belongs in the head. Browsers use it for the tab and search results, and assistive technology announces it before the page content.",
+            "followUpSkill": "web.html"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A document has a shell",
+                "body": "An HTML document begins with a doctype, then an html element with a lang attribute. The head holds metadata such as charset, viewport, and title. The body holds the visible content."
+            },
+            {
+                "title": "Metadata is not decoration",
+                "body": "The charset declaration prevents mojibake, the viewport rule keeps mobile layouts readable, and the title names the page for tabs, search results, and screen readers."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Doctype",
+                "definition": "The declaration that puts the browser in standards mode."
+            },
+            {
+                "term": "Head",
+                "definition": "The container for metadata about the document."
+            },
+            {
+                "term": "Viewport",
+                "definition": "The visible area of the page on a device."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Document shell and metadata",
+            "prompt": "Read the explanation, then build the document.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A document has a shell",
+                    "body": "An HTML document begins with a doctype, then an html element with a lang attribute. The head holds metadata such as charset, viewport, and title. The body holds the visible content."
+                },
+                {
+                    "title": "Metadata is not decoration",
+                    "body": "The charset declaration prevents mojibake, the viewport rule keeps mobile layouts readable, and the title names the page for tabs, search results, and screen readers."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Doctype",
+                    "definition": "The declaration that puts the browser in standards mode."
+                },
+                {
+                    "term": "Head",
+                    "definition": "The container for metadata about the document."
+                },
+                {
+                    "term": "Viewport",
+                    "definition": "The visible area of the page on a device."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "build-document",
+            "title": "Build the document shell",
+            "prompt": "Edit index.html. Add the doctype, html, head metadata, and body around the existing heading.",
+            "evidence": "construction",
+            "language": "html",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<h1>Campus store</h1>\n",
+                    "editable": true,
+                    "language": "html"
+                }
+            ],
+            "entry": "index.html",
+            "preview": "html",
+            "tests": [
+                {
+                    "kind": "dom",
+                    "description": "The document declares its doctype.",
+                    "selector": "html",
+                    "property": "exists",
+                    "expected": true
+                },
+                {
+                    "kind": "static",
+                    "description": "The document starts with a doctype declaration.",
+                    "file": "index.html",
+                    "includes": [
+                        "<!doctype html>"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The html element declares a language.",
+                    "file": "index.html",
+                    "includes": [
+                        "<html lang=\"en\">"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "dom",
+                    "description": "The page title is Campus store.",
+                    "selector": "title",
+                    "property": "text",
+                    "expected": "Campus store"
+                },
+                {
+                    "kind": "static",
+                    "description": "The head includes charset and viewport metadata.",
+                    "file": "index.html",
+                    "includes": [
+                        "<meta charset=\"utf-8\">",
+                        "name=\"viewport\""
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "dom",
+                    "description": "The heading remains in the body.",
+                    "selector": "body h1",
+                    "property": "text",
+                    "expected": "Campus store"
+                }
+            ],
+            "hints": [
+                "Wrap the heading in a body element and add a head above it.",
+                "The doctype comes first, before html.",
+                "Charset and viewport are meta elements in the head.",
+                "Use <!doctype html>, <html lang=\"en\">, <head>, <meta charset=\"utf-8\">, <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">, <title>Campus store</title>, and <body><h1>Campus store</h1></body>."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "document-claims",
+            "title": "Document and metadata claims",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "hints": [
+                "Check where each element belongs.",
+                "The title names the page for tabs and search.",
+                "Viewport affects mobile rendering.",
+                "Reject placing the title in the body."
+            ],
+            "statements": [
+                {
+                    "id": "head-meta",
+                    "label": "Charset, viewport, and title belong in the head.",
+                    "correct": true
+                },
+                {
+                    "id": "title-body",
+                    "label": "The title element can live in the body without consequence.",
+                    "correct": false
+                },
+                {
+                    "id": "viewport",
+                    "label": "The viewport meta keeps mobile browsers from scaling the page unpredictably.",
+                    "correct": true
+                },
+                {
+                    "id": "lang",
+                    "label": "The lang attribute on html helps screen readers choose pronunciation.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Metadata lives in the head and describes the document. The body holds visible content."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 90,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and HTML tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
