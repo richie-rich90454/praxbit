@@ -117,7 +117,14 @@ export function createApplicationServices(input: {
         worlds,
         audit,
     });
-    const account = new AccountService({ pool: input.pool, users, worlds, audit });
+    const account = new AccountService({
+        pool: input.pool,
+        users,
+        worlds,
+        projects,
+        clubs,
+        audit,
+    });
     const ai = new AiService({
         pool: input.pool,
         ai: input.config.ai,
@@ -131,6 +138,7 @@ export function createApplicationServices(input: {
         users,
         worlds,
         sync: syncOperations,
+        content: input.content,
         evidence,
         completions: completion,
         projects: project,
