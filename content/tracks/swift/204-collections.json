@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,9 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional"
-    ],
+    "tags": ["professional"],
     "accessibility": {
         "summary": "The Swift workspace is keyboard accessible. Checks verify source structure; they do not compile or run Swift.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -39,44 +34,28 @@
     "sequence": 107,
     "title": "Structs, dictionaries, and stable reports",
     "summary": "Aggregate sensor readings with value types, then fix a report whose dictionary order changes between runs.",
-    "skills": [
-        "swift.syntax"
-    ],
-    "prerequisites": [
-        "swift.syntax",
-        "concept.data"
-    ],
+    "skills": ["swift.syntax"],
+    "prerequisites": ["swift.syntax", "concept.data"],
     "difficulty": "beginner",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Accumulate reading totals in a dictionary.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find the source of unstable dictionary output.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Apply value semantics to a copied record.",
-            "stepIds": [
-                "copy"
-            ]
+            "stepIds": ["copy"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:robotics",
-        "icon:swift"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:swift"],
     "hints": [
         "A struct copies its stored properties when assigned.",
         "reduce(into:) threads the dictionary through each reading.",
@@ -237,21 +216,14 @@
                         "readings.reduce(into: [String: Int]()) { totals, reading in",
                         "totals[reading.sensor, default: 0] += reading.value"
                     ],
-                    "excludes": [
-                        "TODO",
-                        "return [:]"
-                    ]
+                    "excludes": ["TODO", "return [:]"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.swift",
-                    "includes": [
-                        "func totalsBySensor"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["func totalsBySensor"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
