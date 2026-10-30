@@ -90,7 +90,7 @@ jobs:
     browser:
         name: Browser, accessibility, and visual tests
         runs-on: ubuntu-latest
-        timeout-minutes: 60
+        timeout-minutes: 90
         services:
             postgres:
                 image: postgres:16
@@ -141,6 +141,8 @@ jobs:
               run: |
                   curl --fail --silent http://127.0.0.1:8787/missions/python.collections | grep --quiet '<div id="root">'
                   test "$(curl --fail --silent --output /dev/null --write-out '%{content_type}' http://127.0.0.1:8787/pyodide/pyodide.mjs)" = "text/javascript; charset=utf-8"
+            - name: Verify both production hostnames
+              run: pnpm verify:hosting -- --base http://127.0.0.1:8787
             - name: Playwright tests (desktop, tablet, mobile, firefox, webkit)
               run: pnpm exec playwright test
             - name: Upload Playwright report
