@@ -1,0 +1,271 @@
+{
+    "id": "typescript.exhaustive-unions",
+    "version": 1,
+    "sequence": 65,
+    "courseId": "typescript",
+    "title": "Handle every union member",
+    "summary": "Use a discriminated union and an exhaustive switch so a missing event cannot ship.",
+    "skills": [
+        "ts.types"
+    ],
+    "prerequisites": [
+        "ts.generics"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": [
+            "source-editing",
+            "syntax-diagnostics",
+            "transpiled-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "exhaustive-unions",
+        "briefing": "The activity feed receives order, refund, and visit events. A formatter handles two kinds and labels every visit as unknown. Add the missing branch and make future omissions fail at compile time."
+    },
+    "objectives": [
+        {
+            "id": "handle-visit",
+            "description": "Handle every member of the event union.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "explain-exhaustive",
+            "description": "Explain discriminated unions and exhaustive checks.",
+            "stepIds": [
+                "union-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:typescript"
+    ],
+    "hints": [
+        "The union already declares a visit member with a count field.",
+        "Add a case for event.kind equal to visit.",
+        "Return a string that includes event.count.",
+        "Use a never assignment in the default branch to catch future members."
+    ],
+    "misconceptions": [
+        {
+            "id": "missing-visit",
+            "description": "Falling through to a default for an unhandled member.",
+            "stepId": "apply",
+            "testDescription": "A visit describes its count.",
+            "feedback": "A default that returns a generic label hides missing behavior. Handle visit explicitly and use never in the default.",
+            "followUpSkill": "ts.types"
+        },
+        {
+            "id": "assertion",
+            "description": "Believing a type assertion validates the runtime shape.",
+            "stepId": "union-check",
+            "answer": "assertion",
+            "feedback": "An assertion is erased and does not check the value. Narrow with kind checks or a runtime guard.",
+            "followUpSkill": "ts.types"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "A literal property discriminates a union",
+                "body": "A union whose members share a literal property such as kind is a discriminated union. Checking event.kind narrows the value to the member with that literal, so each branch sees only the fields that member declares."
+            },
+            {
+                "title": "Exhaustiveness is a compile-time check",
+                "body": "A switch over every kind can end with a default that assigns the remaining value to never. If a new member is added and a branch is missing, the assignment stops compiling. This turns an easy-to-miss runtime gap into a build error."
+            },
+            {
+                "title": "Assertions do not close a union",
+                "body": "A type assertion tells the compiler to trust the author. It does not add a missing branch or validate an external value. Runtime boundaries still need guards, and local unions should be handled with checks and exhaustive switches."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Discriminated union",
+                "definition": "A union whose members share a literal property used to distinguish them."
+            },
+            {
+                "term": "Narrowing",
+                "definition": "Refining a union to a specific member through a runtime or literal check."
+            },
+            {
+                "term": "Exhaustive check",
+                "definition": "A check that fails to compile when a union member is unhandled."
+            },
+            {
+                "term": "never",
+                "definition": "The type with no values, used to represent an unreachable branch."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "A literal property discriminates a union",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "A literal property discriminates a union",
+                    "body": "A union whose members share a literal property such as kind is a discriminated union. Checking event.kind narrows the value to the member with that literal, so each branch sees only the fields that member declares."
+                },
+                {
+                    "title": "Exhaustiveness is a compile-time check",
+                    "body": "A switch over every kind can end with a default that assigns the remaining value to never. If a new member is added and a branch is missing, the assignment stops compiling. This turns an easy-to-miss runtime gap into a build error."
+                },
+                {
+                    "title": "Assertions do not close a union",
+                    "body": "A type assertion tells the compiler to trust the author. It does not add a missing branch or validate an external value. Runtime boundaries still need guards, and local unions should be handled with checks and exhaustive switches."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Discriminated union",
+                    "definition": "A union whose members share a literal property used to distinguish them."
+                },
+                {
+                    "term": "Narrowing",
+                    "definition": "Refining a union to a specific member through a runtime or literal check."
+                },
+                {
+                    "term": "Exhaustive check",
+                    "definition": "A check that fails to compile when a union member is unhandled."
+                },
+                {
+                    "term": "never",
+                    "definition": "The type with no values, used to represent an unreachable branch."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Describe every event kind",
+            "prompt": "Edit events.ts. describe returns order plus total, refund plus total, or visit plus count. Keep the switch exhaustive.",
+            "evidence": "construction",
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "events.ts",
+                    "content": "type Event =\n  | { kind: \"order\"; total: number }\n  | { kind: \"refund\"; total: number }\n  | { kind: \"visit\"; count: number };\n\nfunction describe(event: Event): string {\n  switch (event.kind) {\n    case \"order\":\n      return `order ${event.total}`;\n    case \"refund\":\n      return `refund ${event.total}`;\n    default:\n      return \"unknown\";\n  }\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "events.ts",
+            "preview": "console",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "An order describes its total.",
+                    "name": "describe",
+                    "args": [
+                        {
+                            "kind": "order",
+                            "total": 1200
+                        }
+                    ],
+                    "expected": "order 1200"
+                },
+                {
+                    "kind": "function",
+                    "description": "A refund describes its total.",
+                    "name": "describe",
+                    "args": [
+                        {
+                            "kind": "refund",
+                            "total": 300
+                        }
+                    ],
+                    "expected": "refund 300"
+                },
+                {
+                    "kind": "function",
+                    "description": "A visit describes its count.",
+                    "name": "describe",
+                    "args": [
+                        {
+                            "kind": "visit",
+                            "count": 4
+                        }
+                    ],
+                    "expected": "visit 4"
+                }
+            ],
+            "hints": [
+                "Read the third member of the Event union.",
+                "Add a case for the visit kind.",
+                "Use event.count in the returned string.",
+                "case \"visit\": return `visit ${event.count}`;"
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "union-check",
+            "title": "Narrowing and exhaustiveness",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "literal",
+                    "label": "A literal kind property lets TypeScript narrow a discriminated union.",
+                    "correct": true
+                },
+                {
+                    "id": "never",
+                    "label": "An exhaustive switch can use never to catch a missing case.",
+                    "correct": true
+                },
+                {
+                    "id": "assertion",
+                    "label": "A type assertion proves the runtime shape of a value.",
+                    "correct": false
+                },
+                {
+                    "id": "new-member",
+                    "label": "Adding a union member may require updating every exhaustive switch.",
+                    "correct": true
+                }
+            ],
+            "explanation": "A discriminator narrows the union, and a never assignment makes omissions compile errors. Assertions do not validate runtime data.",
+            "hints": [
+                "Three statements are accurate.",
+                "An assertion is a compile-time claim, not a runtime check.",
+                "Exhaustiveness is what makes new members visible.",
+                "Select literal, never, and new-member."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 135,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The TypeScript editor and tests are keyboard accessible. Tests run in the browser runtime.",
+        "keyboardNotes": "Use Tab to move between the editor and the results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web",
+        "professional"
+    ]
+}
