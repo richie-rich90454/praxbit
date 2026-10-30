@@ -5,23 +5,14 @@
     "courseId": "node-services",
     "title": "HTTP handlers with bounded requests",
     "summary": "Read a JSON body with a size limit and answer with the right status code.",
-    "skills": [
-        "node.http",
-        "node.hono"
-    ],
-    "prerequisites": [
-        "node.hono",
-        "http.basics"
-    ],
+    "skills": ["node.http", "node.hono"],
+    "prerequisites": ["node.hono", "http.basics"],
     "difficulty": "beginner",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:node"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:node"],
     "hints": [
         "Check the method and URL before you read any data.",
         "Track the byte count inside the data listener.",
@@ -162,10 +144,7 @@
                     "kind": "static",
                     "description": "The handler accepts only POST /status.",
                     "file": "server.ts",
-                    "includes": [
-                        "request.method !== \"POST\"",
-                        "request.url !== \"/status\""
-                    ],
+                    "includes": ["request.method !== \"POST\"", "request.url !== \"/status\""],
                     "excludes": []
                 },
                 {
@@ -183,33 +162,22 @@
                     "kind": "static",
                     "description": "Malformed JSON is caught and answered with 400.",
                     "file": "server.ts",
-                    "includes": [
-                        "JSON.parse",
-                        "response.writeHead(400"
-                    ],
+                    "includes": ["JSON.parse", "response.writeHead(400"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "A valid update is stored and answered with 201 JSON.",
                     "file": "server.ts",
-                    "includes": [
-                        "latest.push(body)",
-                        "response.writeHead(201",
-                        "application/json"
-                    ],
+                    "includes": ["latest.push(body)", "response.writeHead(201", "application/json"],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "server.ts",
-                    "includes": [
-                        "request.method !== \"POST\""
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["request.method !== \"POST\""],
+                    "excludes": ["TODO"]
                 }
             ],
             "hints": [
@@ -278,8 +246,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
