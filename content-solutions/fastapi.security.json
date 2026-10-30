@@ -1,0 +1,14 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.py": "from typing import Annotated\n\nfrom fastapi import APIRouter, Depends, FastAPI, Header, HTTPException\n\napp = FastAPI()\n\n\ndef require_member(authorization: Annotated[str | None, Header()] = None) -> str:\n    if authorization is None:\n        raise HTTPException(status_code=401, detail=\"Missing bearer token\")\n    scheme, _, token = authorization.partition(\" \")\n    if scheme.lower() != \"bearer\" or token != \"member-token\":\n        raise HTTPException(status_code=403, detail=\"Member role required\")\n    return token\n\n\nmembers = APIRouter(prefix=\"/members\", dependencies=[Depends(require_member)])\n\n\n@members.get(\"/orders\")\ndef list_orders() -> list[dict[str, int]]:\n    return [{\"id\": 1}]\n\n\napp.include_router(members)\n"
+            }
+        },
+        "test": {
+            "files": {
+                "test_main.py": "from fastapi.testclient import TestClient\n\nfrom main import app\n\nclient = TestClient(app)\n\n\ndef test_missing_token_is_rejected() -> None:\n    response = client.get(\"/members/orders\")\n    assert response.status_code == 401\n\n\ndef test_member_token_is_allowed() -> None:\n    response = client.get(\n        \"/members/orders\",\n        headers={\"Authorization\": \"Bearer member-token\"},\n    )\n    assert response.status_code == 200\n"
+            }
+        }
+    }
+}
