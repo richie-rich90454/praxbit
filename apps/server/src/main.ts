@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import type { ServerType } from "@hono/node-server";
 import { resolve as resolvePath } from "node:path";
-import { loadConfiguration, type ServerConfig } from "./config.ts";
+import { assertProductionWebBuild, loadConfiguration, type ServerConfig } from "./config.ts";
 import { loadContent } from "./content/loader.ts";
 import { initializeDatabase } from "./content/seed.ts";
 import { createDatabasePool } from "./db/pool.ts";
@@ -19,6 +19,11 @@ function logStartupFailure(error: unknown): void {
 }
 
 async function start(config: ServerConfig): Promise<Runtime> {
+    const webDirectory =
+        config.webDirectory === undefined
+            ? resolvePath(projectRoot(), "apps", "web", "dist")
+            : resolvePath(projectRoot(), config.webDirectory);
+    assertProductionWebBuild(webDirectory, config.nodeEnvironment);
     const content = await loadContent(config.contentDirectory);
     const pool = createDatabasePool(config);
     try {
@@ -29,10 +34,7 @@ async function start(config: ServerConfig): Promise<Runtime> {
             config,
             pool,
             content,
-            webDirectory:
-                config.webDirectory === undefined
-                    ? resolvePath(projectRoot(), "apps", "web", "dist")
-                    : resolvePath(projectRoot(), config.webDirectory),
+            webDirectory,
         });
         const server = serve({
             fetch: app.fetch,
