@@ -164,7 +164,7 @@ Practice selects due reviews first, then weak skills, then interest-aligned miss
 
 ## Hints
 
-Every mission and every step may define exactly four hints. The escalation is intentional:
+Every mission and every assessed step define exactly four hints. The escalation is intentional:
 
 1. Point at the relevant observation.
 2. Name the relationship or rule.
@@ -175,7 +175,7 @@ Hints are not a solution dump. Using all four is allowed; the resulting evidence
 
 ## Misconceptions
 
-A mission defines at least two misconceptions. Each has an id, a description, a step id, an optional answer key, feedback, and an optional follow-up skill.
+A mission defines at least two misconceptions. Each has an id, a description, an assessed step id, a reachable signature (a wrong option, a code test description, or an explicit diagnostic), feedback, and an optional follow-up skill. At least one misconception per mission must carry a follow-up skill, and every assessed step needs at least one reachable misconception.
 
 When an answer matches a known misconception, the feedback names the incorrect belief and gives a corrective experiment. When it does not match, the evaluator gives a general next step. Misconceptions are teaching material, not a hidden penalty list.
 
@@ -217,12 +217,25 @@ Runtime labels are part of the content contract:
 - Python runs in Pyodide WebAssembly.
 - SQL runs in SQLite WebAssembly; PostgreSQL-specific behavior is taught separately and labeled.
 - Git uses isomorphic-git.
-- Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and the framework/server packs use `static-analysis` with structural checks. The editor is plain text, and the lesson and accessibility notes say the source is not compiled or executed.
+- Java, C, C++, C#, Go, Rust, Kotlin, Swift, Ruby, Zig, Lua, and the framework/server packs use `static-analysis` with structural checks. These steps declare `verification: "structural"` and a `localVerification` command and description. The editor is plain text, and the lesson and accessibility notes say the source is not compiled or executed.
 - The terminal is a deterministic Linux-like simulation.
 
 The framework packs teach components, state, routing, data boundaries, middleware, validation, authorization, dependency injection, source layout, and deployment-facing trade-offs. The advanced tracks apply algorithms, operating-system and compiler ideas, distributed failure, DevOps diagnosis, retrieval and structured AI output, and offline/native boundaries. They are assessed foundations, not replacements for a full reference manual.
 
 SQL missions use SQLite semantics in the browser. PostgreSQL behavior, indexes, transaction isolation, dialect differences, and Redis caching are taught as reviewed artifacts rather than executed against a PostgreSQL server.
+
+### Track standard
+
+A published track is more than a list of files. The content validator enforces these minimums:
+
+| Track kind | Minimum missions |
+| ---------- | ---------------- |
+| Campaign   | 12               |
+| Language   | 5                |
+| Framework  | 4                |
+| Discipline | 5                |
+
+Every non-campaign track must contain at least one step with `evidence: "transfer"`. Every mission must be reachable from a track. Every assessed step needs four specific hints and at least one reachable misconception, and every mission needs at least one misconception with a follow-up skill. These standards describe a complete track, not the current count. `pnpm content:report` lists every shortfall without failing; `pnpm content:validate` fails until the shortfalls are fixed.
 
 ## Depth and external limits
 
@@ -241,17 +254,22 @@ A mission manifest is valid only when it includes:
 - `id` matching `course.mission-name`, a positive `version`, and a positive `sequence`.
 - A `courseId`, title, summary, 1–6 skills, up to 8 prerequisites, difficulty, and estimated minutes (2–30).
 - An interaction kind and a runtime kind with at least one capability. The runtime must truthfully describe what executes.
-- For a language without an in-browser runtime, a code step uses `static-analysis` with `static` or `regex` tests. Do not label it with a browser runtime that does not exist.
+- For a language without an in-browser runtime, a code step uses `static-analysis` with `static` or `regex` tests, declares `verification: "structural"`, and includes `localVerification` with an honest local command and description. Do not label it with a browser runtime that does not exist.
+- JavaScript and TypeScript code steps use `function` or `ast` tests. An `ast` test parses real syntax with the TypeScript compiler and requires or forbids `function-declaration`, `function-call`, `import`, `class-declaration`, `return-statement`, `if-statement`, `for-statement`, or `variable-declaration` nodes. Comments and strings do not count as nodes.
 - A campus scenario with a system, initial state, and briefing.
 - 1–6 objectives with step ids, 1–12 steps, exactly four mission hints, and at least two misconceptions.
+- Exactly four hints on every assessed step, plus at least one reachable misconception per assessed step. A misconception answer must match a wrong option for an option-based step, a code test description, or an explicit diagnostic signature; it must not match the correct answer.
+- At least one misconception with a valid follow-up skill.
 - A lesson with 1–5 sections and at least one vocabulary term.
 - A deterministic evaluation (`steps`, pass score 0.5–1) and rewards.
 - Persistence (`world-action` with a valid action/system, or `none`).
 - Accessibility summary, keyboard notes, and screen-reader notes.
 - A license string and at least one interest tag.
 - A reference solution for every code step and project, stored under `content-solutions/`, never inside the learner-visible content.
+- An editable starter that fails at least one executed test before the learner edits it. The validator runs each starter and reports `starter-passes-tests` when the work is already done.
+- Optional reference-solution alternatives under `alternatives` for a step. The validator runs each alternative against the same tests when present.
 - No solution text, answer keys, or hidden reference output in the mission JSON beyond the evaluator fields the schema requires.
 
-The validator checks the schema, unique ids, skill graph integrity, prerequisite references, track membership, project stage checks, world action references, asset names, safe paths, and reference solutions where a runtime is available. CSS computed-style checks that need a real browser are reported as deferred, not as passes.
+The validator checks the schema, unique ids, skill graph integrity, prerequisite references, track membership and minimums, transfer evidence, step hints, misconception reachability and follow-up skills, project stage checks, world action references, asset names, safe paths, starter negatives, solution alternatives, and reference solutions where a runtime is available. CSS computed-style checks that need a real browser are reported as deferred, not as passes. `pnpm content:report` prints the per-track count and missing standards without failing; `pnpm content:validate` fails on every violation.
 
 See [docs/curriculum/authoring.md](docs/curriculum/authoring.md) for the review checklist and commands.
