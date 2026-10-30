@@ -200,7 +200,7 @@ Placement skips prerequisite checks for the skills it marks. It is advisory: the
 
 ## Applied and advanced tracks
 
-Beyond the 30 launch missions, the repository contains 90 missions in applied and advanced tracks. The full catalogue has 41 tracks and 120 missions.
+Beyond the 30 launch missions, the repository contains 195 missions in applied and advanced tracks. The full catalogue has 44 tracks and 225 missions, including dedicated HTML, CSS, and JavaScript foundations.
 
 | Domain | Tracks | Missions |
 | --- | --- | --- |
