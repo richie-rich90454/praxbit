@@ -1,6 +1,6 @@
 {
     "id": "before-code.send-a-message",
-    "version": 1,
+    "version": 2,
     "sequence": 10,
     "courseId": "before-code",
     "title": "Send a message",
@@ -50,7 +50,8 @@
             "description": "Jumping directly from the laptop to the API.",
             "stepId": "notification-route",
             "answer": "laptop>api>messaging",
-            "feedback": "On this campus the wireless link reaches the router first. The router forwards traffic to the service network."
+            "feedback": "On this campus the wireless link reaches the router first. The router forwards traffic to the service network.",
+            "followUpSkill": "concept.networks"
         },
         {
             "id": "response-is-request",
@@ -58,6 +59,14 @@
             "stepId": "http-check",
             "answer": "response",
             "feedback": "The POST that creates the order is the request. The confirmation returned afterwards is the response."
+        },
+        {
+            "id": "send-means-processed",
+            "description": "Believing a successful send proves the server processed the request.",
+            "stepId": "network-claims",
+            "answer": "guaranteed",
+            "feedback": "Sending only moves bytes onto the network. The server may fail, time out, or reject the request after receiving it.",
+            "followUpSkill": "concept.networks"
         }
     ],
     "lesson": {
@@ -90,6 +99,12 @@
         {
             "kind": "network",
             "id": "notification-route",
+            "hints": [
+                "Click the devices in the order the request travels from the laptop to the messaging service.",
+                "Wireless traffic reaches an access point and then a router before any service.",
+                "A letter goes from sender to local post office to sorting center before the destination, even in the same city.",
+                "Follow the wireless link first, then the campus router, and only then the service that calls messaging."
+            ],
             "title": "Trace the notification",
             "prompt": "Click the devices in order from the laptop to the messaging service.",
             "evidence": "construction",
@@ -168,15 +183,21 @@
                 "explanation": "The laptop initiates the interaction by sending the order data. The confirmation is the response."
             },
             "hints": [
-                "Who initiates the exchange?",
-                "Which message asks the server to do something?",
-                "The order data travels from the client to the server.",
-                "The request is the order data sent by the laptop."
+                "Decide which message starts the interaction and which one answers it.",
+                "The client sends a request; the server returns a response.",
+                "When you order at a counter, your order is the request and the receipt is the response.",
+                "The laptop's order data initiates the exchange; the confirmation number comes back afterward."
             ]
         },
         {
             "kind": "explain",
             "id": "network-claims",
+            "hints": [
+                "Select statements that hold for calls that cross a network.",
+                "Remote calls cross failure boundaries, and intermediate devices may not inspect application data.",
+                "A message can leave your machine successfully while the server is down.",
+                "Two statements are accurate; reject the claims that a request equals a local call and that sending proves processing."
+            ],
             "title": "Network responsibility",
             "prompt": "Select the accurate statements about networked systems.",
             "evidence": "explanation",
