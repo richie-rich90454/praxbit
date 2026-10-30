@@ -117,6 +117,9 @@ pre {
     left: var(--space-4);
     top: -60px;
     z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     background: var(--foreground);
     color: var(--background);
     padding: var(--space-2) var(--space-4);
@@ -158,6 +161,14 @@ pre {
     font-size: 20px;
 }
 
+.brand-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--foreground);
+    text-decoration: none;
+}
+
 .brand:hover {
     color: var(--foreground);
 }
@@ -173,6 +184,7 @@ pre {
 .primary-nav__link {
     display: inline-flex;
     align-items: center;
+    min-height: 44px;
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius);
     color: var(--support);
@@ -196,6 +208,12 @@ pre {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+}
+
+.footer-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
 }
 
 .page {
@@ -357,7 +375,7 @@ pre {
     font-size: var(--text-support);
     font-weight: 500;
     text-decoration: none;
-    min-height: 42px;
+    min-height: 44px;
     transition:
         background-color var(--duration) ease,
         border-color var(--duration) ease;
@@ -398,7 +416,7 @@ pre {
 }
 
 .button--small {
-    min-height: 34px;
+    min-height: 44px;
     padding: 6px 12px;
     font-size: var(--text-meta);
 }
@@ -427,7 +445,7 @@ pre {
     border-radius: var(--radius);
     background: var(--background);
     padding: 10px var(--space-3);
-    min-height: 42px;
+    min-height: 44px;
 }
 
 .textarea {
@@ -448,6 +466,10 @@ input[type="radio"] {
     height: 18px;
     accent-color: var(--accent);
     flex: none;
+}
+
+input[type="range"] {
+    min-height: 44px;
 }
 
 .choice {
@@ -532,6 +554,7 @@ input[type="radio"] {
 
 .tab {
     padding: var(--space-3) var(--space-4);
+    min-height: 44px;
     border: 0;
     border-bottom: 2px solid transparent;
     background: transparent;
@@ -557,6 +580,7 @@ input[type="radio"] {
     padding: var(--space-3);
     border-bottom: 1px solid var(--border);
     vertical-align: top;
+    overflow-wrap: anywhere;
 }
 
 .data-table th {
@@ -606,7 +630,8 @@ input[type="radio"] {
 }
 
 .code-editor .cm-focused {
-    outline: none;
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
 }
 
 .preview-frame {
@@ -641,9 +666,17 @@ input[type="radio"] {
     display: flex;
     gap: var(--space-2);
     align-items: center;
+    flex-wrap: wrap;
     padding: var(--space-2);
     border-top: 1px solid #333333;
     background: #111111;
+}
+
+.terminal__label {
+    flex-basis: 100%;
+    color: #f5f5f5;
+    font-size: var(--text-meta);
+    font-weight: 500;
 }
 
 .terminal__prompt {
@@ -653,13 +686,14 @@ input[type="radio"] {
 
 .terminal__input {
     flex: 1;
+    min-width: 0;
     background: transparent;
     border: 0;
     color: #ffffff;
     font-family: var(--font-code);
     font-size: 13px;
     outline: none;
-    min-height: 28px;
+    min-height: 44px;
 }
 
 .terminal__input:focus-visible {
@@ -678,8 +712,10 @@ input[type="radio"] {
 .method-tab {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 2px;
     padding: var(--space-2) var(--space-1);
+    min-height: 44px;
     background: transparent;
     border: 0;
     border-bottom: 2px solid transparent;
@@ -739,9 +775,9 @@ input[type="radio"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    html:not([data-motion="full"]) *,
+    html:not([data-motion="full"]) *::before,
+    html:not([data-motion="full"]) *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -755,6 +791,56 @@ html[data-motion="reduce"] *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+
+html[data-motion="full"] .pip.pip--celebrating {
+    animation-duration: 200ms;
+}
+
+.pip.pip--celebrating {
+    animation-duration: 200ms;
+}
+
+@media (forced-colors: active) {
+    :focus-visible {
+        outline: 3px solid Highlight;
+        outline-offset: 2px;
+    }
+
+    ::selection {
+        background: Highlight;
+        color: HighlightText;
+    }
+
+    .button,
+    .input,
+    .select,
+    .textarea,
+    .surface,
+    .choice,
+    .data-table th,
+    .data-table td,
+    .method-tabs,
+    .tabs,
+    .code-editor,
+    .terminal,
+    .preview-frame {
+        border-color: CanvasText;
+    }
+
+    .method-tab[aria-selected="true"],
+    .tab[aria-selected="true"],
+    .button[aria-pressed="true"] {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+
+    .status__mark {
+        border: 2px solid currentColor;
+        background: CanvasText;
+        forced-color-adjust: none;
+    }
 }
 
 .map-track {
@@ -930,6 +1016,11 @@ dd {
     display: flex;
     flex-direction: column;
     flex: 1;
+}
+
+#main:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: -2px;
 }
 
 #main > .page {
