@@ -1,0 +1,340 @@
+{
+    "id": "java.concurrency-executors",
+    "version": 1,
+    "sequence": 73,
+    "courseId": "java",
+    "title": "Run work on an executor",
+    "summary": "Split a count across two tasks, collect the futures, and shut the pool down.",
+    "skills": [
+        "java.concurrency"
+    ],
+    "prerequisites": [
+        "java.oop",
+        "java.collections"
+    ],
+    "difficulty": "advanced",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "java-executors",
+        "briefing": "A large inventory scan blocks the request thread. Split the scan across two pool tasks, combine the futures, and make sure the executor is always shut down."
+    },
+    "objectives": [
+        {
+            "id": "use-executor",
+            "description": "Submit the scan work to an executor and collect results.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "diagnose-shutdown",
+            "description": "Diagnose a pool that is never shut down.",
+            "stepIds": [
+                "diagnose"
+            ]
+        },
+        {
+            "id": "explain-concurrency",
+            "description": "Explain futures, shutdown, and shared state accurately.",
+            "stepIds": [
+                "executor-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:java"
+    ],
+    "hints": [
+        "Create one fixed pool for the two halves.",
+        "submit accepts a Callable and returns a Future.",
+        "Collect both results with get before returning.",
+        "Shut the executor down in a finally block."
+    ],
+    "misconceptions": [
+        {
+            "id": "sequential",
+            "description": "Leaving the scan on the request thread.",
+            "stepId": "apply",
+            "testDescription": "The work is submitted to an executor.",
+            "feedback": "The point is to move the work off the caller. Submit the two halves and combine their futures.",
+            "followUpSkill": "java.concurrency"
+        },
+        {
+            "id": "garbage-collect",
+            "description": "Relying on garbage collection to stop a pool.",
+            "stepId": "diagnose",
+            "answer": "gc",
+            "feedback": "Garbage collection does not shut down worker threads deterministically. Call shutdown in a finally block.",
+            "followUpSkill": "java.concurrency"
+        },
+        {
+            "id": "future-runs",
+            "description": "Believing Future.get starts the task again.",
+            "stepId": "executor-check",
+            "answer": "future-get",
+            "feedback": "The task starts when it is submitted. get waits for the existing result and propagates failure.",
+            "followUpSkill": "java.concurrency"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Executors manage threads",
+                "body": "An ExecutorService owns a pool of worker threads and accepts tasks. submit returns a Future that represents the pending result. get waits for completion and propagates exceptions wrapped in ExecutionException. Reusing a pool avoids the cost of creating a thread per request."
+            },
+            {
+                "title": "Shut down the pool",
+                "body": "shutdown stops accepting new tasks and lets submitted tasks finish. shutdownNow attempts to interrupt running tasks. A pool that is never shut down can keep a JVM alive and leak threads in a long-running test suite."
+            },
+            {
+                "title": "Shared mutable state needs coordination",
+                "body": "Two tasks that write the same variable without synchronization create a data race. Use task-local results, synchronization, or atomic classes such as AtomicInteger. Prefer returning values from tasks over mutating shared state."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "ExecutorService",
+                "definition": "A pool that schedules and runs submitted tasks."
+            },
+            {
+                "term": "Future",
+                "definition": "A handle to a result that may not be available yet."
+            },
+            {
+                "term": "Thread pool",
+                "definition": "A set of reusable worker threads."
+            },
+            {
+                "term": "Atomic",
+                "definition": "An operation that completes without interleaving from another thread."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Executors manage threads",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Executors manage threads",
+                    "body": "An ExecutorService owns a pool of worker threads and accepts tasks. submit returns a Future that represents the pending result. get waits for completion and propagates exceptions wrapped in ExecutionException. Reusing a pool avoids the cost of creating a thread per request."
+                },
+                {
+                    "title": "Shut down the pool",
+                    "body": "shutdown stops accepting new tasks and lets submitted tasks finish. shutdownNow attempts to interrupt running tasks. A pool that is never shut down can keep a JVM alive and leak threads in a long-running test suite."
+                },
+                {
+                    "title": "Shared mutable state needs coordination",
+                    "body": "Two tasks that write the same variable without synchronization create a data race. Use task-local results, synchronization, or atomic classes such as AtomicInteger. Prefer returning values from tasks over mutating shared state."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "ExecutorService",
+                    "definition": "A pool that schedules and runs submitted tasks."
+                },
+                {
+                    "term": "Future",
+                    "definition": "A handle to a result that may not be available yet."
+                },
+                {
+                    "term": "Thread pool",
+                    "definition": "A set of reusable worker threads."
+                },
+                {
+                    "term": "Atomic",
+                    "definition": "An operation that completes without interleaving from another thread."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count with two pool tasks",
+            "prompt": "Edit Main.java. countPositiveConcurrently splits the array into two ranges, submits both counts, adds the futures, and shuts the executor down.",
+            "evidence": "construction",
+            "language": "java",
+            "files": [
+                {
+                    "path": "Main.java",
+                    "content": "import java.util.concurrent.ExecutorService;\nimport java.util.concurrent.Executors;\nimport java.util.concurrent.Future;\n\npublic class Main {\n    static int countPositiveConcurrently(int[] values) throws Exception {\n        int count = 0;\n        for (int value : values) {\n            if (value > 0) {\n                count += 1;\n            }\n        }\n        return count;\n    }\n\n    public static void main(String[] args) throws Exception {\n        System.out.println(countPositiveConcurrently(new int[] { 3, -1, 2, 7 }));\n    }\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "Main.java",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The work is submitted to an executor.",
+                    "file": "Main.java",
+                    "includes": [
+                        "Executors.newFixedThreadPool(2)",
+                        "executor.submit(",
+                        "Future<Integer>"
+                    ],
+                    "excludes": [
+                        "for (int value : values)"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The executor is shut down after the results are collected.",
+                    "file": "Main.java",
+                    "includes": [
+                        "left.get()",
+                        "right.get()",
+                        "executor.shutdown()"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The helper still counts only positive values.",
+                    "file": "Main.java",
+                    "includes": [
+                        "if (values[index] > 0)"
+                    ],
+                    "excludes": []
+                }
+            ],
+            "hints": [
+                "Compute the midpoint so each task has a range.",
+                "Submit both ranges as callables.",
+                "Wait for both futures and add the values.",
+                "Use try/finally so shutdown always runs."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "javac Main.java && java Main",
+                "description": "Compile and run Main.java with the JDK."
+            }
+        },
+        {
+            "kind": "debug",
+            "id": "diagnose",
+            "title": "The pool that stays alive",
+            "prompt": "This method returns a future result but never shuts the executor down. Select the faulty instruction and the correct repair.",
+            "evidence": "debugging",
+            "instructions": [
+                {
+                    "id": "create",
+                    "label": "ExecutorService executor = Executors.newFixedThreadPool(2);"
+                },
+                {
+                    "id": "submit",
+                    "label": "Future<Integer> result = executor.submit(task);"
+                },
+                {
+                    "id": "return",
+                    "label": "return result.get();"
+                },
+                {
+                    "id": "end",
+                    "label": "}"
+                }
+            ],
+            "buggyId": "return",
+            "fixes": [
+                {
+                    "id": "finally",
+                    "label": "Wrap the return in try/finally and call executor.shutdown()."
+                },
+                {
+                    "id": "gc",
+                    "label": "Call System.gc() and let the pool disappear."
+                },
+                {
+                    "id": "larger",
+                    "label": "Increase the pool size so the threads are reused."
+                }
+            ],
+            "correctFixId": "finally",
+            "explanation": "The pool owns live worker threads. shutdown in a finally block stops accepting work after the submitted task completes.",
+            "hints": [
+                "The return statement exits without releasing the pool.",
+                "The fix belongs in a finally block.",
+                "shutdown lets submitted work finish before the pool exits.",
+                "Choose the try/finally repair."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "executor-check",
+            "title": "Futures and pool lifecycle",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "reuse",
+                    "label": "ExecutorService reuses worker threads across tasks.",
+                    "correct": true
+                },
+                {
+                    "id": "shutdown",
+                    "label": "shutdown lets submitted tasks finish before the pool exits.",
+                    "correct": true
+                },
+                {
+                    "id": "future-get",
+                    "label": "Future.get returns before the task completes.",
+                    "correct": false
+                },
+                {
+                    "id": "interrupt",
+                    "label": "shutdownNow attempts to interrupt running tasks.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Executors reuse threads, and Future.get waits for a result. shutdown is graceful; shutdownNow attempts interruption.",
+            "hints": [
+                "Three statements are accurate.",
+                "get blocks until the task finishes or fails.",
+                "shutdownNow is the forceful variant.",
+                "Select reuse, shutdown, and interrupt."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 145,
+        "unlocks": [
+            "java.maven-build"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and checks are keyboard accessible. Checks verify source structure; they do not compile or run the language.",
+        "keyboardNotes": "Use Tab to move between the editor and the results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "systems"
+    ]
+}
