@@ -99,6 +99,10 @@ export function transpileTypeScript(source: string): TranspileResult {
     return diagnostics.length === 0 ? { output: result.outputText, diagnostics } : { diagnostics };
 }
 
+function cloneJson<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T;
+}
+
 function timeoutPromise(milliseconds: number): Promise<never> {
     return new Promise(function rejectAfter(resolve, reject): void {
         void resolve;
@@ -129,7 +133,7 @@ async function runSingleFunction(
                 error: `No function named ${test.name} was defined.`,
             };
         }
-        contextGlobals["__praxbitArgs"] = test.args;
+        contextGlobals["__praxbitArgs"] = cloneJson(test.args);
         const callStarted = Date.now();
         const result: unknown = vm.runInContext(
             `__praxbitArgs === undefined ? undefined : ${test.name}.apply(undefined, __praxbitArgs)`,
