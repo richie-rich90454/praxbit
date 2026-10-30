@@ -1,13 +1,8 @@
-import { Capacitor, registerPlugin } from "@capacitor/core";
+import { Capacitor } from "@capacitor/core";
+import { SecureStorage } from "@aparajita/capacitor-secure-storage";
 import { Preferences } from "@capacitor/preferences";
 
 const TOKEN_KEY = "praxbit.native.bearer";
-
-interface SecureStoragePlugin {
-    get(options: { readonly key: string }): Promise<{ readonly value: string }>;
-    set(options: { readonly key: string; readonly value: string }): Promise<void>;
-    remove(options: { readonly key: string }): Promise<void>;
-}
 
 export interface TokenStorageStatus {
     readonly secure: boolean;
@@ -20,8 +15,6 @@ export interface BearerTokenStore {
     save(token: string): Promise<void>;
     clear(): Promise<void>;
 }
-
-const secureStorage = registerPlugin<SecureStoragePlugin>("SecureStorage");
 
 const WEB_WARNING =
     "Praxbit: this browser has no secure bearer-token storage. The session token is kept in local storage and is readable by scripts on this origin.";
@@ -49,8 +42,8 @@ export function createBearerTokenStore(): BearerTokenStore {
     async function load(): Promise<string | undefined> {
         if (secure) {
             try {
-                const result = await secureStorage.get({ key: TOKEN_KEY });
-                return result.value.length === 0 ? undefined : result.value;
+                const value = await SecureStorage.get(TOKEN_KEY);
+                return typeof value === "string" && value.length > 0 ? value : undefined;
             } catch {
                 return undefined;
             }
@@ -69,7 +62,7 @@ export function createBearerTokenStore(): BearerTokenStore {
 
     async function save(token: string): Promise<void> {
         if (secure) {
-            await secureStorage.set({ key: TOKEN_KEY, value: token });
+            await SecureStorage.set(TOKEN_KEY, token);
             return;
         }
         if (native) {
@@ -88,7 +81,7 @@ export function createBearerTokenStore(): BearerTokenStore {
     async function clear(): Promise<void> {
         if (secure) {
             try {
-                await secureStorage.remove({ key: TOKEN_KEY });
+                await SecureStorage.remove(TOKEN_KEY);
             } catch {
                 // The session is already cleared in memory.
             }
