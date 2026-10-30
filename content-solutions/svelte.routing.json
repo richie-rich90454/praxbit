@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "checkout.ts": "type LoadResult = { redirect: string } | { itemCount: number };\n\nfunction loadCheckout(signedIn: boolean, itemCount: number): LoadResult {\n  if (!signedIn) {\n    return { redirect: \"/login\" };\n  }\n  if (itemCount <= 0) {\n    return { redirect: \"/cart\" };\n  }\n  return { itemCount };\n}\n"
+            }
+        }
+    }
+}
