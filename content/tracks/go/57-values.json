@@ -1,18 +1,26 @@
 {
     "id": "go.values",
     "version": 1,
-    "sequence": 57,
+    "sequence": 90,
     "courseId": "go",
     "title": "Values and ranges in Go",
     "summary": "Use a typed slice, a range loop, and a condition to count positive values.",
-    "skills": ["go.syntax"],
-    "prerequisites": ["concept.state", "concept.conditions"],
+    "skills": [
+        "go.syntax"
+    ],
+    "prerequisites": [
+        "concept.state",
+        "concept.conditions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:go"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:go"
+    ],
     "hints": [
         "The range loop already visits every value.",
         "Test the value before incrementing.",
@@ -43,14 +60,26 @@
         {
             "id": "uninitialized",
             "description": "Assuming a declared int is uninitialized.",
-            "stepId": "apply",
-            "feedback": "Go gives every value a zero value. count starts at 0 without an explicit assignment."
+            "stepId": "check",
+            "answer": "zero",
+            "feedback": "Go gives every value a zero value. count starts at 0 without an explicit assignment.",
+            "followUpSkill": "go.syntax"
         },
         {
             "id": "range-copy",
             "description": "Trying to mutate the slice element through the range value.",
             "stepId": "apply",
-            "feedback": "Range yields a copy of each element. Use the index when a mutation is required."
+            "testDescription": "The range loop counts only positive values.",
+            "feedback": "Range yields a copy of each element. Use the index when a mutation is required.",
+            "followUpSkill": "go.syntax"
+        },
+        {
+            "id": "nil-slice",
+            "description": "Believing a nil slice cannot be ranged over.",
+            "stepId": "check",
+            "answer": "nil",
+            "feedback": "A nil slice has length zero. Ranging over it is safe and runs the body zero times.",
+            "followUpSkill": "go.syntax"
         }
     ],
     "lesson": {
@@ -124,6 +153,12 @@
                     "content": "package main\n\nimport \"fmt\"\n\nfunc countPositive(values []int) int {\n    count := 0\n    for _, value := range values {\n        count += 0 // TODO: count positive values\n    }\n    return count\n}\n\nfunc main() {\n    fmt.Println(countPositive([]int{3, -1, 2}))\n}\n",
                     "editable": true,
                     "language": "go"
+                },
+                {
+                    "path": "go.mod",
+                    "language": "go",
+                    "content": "module campus/check\n\ngo 1.23\n",
+                    "editable": false
                 }
             ],
             "entry": "main.go",
@@ -133,24 +168,46 @@
                     "kind": "static",
                     "description": "The function keeps the slice parameter and int result.",
                     "file": "main.go",
-                    "includes": ["func countPositive(values []int) int"],
+                    "includes": [
+                        "func countPositive(values []int) int"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The range loop counts only positive values.",
                     "file": "main.go",
-                    "includes": ["if value > 0 {", "count += 1"],
-                    "excludes": ["count += 0"]
+                    "includes": [
+                        "if value > 0 {",
+                        "count += 1"
+                    ],
+                    "excludes": [
+                        "count += 0"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.go",
-                    "includes": ["func countPositive(values []int) int"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "func countPositive(values []int) int"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "The range loop already visits every value.",
+                "Test value > 0 before incrementing.",
+                "Increment count inside the if block.",
+                "if value > 0 { count += 1 }"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "go test ./...",
+                "description": "Compile and test the module with the Go toolchain."
+            }
         },
         {
             "kind": "explain",
@@ -180,7 +237,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Go initializes values to their zero value. Range yields the index and a copy; the length is part of the slice descriptor."
+            "explanation": "Go initializes values to their zero value. Range yields the index and a copy; the length is part of the slice descriptor.",
+            "hints": [
+                "Two statements are accurate.",
+                "An int starts at zero, not an undefined value.",
+                "A nil slice has length zero and can be ranged over.",
+                "Select slice and range."
+            ]
         }
     ],
     "evaluation": {
@@ -200,5 +263,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems", "professional"]
+    "tags": [
+        "systems",
+        "professional"
+    ]
 }
