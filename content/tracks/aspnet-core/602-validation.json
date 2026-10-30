@@ -5,22 +5,14 @@
     "courseId": "aspnet-core",
     "title": "Validation attributes and ProblemDetails",
     "summary": "Put data annotations on a request DTO and let [ApiController] return a 400 ProblemDetails before the action runs.",
-    "skills": [
-        "aspnet.controllers"
-    ],
-    "prerequisites": [
-        "aspnet.controllers",
-        "api.validation"
-    ],
+    "skills": ["aspnet.controllers"],
+    "prerequisites": ["aspnet.controllers", "api.validation"],
     "difficulty": "developing",
     "estimatedMinutes": 9,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "objective-validate",
             "description": "Declare constraints on the request DTO and bind it to an API action.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-modelstate",
             "description": "Explain when model validation runs and what response it produces.",
-            "stepIds": [
-                "check"
-            ]
+            "stepIds": ["check"]
         },
         {
             "id": "objective-transfer",
             "description": "Predict the result for an invalid numeric range.",
-            "stepIds": [
-                "transfer"
-            ]
+            "stepIds": ["transfer"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:dotnet"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:dotnet"],
     "hints": [
         "Data annotations belong on the request record, not on the entity.",
         "[ApiController] runs model validation automatically.",
@@ -229,13 +210,8 @@
                     "kind": "static",
                     "description": "A created product is answered with 201 and a location.",
                     "file": "ProductsController.cs",
-                    "includes": [
-                        "return Created($\"/api/products/{product.Id}\", product);"
-                    ],
-                    "excludes": [
-                        "return Ok(product);",
-                        "TODO"
-                    ]
+                    "includes": ["return Created($\"/api/products/{product.Id}\", product);"],
+                    "excludes": ["return Ok(product);", "TODO"]
                 }
             ],
             "language": "text"
@@ -335,8 +311,5 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment or test failure."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ]
+    "tags": ["professional", "web"]
 }
