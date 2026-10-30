@@ -5,23 +5,14 @@
     "courseId": "typescript",
     "title": "Narrow the union",
     "summary": "Use TypeScript narrowing to handle strings and numbers safely.",
-    "skills": [
-        "ts.types"
-    ],
-    "prerequisites": [
-        "js.types",
-        "js.objects"
-    ],
+    "skills": ["ts.types"],
+    "prerequisites": ["js.types", "js.objects"],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": [
-            "source-editing",
-            "syntax-diagnostics",
-            "transpiled-tests"
-        ]
+        "capabilities": ["source-editing", "syntax-diagnostics", "transpiled-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -33,24 +24,15 @@
         {
             "id": "narrow",
             "description": "Branch on the runtime type of a union value.",
-            "stepIds": [
-                "fix-narrowing"
-            ]
+            "stepIds": ["fix-narrowing"]
         },
         {
             "id": "demonstrate-understanding",
             "description": "Check understanding through the remaining explanation and transfer evidence.",
-            "stepIds": [
-                "narrowing-check"
-            ]
+            "stepIds": ["narrowing-check"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:api",
-        "icon:type"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:type"],
     "hints": [
         "typeof value === \"string\" narrows the union.",
         "Numbers become text with String(value) or template literals.",
@@ -132,36 +114,28 @@
                     "kind": "function",
                     "description": "A lowercase string is trimmed and uppercased.",
                     "name": "formatIdentifier",
-                    "args": [
-                        "  a1  "
-                    ],
+                    "args": ["  a1  "],
                     "expected": "ID-A1"
                 },
                 {
                     "kind": "function",
                     "description": "A number is formatted as digits.",
                     "name": "formatIdentifier",
-                    "args": [
-                        42
-                    ],
+                    "args": [42],
                     "expected": "ID-42"
                 },
                 {
                     "kind": "function",
                     "description": "An already clean string is preserved.",
                     "name": "formatIdentifier",
-                    "args": [
-                        "B7"
-                    ],
+                    "args": ["B7"],
                     "expected": "ID-B7"
                 },
                 {
                     "kind": "function",
                     "description": "Zero is a valid id.",
                     "name": "formatIdentifier",
-                    "args": [
-                        0
-                    ],
+                    "args": [0],
                     "expected": "ID-0"
                 }
             ],
@@ -226,8 +200,5 @@
         "screenReaderNotes": "Tests announce arguments, expected output, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web",
-        "professional"
-    ]
+    "tags": ["web", "professional"]
 }
