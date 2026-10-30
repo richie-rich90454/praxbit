@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "main.go": "package main\n\nimport \"fmt\"\n\ntype Notifier interface {\n    Notify(message string) error\n}\n\ntype EmailNotifier struct{}\n\nfunc (EmailNotifier) Notify(message string) error {\n    fmt.Println(message)\n    return nil\n}\n\nfunc SendAll(notifier Notifier, messages []string) error {\n    for _, message := range messages {\n        if err := notifier.Notify(message); err != nil {\n            return err\n        }\n    }\n    return nil\n}\n\nfunc main() {\n    SendAll(EmailNotifier{}, []string{\"hello\"})\n}\n"
+            }
+        }
+    }
+}
