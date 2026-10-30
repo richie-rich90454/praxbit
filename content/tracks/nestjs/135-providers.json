@@ -1,18 +1,28 @@
 {
     "id": "nestjs.providers",
     "version": 1,
-    "sequence": 230,
+    "sequence": 155,
     "courseId": "nestjs",
     "title": "Custom providers and export boundaries",
     "summary": "Register a repository behind a token and export it, then review a module that hides the dependency behind a concrete class.",
-    "skills": ["nestjs.providers", "architecture.modularity"],
-    "prerequisites": ["nestjs.modules", "testing.boundaries"],
+    "skills": [
+        "nestjs.providers",
+        "architecture.modularity"
+    ],
+    "prerequisites": [
+        "nestjs.modules",
+        "testing.boundaries"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "browser-typescript",
-        "capabilities": ["source-editing", "execution", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "execution",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Register a token-based provider and export it.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review a module for provider and export risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:api", "icon:nestjs"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:nestjs"
+    ],
     "hints": [
         "Import the repository class and its token.",
         "Add the repository class to the provider list.",
@@ -275,5 +294,8 @@
         "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web", "professional"]
+    "tags": [
+        "web",
+        "professional"
+    ]
 }
