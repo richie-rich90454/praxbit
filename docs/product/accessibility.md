@@ -2,7 +2,7 @@
 
 Praxbit must be usable by learners with different vision, hearing, motor, cognitive, and situational abilities. Accessibility is part of the definition of done, not a later audit.
 
-The implementation is not certified against WCAG. These are requirements and review criteria; a formal audit and assistive-technology matrix are still needed.
+The implementation has completed an internal WCAG 2.2 AA audit. It is not third-party certified. The per-criterion evidence is in [wcag-2.2-aa-audit.md](wcag-2.2-aa-audit.md); a formal audit and a vendor screen-reader matrix remain external work.
 
 ## Structure and navigation
 
@@ -113,14 +113,16 @@ The implementation is not certified against WCAG. These are requirements and rev
 - `pnpm test:a11y` runs the Playwright accessibility checks.
 - Axe is a baseline, not a complete audit. It does not catch every keyboard or screen-reader problem.
 - Manually test with a keyboard, at 200% zoom, with reduced motion, and at the largest text scale.
-- Test with at least one screen reader before a public launch. Record the browser and screen-reader versions.
+- Test with at least one screen reader before a public launch. Record the browser and screen-reader versions. The internal audit verified the browser accessibility tree and live-region output; a vendor screen-reader matrix remains external.
+- Use `pnpm test:wcag` for the WCAG 2.2 AA evidence suite.
 - Review screenshots at desktop, tablet, and mobile sizes.
 - Do not claim WCAG conformance without a completed audit.
 
 ## Known gaps
 
-- Native Android and iOS accessibility has not been tested.
-- Pyodide and complex editor interactions may have screen-reader limitations.
+- Native Android and iOS accessibility has not been device-tested.
+- Pyodide and complex editor interactions have browser accessibility-tree coverage but no vendor screen-reader speech matrix.
 - The visual world is decorative; the list is the primary accessible path.
-- There is no formal cognitive-load or dyslexia review.
+- There is no formal cognitive-load or dyslexia review with representative learners.
 - There is no sign-language or audio version of the lessons.
+- Third-party WCAG certification has not been performed.
