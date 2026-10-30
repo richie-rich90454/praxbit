@@ -1,18 +1,26 @@
 {
     "id": "vue.components",
     "version": 1,
-    "sequence": 73,
+    "sequence": 129,
     "courseId": "vue",
     "title": "Single-file components with declared props",
     "summary": "Build a Vue single-file component that declares its props and renders them in the template.",
-    "skills": ["vue.components"],
-    "prerequisites": ["web.html", "js.functions"],
+    "skills": [
+        "vue.components"
+    ],
+    "prerequisites": [
+        "web.html",
+        "js.functions"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:vue"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:vue"
+    ],
     "hints": [
         "Use a script setup block with the TypeScript language attribute.",
         "Call defineProps with an inline type that has name and price.",
@@ -152,22 +169,35 @@
                     "kind": "static",
                     "description": "The component declares typed props with defineProps.",
                     "file": "ProductCard.vue",
-                    "includes": ["const props = defineProps<{", "name: string", "price: number"],
+                    "includes": [
+                        "const props = defineProps<{",
+                        "name: string",
+                        "price: number"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The template renders the name and a two-decimal price.",
                     "file": "ProductCard.vue",
-                    "includes": ["<h3>{{ props.name }}</h3>", "props.price.toFixed(2)"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "<h3>{{ props.name }}</h3>",
+                        "props.price.toFixed(2)"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "ProductCard.vue",
-                    "includes": ["const props = defineProps<{"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "const props = defineProps<{"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -241,5 +271,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
