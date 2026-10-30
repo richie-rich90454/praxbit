@@ -1,0 +1,279 @@
+{
+    "id": "svelte.routing",
+    "version": 1,
+    "sequence": 224,
+    "courseId": "svelte",
+    "title": "SvelteKit load guards and focus",
+    "summary": "Implement a load-time checkout decision, then review a page that renders for anonymous visitors and never announces the new view.",
+    "skills": ["web.routing", "web.accessibility", "svelte.components"],
+    "prerequisites": ["svelte.stores", "web.routing"],
+    "difficulty": "developing",
+    "estimatedMinutes": 8,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-typescript",
+        "capabilities": ["source-editing", "execution", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "website",
+        "initialState": "routing",
+        "briefing": "The checkout page renders before the session is known, and keyboard users stay on the old navigation after the route changes."
+    },
+    "objectives": [
+        {
+            "id": "objective-apply",
+            "description": "Decide access in a load function before rendering.",
+            "stepIds": ["apply"]
+        },
+        {
+            "id": "objective-review",
+            "description": "Review a page for load-time and accessibility risks.",
+            "stepIds": ["review"]
+        }
+    ],
+    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:svelte"],
+    "hints": [
+        "Check signedIn before itemCount.",
+        "Return a redirect to /login for a signed-out visitor.",
+        "Return a redirect to /cart for an empty cart.",
+        "Return the item count only when checkout may render."
+    ],
+    "misconceptions": [
+        {
+            "id": "default-load",
+            "description": "Rendering checkout and checking access later.",
+            "stepId": "apply",
+            "testDescription": "Signed-out visitors are redirected to login.",
+            "feedback": "A load guard prevents the page from rendering at all. Checking after render flashes private content and wastes work.",
+            "followUpSkill": "web.routing"
+        },
+        {
+            "id": "empty-cart",
+            "description": "Loading checkout with an empty cart.",
+            "stepId": "apply",
+            "testDescription": "An empty cart is redirected to the cart page.",
+            "feedback": "Checkout with no items cannot complete. Redirect to the cart so the user can add something first.",
+            "followUpSkill": "svelte.components"
+        },
+        {
+            "id": "ship-no-focus",
+            "description": "Accepting a page that never focuses or announces the new view.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "A missing load guard and a silent route change are functional defects. Block the change until both are fixed.",
+            "followUpSkill": "web.accessibility"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Load runs before the page",
+                "body": "A SvelteKit load function can redirect before a component renders. Use it for access and cart checks so the checkout page never flashes for an ineligible visitor."
+            },
+            {
+                "title": "Redirect with a reason",
+                "body": "Anonymous visitors belong at sign-in; a signed-in visitor with an empty cart belongs at the catalog. Distinct redirects let the next page explain what is missing."
+            },
+            {
+                "title": "A page change needs an announcement",
+                "body": "Client-side navigation does not reload the document. Move focus to the heading and update the title so keyboard and screen reader users know the view changed."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Load function",
+                "definition": "SvelteKit code that runs before a route renders."
+            },
+            {
+                "term": "Redirect",
+                "definition": "A load result that sends the browser to another route."
+            },
+            {
+                "term": "Page title",
+                "definition": "The document title that identifies the current route."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Load guards and announcements",
+            "prompt": "Read the explanation, then implement the load decision.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Load runs before the page",
+                    "body": "A SvelteKit load function can redirect before a component renders. Use it for access and cart checks so the checkout page never flashes for an ineligible visitor."
+                },
+                {
+                    "title": "Redirect with a reason",
+                    "body": "Anonymous visitors belong at sign-in; a signed-in visitor with an empty cart belongs at the catalog. Distinct redirects let the next page explain what is missing."
+                },
+                {
+                    "title": "A page change needs an announcement",
+                    "body": "Client-side navigation does not reload the document. Move focus to the heading and update the title so keyboard and screen reader users know the view changed."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Load function",
+                    "definition": "SvelteKit code that runs before a route renders."
+                },
+                {
+                    "term": "Redirect",
+                    "definition": "A load result that sends the browser to another route."
+                },
+                {
+                    "term": "Page title",
+                    "definition": "The document title that identifies the current route."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Guard checkout in load",
+            "prompt": "Edit checkout.ts. Redirect signed-out visitors to login, empty carts to the cart page, and return the item count only when checkout is allowed.",
+            "evidence": "construction",
+            "hints": [
+                "Return a redirect object, not a boolean.",
+                "Use /login for the missing session.",
+                "Use /cart for the empty cart.",
+                "Return { itemCount } as the allowed result."
+            ],
+            "language": "typescript",
+            "files": [
+                {
+                    "path": "checkout.ts",
+                    "content": "type LoadResult = { redirect: string } | { itemCount: number };\n\nfunction loadCheckout(signedIn: boolean, itemCount: number): LoadResult {\n  // TODO: redirect signed-out visitors and empty carts before checkout renders\n  return { itemCount };\n}\n",
+                    "editable": true,
+                    "language": "typescript"
+                }
+            ],
+            "entry": "checkout.ts",
+            "preview": "none",
+            "verification": "execution",
+            "tests": [
+                {
+                    "kind": "function",
+                    "description": "Signed-out visitors are redirected to login.",
+                    "name": "loadCheckout",
+                    "args": [false, 2],
+                    "expected": {
+                        "redirect": "/login"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "An empty cart is redirected to the cart page.",
+                    "name": "loadCheckout",
+                    "args": [true, 0],
+                    "expected": {
+                        "redirect": "/cart"
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "A signed-in visitor with items receives the count.",
+                    "name": "loadCheckout",
+                    "args": [true, 2],
+                    "expected": {
+                        "itemCount": 2
+                    }
+                },
+                {
+                    "kind": "function",
+                    "description": "Sign-in wins over the empty-cart redirect.",
+                    "name": "loadCheckout",
+                    "args": [false, 0],
+                    "expected": {
+                        "redirect": "/login"
+                    }
+                }
+            ]
+        },
+        {
+            "kind": "review",
+            "id": "review",
+            "title": "Review the checkout page",
+            "prompt": "Review +page.svelte and select every real access or accessibility problem.",
+            "evidence": "transfer",
+            "hints": [
+                "Check whether access is decided before the page renders.",
+                "Look for focus or title updates after navigation.",
+                "Check whether the back action is a real link.",
+                "Reject findings that describe a load function or title the file does not contain."
+            ],
+            "artifact": {
+                "title": "+page.svelte",
+                "caption": "The page renders checkout for an anonymous visitor and never focuses the heading or announces the view.",
+                "kind": "code",
+                "language": "html",
+                "content": "<script lang=\"ts\">\n    import { goto } from \"$app/navigation\";\n\n    let signedIn = false;\n    let itemCount = 0;\n</script>\n\n<main>\n    <h1>Checkout</h1>\n    {#if !signedIn}\n        <p>Please sign in.</p>\n    {/if}\n    <button type=\"button\" on:click={() => goto(\"/catalog\")}>Back to catalog</button>\n</main>\n"
+            },
+            "findings": [
+                {
+                    "id": "no-redirect",
+                    "label": "The page renders for an anonymous visitor instead of redirecting in load.",
+                    "correct": true
+                },
+                {
+                    "id": "no-focus",
+                    "label": "The page never focuses the heading or announces the new checkout view.",
+                    "correct": true
+                },
+                {
+                    "id": "button",
+                    "label": "The back action uses a button with goto instead of a link, so it cannot be opened in a new tab.",
+                    "correct": true
+                },
+                {
+                    "id": "guard",
+                    "label": "A load function already redirects an empty cart.",
+                    "correct": false
+                },
+                {
+                    "id": "title",
+                    "label": "The page sets a descriptive document title for checkout.",
+                    "correct": false
+                }
+            ],
+            "verdicts": [
+                {
+                    "id": "block",
+                    "label": "Block the change until the listed risks are fixed."
+                },
+                {
+                    "id": "ship",
+                    "label": "Ship it; the remaining concerns are cosmetic."
+                },
+                {
+                    "id": "style",
+                    "label": "Only formatting and naming need work."
+                }
+            ],
+            "correctVerdict": "block",
+            "explanation": "The page has no load guard, so an anonymous visitor sees checkout. It also has no focus or title update, and the back action is a button rather than a link. There is no load function in the artifact."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 120,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The workspace is keyboard accessible. Use the editor with Tab and run checks with Ctrl+Enter; every result is announced in text.",
+        "keyboardNotes": "Tab moves between the editor, hints, and results. Ctrl+Enter runs the checks. Hint buttons reveal one level at a time.",
+        "screenReaderNotes": "Each check announces its description, pass or fail state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["web"]
+}
