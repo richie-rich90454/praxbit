@@ -44,13 +44,25 @@
             "id": "plain-function",
             "description": "Deriving state in a plain function instead of a memo.",
             "stepId": "apply",
-            "feedback": "A plain function recomputes on every call and has no reactive owner. createMemo caches the value and tracks its dependencies."
+            "feedback": "A plain function recomputes on every call and has no reactive owner. createMemo caches the value and tracks its dependencies.",
+            "testDescription": "The store uses a shared signal and a memoized total.",
+            "followUpSkill": "solid.signals"
         },
         {
             "id": "map-list",
             "description": "Rendering reactive lists with map.",
             "stepId": "apply",
-            "feedback": "Use <For each={items()}> so Solid reconciles rows by identity and tracks the source."
+            "feedback": "Use <For each={items()}> so Solid reconciles rows by identity and tracks the source.",
+            "diagnostic": "Rendering with map rebuilds rows and loses the For component's identity tracking.",
+            "followUpSkill": "solid.control-flow"
+        },
+        {
+            "id": "ship-map",
+            "description": "Shipping a list built with map instead of For.",
+            "stepId": "review",
+            "answer": "ship",
+            "feedback": "Map rebuilds every row and loses identity. Block the change until the list uses For with a stable key.",
+            "followUpSkill": "solid.control-flow"
         }
     ],
     "lesson": {
@@ -185,7 +197,18 @@
                     "includes": ["const [items, setItems] = createSignal<CartItem[]>([])"],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Create a shared signal with createSignal and a store factory wrapped in createRoot.",
+                "Read the signal by calling items(), not by reading items.value.",
+                "Derive total with createMemo so it recomputes only when items change.",
+                "Throw redirect(\"/catalog\") from the guard when the cart is empty."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm test",
+                "description": "Run the Solid testing suite with Vitest."
+            }
         },
         {
             "kind": "review",
@@ -232,7 +255,13 @@
                 }
             ],
             "correctVerdict": "block",
-            "explanation": "Destructuring props snapshots the initial array, so later parent updates never reach this component. Rendering with map instead of <For each={props.products}> rebuilds every row instead of reconciling by item identity."
+            "explanation": "Destructuring props snapshots the initial array, so later parent updates never reach this component. Rendering with map instead of <For each={props.products}> rebuilds every row instead of reconciling by item identity.",
+            "hints": [
+                "Check whether the total is derived or recalculated in a plain function.",
+                "Look for list rendering that recreates every row.",
+                "Check the guard for a deny path when the cart is empty.",
+                "Block only for findings that are present in the artifact."
+            ]
         }
     ],
     "evaluation": {
