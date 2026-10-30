@@ -1,0 +1,321 @@
+{
+    "id": "devops.backups",
+    "version": 1,
+    "sequence": 410,
+    "courseId": "devops",
+    "title": "A backup you have not restored is a hope",
+    "summary": "Order a restore drill, write an encrypted backup runbook, and reason about recovery objectives.",
+    "skills": ["ops.deployment", "engineering.incident"],
+    "prerequisites": ["devops.ci", "ops.deployment"],
+    "difficulty": "developing",
+    "estimatedMinutes": 9,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": ["source-editing", "static-analysis"]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "server-room",
+        "initialState": "backups",
+        "briefing": "The database host was replaced last quarter. Nightly snapshots still run, but nobody has restored one, the encryption key lives on the same host, and the retention job deletes anything older than three days. Write the backup and restore runbook that would survive a real loss."
+    },
+    "objectives": [
+        {
+            "id": "order",
+            "description": "Order a restore drill from verification to documentation.",
+            "stepIds": ["restore-order"]
+        },
+        {
+            "id": "runbook",
+            "description": "Write a backup script with encryption, checksums, and a restore test.",
+            "stepIds": ["backup-plan"]
+        },
+        {
+            "id": "transfer",
+            "description": "Explain RPO, RTO, and why snapshots are not backups.",
+            "stepIds": ["recovery-transfer"]
+        }
+    ],
+    "assets": ["pip:alert", "scene:campus", "system:server-room", "icon:database"],
+    "hints": [
+        "A backup is only evidence after a restore succeeds.",
+        "Keep the encryption key away from the backup host.",
+        "Record a checksum and verify it before restoring.",
+        "Measure recovery time and document the result."
+    ],
+    "misconceptions": [
+        {
+            "id": "snapshot-is-backup",
+            "description": "Treating a same-host snapshot as an independent backup.",
+            "stepId": "restore-order",
+            "answer": "restore,verify,checks,measure,document",
+            "feedback": "A snapshot on the same host or account shares the failure domain. Keep an independent, encrypted copy and test a restore.",
+            "followUpSkill": "engineering.incident"
+        },
+        {
+            "id": "key-on-host",
+            "description": "Storing the backup encryption key beside the backup.",
+            "stepId": "backup-plan",
+            "testDescription": "Keeps the key out of the backup host.",
+            "feedback": "A stolen backup and its key are the same as no encryption. Store the key in a separate secret manager with its own access control."
+        },
+        {
+            "id": "rpo-rto",
+            "description": "Confusing acceptable data loss with acceptable downtime.",
+            "stepId": "recovery-transfer",
+            "answer": "same",
+            "feedback": "RPO bounds how much data may be lost; RTO bounds how long recovery may take. They imply different investments."
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Two numbers, two investments",
+                "body": "Recovery point objective (RPO) is the maximum acceptable data loss, which sets backup frequency. Recovery time objective (RTO) is the maximum acceptable downtime, which sets restore speed, staffing, and runbook quality."
+            },
+            {
+                "title": "Independence and integrity",
+                "body": "A backup must survive the loss of the primary host, account, or region. Encrypt it, record a checksum, and keep the key somewhere else. Verify the checksum before a restore so corruption is discovered before the outage."
+            },
+            {
+                "title": "Restore is the test",
+                "body": "A scheduled dump proves only that a job ran. Restore into an isolated environment, run application checks, measure the time, and document the result. Retention must keep enough history to cover the RPO and legal obligations."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "RPO",
+                "definition": "Recovery point objective: the maximum acceptable amount of data loss."
+            },
+            {
+                "term": "RTO",
+                "definition": "Recovery time objective: the maximum acceptable time to restore service."
+            },
+            {
+                "term": "Restore drill",
+                "definition": "A planned test that restores a backup and verifies the result."
+            },
+            {
+                "term": "Checksum",
+                "definition": "A digest used to detect corruption or tampering."
+            },
+            {
+                "term": "Retention policy",
+                "definition": "Rules for how long backups are kept and when they are deleted."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Recovery is a tested path",
+            "prompt": "Read the explanation, then order the restore drill.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Two numbers, two investments",
+                    "body": "Recovery point objective (RPO) is the maximum acceptable data loss, which sets backup frequency. Recovery time objective (RTO) is the maximum acceptable downtime, which sets restore speed, staffing, and runbook quality."
+                },
+                {
+                    "title": "Independence and integrity",
+                    "body": "A backup must survive the loss of the primary host, account, or region. Encrypt it, record a checksum, and keep the key somewhere else. Verify the checksum before a restore so corruption is discovered before the outage."
+                },
+                {
+                    "title": "Restore is the test",
+                    "body": "A scheduled dump proves only that a job ran. Restore into an isolated environment, run application checks, measure the time, and document the result. Retention must keep enough history to cover the RPO and legal obligations."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "RPO",
+                    "definition": "Recovery point objective: the maximum acceptable amount of data loss."
+                },
+                {
+                    "term": "RTO",
+                    "definition": "Recovery time objective: the maximum acceptable time to restore service."
+                },
+                {
+                    "term": "Restore drill",
+                    "definition": "A planned test that restores a backup and verifies the result."
+                },
+                {
+                    "term": "Checksum",
+                    "definition": "A digest used to detect corruption or tampering."
+                },
+                {
+                    "term": "Retention policy",
+                    "definition": "Rules for how long backups are kept and when they are deleted."
+                }
+            ]
+        },
+        {
+            "kind": "order",
+            "id": "restore-order",
+            "title": "Order the restore drill",
+            "prompt": "Arrange the drill from the first action to the last.",
+            "evidence": "construction",
+            "hints": [
+                "Start by confirming the backup is the one you think it is.",
+                "Restore into a place that cannot affect production.",
+                "Run application checks against the restored data.",
+                "Measure the time, then record the result and improve the runbook."
+            ],
+            "items": [
+                {
+                    "id": "verify",
+                    "label": "Verify the checksum and that the backup is independent of the failed host"
+                },
+                {
+                    "id": "restore",
+                    "label": "Restore into an isolated environment"
+                },
+                {
+                    "id": "checks",
+                    "label": "Run integrity and application checks against the restored data"
+                },
+                {
+                    "id": "measure",
+                    "label": "Measure elapsed time against the RTO"
+                },
+                {
+                    "id": "document",
+                    "label": "Record the result and fix the runbook or retention gaps"
+                }
+            ],
+            "correctOrder": ["verify", "restore", "checks", "measure", "document"],
+            "explanation": "Verification prevents restoring corruption. Isolation protects production. Checks prove the data is usable, the measurement proves the RTO, and documentation turns the drill into improvement."
+        },
+        {
+            "kind": "code",
+            "id": "backup-plan",
+            "title": "Write the backup script",
+            "prompt": "Edit backup.sh. Dump PostgreSQL in a consistent format, encrypt the dump, record a checksum, copy it offsite with retention, and include a restore verification step. Keep the key out of the backup host.",
+            "evidence": "construction",
+            "hints": [
+                "Use set -euo pipefail so a failed step stops the job.",
+                "Use pg_dump with the custom format for a restorable archive.",
+                "Encrypt before copying and record a checksum.",
+                "Add a pg_restore --list check in an isolated restore test."
+            ],
+            "language": "text",
+            "files": [
+                {
+                    "path": "backup.sh",
+                    "content": "#!/usr/bin/env bash\nset -euo pipefail\n\n# TODO: dump, encrypt, checksum, copy offsite, and verify a restore.\n",
+                    "editable": true,
+                    "language": "bash"
+                }
+            ],
+            "entry": "backup.sh",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "bash -n backup.sh",
+                "description": "Checks the shell script for syntax errors before running it."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The dump is consistent and the script stops on failure.",
+                    "file": "backup.sh",
+                    "includes": ["set -euo pipefail", "pg_dump", "--format=custom"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The dump is encrypted and its integrity is recorded.",
+                    "file": "backup.sh",
+                    "includes": ["age -r", "sha256sum"],
+                    "excludes": ["gpg --symmetric"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Keeps the key out of the backup host.",
+                    "file": "backup.sh",
+                    "includes": ["BACKUP_RECIPIENT", "secret manager"],
+                    "excludes": ["AGE-SECRET-KEY"]
+                },
+                {
+                    "kind": "static",
+                    "description": "Copies offsite and applies retention.",
+                    "file": "backup.sh",
+                    "includes": ["aws s3 cp", "find", "-mtime"],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Includes a real restore verification.",
+                    "file": "backup.sh",
+                    "includes": ["pg_restore", "--list", "restore-test"],
+                    "excludes": ["TODO"]
+                }
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "recovery-transfer",
+            "title": "State the recovery contract",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Data loss and downtime are different limits.",
+                "A backup on the same host shares the failure.",
+                "Encryption without separate key custody is weak.",
+                "Select RPO/RTO, independence, checksums, and restore drills; reject snapshots as backups."
+            ],
+            "statements": [
+                {
+                    "id": "rpo",
+                    "label": "RPO sets how much data may be lost and therefore how often backups must run.",
+                    "correct": true
+                },
+                {
+                    "id": "rto",
+                    "label": "RTO sets how long recovery may take and therefore how fast the restore path must be.",
+                    "correct": true
+                },
+                {
+                    "id": "independent",
+                    "label": "A backup must survive loss of the primary host, account, or region.",
+                    "correct": true
+                },
+                {
+                    "id": "drill",
+                    "label": "A restore drill is the evidence that a backup is usable.",
+                    "correct": true
+                },
+                {
+                    "id": "same",
+                    "label": "RPO and RTO are the same number.",
+                    "correct": false
+                },
+                {
+                    "id": "snapshot",
+                    "label": "A snapshot on the same host is a complete backup strategy.",
+                    "correct": false
+                }
+            ],
+            "explanation": "Recovery needs independent copies, integrity checks, separate key custody, measured restore time, and a drill that proves the path works."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 130,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "Every control is reachable by keyboard, and the checks report text results rather than color alone.",
+        "keyboardNotes": "Use Tab to move between controls. Space selects a choice, and Ctrl+Enter runs or submits the active check.",
+        "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": ["systems", "professional"]
+}
