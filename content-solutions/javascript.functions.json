@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "implement-function": {
+            "files": {
+                "main.js": "function formatGreeting(name) {\n  return `Hello, ${name}!`;\n}\n"
+            }
+        }
+    }
+}
