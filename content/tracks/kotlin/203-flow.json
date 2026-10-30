@@ -40,7 +40,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "id": "kotlin.flow",
-    "sequence": 203,
+    "sequence": 104,
     "title": "Flows, limits, and cancellation",
     "summary": "Transform a cold Flow, stop after two readings, and repair a loop that ignores cancellation.",
     "skills": [
