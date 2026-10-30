@@ -1,18 +1,28 @@
 {
     "id": "solidjs.signals",
     "version": 1,
-    "sequence": 76,
+    "sequence": 134,
     "courseId": "solidjs",
     "title": "Signals, memos, and guarded routes",
     "summary": "Build a shared cart store with signals, a memoized total, and a route guard.",
-    "skills": ["solid.signals", "solid.control-flow", "web.routing"],
-    "prerequisites": ["solid.components", "concept.conditions"],
+    "skills": [
+        "solid.signals",
+        "solid.control-flow",
+        "web.routing"
+    ],
+    "prerequisites": [
+        "solid.components",
+        "concept.conditions"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:website", "icon:solid"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:website",
+        "icon:solid"
+    ],
     "hints": [
         "Create the signal with createSignal and read it by calling items().",
         "Wrap the store factory in createRoot so its memo has an owner.",
@@ -180,22 +199,34 @@
                     "kind": "static",
                     "description": "Adding an item updates the signal immutably.",
                     "file": "cart.ts",
-                    "includes": ["setItems(", "return [...current, item]"],
+                    "includes": [
+                        "setItems(",
+                        "return [...current, item]"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The route guard redirects an empty cart to the catalog.",
                     "file": "cart.ts",
-                    "includes": ["export function requireCart()", "throw redirect(\"/catalog\")"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "export function requireCart()",
+                        "throw redirect(\"/catalog\")"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "cart.ts",
-                    "includes": ["const [items, setItems] = createSignal<CartItem[]>([])"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "const [items, setItems] = createSignal<CartItem[]>([])"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ],
             "hints": [
@@ -281,5 +312,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["web"]
+    "tags": [
+        "web"
+    ]
 }
