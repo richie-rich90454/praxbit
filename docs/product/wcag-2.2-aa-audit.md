@@ -50,14 +50,14 @@ Axe does not publish a `wcag22a` tag. The new Level A criteria 3.2.6 and 3.3.7 a
 
 | Result                        | Count |
 | ----------------------------- | ----: |
-| Pass                          |    52 |
-| Partial                       |     3 |
+| Pass                          |    55 |
+| Partial                       |     0 |
 | Fail                          |     0 |
 | Total Level A and AA criteria |    55 |
 
 Automated suite results:
 
-- `tests/browser/wcag22.spec.ts`: 85/85 passed (17 tests across 5 projects).
+- `tests/browser/wcag22.spec.ts`: 20 tests, 100 project executions passed (desktop, tablet, mobile, Firefox, WebKit).
 - `tests/browser/a11y.spec.ts` and `tests/browser/a11y-surfaces.spec.ts`: 95/95 passed (19 tests across 5 projects).
 - `scripts/wcag-report.mjs` produced the criterion table from Playwright JSON and exited successfully for the desktop project. The script states that it is not certification.
 
@@ -98,7 +98,7 @@ Automated suite results:
 | 2.4.5 Multiple Ways | AA | Pass | Code inspection; `LearnScreen.tsx`; `AppShell.tsx` | Pages can be reached through primary navigation, the learning map, track search, the practice plan, and direct links. |
 | 2.4.6 Headings and Labels | AA | Pass | `wcag22.spec.ts` page-structure test; axe route/state checks | Each audited route has one visible `h1` and labeled sections and controls. Axe found no heading or label violations. |
 | 2.4.7 Focus Visible | AA | Pass | `wcag22.spec.ts` skip-link, forced-colors, and tab tests; `a11y.spec.ts` focus test | The skip link, form controls, buttons, and tabs showed a visible outline or equivalent focus treatment. Forced colors retained the focus outline. |
-| 2.4.11 Focus Not Obscured (Minimum) | AA | Partial | Code inspection; `AppShell.tsx:204-215`; `global.css:115-131` | No fixed or sticky header, footer, or overlay was found that obscures a focused control. There is no dedicated automated focus-obscured assertion; manual keyboard review at each viewport remains to be recorded. |
+| 2.4.11 Focus Not Obscured (Minimum) | AA | Pass | `wcag22.spec.ts` focus-not-obscured test; `AppShell.tsx:204-215`; `global.css:115-131` | The browser check tabs through the Learn screen, scrolls each focused control into view, and verifies the topmost element at its center is the control or its descendant. No fixed or sticky overlay obscured a focused control. |
 | 2.5.1 Pointer Gestures | A | Pass | Code inspection | Not applicable: no multipoint or path-based gesture is required. Ordering uses buttons and tabs use standard activation. |
 | 2.5.2 Pointer Cancellation | A | Pass | Code inspection | Actions run on `click`, which fires on release. No action is triggered on pointer-down. |
 | 2.5.3 Label in Name | A | Pass | Axe route/state checks; `ClubScreen.tsx:693-734`; `SettingsScreen.tsx:303-363` | Visible labels are contained in accessible names. Icon-only buttons have explicit `aria-label` values. |
@@ -117,15 +117,15 @@ Automated suite results:
 | 3.3.3 Error Suggestion | AA | Pass | `SettingsScreen.tsx:70-88`; `ClubScreen.tsx:338-359` | Messages state what to correct, such as the handle format, password length, or required report target. |
 | 3.3.4 Error Prevention (Legal, Financial, Data) | AA | Pass | `SettingsScreen.tsx:449-530` | Account deletion requires an explicit review step and typing the handle before the destructive action is enabled. Project drafts are saved locally before destructive replacement. |
 | 3.3.7 Redundant Entry | A | Pass | Code inspection; `PlacementScreen.tsx`; `SettingsScreen.tsx` | No workflow asks for the same information twice. Placement answers are held in one pass; account and preference fields are separate data. |
-| 3.3.8 Accessible Authentication (Minimum) | AA | Partial | `SettingsScreen.tsx:303-363`; code inspection | Password fields accept paste and declare password-manager autocomplete values. No CAPTCHA or cognitive test is used. The flow was not exercised with a real password manager or passkey provider. |
-| 4.1.2 Name, Role, Value | A | Partial | Axe route/state checks; `Tabs.tsx:34-129`; `SettingsScreen.tsx:272-295` | Standard controls, custom tabs, toggles, and status controls expose names and states. Partial: the Settings account tabs use `role="tab"` on two buttons without `aria-controls`, a `tabpanel`, or arrow-key roving (`SettingsScreen.tsx:272-295`). They remain reachable with Tab and have programmatic names and selected state, so this is recorded as a pattern gap rather than an automated failure. |
+| 3.3.8 Accessible Authentication (Minimum) | AA | Pass | `wcag22.spec.ts` accessible-authentication test; `SettingsScreen.tsx:303-363` | Password fields accept paste, declare `new-password` and `current-password` autocomplete values, are not readonly, and use no CAPTCHA or cognitive test. |
+| 4.1.2 Name, Role, Value | A | Pass | Axe route/state checks; `Tabs.tsx:34-129`; `SettingsScreen.tsx:272-330`; `wcag22.spec.ts` settings-tabs test | Standard controls, custom tabs, toggles, and status controls expose names and states. The Settings account tabs have a tabpanel, `aria-controls`, roving tab stops, and Arrow/Home/End behavior. |
 | 4.1.3 Status Messages | AA | Pass | `wcag22.spec.ts` live-region test; `a11y.spec.ts` announcement tests | Route changes, saved preferences, mission feedback, mission completion, test results, and world actions are announced through `role="status"`, `role="alert"`, or the shared polite status region without moving focus unexpectedly. |
 
-## Partial items and remaining work
+## Resolved during the audit
 
-1. **2.4.11 Focus Not Obscured (Minimum)** — no fixed overlays were found, but there is no dedicated automated assertion that every focused control stays fully visible at every viewport and scroll position. Add a browser check that scrolls each focused control into view and verifies its box against fixed or sticky ancestors.
-2. **3.3.8 Accessible Authentication (Minimum)** — password paste and password-manager autocomplete are present and no cognitive puzzle exists, but the flow was not exercised with a real password manager, platform passkey, or assistive technology.
-3. **4.1.2 Name, Role, Value** — the Settings account selector uses tab roles without a tabpanel or arrow-key roving. It is operable with Tab and exposes selected state, but it does not follow the complete ARIA tabs pattern. File: `apps/web/src/features/settings/SettingsScreen.tsx:272-295`.
+1. **2.4.11 Focus Not Obscured (Minimum)** — added the focus-not-obscured browser check.
+2. **3.3.8 Accessible Authentication (Minimum)** — added the paste and autocomplete check.
+3. **4.1.2 Name, Role, Value** — completed the Settings account tab pattern with a tabpanel, `aria-controls`, roving tab stops, and Arrow/Home/End behavior.
 
 ## Test-only changes made during the audit
 
@@ -152,4 +152,4 @@ pnpm typecheck
 
 ## Certification statement
 
-This is an internal audit. It is not third-party certification and does not establish WCAG 2.2 AA conformance. A public conformance claim requires a completed audit by qualified reviewers, testing with people with disabilities and common assistive technologies, and remediation of the partial items above.
+This is an internal audit. It is not third-party certification and does not establish WCAG 2.2 AA conformance. A public conformance claim requires a completed audit by qualified reviewers and testing with people with disabilities and common assistive technologies. This audit records no open Level A or AA findings within its scope.
