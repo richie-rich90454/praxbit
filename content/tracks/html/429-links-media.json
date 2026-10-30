@@ -1,0 +1,264 @@
+{
+    "id": "html.links-media",
+    "version": 1,
+    "sequence": 215,
+    "courseId": "html",
+    "title": "Links, images, and media",
+    "summary": "Use anchors, images with alt text, and responsive media elements correctly.",
+    "skills": [
+        "web.html",
+        "web.accessibility"
+    ],
+    "prerequisites": [
+        "web.html"
+    ],
+    "difficulty": "beginner",
+    "estimatedMinutes": 6,
+    "interaction": "code",
+    "runtime": {
+        "kind": "browser-html",
+        "capabilities": [
+            "source-editing",
+            "sandboxed-preview",
+            "dom-tests"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "storefront",
+        "initialState": "broken-links",
+        "briefing": "The storefront has placeholder links, images without descriptions, and a video that autoplays with sound. Fix the markup so links point to real destinations, images describe themselves, and media does not interrupt visitors."
+    },
+    "objectives": [
+        {
+            "id": "links",
+            "description": "Use meaningful anchor text and destinations.",
+            "stepIds": [
+                "fix-media"
+            ]
+        },
+        {
+            "id": "media",
+            "description": "Provide alt text and accessible media.",
+            "stepIds": [
+                "fix-media"
+            ]
+        },
+        {
+            "id": "transfer",
+            "description": "Transfer link and media decisions to a new page.",
+            "stepIds": [
+                "media-transfer"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:storefront",
+        "icon:media"
+    ],
+    "hints": [
+        "Anchor text should describe the destination.",
+        "Images need alt text; decorative ones use empty alt.",
+        "Avoid autoplay with sound; provide controls.",
+        "Use href with real paths, alt on images, and controls on video without autoplay."
+    ],
+    "misconceptions": [
+        {
+            "id": "click-here",
+            "description": "Using 'click here' as link text.",
+            "stepId": "fix-media",
+            "testDescription": "Links use descriptive text instead of 'click here'.",
+            "feedback": "Link text should describe the destination. 'Click here' is meaningless out of context and hard to scan.",
+            "followUpSkill": "web.html"
+        },
+        {
+            "id": "autoplay-ok",
+            "description": "Autoplaying media with sound is acceptable by default.",
+            "stepId": "media-transfer",
+            "answer": "autoplay",
+            "feedback": "Autoplay with sound interrupts visitors and can violate accessibility expectations. Provide controls and avoid sound by default.",
+            "followUpSkill": "web.accessibility"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Links name destinations",
+                "body": "Anchor text should describe where the link goes. Screen reader users often navigate by a list of links, so 'click here' is useless. Use real href values rather than placeholder fragments."
+            },
+            {
+                "title": "Media needs care",
+                "body": "Images need alternative text unless they are decorative. Video and audio should provide controls and avoid autoplay with sound. Captions help users who cannot hear."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Anchor",
+                "definition": "An element that creates a hyperlink."
+            },
+            {
+                "term": "Alt text",
+                "definition": "A text alternative for an image."
+            },
+            {
+                "term": "Controls",
+                "definition": "User interface for playing, pausing, and seeking media."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Links and media",
+            "prompt": "Read the explanation, then fix the page.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Links name destinations",
+                    "body": "Anchor text should describe where the link goes. Screen reader users often navigate by a list of links, so 'click here' is useless. Use real href values rather than placeholder fragments."
+                },
+                {
+                    "title": "Media needs care",
+                    "body": "Images need alternative text unless they are decorative. Video and audio should provide controls and avoid autoplay with sound. Captions help users who cannot hear."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Anchor",
+                    "definition": "An element that creates a hyperlink."
+                },
+                {
+                    "term": "Alt text",
+                    "definition": "A text alternative for an image."
+                },
+                {
+                    "term": "Controls",
+                    "definition": "User interface for playing, pausing, and seeking media."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "fix-media",
+            "title": "Fix links and media",
+            "prompt": "Edit index.html. Use descriptive link text, real hrefs, alt text, and an accessible video element.",
+            "evidence": "construction",
+            "language": "html",
+            "files": [
+                {
+                    "path": "index.html",
+                    "content": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Campus store</title>\n</head>\n<body>\n  <a href=\"#\">click here</a>\n  <img src=\"pencils.svg\">\n  <video src=\"tour.mp4\" autoplay></video>\n</body>\n</html>\n",
+                    "editable": true,
+                    "language": "html"
+                }
+            ],
+            "entry": "index.html",
+            "preview": "html",
+            "tests": [
+                {
+                    "kind": "dom",
+                    "description": "Links use descriptive text instead of 'click here'.",
+                    "selector": "a",
+                    "property": "text",
+                    "expected": "Supplies"
+                },
+                {
+                    "kind": "dom",
+                    "description": "The link points to a real destination.",
+                    "selector": "a",
+                    "property": "attribute",
+                    "attribute": "href",
+                    "expected": "/supplies"
+                },
+                {
+                    "kind": "dom",
+                    "description": "The image has alternative text.",
+                    "selector": "img",
+                    "property": "attribute",
+                    "attribute": "alt",
+                    "expected": "not-empty"
+                },
+                {
+                    "kind": "dom",
+                    "description": "The video provides controls.",
+                    "selector": "video[controls]",
+                    "property": "count",
+                    "expected": 1
+                },
+                {
+                    "kind": "dom",
+                    "description": "The video does not autoplay.",
+                    "selector": "video[autoplay]",
+                    "property": "count",
+                    "expected": 0
+                }
+            ],
+            "hints": [
+                "Replace 'click here' with text like Supplies.",
+                "Set href to /supplies.",
+                "Add alt text to the image.",
+                "Add controls to the video and remove autoplay."
+            ],
+            "verification": "execution"
+        },
+        {
+            "kind": "explain",
+            "id": "media-transfer",
+            "title": "Transfer media decisions",
+            "prompt": "Select every accurate statement.",
+            "evidence": "transfer",
+            "hints": [
+                "Check each statement against link and media best practices.",
+                "Descriptive link text helps navigation.",
+                "Autoplay with sound is disruptive.",
+                "Select descriptive links, alt text, controls, and captions; reject autoplay."
+            ],
+            "statements": [
+                {
+                    "id": "descriptive-links",
+                    "label": "Link text should describe the destination.",
+                    "correct": true
+                },
+                {
+                    "id": "autoplay",
+                    "label": "Autoplaying video with sound is a good default.",
+                    "correct": false
+                },
+                {
+                    "id": "alt",
+                    "label": "Meaningful images need alternative text.",
+                    "correct": true
+                },
+                {
+                    "id": "captions",
+                    "label": "Captions help users who cannot hear audio.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Links and media should be descriptive, controllable, and accessible to users with different abilities."
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 95,
+        "unlocks": []
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and preview are keyboard accessible, and HTML tests report text results.",
+        "keyboardNotes": "Use Ctrl+Enter to run tests and Tab to move between editor and results.",
+        "screenReaderNotes": "Each test announces its selector, property, expected value, and result."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "web"
+    ]
+}
