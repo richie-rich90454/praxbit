@@ -1,0 +1,331 @@
+{
+    "id": "csharp.async-cancellation",
+    "version": 1,
+    "sequence": 87,
+    "courseId": "csharp",
+    "title": "Await work and honor cancellation",
+    "summary": "Convert a blocking count into an async method that observes a cancellation token.",
+    "skills": [
+        "csharp.async"
+    ],
+    "prerequisites": [
+        "csharp.linq",
+        "concept.iteration"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "api",
+        "initialState": "csharp-async",
+        "briefing": "A reporting endpoint counts large batches. The current method blocks with .Result and ignores cancellation, so a canceled request keeps working. Make the method async and cooperative."
+    },
+    "objectives": [
+        {
+            "id": "await-count",
+            "description": "Await asynchronous work instead of blocking.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-signature",
+            "description": "Choose a cancellation-aware API signature.",
+            "stepIds": [
+                "async-transfer"
+            ]
+        },
+        {
+            "id": "explain-async",
+            "description": "Explain tasks, cancellation, and async void accurately.",
+            "stepIds": [
+                "async-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:api",
+        "icon:csharp"
+    ],
+    "hints": [
+        "An async method returns Task<int>, not int.",
+        "Await each unit of work instead of reading .Result.",
+        "Pass the token to Task.Delay and check it before the work.",
+        "Mark Main as async Task and await the count."
+    ],
+    "misconceptions": [
+        {
+            "id": "blocking-result",
+            "description": "Blocking on a task with .Result.",
+            "stepId": "apply",
+            "testDescription": "The method awaits instead of blocking.",
+            "feedback": "Await the task so the calling thread is released. .Result blocks and can deadlock in a synchronization context.",
+            "followUpSkill": "csharp.async"
+        },
+        {
+            "id": "void-handler",
+            "description": "Returning async void from a library method.",
+            "stepId": "async-transfer",
+            "answer": "void-handler",
+            "feedback": "A library method should return Task so callers can await completion and observe exceptions.",
+            "followUpSkill": "csharp.async"
+        },
+        {
+            "id": "async-void",
+            "description": "Believing async void methods can be awaited.",
+            "stepId": "async-check",
+            "answer": "async-void",
+            "feedback": "async void has no awaitable handle. Use async Task for anything a caller needs to observe.",
+            "followUpSkill": "csharp.async"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Async work is awaited, not blocked",
+                "body": "An async method returns a Task that represents work in progress. await releases the current thread until the task completes. Calling .Result or .Wait blocks the thread and can deadlock when a synchronization context is involved."
+            },
+            {
+                "title": "Cancellation is cooperative",
+                "body": "A CancellationToken is passed into asynchronous work. The work checks ThrowIfCancellationRequested or passes the token to APIs that observe it. Cancellation is a request, not an interruption, so every long-running operation must cooperate."
+            },
+            {
+                "title": "Async all the way down",
+                "body": "Return Task or Task<T> from asynchronous methods so callers can await them. async void is appropriate only for top-level event handlers because the caller cannot observe completion or exceptions."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Task",
+                "definition": "A value representing asynchronous work and its eventual result."
+            },
+            {
+                "term": "await",
+                "definition": "An operator that suspends the current method until a task completes."
+            },
+            {
+                "term": "CancellationToken",
+                "definition": "A cooperative signal that requests cancellation."
+            },
+            {
+                "term": "async void",
+                "definition": "An asynchronous method whose completion cannot be awaited."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Async work is awaited, not blocked",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Async work is awaited, not blocked",
+                    "body": "An async method returns a Task that represents work in progress. await releases the current thread until the task completes. Calling .Result or .Wait blocks the thread and can deadlock when a synchronization context is involved."
+                },
+                {
+                    "title": "Cancellation is cooperative",
+                    "body": "A CancellationToken is passed into asynchronous work. The work checks ThrowIfCancellationRequested or passes the token to APIs that observe it. Cancellation is a request, not an interruption, so every long-running operation must cooperate."
+                },
+                {
+                    "title": "Async all the way down",
+                    "body": "Return Task or Task<T> from asynchronous methods so callers can await them. async void is appropriate only for top-level event handlers because the caller cannot observe completion or exceptions."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Task",
+                    "definition": "A value representing asynchronous work and its eventual result."
+                },
+                {
+                    "term": "await",
+                    "definition": "An operator that suspends the current method until a task completes."
+                },
+                {
+                    "term": "CancellationToken",
+                    "definition": "A cooperative signal that requests cancellation."
+                },
+                {
+                    "term": "async void",
+                    "definition": "An asynchronous method whose completion cannot be awaited."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Await the count",
+            "prompt": "Edit Program.cs. CountAsync returns Task<int>, awaits each step, and checks the cancellation token before processing each value.",
+            "evidence": "construction",
+            "language": "csharp",
+            "files": [
+                {
+                    "path": "Program.cs",
+                    "content": "using System;\nusing System.Collections.Generic;\nusing System.Threading;\nusing System.Threading.Tasks;\n\nclass Program\n{\n    static int CountAsync(IEnumerable<int> values, CancellationToken token)\n    {\n        int count = 0;\n        foreach (int value in values)\n        {\n            if (value > 0)\n            {\n                count += 1;\n            }\n        }\n        return Task.FromResult(count).Result; // TODO: await and honor cancellation\n    }\n\n    static void Main()\n    {\n        Console.WriteLine(CountAsync(new[] { 3, -1, 2 }, CancellationToken.None));\n    }\n}\n",
+                    "editable": true,
+                    "language": "csharp"
+                },
+                {
+                    "path": "Campus.csproj",
+                    "content": "<Project Sdk=\"Microsoft.NET.Sdk\">\n  <PropertyGroup>\n    <OutputType>Exe</OutputType>\n    <TargetFramework>net8.0</TargetFramework>\n    <ImplicitUsings>enable</ImplicitUsings>\n    <Nullable>enable</Nullable>\n  </PropertyGroup>\n</Project>\n",
+                    "editable": false,
+                    "language": "xml"
+                }
+            ],
+            "entry": "Program.cs",
+            "preview": "none",
+            "verification": "structural",
+            "localVerification": {
+                "command": "dotnet build",
+                "description": "Build the project with the .NET SDK."
+            },
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The method awaits instead of blocking.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "async Task<int>",
+                        "await Task.Delay(1, token)"
+                    ],
+                    "excludes": [
+                        ".Result"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "Cancellation is checked before and during the scan.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "token.ThrowIfCancellationRequested();"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter TODO is gone.",
+                    "file": "Program.cs",
+                    "includes": [
+                        "static async Task Main()"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The signature currently returns int.",
+                "Change the return type to Task<int>.",
+                "Await inside the loop so cancellation can be observed.",
+                "Mark Main async and await CountAsync."
+            ]
+        },
+        {
+            "kind": "quiz",
+            "id": "async-transfer",
+            "title": "Choose the library signature",
+            "prompt": "A library method loads a report and should let callers cancel the work. Which signature is appropriate?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the signature.",
+                "options": [
+                    {
+                        "id": "task-token",
+                        "label": "Task<Report> LoadAsync(CancellationToken token)"
+                    },
+                    {
+                        "id": "void-handler",
+                        "label": "async void LoadAsync()"
+                    },
+                    {
+                        "id": "sync",
+                        "label": "Report Load()"
+                    },
+                    {
+                        "id": "task-no-token",
+                        "label": "Task<Report> LoadAsync() with an internal timeout"
+                    }
+                ],
+                "correctId": "task-token",
+                "explanation": "Task<Report> lets the caller await completion, and the token lets it cancel. async void hides completion, while a synchronous method blocks the caller."
+            },
+            "hints": [
+                "The caller needs to await completion.",
+                "The caller also needs a way to request cancellation.",
+                "Use Task<T> plus CancellationToken.",
+                "Choose Task<Report> LoadAsync(CancellationToken token)."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "async-check",
+            "title": "Tasks and cancellation",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "await",
+                    "label": "await releases the current thread while the task is incomplete.",
+                    "correct": true
+                },
+                {
+                    "id": "cooperative",
+                    "label": "Cancellation is cooperative and must be observed by the work.",
+                    "correct": true
+                },
+                {
+                    "id": "async-void",
+                    "label": "An async void method can be awaited by its caller.",
+                    "correct": false
+                },
+                {
+                    "id": "whenall",
+                    "label": "Task.WhenAll can await several tasks together.",
+                    "correct": true
+                }
+            ],
+            "explanation": "await keeps the caller responsive, cancellation is a request, and Task.WhenAll composes independent work. async void cannot be awaited.",
+            "hints": [
+                "Three statements are accurate.",
+                "async void is only for top-level event handlers.",
+                "WhenAll waits for a collection of tasks.",
+                "Select await, cooperative, and whenall."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 145,
+        "unlocks": [
+            "csharp.dependency-injection"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The code editor and structural checks are keyboard accessible. The checks inspect source text; they do not compile or run the program.",
+        "keyboardNotes": "Use Tab between the editor and results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, pass state, and the missing or forbidden source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional",
+        "web"
+    ]
+}
