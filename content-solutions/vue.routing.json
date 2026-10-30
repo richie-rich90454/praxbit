@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "access.ts": "type Session = { role: \"member\" | \"admin\" } | null;\ntype CheckoutDecision = \"allow\" | \"login\" | \"catalog\";\n\nfunction canEnterCheckout(session: Session, itemCount: number): CheckoutDecision {\n  if (session === null) {\n    return \"login\";\n  }\n  if (itemCount <= 0) {\n    return \"catalog\";\n  }\n  return \"allow\";\n}\n"
+            }
+        }
+    }
+}
