@@ -192,6 +192,16 @@ export function csrfMiddleware(): MiddlewareHandler<AppEnvironment> {
             await next();
             return;
         }
+        // A native client establishes its bearer session before it has a
+        // session cookie. The custom header forces a CORS preflight, so the
+        // configured origin allowlist remains the gate.
+        if (
+            context.req.header(NATIVE_CLIENT_HEADER)?.toLowerCase() === "native" &&
+            getCookie(context, SESSION_COOKIE) === undefined
+        ) {
+            await next();
+            return;
+        }
         const cookieToken = getCookie(context, CSRF_COOKIE);
         const headerToken = context.req.header("x-csrf-token");
         if (
