@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,10 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ],
+    "tags": ["professional", "web"],
     "accessibility": {
         "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -40,45 +34,28 @@
     "sequence": 112,
     "title": "Hashes, defaults, and grouped totals",
     "summary": "Total order rows with a default-zero hash, then diagnose a shared default array that leaks items across categories.",
-    "skills": [
-        "ruby.syntax",
-        "ruby.objects"
-    ],
-    "prerequisites": [
-        "ruby.syntax",
-        "concept.data"
-    ],
+    "skills": ["ruby.syntax", "ruby.objects"],
+    "prerequisites": ["ruby.syntax", "concept.data"],
     "difficulty": "beginner",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Accumulate rows into a default-zero hash.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find the shared mutable default behind duplicate items.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Choose a safe default for grouping lists.",
-            "stepIds": [
-                "grouping"
-            ]
+            "stepIds": ["grouping"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:ruby"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:ruby"],
     "hints": [
         "rows.each_with_object starts from a hash you control.",
         "Hash.new(0) gives a missing key a numeric default.",
@@ -224,9 +201,7 @@
                     "kind": "static",
                     "description": "The method keeps the taught name and parameter.",
                     "file": "main.rb",
-                    "includes": [
-                        "def totals_by_category(rows)"
-                    ],
+                    "includes": ["def totals_by_category(rows)"],
                     "excludes": []
                 },
                 {
@@ -237,21 +212,14 @@
                         "rows.each_with_object(Hash.new(0)) do |row, totals|",
                         "totals[row[:category]] += row[:amount]"
                     ],
-                    "excludes": [
-                        "totals = {}",
-                        "TODO"
-                    ]
+                    "excludes": ["totals = {}", "TODO"]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.rb",
-                    "includes": [
-                        "def totals_by_category"
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["def totals_by_category"],
+                    "excludes": ["TODO"]
                 }
             ]
         },
