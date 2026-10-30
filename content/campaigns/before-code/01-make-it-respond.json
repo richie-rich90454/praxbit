@@ -1,6 +1,6 @@
 {
     "id": "before-code.make-it-respond",
-    "version": 1,
+    "version": 2,
     "sequence": 1,
     "courseId": "before-code",
     "title": "Make it respond",
@@ -55,13 +55,16 @@
             "description": "Counting the existing marks instead of the input value.",
             "stepId": "stamp",
             "answer": "3",
-            "feedback": "The press does not remember the previous run. Reset the press, set the dial, and count only the new marks."
+            "feedback": "The press does not remember the previous run. Reset the press, set the dial, and count only the new marks.",
+            "followUpSkill": "concept.computation"
         },
         {
             "id": "input-is-processing",
             "description": "Treating a sensor or button as the processing step.",
-            "stepId": "parts",
-            "feedback": "The sensor produces information. Processing is the decision or calculation made from that information."
+            "stepId": "parts-check",
+            "answer": "sensor",
+            "feedback": "The sensor produces information. Processing is the decision or calculation made from that information, which is the controller here.",
+            "followUpSkill": "concept.computation"
         }
     ],
     "lesson": {
@@ -151,10 +154,10 @@
                 "explanation": "The rule is uppercase every letter. The input is lowercase campus, so the output is CAMPUS."
             },
             "hints": [
-                "Try pulse values 1, 2, and 3. Watch what changes.",
-                "Compare the number on the dial with the number of marks.",
-                "The number of marks equals the dial value. Now apply that rule to four.",
-                "Reset, choose four, and run. The output is four marks; the transfer machine changes letter case instead of printing."
+                "Run the press with several different pulse counts and watch the printed marks.",
+                "Look for the relationship between the input number and the output count.",
+                "If the dial is 2 the press prints 2 marks; if the dial is 5 it prints 5.",
+                "Reset the press, choose 4 pulses, and predict from the one-mark-per-pulse pattern before running it."
             ]
         },
         {
@@ -215,10 +218,10 @@
                 "explanation": "The sensor supplies input, the controller applies a rule, and the light is output."
             },
             "hints": [
-                "Which part receives information from the world?",
-                "Which part makes a decision?",
-                "The controller turns a detection into a decision.",
-                "Processing is the controller's decision. The sensor is input and the light is output."
+                "Identify which part receives information, which part decides, and which part acts.",
+                "Processing turns input into a decision; it is neither the sensor nor the light.",
+                "In a thermostat the temperature sensor is input and the heater is output; comparing the reading with the target is processing.",
+                "Processing is the decision, not the detection or the light. Which role is left?"
             ]
         }
     ],
