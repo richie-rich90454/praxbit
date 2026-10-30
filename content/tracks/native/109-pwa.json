@@ -42,21 +42,25 @@
     "misconceptions": [
         {
             "id": "cache-api",
-            "description": "Caching every response, including authenticated API calls.",
-            "stepId": "apply",
-            "feedback": "Private responses can be replayed to another user on a shared device. Skip /api/ or cache only explicitly public responses."
+            "description": "Caching every API response by default.",
+            "stepId": "check",
+            "answer": "api",
+            "feedback": "Caching authenticated API responses can leak data across users and serve stale state. Cache deliberately and skip APIs unless the policy is explicit.",
+            "followUpSkill": "web.browser-apis"
         },
         {
             "id": "one-cache",
-            "description": "Reusing one cache name across releases.",
+            "description": "Keeping only one cache version and never cleaning old ones.",
             "stepId": "apply",
-            "feedback": "Old shell assets survive the deploy. Version the cache name and delete stale caches on activate."
+            "testDescription": "Both caches carry the same version and stale caches are deleted.",
+            "feedback": "Version both caches together and delete stale cache names during activation so old assets do not accumulate."
         },
         {
             "id": "no-waituntil",
-            "description": "Starting install work without event.waitUntil.",
+            "description": "Returning before the cache write finishes.",
             "stepId": "apply",
-            "feedback": "The browser may terminate the worker before the cache is filled. Pass the promise to waitUntil."
+            "testDescription": "Assets use stale-while-revalidate and the starter marker is gone.",
+            "feedback": "Use event.waitUntil for background cache work so the worker stays alive until the write completes."
         }
     ],
     "lesson": {
@@ -208,7 +212,18 @@
                     "includes": ["const CACHE_VERSION = \"v3\""],
                     "excludes": ["TODO"]
                 }
-            ]
+            ],
+            "hints": [
+                "Version both caches together.",
+                "Handle navigation fallback separately from API requests.",
+                "Use stale-while-revalidate for assets and clean old caches on activation.",
+                "Skip API caching, serve the offline document for navigations, and delete stale cache names."
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "pnpm content:validate",
+                "description": "Runs the repository content validator, which executes the same structural checks against the authored file."
+            }
         },
         {
             "kind": "explain",
@@ -248,7 +263,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "The manifest describes the installed app and the worker controls what loads offline. A versioned shell cache plus cleanup on activate keeps releases separate, and per-request strategies keep private responses out of shared caches."
+            "explanation": "The manifest describes the installed app and the worker controls what loads offline. A versioned shell cache plus cleanup on activate keeps releases separate, and per-request strategies keep private responses out of shared caches.",
+            "hints": [
+                "The manifest describes installability, not offline behavior.",
+                "The service worker lifecycle controls when a new version takes over.",
+                "API responses need a deliberate caching policy.",
+                "Select manifest, lifecycle, and fallback behavior; reject caching every API response."
+            ]
         }
     ],
     "evaluation": {
