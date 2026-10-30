@@ -1,18 +1,28 @@
 {
     "id": "lua.tables",
     "version": 1,
-    "sequence": 70,
+    "sequence": 121,
     "courseId": "lua",
     "title": "Tables, metatables, and modules",
     "summary": "Use a table as a map, resolve methods through __index, and review error handling that hides failures.",
-    "skills": ["lua.tables", "lua.functions", "lua.modules"],
-    "prerequisites": ["lua.syntax", "concept.testing"],
+    "skills": [
+        "lua.tables",
+        "lua.functions",
+        "lua.modules"
+    ],
+    "prerequisites": [
+        "lua.syntax",
+        "concept.testing"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 6,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +34,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-review",
             "description": "Review an artifact and identify the concrete risks.",
-            "stepIds": ["review"]
+            "stepIds": [
+                "review"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:lua"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:lua"
+    ],
     "hints": [
         "Inventory.__index = Inventory makes method lookup fall back to the module table.",
         "setmetatable({ items = {} }, Inventory) attaches that fallback to each instance.",
@@ -172,7 +191,9 @@
                     "kind": "static",
                     "description": "The module table keeps the taught name.",
                     "file": "main.lua",
-                    "includes": ["local Inventory = {}"],
+                    "includes": [
+                        "local Inventory = {}"
+                    ],
                     "excludes": []
                 },
                 {
@@ -189,15 +210,24 @@
                     "kind": "static",
                     "description": "Adding to an unseen item starts from zero.",
                     "file": "main.lua",
-                    "includes": ["self.items[name] = (self.items[name] or 0) + count"],
-                    "excludes": ["TODO", "self.items[name] = 0"]
+                    "includes": [
+                        "self.items[name] = (self.items[name] or 0) + count"
+                    ],
+                    "excludes": [
+                        "TODO",
+                        "self.items[name] = 0"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "main.lua",
-                    "includes": ["local Inventory = {}"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "local Inventory = {}"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
             ]
         },
@@ -277,5 +307,8 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["games", "systems"]
+    "tags": [
+        "games",
+        "systems"
+    ]
 }
