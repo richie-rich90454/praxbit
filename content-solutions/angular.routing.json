@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "apply": {
+            "files": {
+                "checkout.guard.ts": "type CheckoutAccess = \"allow\" | \"login\" | \"catalog\";\n\nfunction checkoutAccess(signedIn: boolean, itemCount: number): CheckoutAccess {\n  if (!signedIn) {\n    return \"login\";\n  }\n  if (itemCount <= 0) {\n    return \"catalog\";\n  }\n  return \"allow\";\n}\n"
+            }
+        }
+    }
+}
