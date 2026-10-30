@@ -1,0 +1,9 @@
+{
+    "steps": {
+        "implement-update": {
+            "files": {
+                "main.js": "function updateField(student, key, value) {\n  return { ...student, [key]: value };\n}\n"
+            }
+        }
+    }
+}
