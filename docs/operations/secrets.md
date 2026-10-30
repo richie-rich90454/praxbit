@@ -12,13 +12,13 @@ The server reads `.env` from the project root. It should be:
 - Backed up only in an encrypted location, or not backed up at all if it can be reissued.
 
 ```bash
-cp .env.example .env
+cp .env.production.example .env
 chmod 600 .env
 ```
 
 On Windows, use the file properties or `icacls` to restrict access. Running as root is allowed; if you do, keep the checkout and `.env` readable only by root. A process manager may use `PRAXBIT_ENV_FILE` to point at another file outside the repository.
 
-Do not commit a real `.env` file. The committed example is `.env.example` and contains placeholders only.
+Do not commit a real `.env` file. The committed templates are `.env.example` and `.env.production.example`; both contain placeholders only.
 
 ## What is secret
 
