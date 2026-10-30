@@ -1,18 +1,27 @@
 {
     "id": "ai.cost-privacy",
     "version": 1,
-    "sequence": 405,
+    "sequence": 55,
     "courseId": "ai-engineering",
     "title": "The bill and the data you did not need",
     "summary": "Cut token cost by sending less and caching deliberately, while keeping personal data out of prompts and logs.",
-    "skills": ["ai.evaluation", "ai.foundations"],
-    "prerequisites": ["ai.foundations", "ai.evaluation"],
+    "skills": [
+        "ai.evaluation",
+        "ai.foundations"
+    ],
+    "prerequisites": [
+        "ai.foundations",
+        "ai.evaluation"
+    ],
     "difficulty": "developing",
     "estimatedMinutes": 8,
     "interaction": "review",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["configuration-review", "no-execution"]
+        "capabilities": [
+            "configuration-review",
+            "no-execution"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,20 +33,31 @@
         {
             "id": "review",
             "description": "Identify cost and privacy problems in the request path.",
-            "stepIds": ["budget-review"]
+            "stepIds": [
+                "budget-review"
+            ]
         },
         {
             "id": "choose",
             "description": "Choose the change that reduces cost per successful answer.",
-            "stepIds": ["cost-driver"]
+            "stepIds": [
+                "cost-driver"
+            ]
         },
         {
             "id": "transfer",
             "description": "Explain minimization, caching, and retention trade-offs.",
-            "stepIds": ["privacy-transfer"]
+            "stepIds": [
+                "privacy-transfer"
+            ]
         }
     ],
-    "assets": ["pip:alert", "scene:campus", "system:api", "icon:coin"],
+    "assets": [
+        "pip:alert",
+        "scene:campus",
+        "system:api",
+        "icon:coin"
+    ],
     "hints": [
         "Ask which data the model needs to answer this request.",
         "Stable prompt prefixes can be cached; changing context cannot.",
@@ -308,5 +328,8 @@
         "screenReaderNotes": "Each option, finding, and test announces its label, state, and whether the check passed."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["ai", "professional"]
+    "tags": [
+        "ai",
+        "professional"
+    ]
 }
