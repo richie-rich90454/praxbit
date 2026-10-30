@@ -5,22 +5,14 @@
     "courseId": "css",
     "title": "Box model and spacing",
     "summary": "Control margin, border, padding, and content width with box-sizing.",
-    "skills": [
-        "web.css"
-    ],
-    "prerequisites": [
-        "web.html"
-    ],
+    "skills": ["web.css"],
+    "prerequisites": ["web.html"],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "browser-css",
-        "capabilities": [
-            "source-editing",
-            "sandboxed-preview",
-            "computed-style-tests"
-        ]
+        "capabilities": ["source-editing", "sandboxed-preview", "computed-style-tests"]
     },
     "scenario": {
         "world": "campus",
@@ -32,31 +24,20 @@
         {
             "id": "box-sizing",
             "description": "Use border-box sizing.",
-            "stepIds": [
-                "fix-box"
-            ]
+            "stepIds": ["fix-box"]
         },
         {
             "id": "spacing",
             "description": "Set padding and margin consistently.",
-            "stepIds": [
-                "fix-box"
-            ]
+            "stepIds": ["fix-box"]
         },
         {
             "id": "understanding",
             "description": "Explain the box model.",
-            "stepIds": [
-                "box-claims"
-            ]
+            "stepIds": ["box-claims"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:storefront",
-        "icon:layout"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:storefront", "icon:layout"],
     "hints": [
         "Set box-sizing: border-box on the card.",
         "Use padding for inner space and margin for outer space.",
@@ -188,9 +169,7 @@
                     "kind": "static",
                     "description": "border-box is applied globally or to the card.",
                     "file": "styles.css",
-                    "includes": [
-                        "border-box"
-                    ],
+                    "includes": ["border-box"],
                     "excludes": []
                 }
             ],
@@ -256,7 +235,5 @@
         "screenReaderNotes": "Each test announces selector, property, expected value, and result."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "web"
-    ]
+    "tags": ["web"]
 }
