@@ -1,18 +1,26 @@
 {
     "id": "rust.values",
     "version": 1,
-    "sequence": 59,
+    "sequence": 95,
     "courseId": "rust",
     "title": "Values and borrowing in Rust",
     "summary": "Use a borrowed slice, a loop, and a condition to count positive values.",
-    "skills": ["rust.syntax"],
-    "prerequisites": ["concept.state", "concept.conditions"],
+    "skills": [
+        "rust.syntax"
+    ],
+    "prerequisites": [
+        "concept.state",
+        "concept.conditions"
+    ],
     "difficulty": "beginner",
     "estimatedMinutes": 5,
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": ["source-editing", "static-analysis"]
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
     },
     "scenario": {
         "world": "campus",
@@ -24,15 +32,24 @@
         {
             "id": "objective-apply",
             "description": "Apply the taught syntax in a working file.",
-            "stepIds": ["apply"]
+            "stepIds": [
+                "apply"
+            ]
         },
         {
             "id": "objective-check",
             "description": "Explain the semantics accurately.",
-            "stepIds": ["check"]
+            "stepIds": [
+                "check"
+            ]
         }
     ],
-    "assets": ["pip:explaining", "scene:campus", "system:robotics", "icon:rust"],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:robotics",
+        "icon:rust"
+    ],
     "hints": [
         "The loop yields a reference to each value.",
         "Dereference the reference before comparing.",
@@ -43,14 +60,26 @@
         {
             "id": "copy",
             "description": "Assuming a slice parameter copies the data.",
-            "stepId": "apply",
-            "feedback": "A slice reference borrows the existing data. No copy occurs."
+            "stepId": "check",
+            "answer": "copy",
+            "feedback": "A slice reference borrows the existing data. No copy occurs.",
+            "followUpSkill": "rust.syntax"
         },
         {
             "id": "bounds",
             "description": "Expecting indexing to return Option.",
+            "stepId": "check",
+            "answer": "panic",
+            "feedback": "Indexing panics on an invalid index. Use get for an Option.",
+            "followUpSkill": "rust.syntax"
+        },
+        {
+            "id": "zero-count",
+            "description": "Leaving the placeholder increment.",
             "stepId": "apply",
-            "feedback": "Indexing panics on an invalid index. Use get for an Option."
+            "testDescription": "The loop counts only positive values.",
+            "feedback": "count += 0 never changes the count. Increment in the positive branch.",
+            "followUpSkill": "rust.syntax"
         }
     ],
     "lesson": {
@@ -124,6 +153,12 @@
                     "content": "fn count_positive(values: &[i32]) -> usize {\n    let mut count = 0;\n    for value in values {\n        count += 0; // TODO: count positive values\n    }\n    count\n}\n\nfn main() {\n    println!(\"{}\", count_positive(&[3, -1, 2]));\n}\n",
                     "editable": true,
                     "language": "rust"
+                },
+                {
+                    "path": "Cargo.toml",
+                    "language": "toml",
+                    "content": "[package]\nname = \"campus-check\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n",
+                    "editable": false
                 }
             ],
             "entry": "src/main.rs",
@@ -133,24 +168,46 @@
                     "kind": "static",
                     "description": "The function borrows a slice and returns a count.",
                     "file": "src/main.rs",
-                    "includes": ["fn count_positive(values: &[i32]) -> usize"],
+                    "includes": [
+                        "fn count_positive(values: &[i32]) -> usize"
+                    ],
                     "excludes": []
                 },
                 {
                     "kind": "static",
                     "description": "The loop counts only positive values.",
                     "file": "src/main.rs",
-                    "includes": ["if *value > 0", "count += 1"],
-                    "excludes": ["count += 0"]
+                    "includes": [
+                        "if *value > 0",
+                        "count += 1"
+                    ],
+                    "excludes": [
+                        "count += 0"
+                    ]
                 },
                 {
                     "kind": "static",
                     "description": "The starter placeholder is gone.",
                     "file": "src/main.rs",
-                    "includes": ["fn count_positive(values: &[i32]) -> usize"],
-                    "excludes": ["TODO"]
+                    "includes": [
+                        "fn count_positive(values: &[i32]) -> usize"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
                 }
-            ]
+            ],
+            "hints": [
+                "The loop yields references to the values.",
+                "Dereference before comparing.",
+                "Increment only when the value is positive.",
+                "if *value > 0 { count += 1; }"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "cargo test",
+                "description": "Compile and test the crate with Cargo."
+            }
         },
         {
             "kind": "explain",
@@ -180,7 +237,13 @@
                     "correct": false
                 }
             ],
-            "explanation": "Borrowing gives temporary access without transferring ownership. Out-of-bounds indexing panics; get returns an Option."
+            "explanation": "Borrowing gives temporary access without transferring ownership. Out-of-bounds indexing panics; get returns an Option.",
+            "hints": [
+                "Two statements are accurate.",
+                "A shared reference borrows; it does not copy.",
+                "Indexing out of bounds panics; get returns Option.",
+                "Select immutable and borrow."
+            ]
         }
     ],
     "evaluation": {
@@ -200,5 +263,7 @@
         "screenReaderNotes": "Each check announces its description, whether it passed, and the missing or forbidden source fragment."
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": ["systems"]
+    "tags": [
+        "systems"
+    ]
 }
