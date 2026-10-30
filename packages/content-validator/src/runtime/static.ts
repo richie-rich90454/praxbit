@@ -79,12 +79,20 @@ export function runStaticTests(
             }
             try {
                 const pattern = new RegExp(test.pattern, test.flags);
-                const passed = pattern.test(content);
+                const matched = pattern.test(content);
+                const passed = test.invert === true ? !matched : matched;
                 outcomes.push({
                     description: test.description,
                     passed,
                     deferred: false,
-                    ...(passed ? {} : { error: `The pattern was not found in ${test.file}.` }),
+                    ...(passed
+                        ? {}
+                        : {
+                              error:
+                                  test.invert === true
+                                      ? `The forbidden pattern was found in ${test.file}.`
+                                      : `The pattern was not found in ${test.file}.`,
+                          }),
                 });
             } catch (error) {
                 outcomes.push({
