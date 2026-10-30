@@ -49,13 +49,23 @@
             "id": "validation-enough",
             "description": "Believing input validation alone makes string-built SQL safe.",
             "stepId": "injection-review",
-            "feedback": "Validation helps, but parameterized queries keep data separate from SQL syntax. Both are useful; the query construction must be safe."
+            "answer": "accept:interpolation,quote,parameter",
+            "feedback": "Validation helps, but parameterized queries keep data separate from SQL syntax. Accepting the endpoint leaves the query construction unsafe.",
+            "followUpSkill": "security.injection"
         },
         {
             "id": "happy-tests",
             "description": "Testing only friendly input.",
             "stepId": "injection-tests",
-            "feedback": "Security tests must include hostile strings that try to change the query structure."
+            "answer": "looks",
+            "feedback": "Security tests must include hostile strings that try to change the query structure. Reading the function is not a test case."
+        },
+        {
+            "id": "validation-only",
+            "description": "Treating validation as a replacement for parameterized queries.",
+            "stepId": "injection-check",
+            "answer": "validation",
+            "feedback": "Validation can reject some inputs, but only parameter binding keeps every value outside the SQL grammar."
         }
     ],
     "lesson": {
@@ -140,7 +150,13 @@
                 }
             ],
             "correctVerdict": "reject",
-            "explanation": "Length validation does not make interpolation safe. The value must be bound as a query parameter."
+            "explanation": "Length validation does not make interpolation safe. The value must be bound as a query parameter.",
+            "hints": [
+                "Follow the value of name from the function argument to the SQL text.",
+                "Look for a quote character that ends the intended string literal.",
+                "Ask what evidence would show the value stays data instead of SQL syntax.",
+                "Reject the endpoint: the query needs parameters, and the tests must include hostile strings."
+            ]
         },
         {
             "kind": "test-design",
@@ -185,7 +201,13 @@
                     "shouldSelect": false
                 }
             ],
-            "explanation": "A security test suite includes ordinary data, quotes, SQL keywords, and comment syntax. Reading code is not a test."
+            "explanation": "A security test suite includes ordinary data, quotes, SQL keywords, and comment syntax. Reading code is not a test.",
+            "hints": [
+                "Start with ordinary input so the search still works.",
+                "Add a quote and a boolean expression that tries to match every row.",
+                "Add comment syntax and a destructive statement as data.",
+                "Keep normal, quote, OR, comment, and empty-string cases; reading the code is not a test."
+            ]
         },
         {
             "kind": "explain",
@@ -215,7 +237,13 @@
                     "correct": true
                 }
             ],
-            "explanation": "Parameterization is the primary defense. Least privilege limits damage, and hostile tests catch regressions."
+            "explanation": "Parameterization is the primary defense. Least privilege limits damage, and hostile tests catch regressions.",
+            "hints": [
+                "Separate validation from how the query is built.",
+                "Parameter binding keeps values outside the SQL grammar.",
+                "Least privilege limits the damage but does not stop injection.",
+                "Select parameterization, hostile-input testing, and least privilege; reject the claim that validation alone is enough."
+            ]
         }
     ],
     "evaluation": {
