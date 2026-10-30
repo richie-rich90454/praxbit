@@ -1,0 +1,322 @@
+{
+    "id": "java.collections-streams",
+    "version": 1,
+    "sequence": 72,
+    "courseId": "java",
+    "title": "Aggregate with collections",
+    "summary": "Count categories with a Map and choose the right collection for a report.",
+    "skills": [
+        "java.collections"
+    ],
+    "prerequisites": [
+        "java.oop"
+    ],
+    "difficulty": "developing",
+    "estimatedMinutes": 7,
+    "interaction": "code",
+    "runtime": {
+        "kind": "static-analysis",
+        "capabilities": [
+            "source-editing",
+            "static-analysis"
+        ]
+    },
+    "scenario": {
+        "world": "campus",
+        "system": "dev-team",
+        "initialState": "java-collections",
+        "briefing": "The campus report counts how many products belong to each category. The current code overwrites each count with 1. Accumulate the counts and keep the collection types explicit."
+    },
+    "objectives": [
+        {
+            "id": "count-categories",
+            "description": "Accumulate counts in a typed map.",
+            "stepIds": [
+                "apply"
+            ]
+        },
+        {
+            "id": "choose-collection",
+            "description": "Choose a collection for a lookup-and-order requirement.",
+            "stepIds": [
+                "collection-transfer"
+            ]
+        },
+        {
+            "id": "explain-collections",
+            "description": "Explain map operations and collection behavior accurately.",
+            "stepIds": [
+                "collection-check"
+            ]
+        }
+    ],
+    "assets": [
+        "pip:explaining",
+        "scene:campus",
+        "system:dev-team",
+        "icon:java"
+    ],
+    "hints": [
+        "A HashMap lookup replaces the previous value when the key already exists.",
+        "Use Map.merge to add one to the existing count.",
+        "Integer::sum is a method reference that adds two integers.",
+        "counts.merge(category, 1, Integer::sum);"
+    ],
+    "misconceptions": [
+        {
+            "id": "overwrite-count",
+            "description": "Putting a literal 1 for every occurrence.",
+            "stepId": "apply",
+            "testDescription": "Repeated categories accumulate their counts.",
+            "feedback": "put replaces the previous count. merge adds the new occurrence to the existing value.",
+            "followUpSkill": "java.collections"
+        },
+        {
+            "id": "list-only",
+            "description": "Using a bare list when lookup by key is required.",
+            "stepId": "collection-transfer",
+            "answer": "list-only",
+            "feedback": "A list requires a scan for every lookup. A Map keyed by customer id gives direct access and can hold the orders in a list.",
+            "followUpSkill": "java.collections"
+        },
+        {
+            "id": "hash-order",
+            "description": "Expecting HashMap to preserve insertion order.",
+            "stepId": "collection-check",
+            "answer": "hash-order",
+            "feedback": "HashMap does not promise iteration order. Use LinkedHashMap when insertion order matters.",
+            "followUpSkill": "java.collections"
+        }
+    ],
+    "lesson": {
+        "sections": [
+            {
+                "title": "Choose a collection for the access pattern",
+                "body": "A List keeps insertion order and allows duplicates. A Set rejects duplicates but does not promise order. A Map associates unique keys with values and supports constant-time lookup by key. Pick the structure from the operations the code performs, not from habit."
+            },
+            {
+                "title": "Merge and compute update a map in one step",
+                "body": "Map.merge(key, value, remappingFunction) inserts the value when the key is absent and combines it when the key exists. For counting, merge(category, 1, Integer::sum) replaces a get, null-check, and put sequence."
+            },
+            {
+                "title": "Streams compose transformations",
+                "body": "The stream API can filter, map, group, and collect without mutating the source. Collectors.groupingBy builds a map of lists. Use streams when the pipeline is clearer; use a loop when it is not."
+            }
+        ],
+        "vocabulary": [
+            {
+                "term": "Map",
+                "definition": "A collection of unique keys mapped to values."
+            },
+            {
+                "term": "merge",
+                "definition": "A Map operation that inserts or combines the value for a key."
+            },
+            {
+                "term": "Stream",
+                "definition": "A lazy sequence of values processed by a pipeline of operations."
+            },
+            {
+                "term": "Immutable collection",
+                "definition": "A collection whose contents cannot be changed after creation."
+            }
+        ]
+    },
+    "steps": [
+        {
+            "kind": "lesson",
+            "id": "lesson",
+            "title": "Choose a collection for the access pattern",
+            "prompt": "Read the explanation, then apply it in the next step.",
+            "evidence": "prediction",
+            "sections": [
+                {
+                    "title": "Choose a collection for the access pattern",
+                    "body": "A List keeps insertion order and allows duplicates. A Set rejects duplicates but does not promise order. A Map associates unique keys with values and supports constant-time lookup by key. Pick the structure from the operations the code performs, not from habit."
+                },
+                {
+                    "title": "Merge and compute update a map in one step",
+                    "body": "Map.merge(key, value, remappingFunction) inserts the value when the key is absent and combines it when the key exists. For counting, merge(category, 1, Integer::sum) replaces a get, null-check, and put sequence."
+                },
+                {
+                    "title": "Streams compose transformations",
+                    "body": "The stream API can filter, map, group, and collect without mutating the source. Collectors.groupingBy builds a map of lists. Use streams when the pipeline is clearer; use a loop when it is not."
+                }
+            ],
+            "vocabulary": [
+                {
+                    "term": "Map",
+                    "definition": "A collection of unique keys mapped to values."
+                },
+                {
+                    "term": "merge",
+                    "definition": "A Map operation that inserts or combines the value for a key."
+                },
+                {
+                    "term": "Stream",
+                    "definition": "A lazy sequence of values processed by a pipeline of operations."
+                },
+                {
+                    "term": "Immutable collection",
+                    "definition": "A collection whose contents cannot be changed after creation."
+                }
+            ]
+        },
+        {
+            "kind": "code",
+            "id": "apply",
+            "title": "Count each category",
+            "prompt": "Edit Main.java. countByCategory returns the number of occurrences of each category. Use Map.merge so repeated categories accumulate.",
+            "evidence": "construction",
+            "language": "java",
+            "files": [
+                {
+                    "path": "Main.java",
+                    "content": "import java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\n\npublic class Main {\n    static Map<String, Integer> countByCategory(List<String> categories) {\n        Map<String, Integer> counts = new HashMap<>();\n        for (String category : categories) {\n            counts.put(category, 1);\n        }\n        return counts;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(countByCategory(List.of(\"book\", \"book\", \"lamp\")));\n    }\n}\n",
+                    "editable": true,
+                    "language": "java"
+                }
+            ],
+            "entry": "Main.java",
+            "preview": "none",
+            "tests": [
+                {
+                    "kind": "static",
+                    "description": "The method keeps the typed list and map signature.",
+                    "file": "Main.java",
+                    "includes": [
+                        "static Map<String, Integer> countByCategory(List<String> categories)"
+                    ],
+                    "excludes": []
+                },
+                {
+                    "kind": "static",
+                    "description": "Repeated categories accumulate their counts.",
+                    "file": "Main.java",
+                    "includes": [
+                        "counts.merge(category, 1, Integer::sum);"
+                    ],
+                    "excludes": [
+                        "counts.put(category, 1);"
+                    ]
+                },
+                {
+                    "kind": "static",
+                    "description": "The starter overwrite is gone.",
+                    "file": "Main.java",
+                    "includes": [
+                        "Map<String, Integer> counts = new HashMap<>();"
+                    ],
+                    "excludes": [
+                        "TODO"
+                    ]
+                }
+            ],
+            "hints": [
+                "The map starts empty and the loop visits every category.",
+                "Replace put with an operation that reads the old value.",
+                "merge inserts 1 for a new key and combines for an existing key.",
+                "counts.merge(category, 1, Integer::sum);"
+            ],
+            "verification": "structural",
+            "localVerification": {
+                "command": "javac Main.java && java Main",
+                "description": "Compile and run Main.java with the JDK."
+            }
+        },
+        {
+            "kind": "quiz",
+            "id": "collection-transfer",
+            "title": "Choose the report structure",
+            "prompt": "A report needs each customer's orders in insertion order and direct lookup by customer id. Which structure fits?",
+            "evidence": "transfer",
+            "quiz": {
+                "prompt": "Choose the collection.",
+                "options": [
+                    {
+                        "id": "map-of-lists",
+                        "label": "Map<String, List<Order>>"
+                    },
+                    {
+                        "id": "list-only",
+                        "label": "List<Order>"
+                    },
+                    {
+                        "id": "set-only",
+                        "label": "Set<Order>"
+                    },
+                    {
+                        "id": "map-of-strings",
+                        "label": "Map<String, String>"
+                    }
+                ],
+                "correctId": "map-of-lists",
+                "explanation": "The map provides lookup by customer id, and each value keeps that customer's orders in a list. A bare list or set cannot express the grouping directly."
+            },
+            "hints": [
+                "The report performs two operations: lookup by id and ordered storage.",
+                "One structure should map a key to a collection.",
+                "Use a Map whose values are Lists.",
+                "Choose Map<String, List<Order>>."
+            ]
+        },
+        {
+            "kind": "explain",
+            "id": "collection-check",
+            "title": "Map operations and collection behavior",
+            "prompt": "Select every accurate statement.",
+            "evidence": "explanation",
+            "statements": [
+                {
+                    "id": "merge",
+                    "label": "Map.merge can insert or combine a value in one call.",
+                    "correct": true
+                },
+                {
+                    "id": "hash-order",
+                    "label": "A HashMap guarantees insertion order.",
+                    "correct": false
+                },
+                {
+                    "id": "grouping",
+                    "label": "Collectors.groupingBy can build a map of lists from a stream.",
+                    "correct": true
+                },
+                {
+                    "id": "immutable",
+                    "label": "Map.of returns an immutable map.",
+                    "correct": true
+                }
+            ],
+            "explanation": "Map.merge and groupingBy build grouped results. HashMap has no iteration-order guarantee; LinkedHashMap does. Map.of is immutable.",
+            "hints": [
+                "Three statements are accurate.",
+                "HashMap is about lookup, not order.",
+                "Map.of rejects structural changes after creation.",
+                "Select merge, grouping, and immutable."
+            ]
+        }
+    ],
+    "evaluation": {
+        "kind": "steps",
+        "passScore": 1
+    },
+    "rewards": {
+        "experience": 140,
+        "unlocks": [
+            "java.concurrency-executors"
+        ]
+    },
+    "persistence": {
+        "kind": "none"
+    },
+    "accessibility": {
+        "summary": "The editor and checks are keyboard accessible. Checks verify source structure; they do not compile or run the language.",
+        "keyboardNotes": "Use Tab to move between the editor and the results. Ctrl+Enter runs the checks.",
+        "screenReaderNotes": "Each check announces its description, whether it passed, and the first mismatch or missing source fragment."
+    },
+    "license": "Praxbit original content, CC BY-NC-SA 4.0",
+    "tags": [
+        "professional"
+    ]
+}
