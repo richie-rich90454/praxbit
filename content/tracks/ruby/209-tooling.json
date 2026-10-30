@@ -4,10 +4,7 @@
     "interaction": "code",
     "runtime": {
         "kind": "static-analysis",
-        "capabilities": [
-            "source-editing",
-            "static-analysis"
-        ]
+        "capabilities": ["source-editing", "static-analysis"]
     },
     "scenario": {
         "world": "campus",
@@ -27,10 +24,7 @@
         "kind": "none"
     },
     "license": "Praxbit original content, CC BY-NC-SA 4.0",
-    "tags": [
-        "professional",
-        "web"
-    ],
+    "tags": ["professional", "web"],
     "accessibility": {
         "summary": "The Ruby workspace is keyboard accessible. Checks verify source structure; they do not compile or run Ruby.",
         "keyboardNotes": "Use Tab to move between the editor and results. Ctrl+Enter runs the checks.",
@@ -40,45 +34,28 @@
     "sequence": 114,
     "title": "Make the test task reproducible",
     "summary": "Declare the test gem, wire a Rake test task, and diagnose a local command that bypasses Bundler.",
-    "skills": [
-        "ruby.tooling",
-        "ruby.syntax"
-    ],
-    "prerequisites": [
-        "ruby.syntax",
-        "git.basics"
-    ],
+    "skills": ["ruby.tooling", "ruby.syntax"],
+    "prerequisites": ["ruby.syntax", "git.basics"],
     "difficulty": "developing",
     "estimatedMinutes": 7,
     "objectives": [
         {
             "id": "objective-apply",
             "description": "Declare a test dependency and a Rake task.",
-            "stepIds": [
-                "apply"
-            ]
+            "stepIds": ["apply"]
         },
         {
             "id": "objective-diagnose",
             "description": "Find a command that ignores the bundle.",
-            "stepIds": [
-                "diagnose"
-            ]
+            "stepIds": ["diagnose"]
         },
         {
             "id": "objective-transfer",
             "description": "Explain why bundle exec changes dependency resolution.",
-            "stepIds": [
-                "reproduce"
-            ]
+            "stepIds": ["reproduce"]
         }
     ],
-    "assets": [
-        "pip:explaining",
-        "scene:campus",
-        "system:dev-team",
-        "icon:ruby"
-    ],
+    "assets": ["pip:explaining", "scene:campus", "system:dev-team", "icon:ruby"],
     "hints": [
         "The Gemfile names gems; Bundler resolves and locks versions.",
         "A Rake test task loads a test library and a file pattern.",
@@ -230,13 +207,8 @@
                     "kind": "static",
                     "description": "The Gemfile declares minitest.",
                     "file": "Gemfile",
-                    "includes": [
-                        "gem \"minitest\"",
-                        "source \"https://rubygems.org\""
-                    ],
-                    "excludes": [
-                        "TODO"
-                    ]
+                    "includes": ["gem \"minitest\"", "source \"https://rubygems.org\""],
+                    "excludes": ["TODO"]
                 },
                 {
                     "kind": "static",
@@ -248,10 +220,7 @@
                         "t.pattern = \"test/**/*_test.rb\"",
                         "task default: :test"
                     ],
-                    "excludes": [
-                        "no tests configured",
-                        "TODO"
-                    ]
+                    "excludes": ["no tests configured", "TODO"]
                 }
             ]
         },
